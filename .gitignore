@@ -1,0 +1,25 @@
+# Private files
+
+includes/db.php
+/xadm/
+/storm/
+/temp/
+subscribe.php
+down.php
+simulateel4.php
+includes/player_photo.php
+
+# Cache, temp and generated files
+/load/
+/logs/
+
+# Site content
+# The following folders contain product images, virtual products, CSV's, etc.
+
+/cup/
+/images/
+/img/
+/logos/
+/mailing/
+/old/
+/photos/
