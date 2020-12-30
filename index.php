@@ -276,6 +276,11 @@ else mysql_query("UPDATE e_xoops_users SET last_login='".mktime()."' WHERE uid='
                 <a class="nav-link" href="/contact"><? echo LANG_NAV_IMPERSSUM; ?></a>
               </li>
             </ul>
+            <div class="d-flex d-none justify-content-center"><hr class="m-2 w-50"></div>
+            <div class="text-center">
+              <a href="https://www.facebook.com/hockeylive" target="_blank" rel="noopener"><i class="fa-2x fa-facebook-square fab"></i></a>
+              <a href="https://www.github.com/palsoft333/hockeylivesk" target="_blank" rel="noopener" class="ml-2 text-secondary"><i class="fa-2x fa-github-square fab"></i></a>
+            </div>
           </div>
         </div>
       </footer>
