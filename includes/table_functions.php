@@ -16,7 +16,8 @@ function Get_Table($lid, $params, $table_type, $sim, $pos=false) {
   
   $title = LANG_NAV_TABLE.' '.$vyb[longname];
   $leaguecolor = $vyb[color];
-  $content .= "<div id='table-spinner' class='position-absolute' style='top: 50%; left: 50%; z-index: 2; display: none;'>
+  $content .= "<div id='toasts' class='fixed-top' style='top: 80px; right: 23px; left: initial; z-index:3;'></div>
+			   <div id='table-spinner' class='position-absolute' style='top: 50%; left: 50%; z-index: 2; display: none;'>
                 <div class='spinner-border text-".$leaguecolor."' role='status'>
                   <span class='sr-only'>Loading...</span>
                 </div>
@@ -286,7 +287,8 @@ function Get_Table($lid, $params, $table_type, $sim, $pos=false) {
       if(strstr($vyb[longname], 'MS'))
         {
         $playoff_line=4;
-        $games_total=7;
+        if(strstr($vyb[longname], 'MS U20')) $games_total=4;
+        else $games_total=7;
         }
       elseif(strstr($vyb[longname], 'Svetový pohár')) 
         {
@@ -848,7 +850,9 @@ function Render_Playoff_Boxes($league_data, $po_type, $playoff_wins, $conf=FALSE
                  </div>';
     $k++;
     }
-  if($league_data[el]==0 && $uid) $out .= '<script type="text/javascript" src="/includes/js/games_events.js"></script>';
+  if($league_data[el]==0 && $uid) $out .= '<script src="/vendor/jquery/jquery.min.js?v=3.5.1"></script>
+  <script type="text/javascript" src="/js/main.min.js"></script>
+  <script type="text/javascript" src="/js/games_events.js"></script>';
   return $out;
   }
   
