@@ -479,7 +479,7 @@ $p++;
             {
             if($i==0) $line=" style='border-bottom:1px dashed black !important;'";
             }
-          elseif($i==3 || $i==6) $line=" border-bottom:1px dashed black !important;";
+          elseif($i==3 || $i==6) $line=" style='border-bottom:1px dashed black !important;'";
           if($_SESSION[lang] != 'sk') $tabul[$i][2] = TeamParser($tabul[$i][2]);
           $ttable .= "<tr><td class='text-center'$line>$p.</td><td$line><a href='/team/".$tabul[$i][0]."$el-".SEOtitle($tabul[$i][2])."'><img class='flag-iihf ".$tabul[$i][1]."-small mr-1' src='/images/blank.png' alt='".$tabul[$i][2]."'>".$tabul[$i][2]."</a></td><td class='text-center'$line><b>".$tabul[$i][3]."</b></td></tr>";
           if($pos==$tabul[$i][1]) return $p;
@@ -516,6 +516,7 @@ $p++;
 		}
 	}
 $ttable = str_replace(">Slovensko<", "><span class='font-weight-bold'>Slovensko</span><", $ttable);
+$ttable = str_replace(">Slovensko U20<", "><span class='font-weight-bold'>Slovensko U20</span><", $ttable);
 //$ttable = str_replace(">Slovan<", "><span class='font-weight-bold'>Slovan</span><", $ttable);
 $ttable = str_replace(">Európa<", "><span class='font-weight-bold'>Európa</span><", $ttable);
 return $ttable;
