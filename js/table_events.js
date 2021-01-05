@@ -10,6 +10,7 @@ function GetTable(lid) {
            $('.container-fluid').html(data);
            window.history.pushState('page', 'hockey-LIVE.sk', '/table/'+lid);
            SwitchToggle();
+           Bet_Initialize();
             if(window.pageYOffset!=0) $('html,body').animate({
                scrollTop: $(".container-fluid").offset().top
             });

@@ -278,7 +278,8 @@ else mysql_query("UPDATE e_xoops_users SET last_login='".mktime()."' WHERE uid='
             </ul>
             <div class="d-flex d-none justify-content-center"><hr class="m-2 w-50"></div>
             <div class="text-center">
-              <a href="https://www.facebook.com/hockeylive" target="_blank" rel="noopener"><i class="fa-2x fa-facebook-square fab"></i></a>
+              <a href="https://www.instagram.com/hockeylive.sk" target="_blank" rel="noopener" class="text-danger"><i class="fa-2x fa-instagram-square fab"></i></a>
+              <a href="https://www.facebook.com/hockeylive" target="_blank" rel="noopener" class="ml-2"><i class="fa-2x fa-facebook-square fab"></i></a>
               <a href="https://www.github.com/palsoft333/hockeylivesk" target="_blank" rel="noopener" class="ml-2 text-secondary"><i class="fa-2x fa-github-square fab"></i></a>
             </div>
           </div>
@@ -330,12 +331,16 @@ else mysql_query("UPDATE e_xoops_users SET last_login='".mktime()."' WHERE uid='
 <? 
 if(!$_GET[p] && !$_GET[topicID]) echo '  <script type="text/javascript" src="/js/jquery.calendario.js?v=1.0.5"></script>
   <script type="text/javascript" src="/js/homepage_events.js?v=1.1.1"></script>';
-elseif($_GET[p]=="games") echo '  <script type="text/javascript" src="/js/games_events.js?v=1.0.3"></script>
+elseif($_GET[p]=="games") echo '  <script type="text/javascript" src="/js/games_events.js?v=1.0.4"></script>
   <script src="/js/jquery.emojiarea.min.js?v=1.0.0"></script>
   <script src="/images/smilies/emojis.js?v=1.0.0"></script>
   <script src="/js/comments.js?v=1.0.1"></script>
   <script src="https://www.google.com/recaptcha/api.js?render=explicit&onload=onRecaptchaLoadCallback"></script>';
-elseif($_GET[p]=="table") echo '  <script type="text/javascript" src="/js/table_events.js?v=1.0.0"></script>';
+elseif($_GET[p]=="table") 
+  {
+  if(strstr($_GET[lid], "playoff")) echo '  <script type="text/javascript" src="/js/games_events.js?v=1.0.4"></script>';
+  echo '  <script type="text/javascript" src="/js/table_events.js?v=1.0.1"></script>';
+  }
 elseif($_GET[p]=="teams") echo '  <script type="text/javascript" src="/js/teams_events.js?v=1.0.0"></script>
   <script src="/js/jquery.emojiarea.min.js?v=1.0.0"></script>
   <script src="/images/smilies/emojis.js?v=1.0.0"></script>

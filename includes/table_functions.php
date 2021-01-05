@@ -850,9 +850,9 @@ function Render_Playoff_Boxes($league_data, $po_type, $playoff_wins, $conf=FALSE
                  </div>';
     $k++;
     }
-  if($league_data[el]==0 && $uid) $out .= '<script src="/vendor/jquery/jquery.min.js?v=3.5.1"></script>
+/*  if($league_data[el]==0 && $uid) $out .= '<script src="/vendor/jquery/jquery.min.js?v=3.5.1"></script>
   <script type="text/javascript" src="/js/main.min.js"></script>
-  <script type="text/javascript" src="/js/games_events.js"></script>';
+  <script type="text/javascript" src="/js/games_events.js"></script>';*/
   return $out;
   }
   

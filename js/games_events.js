@@ -26,12 +26,12 @@ function Bet(tipbox, previous) {
   
   if(previous=="-")
     {
-    if(tip1!=="-" && tip2!=="-") var dataString = 'place='+gid+'&tip1='+tip1+'&tip2='+tip2;
+    if(tip1!=="-" && tip2!=="-") { var dataString = 'place='+gid+'&tip1='+tip1+'&tip2='+tip2; var what="place"; }
     }
   if(previous!=="-")
     {
-    if(tip1!=="-" && tip2!=="-") var dataString = 'place='+gid+'&tip1='+tip1+'&tip2='+tip2;
-    if(tip1=="-" || tip2=="-") { var dataString = 'delete='+gid; }
+    if(tip1!=="-" && tip2!=="-") { var dataString = 'place='+gid+'&tip1='+tip1+'&tip2='+tip2; var what="place"; }
+    if(tip1=="-" || tip2=="-") { var dataString = 'delete='+gid; var what="delete"; }
     }
   
   if(previous=="-" && tip1!=="-" && tip2!=="-" || previous!=="-" && (tip1=="-" || tip2=="-") || previous!=="-" && tip1!=="-" && tip2!=="-")
@@ -48,14 +48,14 @@ function Bet(tipbox, previous) {
          success: function (data) {
             if(previous=="-" && tip1!=="-" && tip2!=="-") 
               {
-              Notification("chart-bar", "Tipovanie", smallText, 'Tip '+tip1+':'+tip2+' bol pridaný', 5000);
               ga('send', 'event', 'User', 'betPlace', gid+' - '+tip1+':'+tip2);
               }
             if(previous!=="-" && (tip1=="-" || tip2=="-"))
               {
-              Notification("eraser", "Tipovanie", smallText, 'Tip bol zmazaný', 5000);
               ga('send', 'event', 'User', 'betRemove', gid);
               }
+            if(what=="place") Notification("chart-bar", "Tipovanie", smallText, 'Tip '+tip1+':'+tip2+' bol pridaný', 5000);
+            else if(what=="delete") Notification("eraser", "Tipovanie", smallText, 'Tip bol zmazaný', 5000);
          }
     });
     }
