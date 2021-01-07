@@ -329,7 +329,7 @@ ORDER BY datetime DESC LIMIT 1");
               $score = $prev[goals2].":".$prev[goals1];
               }
             }
-          $favteam .= '<li class="list-group-item px-0"><i class="fa-undo-alt fas mr-3 text-gray-400"></i>Naposledy '.$hl.' tímom <strong>'.$skym.'</strong> ('.$score.')</li>';
+          $favteam .= '<li class="list-group-item px-0 p-fluid"><i class="fa-undo-alt fas mr-3 text-gray-400"></i>Naposledy '.$hl.' tímom <strong>'.$skym.'</strong> ('.$score.')</li>';
           }
         if(mysql_num_rows($w)>0)
           {
@@ -356,14 +356,14 @@ ORDER BY datetime DESC LIMIT 1");
           elseif(date("Y-m-d", strtotime($next[datetime]))==date("Y-m-d", mktime(0,0,0,date("n"),date("j")+1))) $datum='zajtra '.$kde.' o '.date("H:i", strtotime($next[datetime]));
           elseif(date("Y-m-d", strtotime($next[datetime]))==date("Y-m-d", mktime(0,0,0,date("n"),date("j")+2))) $datum='pozajtra '.$kde.' o '.date("H:i", strtotime($next[datetime]));
           else $datum = date("j.n.Y \o H:i", strtotime($next[datetime]))." ".$kde;
-          $favteam .= '<li class="list-group-item px-0"><i class="fa-calendar fas mr-3 text-gray-400"></i>Najbližšie hrá '.$datum.' s tímom <strong>'.$skym.'</strong></li>';
+          $favteam .= '<li class="list-group-item px-0 p-fluid"><i class="fa-calendar fas mr-3 text-gray-400"></i>Najbližšie hrá '.$datum.' s tímom <strong>'.$skym.'</strong></li>';
           }
 
         if($team[cws]==1 || $team[cls]==1) $hl = "začal";
         else $hl = "ťahá";
         if($team[cws]>0) { $co=$team[cws]; if($team[cws]==1) $wl = "výhrou"; else $wl = "výhrami"; $ico = "5"; }
         else { $co=$team[cls]; if($team[cls]==1) $wl = "prehrou"; else $wl = "prehrami"; $ico = "3"; }
-        $favteam .= '<li class="list-group-item px-0"><i class="fa-thumbs-up fas mr-3 text-gray-400"></i>Momentálne '.$hl.' sériu s <strong>'.$co.'</strong> '.$wl.'</li>';
+        $favteam .= '<li class="list-group-item px-0 p-fluid"><i class="fa-thumbs-up fas mr-3 text-gray-400"></i>Momentálne '.$hl.' sériu s <strong>'.$co.'</strong> '.$wl.'</li>';
       $favteam .= "     </ul>
                       </div>
                     </div>
