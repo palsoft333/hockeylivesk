@@ -110,6 +110,7 @@
                 echo Get_upcomming();
                 echo Get_Latest_Stats();
                 echo Favourite_Team();
+                echo Sending_Prize();
                 echo '
               <div class="advert-container card shadow">
                 <p class="m-auto p-2 small">Najlepšie <a href="http://casino-hry.sk/">Slovenské Online Casino</a> recenzie a hry zadarmo</p>

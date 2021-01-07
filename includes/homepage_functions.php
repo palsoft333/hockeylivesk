@@ -374,6 +374,56 @@ ORDER BY datetime DESC LIMIT 1");
 }
 
 /*
+* Funkcia pre výpis vecnej ceny, ktorá sa práve odosiela víťazovi
+* version: 1.0.0 (7.1.2021 - vytvorenie funkcie)
+* @return $sending string
+*/
+
+function Sending_Prize() {
+  $q = mysql_query("SELECT u.*, l.longname FROM `e_xoops_users` u LEFT JOIN 2004leagues l ON l.id=SUBSTRING_INDEX(sending_prize,'-',1) WHERE u.sending_prize IS NOT NULL");
+  if(mysql_num_rows($q)>0)
+    {
+    while($f = mysql_fetch_array($q))
+      {
+      $prize = explode("-", $f[sending_prize]);
+      if($prize[1]==0) { $hl = "prechodná bunda"; $image = "bunda.jpg"; }
+      elseif($prize[1]==1) { $hl = "zimná čiapka"; $image = "ciapka.jpg"; }
+      elseif($prize[1]==2) { $hl = "USB LED lampa"; $image = "usbled.jpg"; }
+      elseif($prize[1]==3) { $hl = "odznaky"; $image = "odznaky.jpg"; }
+      elseif($prize[1]==4) { $hl = "perá"; $image = "pero.jpg"; }
+      elseif($prize[1]==5) { $hl = "nálepky"; $image = "nalepky.jpg"; }
+      elseif($prize[1]==6) { $hl = "držiak na puk"; $image = "drziak.jpg"; }
+      elseif($prize[1]==7) { $hl = "závesná placka"; $image = "placka.jpg"; }
+      elseif($prize[1]==8) { $hl = "mikina s kapucňou"; $image = "mikina.jpg"; }
+      else { $hl = "zástavka na auto"; $image = "zastavka.jpg"; }
+      $sending .= '
+      <div class="card shadow mb-4">
+        <div class="card-header">
+          <div class="font-weight-bold text-primary text-uppercase">Vecná cena na ceste</div>
+        </div>
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs text-muted font-weight-bold mb-1">Za víťazstvo v '.$f[longname].'</div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12 text-center"><i class="fa-2x fa-trophy fas img-thumbnail p-2 rounded-circle shadow-sm text-warning"><span class="badge badge-info d-block text-xs">1.miesto</span></i></div>
+            <div class="col-12 text-center"><i class="fa-angle-double-down fas text-gray-500"></i></div>
+            <div class="col-12 text-center"><img class="img-thumbnail rounded-circle shadow-sm" src="/images/ceny/'.$image.'" style="width: 100px;"><p class="mt-1 mb-0 small">'.$hl.'</p></div>
+            <div class="col-12 text-center"><i class="fa-angle-double-down fas text-gray-500"></i></div><div class="col-12 text-center"><img class="img-thumbnail rounded-circle shadow-sm" src="'.($f[user_avatar]!="" ? '/images/user_avatars/'.$f[uid].'.'.$f[user_avatar]:'/img/players/no_photo.jpg').'" style="width: 65px;"><p class="mt-1 mb-0 small">'.$f[uname].'</p><p></p></div>
+          </div>
+        </div>
+        <div class="card-footer text-center p-fluid">
+          <a href="/bets" class="text-gray-700">Tiež chcete súťažiť?</a>
+        </div>
+      </div>';
+      }
+    return $sending;
+    }
+}
+
+/*
 * Funkcia pre výpis hráča týždňa
 * version: 1.0.0 (26.9.2017 - vytvorenie funkcie)
 * version: 2.0.0 (6.2.2020 - prispôsobenie pre Boostrap 4 template)

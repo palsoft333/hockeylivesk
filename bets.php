@@ -132,7 +132,7 @@ $content .= '<div class="league-select">
                     <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/images/ceny/bunda.jpg" class="lazy card-img-top" alt="Prechodná tmavomodrá bunda">
                     <div class="card-body">
                       <h5 class="card-title">Prechodná tmavomodrá bunda</h5>
-                      <p class="card-text"><small class="text-muted">veľkosť XL</small></p>
+                      <p class="card-text"><small class="text-muted">veľkosť L, XL</small></p>
                     </div>
                   </div>
                   
@@ -207,6 +207,6 @@ $content .= '<div class="league-select">
 // nie je prihlaseny
 else
   {
-  $content .= "Nie ste prihlásený!";
+  $content = "<div class='alert alert-warning' role='alert'><i class='fas fa-chart-line'></i> Pre prehľad vašich tipov sa musíte <a href='/login' class='alert-link'>prihlásiť</a>.</div>";
   }
 ?>
