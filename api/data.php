@@ -84,8 +84,8 @@ function h2h_reorder1($uloha, $lid, $league_data)
   
 function TeamParser($team)
   {
-  $slovak_teams = array("Bielorusko","Dánsko","Česko","Európa","Fínsko","Francúzsko","Japonsko","Kanada","Kazachstan","Lotyšsko","Maďarsko","Nemecko","Nórsko","Rakúsko","Rusko","Severná Amerika","Slovensko","Slovinsko","Taliansko","Ukrajina","USA","Švajčiarsko","Švédsko");
-  $foreign_teams = array("Belarus","Denmark","Czechia","Europe","Finland","France","Japan","Canada","Kazakhstan","Latvia","Hungary","Germany","Norway","Austria","Russia","North America","Slovakia","Slovenia","Italy","Ukraine","USA","Switzerland","Sweden");
+  $slovak_teams = array("Bielorusko","Dánsko","Česko","Európa","Fínsko","Francúzsko","Japonsko","Kanada","Kazachstan","Lotyšsko","Maďarsko","Nemecko","Nórsko","Rakúsko","Rusko","Severná Amerika","Slovensko","Slovinsko","Taliansko","Ukrajina","USA","Veľká Británia","Švajčiarsko","Švédsko");
+  $foreign_teams = array("Belarus","Denmark","Czechia","Europe","Finland","France","Japan","Canada","Kazakhstan","Latvia","Hungary","Germany","Norway","Austria","Russia","North America","Slovakia","Slovenia","Italy","Ukraine","USA","Great Britain","Switzerland","Sweden");
   $newname = str_replace($slovak_teams,$foreign_teams,$team);
   return $newname;
   }
@@ -118,6 +118,11 @@ if($_GET[team])
     $lname = "MS ".$year;
     $el = 0;
     }
+  elseif($t=="WJC") 
+    {
+    $lname = "MS U20 ".$year;
+    $el = 0;
+    }
   elseif($t=="OG") 
     {
     $lname = "ZOH % ".$year;
@@ -146,8 +151,8 @@ if($_GET[team])
       if($y[pos]=="CE" || $y[pos]=="RW" || $y[pos]=="LW") $y[pos]="F";
       }
     $players["players"][$i]["id"] = $y[id].$el;
-    $players["players"][$i]["name"] = iconv("cp1250", "utf-8", $y[name]);
-    if($y[injury]!=NULL) $players["players"][$i]["injury"] = iconv("cp1250", "utf-8", $y[injury]);
+    $players["players"][$i]["name"] = $y[name];
+    if($y[injury]!=NULL) $players["players"][$i]["injury"] = $y[injury];
     else $players["players"][$i]["injury"] = 0;
     $players["players"][$i]["pos"] = $y[pos];
     if($el==1) 
@@ -174,9 +179,9 @@ if($_GET[team])
     {
     if($lang=="en") 
       {
-      $y[team1long] = TeamParser(iconv("cp1250", "utf-8", $y[team1long]));
-      $y[team2long] = TeamParser(iconv("cp1250", "utf-8", $y[team2long]));
-      $y[kedy] = StatusParser(iconv("cp1250", "utf-8", $y[kedy]));
+      $y[team1long] = TeamParser($y[team1long]);
+      $y[team2long] = TeamParser($y[team2long]);
+      $y[kedy] = StatusParser($y[kedy]);
       }
     $players["games"][$i]["id"] = $y[id];
     $players["games"][$i]["po_type"] = $y[po_type];
@@ -218,7 +223,7 @@ elseif($_GET[player])
     $t = $_GET["tournament"];
     if($t=="WCH" || $t=="OG") $el = 0;
     else $el = 1;
-    $name = iconv("utf-8", "cp1250", $_GET[id]);
+    $name = $_GET[id];
     if($el==1) $q = mysql_query("SELECT * FROM el_players WHERE name='$name' LIMIT 1");
     else $q = mysql_query("SELECT * FROM 2004players WHERE name='$name' LIMIT 1");
     if(mysql_num_rows($q)>0)
@@ -240,9 +245,9 @@ elseif($_GET[player])
     $elinf = mysql_query("SELECT name, max(pos) as pos, max(born) as born, max(hold) as hold, max(kg) as kg, max(cm) as cm FROM 2004players WHERE name='$data[name]'$coll ORDER BY id DESC LIMIT 1");
     $elinfo = mysql_fetch_array($elinf);
     }
-  if($lang=="en") $data[teamlong] = TeamParser(iconv("cp1250", "utf-8", $data[teamlong]));
+  if($lang=="en") $data[teamlong] = TeamParser($data[teamlong]);
   $player["id"] = $data[id].$el;
-  $player["name"] = iconv("cp1250", "utf-8", $data[name]);
+  $player["name"] = $data[name];
   $player["teamshort"] = $data[teamshort];
   $player["teamlong"] = $data[teamlong];
   $player["jersey"] = $data[jersey];
@@ -273,8 +278,8 @@ elseif($_GET[player])
   $i=0;
   while($f = mysql_fetch_array($w))
     {
-    if($lang=="en") $f[teamlong] = TeamParser(iconv("cp1250", "utf-8", $f[teamlong]));
-    $player["league"][$i]["name"] = iconv("cp1250", "utf-8", $f[longname]);
+    if($lang=="en") $f[teamlong] = TeamParser($f[teamlong]);
+    $player["league"][$i]["name"] = $f[longname];
     $player["league"][$i]["team"] = $f[teamlong];
     $player["league"][$i]["stats"]["goals"] = $f[goals];
     $player["league"][$i]["stats"]["asists"] = $f[asists];
@@ -318,9 +323,9 @@ elseif($_GET[game])
   else die("Incorrect game ID");
   if($lang=="en") 
     {
-    $y[team1long] = TeamParser(iconv("cp1250", "utf-8", $y[team1long]));
-    $y[team2long] = TeamParser(iconv("cp1250", "utf-8", $y[team2long]));
-    $y[kedy] = StatusParser(iconv("cp1250", "utf-8", $y[kedy]));
+    $y[team1long] = TeamParser($y[team1long]);
+    $y[team2long] = TeamParser($y[team2long]);
+    $y[kedy] = StatusParser($y[kedy]);
     }
   $game["id"] = $y[id].$el;
   $game["po_type"] = $y[po_type];
@@ -337,13 +342,13 @@ elseif($_GET[game])
   $i=0;
   while($f = mysql_fetch_array($w))
     {
-    if($lang=="en") $f[teamlong] = TeamParser(iconv("cp1250", "utf-8", $f[teamlong]));
+    if($lang=="en") $f[teamlong] = TeamParser($f[teamlong]);
     $game["goals"][$i]["time"] = $f[time];
     $game["goals"][$i]["teamshort"] = $f[teamshort];
     $game["goals"][$i]["teamlong"] = $f[teamlong];
-    $game["goals"][$i]["goaler"] = iconv("cp1250", "utf-8", $f[goaler]);
-    $game["goals"][$i]["asister1"] = iconv("cp1250", "utf-8", $f[asister1]);
-    $game["goals"][$i]["asister2"] = iconv("cp1250", "utf-8", $f[asister2]);
+    $game["goals"][$i]["goaler"] = $f[goaler];
+    $game["goals"][$i]["asister1"] = $f[asister1];
+    $game["goals"][$i]["asister2"] = $f[asister2];
     $game["goals"][$i]["status"] = $f[status];
     $game["goals"][$i]["when"] = $f[kedy];
     $i++;
@@ -353,13 +358,13 @@ elseif($_GET[game])
   $i=0;
   while($r = mysql_fetch_array($e))
     {
-    if($lang=="en") $r[teamlong] = TeamParser(iconv("cp1250", "utf-8", $r[teamlong]));
+    if($lang=="en") $r[teamlong] = TeamParser($r[teamlong]);
     $game["penalties"][$i]["time"] = $r[time];
     $game["penalties"][$i]["teamshort"] = $r[teamshort];
     $game["penalties"][$i]["teamlong"] = $r[teamlong];
-    $game["penalties"][$i]["player"] = iconv("cp1250", "utf-8", $r[player]);
+    $game["penalties"][$i]["player"] = $r[player];
     $game["penalties"][$i]["minutes"] = $r[minutes];
-    $game["penalties"][$i]["penalty"] = iconv("cp1250", "utf-8", $r[kedy]);
+    $game["penalties"][$i]["penalty"] = $r[kedy];
     $i++;
     }
   if($el==1) $i = mysql_query("(SELECT *, 1 as roz FROM el_matches WHERE (team1short='$y[team1short]' || team2short='$y[team1short]') && kedy!='na programe' ORDER BY datetime DESC LIMIT 5) UNION (SELECT *, 2 as roz FROM el_matches WHERE (team1short='$y[team2short]' || team2short='$y[team2short]') && kedy!='na programe' ORDER BY datetime DESC LIMIT 5)");
@@ -416,8 +421,8 @@ elseif($_GET[game])
       }
     if($lang=="en") 
       {
-      $vs1 = TeamParser(iconv("cp1250", "utf-8", $vs1));
-      $vs2 = TeamParser(iconv("cp1250", "utf-8", $vs2));
+      $vs1 = TeamParser($vs1);
+      $vs2 = TeamParser($vs2);
       }
     $game["last5games"]["team1"][$x]["date"] = $lastt1[$x][6];
     $game["last5games"]["team1"][$x]["versus"] = $vs1;
@@ -481,7 +486,7 @@ elseif($_GET[game])
   $game["stats"]["team1"]["scoreinsh"] = $t1[shgf].":".$t1[ppga];
   $game["stats"]["team1"]["shutouts"] = $t1[so];
   $game["stats"]["team1"]["penaltyminutes"] = $t1[penalty];
-  $game["stats"]["team1"]["bestplayer"]["name"] = iconv("cp1250", "utf-8", $p1[name]);
+  $game["stats"]["team1"]["bestplayer"]["name"] = $p1[name];
   $game["stats"]["team1"]["bestplayer"]["goals"] = $p1[goals];
   $game["stats"]["team1"]["bestplayer"]["asists"] = $p1[asists];
   $game["stats"]["team2"]["gp"] = $t2[zapasov];
@@ -493,7 +498,7 @@ elseif($_GET[game])
   $game["stats"]["team2"]["scoreinsh"] = $t2[shgf].":".$t2[ppga];
   $game["stats"]["team2"]["shutouts"] = $t2[so];
   $game["stats"]["team2"]["penaltyminutes"] = $t2[penalty];
-  $game["stats"]["team2"]["bestplayer"]["name"] = iconv("cp1250", "utf-8", $p2[name]);
+  $game["stats"]["team2"]["bestplayer"]["name"] = $p2[name];
   $game["stats"]["team2"]["bestplayer"]["goals"] = $p2[goals];
   $game["stats"]["team2"]["bestplayer"]["asists"] = $p2[asists];
   $game = json_encode($game, JSON_UNESCAPED_UNICODE);
@@ -545,6 +550,11 @@ elseif($_GET[games])
     $lname = "MS ".$year;
     $el = 0;
     }
+  elseif($t=="WJC") 
+    {
+    $lname = "MS U20 ".$year;
+    $el = 0;
+    }
   elseif($t=="OG") 
     {
     $lname = "ZOH % ".$year;
@@ -569,9 +579,9 @@ elseif($_GET[games])
     {
     if($lang=="en") 
       {
-      $e[team1long] = TeamParser(iconv("cp1250", "utf-8", $e[team1long]));
-      $e[team2long] = TeamParser(iconv("cp1250", "utf-8", $e[team2long]));
-      $e[kedy] = StatusParser(iconv("cp1250", "utf-8", $e[kedy]));
+      $e[team1long] = TeamParser($e[team1long]);
+      $e[team2long] = TeamParser($e[team2long]);
+      $e[kedy] = StatusParser($e[kedy]);
       }
     $games["games"][$i]["id"] = $e[id].$el;
     $games["games"][$i]["group"] = $e[skupina];
@@ -602,6 +612,11 @@ elseif($_GET[table])
     $lname = "MS ".$year;
     $el = 0;
     $teams_table = "2004teams";
+    }
+  elseif($t=="WJC") 
+    {
+    $lname = "MS U20 ".$year;
+    $el = 0;
     }
   elseif($t=="OG") 
     {
@@ -691,7 +706,7 @@ elseif($_GET[table])
         // relegated to DIV.I
         if(strstr($f[longname], "MS") && $show_clinch==1 && (($games_total-$data[zapasov])*$f[points])+$data[body] < $reord[6][6] || strstr($f[longname], "MS") && $show_clinch==1 && ($data[zapasov]==7 && $i==7)) { $clinch = "tím zostupuje do I.DIV"; $relegwas=1; }
         $group["group"][$skup][$p]["shortname"] = $data[shortname];
-        $group["group"][$skup][$p]["longname"] = iconv("cp1250", "utf-8", $data[longname]);
+        $group["group"][$skup][$p]["longname"] = $data[longname];
         $group["group"][$skup][$p]["gp"] = $data[zapasov];
         $group["group"][$skup][$p]["wins"] = $wins;
         $group["group"][$skup][$p]["losts"] = $losts;
