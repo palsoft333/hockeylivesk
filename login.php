@@ -83,7 +83,7 @@ else {
           <div class="card-body p-0">
             <!-- Nested Row within Card Body -->
             <div class="row">
-              <div class="col-lg-6 d-none d-lg-block animated--fade-in lazy" data-src="https://source.unsplash.com/600x800/?ice%20hockey" style="    background-position: center; background-size: cover;"></div>
+              <div class="col-lg-6 d-none d-lg-block animated--fade-in lazy" data-src="https://source.unsplash.com/collection/3668324/600x800" style="    background-position: center; background-size: cover;"></div>
               <div class="col-lg-6">
                 <div class="p-5">
                   <div class="text-center">
