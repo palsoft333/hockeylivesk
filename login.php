@@ -1,113 +1,149 @@
-<?php
+<?
 session_start();
-include("db.php");
-include("main_functions.php");
+if($_SESSION['logged']) header("Location:/");
+include("includes/login.php");
+if($_GET[changeLang] != '' && ($_GET[changeLang] == 'sk' || $_GET[changeLang] == 'en')) {
+			$_SESSION[lang] = $_GET[changeLang];
+			header("Location: index.php");
+			die();
+			}
 if(isset($_SESSION[lang])) {
-  include("lang/lang_$_SESSION[lang].php");
+  include("includes/lang/lang_$_SESSION[lang].php");
 }
 else {
    $_SESSION[lang] = 'sk';
-    include("lang/lang_sk.php");
-}
-
-header('Content-Type: text/html; charset=utf-8');
-
-if(isset($_POST['username']) && isset($_POST['password']))
-{
-  $username=mysql_real_escape_string($_POST['username']);
-  $password=md5(mysql_real_escape_string($_POST['password']));
-
-  $result=mysql_query("SELECT uid FROM e_xoops_users WHERE email='$username' and pass='$password'");
-  $count=mysql_num_rows($result);
-  
-  if($count==1)
-    {
-    $row=mysql_fetch_array($result);
-    mysql_query("UPDATE e_xoops_users SET last_login='".mktime()."' WHERE uid='".$row['uid']."'");
-    $_SESSION['logged']=$row['uid'];
-    if($_POST['remember']=="on")
-      {
-      $cookiehash = md5(sha1($row['uname'] . $_SERVER['HTTP_X_FORWARDED_FOR'] . $_SERVER['HTTP_USER_AGENT']));
-      setcookie("uname",$cookiehash,time()+3600*24*365,'/','.hockey-live.sk');
-      $ls = mysql_query("SELECT JSON_SEARCH(login_session, 'one', '".$cookiehash."') as search FROM `e_xoops_users` WHERE uid='".$row['uid']."'");
-      $lse = mysql_fetch_array($ls);
-      if($lse[search]==NULL) mysql_query("UPDATE e_xoops_users SET login_session=JSON_MERGE_PRESERVE(login_session, '\"".$cookiehash."\"') WHERE uid='".$row['uid']."'");
-      }
-    header("Location:/");
-    }
-  else
-    {
-    $alert = LANG_LOGIN_ERROR;
-    }
-}
-
-if($_GET[logout])
-{
-  $ls = mysql_query("SELECT JSON_SEARCH(login_session, 'one', '".$_COOKIE['uname']."') as search FROM `e_xoops_users` WHERE uid='".$_SESSION['logged']."'");
-  $lse = mysql_fetch_array($ls);
-  if($lse[search]!=NULL) mysql_query("UPDATE e_xoops_users SET login_session=JSON_REMOVE(login_session, ".$lse[search].") WHERE uid='".$_SESSION['logged']."'");
-  session_unset($_SESSION['logged']);
-  unset($_COOKIE['uname']);
-  setcookie("uname", "", time() - 3600, "/", ".hockey-live.sk", 1);
-  header("Location:/");
-}
-
-if(isset($_POST['forgot']))
-{
-$email=mysql_real_escape_string($_POST['forgot']);
-$result=mysql_query("SELECT email FROM e_xoops_users WHERE email='$email'");
-if(mysql_num_rows($result)>0) 
-  {
-  $newpass = bin2hex(openssl_random_pseudo_bytes(3));
-  $newpassmd5 = md5($newpass);
-  mysql_query("UPDATE e_xoops_users SET pass='$newpassmd5' WHERE email='$email'");
-  $headers = "From: hockey-LIVE.sk <".SITE_MAIL.">\r\n";
-  $headers .= "Reply-To: ".SITE_MAIL."\r\n";
-  $headers .= "MIME-Version: 1.0\r\n";
-  $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
-  mail($email, "Vaše nové heslo na prihlásenie", "Vaše nové heslo pre prihlásenie na stránkach www.hockey-live.sk je: <b>".$newpass."</b><br><br>Odporúčame Vám zmeniť si ho pri najbližšom prihlásení.", $headers);
-  echo "exists";
-  }
-}
-
-if($_POST[change]=="pass")
-{
-  $currentpass=md5(mysql_real_escape_string($_POST['currentpass']));
-  $password=md5(mysql_real_escape_string($_POST['password']));
-  $result=mysql_query("SELECT pass FROM e_xoops_users WHERE uid='".$_SESSION['logged']."'");
-  $row=mysql_fetch_array($result);
-  if($row[pass]==$currentpass)
-    {
-    mysql_query("UPDATE e_xoops_users SET pass='$password' WHERE uid='".$_SESSION['logged']."'");
-    echo "ok";
-    }
-}
-
-if($_POST[change]=="data")
-{
-  $email=mysql_real_escape_string($_POST['email']);
-  $tshort=mysql_real_escape_string($_POST['tshort']);
-  $goalhorn=mysql_real_escape_string($_POST['goalhorn']);
-  $avatar=mysql_real_escape_string($_POST['avatar']);
-  if(strlen($_POST['avatar'])>0)
-    {
-    $data = explode(',', $_POST['avatar']);
-    $data1 = explode(';', $data[0]);
-    $data2 = explode('/', $data1[0]);
-    $img_type = $data2[1];
-    $img = base64_decode($data[1]);
-    if($img_type=="jpeg") $img_type="jpg";
-    file_put_contents('../images/user_avatars/'.$_SESSION['logged'].'.'.$img_type, $img);
-    mysql_query("UPDATE e_xoops_users SET user_avatar='$img_type' WHERE uid='".$_SESSION['logged']."'");
-    $headers = 'From: '.SITE_MAIL. "\r\n" .
-    'Reply-To: '.SITE_MAIL. "\r\n" .
-    'X-Mailer: PHP/' . phpversion();
-    mail(ADMIN_MAIL, "Zmenený avatar", "ID užívateľa: ".$_SESSION['logged'], $headers);
-    }
-  if(filter_var($email, FILTER_VALIDATE_EMAIL))
-    {
-    mysql_query("UPDATE e_xoops_users SET email='$email', user_favteam='$tshort', goalhorn='$goalhorn' WHERE uid='".$_SESSION['logged']."'");
-    echo "ok";
-    }
+    include("includes/lang/lang_sk.php");
 }
 ?>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="hockey-LIVE.sk">
+  <meta name="title" content="<? echo LANG_NAV_LOGIN2; ?>" />
+  <meta property="og:image" content="https://www.hockey-live.sk/images/hl_avatar.png" />
+  <meta name="twitter:image" content="https://www.hockey-live.sk/images/hl_avatar.png" />
+  <meta property="og:description" content="Portál pokrývajúci slovenský a zahraničný ľadový hokej. Štatistiky, tipovanie, databáza hráčov, výsledkový servis z domácich líg, zahraničných turnajov, KHL a NHL." />
+
+  <title>hockey-LIVE.sk - <? echo LANG_NAV_LOGIN2; ?></title>
+
+  <!-- Custom fonts for this template-->
+  <link href="vendor/fontawesome-free/css/all.min.css?v=5.13.0" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+
+  <!-- Custom styles for this template-->
+  <link href="css/template.min.css?v=1.0.2" rel="stylesheet">
+  <link href="css/main.css?v=1.2.1" rel="stylesheet">
+
+</head>
+
+<body class="bg-gradient-hl">
+
+  <!-- Forgot password modal -->
+  <div class="modal fade" id="ModalCenter" tabindex="-1" role="dialog" aria-labelledby="ModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="ModalCenterTitle"><? echo LANG_LOGIN_FORGOT1; ?></h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="<? echo LANG_CLOSE; ?>">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>Zadajte svoj e-mail použitý pri registrácii a my Vám zašleme nové heslo ...</p>
+          <div class="alert alert-danger d-none animated--fade-in" role="alert" id="alert"></div>
+          <form class="user">
+            <div class="form-group">
+              <input type="text" id="email" class="form-control form-control-user" aria-describedby="emailHelp" placeholder="<? echo LANG_NAV_EMAIL; ?>...">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal"><? echo LANG_CLOSE; ?></button>
+          <button type="button" class="btn btn-primary" id="forgotok"><? echo LANG_LOGIN_SENDMAIL;?></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <img src="/img/hockey_logo_big.svg" alt="hockey-LIVE.sk" class="col-sm-6 col-md-3 img-fluid mx-auto d-block pt-3">
+    <!-- Outer Row -->
+    <div class="row justify-content-center">
+
+      <div class="col-xl-10 col-lg-12 col-md-9">
+
+        <div class="card o-hidden border-0 shadow-lg my-5">
+          <div class="card-body p-0">
+            <!-- Nested Row within Card Body -->
+            <div class="row">
+              <div class="col-lg-6 d-none d-lg-block animated--fade-in lazy" data-src="https://source.unsplash.com/collection/3668324/600x800" style="    background-position: center; background-size: cover;"></div>
+              <div class="col-lg-6">
+                <div class="p-5">
+                  <div class="text-center">
+                    <h1 class="h4 text-gray-900 mb-4"><? echo LANG_LOGIN_WELCOMEBACK; ?></h1>
+                  </div>
+                  <?
+                  if($alert)
+                    {
+                    echo '<div class="alert alert-danger" role="alert">
+                            '.$alert.'
+                          </div>';
+                    }
+                  ?>
+                  <form class="user" method="post" action="/login">
+                    <div class="form-group">
+                      <input type="text" name="username" class="form-control form-control-user" aria-describedby="emailHelp" placeholder="<? echo LANG_NAV_EMAIL; ?>..." autocomplete="email">
+                    </div>
+                    <div class="form-group">
+                      <input type="password" name="password" class="form-control form-control-user" placeholder="<? echo LANG_NAV_PASSWORD; ?>" autocomplete="current-password">
+                    </div>
+                    <div class="form-group">
+                      <div class="custom-control custom-checkbox small">
+                        <input type="checkbox" class="custom-control-input" id="remember" name="remember">
+                        <label class="custom-control-label" for="remember"><? echo LANG_NAV_REMEMBER; ?></label>
+                      </div>
+                    </div>
+                    <button type="submit" class="btn btn-hl btn-user btn-block">
+                      <? echo LANG_NAV_LOGIN; ?>
+                    </button>
+                  </form>
+                  <hr>
+                  <div class="text-center">
+                    <a class="small" href="#" data-toggle="modal" data-target="#ModalCenter"><? echo LANG_LOGIN_FORGOT; ?></a>
+                  </div>
+                  <div class="text-center">
+                    <a class="small" href="/register"><? echo LANG_NAV_REGISTRATION; ?></a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Bootstrap core JavaScript-->
+  <script src="vendor/jquery/jquery.min.js"></script>
+  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Core plugin JavaScript-->
+  <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+  
+  <script src="/js/jquery.lazy.min.js"></script>
+  <script src="/js/main.min.js?v=1.1.7"></script>
+  <script src="/js/login_events.js?v=1.0.1"></script>
+
+</body>
+
+</html>
