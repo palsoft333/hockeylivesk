@@ -293,7 +293,7 @@ define("LANG_GAMECONT_NOPOTW","Momentálne nemáme žiadneho hráča týždňa")
 define("LANG_NAV_MAINMENU","Hlavné menu");
 define("LANG_NAV_LOGIN","Prihlásiť sa");
 define("LANG_NAV_LOGIN2","Prihlásenie");
-define("LANG_NAV_REMEMBER","Zapamätať si ma");
+define("LANG_NAV_REMEMBER","Zapamätať si ma na tomto zariadení");
 define("LANG_NAV_REGISTRATION","Registrácia");
 define("LANG_NAV_USERNAME","Prihlasovacie meno");
 define("LANG_NAV_PASSWORD","Heslo");

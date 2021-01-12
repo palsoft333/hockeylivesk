@@ -27,9 +27,11 @@ if(isset($_POST['username']) && isset($_POST['password']))
     $_SESSION['logged']=$row['uid'];
     if($_POST['remember']=="on")
       {
-      $cookiehash = md5(sha1($row['uname'] . $_SERVER['HTTP_X_FORWARDED_FOR']));
+      $cookiehash = md5(sha1($row['uname'] . $_SERVER['HTTP_X_FORWARDED_FOR'] . $_SERVER['HTTP_USER_AGENT']));
       setcookie("uname",$cookiehash,time()+3600*24*365,'/','.hockey-live.sk');
-      mysql_query("UPDATE e_xoops_users SET login_session='".$cookiehash."' WHERE uid='".$row['uid']."'");
+      $ls = mysql_query("SELECT JSON_SEARCH(login_session, 'one', '".$cookiehash."') as search FROM `e_xoops_users` WHERE uid='".$row['uid']."'");
+      $lse = mysql_fetch_array($ls);
+      if($lse[search]==NULL) mysql_query("UPDATE e_xoops_users SET login_session=JSON_MERGE_PRESERVE(login_session, '\"".$cookiehash."\"') WHERE uid='".$row['uid']."'");
       }
     header("Location:/");
     }
@@ -41,6 +43,9 @@ if(isset($_POST['username']) && isset($_POST['password']))
 
 if($_GET[logout])
 {
+  $ls = mysql_query("SELECT JSON_SEARCH(login_session, 'one', '".$_COOKIE['uname']."') as search FROM `e_xoops_users` WHERE uid='".$_SESSION['logged']."'");
+  $lse = mysql_fetch_array($ls);
+  if($lse[search]!=NULL) mysql_query("UPDATE e_xoops_users SET login_session=JSON_REMOVE(login_session, ".$lse[search].") WHERE uid='".$_SESSION['logged']."'");
   session_unset($_SESSION['logged']);
   unset($_COOKIE['uname']);
   setcookie("uname", "", time() - 3600, "/", ".hockey-live.sk", 1);

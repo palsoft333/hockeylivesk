@@ -285,7 +285,7 @@ define("LANG_GAMECONT_NOPOTW","We have no player of the week at the moment");
 define("LANG_NAV_MAINMENU","Main menu");
 define("LANG_NAV_LOGIN","Login");
 define("LANG_NAV_LOGIN2","Login");
-define("LANG_NAV_REMEMBER","Remember me");
+define("LANG_NAV_REMEMBER","Remember me on this device");
 define("LANG_NAV_REGISTRATION","Register");
 define("LANG_NAV_USERNAME","Username");
 define("LANG_NAV_PASSWORD","Password");

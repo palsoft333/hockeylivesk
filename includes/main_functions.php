@@ -1012,7 +1012,7 @@ function TeamParser($name)
 function CheckCookieLogin() {
     $uname = $_COOKIE['uname']; 
     if (!empty($uname)) {
-        $q = mysql_query("SELECT * FROM `e_xoops_users` WHERE `login_session`='$uname'");
+        $q = mysql_query("SELECT dt.* FROM (SELECT uid, JSON_SEARCH(login_session, 'one', '".$uname."') as search FROM `e_xoops_users`)dt WHERE dt.search IS NOT NULL");
         if(mysql_num_rows($q)>0)
           {
           $f = mysql_fetch_array($q);
