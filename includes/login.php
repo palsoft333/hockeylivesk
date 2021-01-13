@@ -29,9 +29,13 @@ if(isset($_POST['username']) && isset($_POST['password']))
       {
       $cookiehash = md5(sha1($row['uname'] . $_SERVER['HTTP_X_FORWARDED_FOR'] . $_SERVER['HTTP_USER_AGENT']));
       setcookie("uname",$cookiehash,time()+3600*24*365,'/','.hockey-live.sk');
-      $ls = mysql_query("SELECT JSON_SEARCH(login_session, 'one', '".$cookiehash."') as search FROM `e_xoops_users` WHERE uid='".$row['uid']."'");
+      $ls = mysql_query("SELECT login_session, JSON_SEARCH(login_session, 'one', '".$cookiehash."') as search FROM `e_xoops_users` WHERE uid='".$row['uid']."'");
       $lse = mysql_fetch_array($ls);
-      if($lse[search]==NULL) mysql_query("UPDATE e_xoops_users SET login_session=JSON_MERGE_PRESERVE(login_session, '\"".$cookiehash."\"') WHERE uid='".$row['uid']."'");
+      if($lse[login_session]!=NULL)
+        {
+        if($lse[search]==NULL) mysql_query("UPDATE e_xoops_users SET login_session=JSON_MERGE_PRESERVE(login_session, '\"".$cookiehash."\"') WHERE uid='".$row['uid']."'");
+        }
+      else mysql_query("UPDATE e_xoops_users SET login_session='[\"".$cookiehash."\"]' WHERE uid='".$row['uid']."'");
       }
     header("Location:/");
     }
