@@ -22,6 +22,7 @@ RewriteCond %{REQUEST_FILENAME} !-d
 
 RewriteRule ^login/?$ /login.php [NC,L]
 RewriteRule ^logout/?$ /includes/login.php?logout=1 [NC,L]
+RewriteRule ^logoutall/?$ /includes/login.php?logoutall=1 [NC,L]
 RewriteRule ^register/?$ /register.php [NC,L]
 RewriteRule ^news/([a-zA-Z-_0-9_/]+)/?$ /index.php?p=articles&id=$1 [NC,L]
 RewriteRule ^category/([a-zA-Z-_0-9_/]+)/([a-zA-Z-_0-9_/]+)/?$ /index.php?topicID=$1&page=$2 [NC,L]
