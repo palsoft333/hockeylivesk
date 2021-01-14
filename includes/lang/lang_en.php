@@ -63,6 +63,9 @@ define("LANG_USERPROFILE_REGISTERED","Registration date");
 define("LANG_USERPROFILE_LASTLOGIN","Last login");
 define("LANG_USERPROFILE_PICTURE","Profile picture");
 define("LANG_USERPROFILE_UPLOAD","Upload a photo");
+define("LANG_USERPROFILE_CURRENTLYLOGGED","Currently you have auto-login enabled on %s devices.");
+define("LANG_USERPROFILE_LOGOUTFROMALL","Log out of all devices");
+define("LANG_USERPROFILE_LOGOUTCONF",'If you really want to log out of all devices, press the "Log out" button');
 
 define("LANG_G","G");
 define("LANG_A","A");

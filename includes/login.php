@@ -56,6 +56,12 @@ if($_GET[logout])
   header("Location:/");
 }
 
+if($_GET[logoutall])
+{
+  mysql_query("UPDATE e_xoops_users SET login_session=NULL WHERE uid='".$_SESSION['logged']."'");
+  header("Location:/profile");
+}
+
 if(isset($_POST['forgot']))
 {
 $email=mysql_real_escape_string($_POST['forgot']);

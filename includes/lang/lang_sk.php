@@ -71,6 +71,9 @@ define("LANG_USERPROFILE_REGISTERED","Dátum registrácie");
 define("LANG_USERPROFILE_LASTLOGIN","Posledné prihlásenie");
 define("LANG_USERPROFILE_PICTURE","Profilová fotka");
 define("LANG_USERPROFILE_UPLOAD","Nahrať fotku");
+define("LANG_USERPROFILE_CURRENTLYLOGGED","Aktuálne máte zapnuté automatické prihlásenie na %s zariadeniach.");
+define("LANG_USERPROFILE_LOGOUTFROMALL","Odhlásiť zo všetkých zariadení");
+define("LANG_USERPROFILE_LOGOUTCONF",'Ak sa chcete naozaj odhlásiť zo všetkých zariadení, stlačte tlačidlo "Odhlásiť sa"');
 
 define("LANG_G","G");
 define("LANG_A","A");

@@ -13,7 +13,7 @@ if($_GET[profile])
   {
   if($_SESSION['logged'])
     {
-    $q = mysql_query("SELECT * FROM e_xoops_users WHERE uid='".$_SESSION['logged']."'");
+    $q = mysql_query("SELECT *, JSON_LENGTH(login_session) as num_devices FROM e_xoops_users WHERE uid='".$_SESSION['logged']."'");
     $f = mysql_fetch_array($q);
     $r = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
     $r = mysql_query("SELECT shortname, longname FROM 2004teams WHERE shortname='".$f[user_favteam]."' GROUP BY shortname UNION SELECT shortname, longname FROM el_teams WHERE shortname='".$f[user_favteam]."' GROUP BY shortname ORDER BY longname ASC");
@@ -22,6 +22,25 @@ if($_GET[profile])
     else $avatar = '/img/players/no_photo.jpg';
     $leaguecolor = "hl";
     $title = LANG_NAV_USERHOMEPAGE;
+    
+    $content .= '<!-- Logout devices modal-->
+      <div class="modal fade" id="logoutallModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">'.LANG_LOGOUT.'?</h5>
+              <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">×</span>
+              </button>
+            </div>
+            <div class="modal-body">'.LANG_USERPROFILE_LOGOUTCONF.'</div>
+            <div class="modal-footer">
+              <button class="btn btn-secondary" type="button" data-dismiss="modal">'.LANG_CANCEL.'</button>
+              <a class="btn btn-hl" href="/logoutall">'.LANG_LOGOUT.'</a>
+            </div>
+          </div>
+        </div>
+      </div>';
     
     $content .= "<div id='toasts' class='fixed-top' style='top: 80px; right: 23px; left: initial; z-index:3;'></div>
                  <img class='float-left img-profile img-thumbnail mr-2 rounded-circle' src='".$avatar."' style='width: 55px;'>
@@ -115,6 +134,7 @@ if($_GET[profile])
               <span class="text text-gray-800">'.LANG_USERPROFILE_CHANGEPASS.'</span>
             </button>
           </form>
+          '.($f[num_devices]>0 ? '<p class="alert alert-info mt-4 small">'.sprintf(LANG_USERPROFILE_CURRENTLYLOGGED, '<strong><i class="fas fa-desktop"></i> '.$f[num_devices].'</strong>').'<br><br><a href="#" data-toggle="modal" data-target="#logoutallModal" class="alert-link">'.LANG_USERPROFILE_LOGOUTFROMALL.'</a></p>':'').'
         </div>
       </div>
       
