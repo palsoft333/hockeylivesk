@@ -49,6 +49,9 @@ switch ($_GET[p]) {
     case "privacy":
         include("privacypolicy.php");
         break;
+    case "partners":
+        include("partners.php");
+        break;
     case "contact":
         include("contact.php");
         break;
@@ -273,6 +276,9 @@ else mysql_query("UPDATE e_xoops_users SET last_login='".mktime()."' WHERE uid='
                 <a class="nav-link" href="/privacy"><? echo LANG_PRIVACY; ?></a>
               </li>
               <li class="nav-item">
+                <a class="nav-link" href="/partners"><? echo LANG_PARTNERS_TITLE; ?></a>
+              </li>
+              <li class="nav-item">
                 <a class="nav-link" href="/contact"><? echo LANG_NAV_IMPERSSUM; ?></a>
               </li>
             </ul>
@@ -327,7 +333,7 @@ else mysql_query("UPDATE e_xoops_users SET last_login='".mktime()."' WHERE uid='
   <!-- Custom scripts for all pages-->
   <script src="/js/jquery-ui.min.js?v=1.12.1"></script>
   <script src="/js/jquery.lazy.min.js"></script>
-  <script src="/js/main.min.js?v=1.2.1"></script>
+  <script src="/js/main.min.js?v=1.2.2"></script>
 <? 
 if(!$_GET[p] && !$_GET[topicID]) echo '  <script type="text/javascript" src="/js/jquery.calendario.js?v=1.0.5"></script>
   <script type="text/javascript" src="/js/homepage_events.js?v=1.1.1"></script>';

@@ -325,6 +325,10 @@ define("LANG_PLAYERDB_PLAYER","Player");
 define("LANG_PLAYERDB_TEAMS","Teams");
 define("LANG_PLAYERDB_FILTER","Filter by team");
 
+define("LANG_PARTNERS_TITLE",'Partners');
+define("LANG_PARTNERS_TEXT",'Partners of our portal are ranked according to how many visitors they helped point to our site. We cannot thank them enough for this and hope that our users will also find their way to their sites using these links.');
+define("LANG_PARTNERS_MAILUS",'If you are interested in cooperation with our portal, you can write us an e-mail at');
+
 define('LANG_PRIVACYPOLICY','Privacy policy');
 define('LANG_PRIVACY_TEXT1','At our portal we take privacy seriously. It is important for us that your personal data will be safe. All personal information that is obtained during your visit of our site is processed in accordance with the law no. 122/2013 Z.z. (Hereinafter referred to as the "Personal Data Protection Act"). By voluntarily filling in your personal data, you hereby consent to the processing of your personal data in accordance with the Personal Data Protection Act.');
 define('LANG_PRIVACY_WHATDATA','What data we store about you?');

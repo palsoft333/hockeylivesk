@@ -460,6 +460,10 @@ define("LANG_FANTASY_AUTOCHANGE",'Automatický výber. Zameniť?');
 define("LANG_FANTASY_MUSTCHANGE1",'Hráč sa nezúčastní. Vymeňte ho za iného');
 define("LANG_FANTASY_ROUND",'Kolo');
 
+define("LANG_PARTNERS_TITLE",'Partneri');
+define("LANG_PARTNERS_TEXT",'Partneri nášho portálu sú zoradení podľa toho, koľko návštevníkom pomohli poukázať na našu stránku. Za to im úprimne ďakujeme a dúfame, že naši užívatelia si takisto nájdu cestu k nim pomocou týchto odkazov.');
+define("LANG_PARTNERS_MAILUS",'V prípade záujmu o spoluprácu s našim portálom nám môžete napísať na mail');
+
 define('LANG_PRIVACYPOLICY','Ochrana osobných údajov');
 define('LANG_PRIVACY_TEXT1','Ochranu osobných údajov na našom portále berieme vážne. Je pre nás dôležité, aby vaše osobné údaje boli v bezpečí. Všetky osobné údaje, ktoré sú získavané počas vašej návštevy na našich stránkach sú spracovávané v súlade so zákonom č. 122/2013 Z.z. (ďalej len „zákon o ochrane osobných údajov“). Dobrovoľným vyplnením vašich osobných údajov nám týmto dávate súhlas s ich spracovaním v súlade so zákonom o ochrane osobných údajov.');
 define('LANG_PRIVACY_WHATDATA','Aké údaje o Vás uchovávame?');

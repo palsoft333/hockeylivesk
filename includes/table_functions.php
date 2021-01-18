@@ -89,7 +89,7 @@ function Get_Table($lid, $params, $table_type, $sim, $pos=false) {
                   array("league",LANG_TEAMTABLE_LEAGUE)
                   );
         //if(strstr($vyb[longname], 'NHL')) $types[] = array("roundrobin",LANG_TEAMTABLE_ROUNDROBIN);
-        // nasleduje COVID sezona bez konferencii
+        // nasleduje riadk pre COVID sezonu bez konferencii
         if(strstr($vyb[longname], 'NHL')) array_splice($types, 1, 1);
         $i=0;
         while($i < count($types))
@@ -171,7 +171,7 @@ function Get_Table($lid, $params, $table_type, $sim, $pos=false) {
   // KHL
   if(strstr($vyb[longname], 'KHL'))
     {
-    $games_total = 62;
+    $games_total = 60;
     $playoff_line = 8;
     $wpoints = $vyb[points];
     $playoff_wins = 4;
@@ -230,10 +230,10 @@ function Get_Table($lid, $params, $table_type, $sim, $pos=false) {
     if($table_type=="division")
       {
       // LANG_TEAMTABLE_PACIFIC, LANG_TEAMTABLE_ATLANTIC, LANG_TEAMTABLE_METROPOLITAN
-      $rtable .= Render_Table(LANG_TEAMTABLE_CENTRAL, $vyb, $table_type, $div1_teams, $wpoints, $games_total, 0, $orderby, $sim);
-      $rtable .= Render_Table("Západná divízia", $vyb, $table_type, $div2_teams, $wpoints, $games_total, 0, $orderby, $sim);
-      $rtable .= Render_Table("Východná divízia", $vyb, $table_type, $div3_teams, $wpoints, $games_total, 0, $orderby, $sim);
-      $rtable .= Render_Table("Severná divízia", $vyb, $table_type, $div4_teams, $wpoints, $games_total, 0, $orderby, $sim);
+      $rtable .= Render_Table("Discover Centrálna divízia", $vyb, $table_type, $div1_teams, $wpoints, $games_total, 0, $orderby, $sim);
+      $rtable .= Render_Table("Honda Západná divízia", $vyb, $table_type, $div2_teams, $wpoints, $games_total, 0, $orderby, $sim);
+      $rtable .= Render_Table("MassMutual Východná divízia", $vyb, $table_type, $div3_teams, $wpoints, $games_total, 0, $orderby, $sim);
+      $rtable .= Render_Table("Scotia Severná divízia", $vyb, $table_type, $div4_teams, $wpoints, $games_total, 0, $orderby, $sim);
       }
     if($table_type=="league")
       {
@@ -256,7 +256,7 @@ function Get_Table($lid, $params, $table_type, $sim, $pos=false) {
   // Tipsport Liga
   elseif($vyb[el]==1)
     {
-    $games_total = 58;
+    $games_total = 50;
     $playoff_line = 8;
     $wpoints = $vyb[points];
     $playoff_wins = 4;
@@ -850,9 +850,6 @@ function Render_Playoff_Boxes($league_data, $po_type, $playoff_wins, $conf=FALSE
                  </div>';
     $k++;
     }
-/*  if($league_data[el]==0 && $uid) $out .= '<script src="/vendor/jquery/jquery.min.js?v=3.5.1"></script>
-  <script type="text/javascript" src="/js/main.min.js"></script>
-  <script type="text/javascript" src="/js/games_events.js"></script>';*/
   return $out;
   }
   

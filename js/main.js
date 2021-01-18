@@ -134,5 +134,10 @@ $(document).ready( function() {
 }); // End of use strict
 
 $(function() {
-  $(".lazy").lazy({ effect: 'fadeIn' });
+  $(".lazy").lazy(
+    { effect: 'fadeIn',     
+      afterLoad: function(e) {
+        e.removeClass("lazy");
+    }}
+  );
 });
