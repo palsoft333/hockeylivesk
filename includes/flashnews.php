@@ -9,8 +9,8 @@ else {
     include("lang/lang_sk.php");
 }
 
-/*$ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, "https://graph.facebook.com/hockeylive/feed?access_token=".FB_ACCESS_TOKEN."&locale=sk_SK");
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, "https://graph.facebook.com/v9.0/397829000227/posts?fields=picture%2Cmessage%2Ccreated_time%2Cstory%2Ccomments&access_token=".FB_ACCESS_TOKEN);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 curl_setopt($ch, CURLOPT_TIMEOUT, 20);
 
@@ -21,8 +21,8 @@ $page_posts = json_decode($feedData, true);
 // zmenit FB cas na unix cas
 foreach($page_posts['data'] as &$value) {
     $value['created_time'] = strtotime($value['created_time']);
-}*/
-$page_posts['data'] = [];
+}
+//$page_posts['data'] = [];
 
 // nacitat nasich 5 poslednych rychlych noviniek a zlucit ich s FB feedom
 $s = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
@@ -37,7 +37,7 @@ while($a = mysql_fetch_array($s))
 // zoradit podla casu
 usort($page_posts['data'], function($a,$b){ $c = $b[created_time] - $a[created_time]; return $c; });
 // odstranit poslednych 5 prispevkov (limit je 25)
-//unset($page_posts['data'][25], $page_posts['data'][26], $page_posts['data'][27], $page_posts['data'][28], $page_posts['data'][29]);
+unset($page_posts['data'][25], $page_posts['data'][26], $page_posts['data'][27], $page_posts['data'][28], $page_posts['data'][29]);
 
 $i=0;
 foreach($page_posts['data'] as $post){
@@ -71,7 +71,7 @@ foreach($page_posts['data'] as $post){
               <td colspan='2'>".($picture ? "<img src='data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=' data-src='$picture' class='lazy bg-gray-100 float-left img-thumbnail mr-2 p-1 shadow-sm w-25'>" : "")."$message</td>
             </tr>
             <tr$tableclass>
-              <td colspan='2' class='text-right'><div class='comment-count float-right'>".($our==1 ? "<a href='/news/".$post_id[0]."-".SEOtitle($story)."'><i class='far fa-comment'></i> <span>$comments ".LANG_COMMENTS."</span></a>" : "<a href='https://www.facebook.com/hockeylive/posts/".$post_id[1]."' target='_blank'><i class='fas fa-comment'></i> $comments ".LANG_COMMENTS."</span></a>")."</div></td>
+              <td colspan='2' class='text-right'><div class='comment-count float-right'>".($our==1 ? "<a href='/news/".$post_id[0]."-".SEOtitle($story)."'><i class='far fa-comment'></i> <span>$comments ".LANG_COMMENTS."</span></a>" : "<a href='https://www.facebook.com/hockeylive/posts/".$post_id[1]."' target='_blank'><i class='far fa-comment'></i> $comments ".LANG_COMMENTS."</span></a>")."</div></td>
             </tr>
           </table>";
     $i++;

@@ -55,6 +55,14 @@ function GetFlashNews() {
     if(data)
       {
       $("#flash-container").html(data).fadeIn(1500);
+      $(function() {
+        $(".lazy").lazy(
+          { effect: 'fadeIn',     
+            afterLoad: function(e) {
+              e.removeClass("lazy");
+          }}
+        );
+      });
       }
     else
       {

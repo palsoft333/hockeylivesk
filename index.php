@@ -336,7 +336,7 @@ else mysql_query("UPDATE e_xoops_users SET last_login='".mktime()."' WHERE uid='
   <script src="/js/main.min.js?v=1.2.2"></script>
 <? 
 if(!$_GET[p] && !$_GET[topicID]) echo '  <script type="text/javascript" src="/js/jquery.calendario.js?v=1.0.5"></script>
-  <script type="text/javascript" src="/js/homepage_events.js?v=1.1.1"></script>';
+  <script type="text/javascript" src="/js/homepage_events.js?v=1.1.2"></script>';
 elseif($_GET[p]=="games") echo '  <script type="text/javascript" src="/js/games_events.js?v=1.0.4"></script>
   <script src="/js/jquery.emojiarea.min.js?v=1.0.0"></script>
   <script src="/images/smilies/emojis.js?v=1.0.0"></script>
