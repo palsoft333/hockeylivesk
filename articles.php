@@ -6,7 +6,7 @@ if(mysql_num_rows($q)>0)
   $f = mysql_fetch_array($q);
   $w = mysql_query("SELECT * FROM 2004leagues WHERE topic_id='".$f[topicid]."' ORDER BY id DESC LIMIT 1");
   $e = mysql_fetch_array($w);
-  if($f[topicid]==4) $e[color]="hl";
+  if($f[topicid]==4 || mysql_num_rows($w)==0) $e[color]="hl";
 
   $leaguecolor = $e[color];
   $active_league = $e[id];
