@@ -4,7 +4,7 @@ if($_SESSION['logged']) header("Location:/");
 include("includes/register.php");
 $langs = array();
 
-if(!$_SESSION[lang] && $_SESSION[lang]!="sk" && $_SESSION[lang]!="en")
+if(!isset($_SESSION[lang]))
   {
   if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
       preg_match_all('/([a-z]{1,8}(-[a-z]{1,8})?)\s*(;\s*q\s*=\s*(1|0\.[0-9]+))?/i', $_SERVER['HTTP_ACCEPT_LANGUAGE'], $lang_parse);
@@ -16,7 +16,9 @@ if(!$_SESSION[lang] && $_SESSION[lang]!="sk" && $_SESSION[lang]!="en")
               if ($val === '') $langs[$lang] = 1;
           }
 
-          arsort($langs, SORT_NUMERIC);
+          if (!count(array_unique($langs)) === 1) {
+            arsort($langs, SORT_NUMERIC);
+          }
       }
   }
   

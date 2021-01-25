@@ -15,7 +15,7 @@ else
   {
   $langs = array();
 
-  if(!$_SESSION[lang] && $_SESSION[lang]!="sk" && $_SESSION[lang]!="en")
+  if(!isset($_SESSION[lang]))
     {
     if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
         preg_match_all('/([a-z]{1,8}(-[a-z]{1,8})?)\s*(;\s*q\s*=\s*(1|0\.[0-9]+))?/i', $_SERVER['HTTP_ACCEPT_LANGUAGE'], $lang_parse);
@@ -27,7 +27,9 @@ else
                 if ($val === '') $langs[$lang] = 1;
             }
 
-            arsort($langs, SORT_NUMERIC);
+            if (!count(array_unique($langs)) === 1) {
+              arsort($langs, SORT_NUMERIC);
+            }
         }
     }
     
@@ -230,6 +232,19 @@ else mysql_query("UPDATE e_xoops_users SET last_login='".mktime()."' WHERE uid='
 
       <!-- Divider -->
       <hr class="sidebar-divider d-none d-md-block">
+      
+      <!-- Language dropdown -->
+      <div class="dropdown text-center mb-3">
+        <button class="btn btn-sm dropdown-toggle text-white-50" type="button" id="langselect" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="border: 1px solid rgba(255,255,255,.15);">
+          <? if($_SESSION[lang]=="sk") echo '<img class="SVK-small flag-iihf" src="/img/blank.png" alt="Slovensky">';
+             else echo '<img class="GBR-small flag-iihf" src="/img/blank.png" alt="English">';
+          ?>
+        </button>
+        <div class="dropdown-menu bg-light" aria-labelledby="langselect">
+          <a class="dropdown-item" href="/?changeLang=sk"><img class="SVK-small flag-iihf" src="/img/blank.png" alt="Slovensky"> Slovensky</a>
+          <a class="dropdown-item" href="/?changeLang=en"><img class="GBR-small flag-iihf" src="/img/blank.png" alt="English"> English</a>
+        </div>
+      </div>
 
       <!-- Sidebar Toggler (Sidebar) -->
       <div class="text-center d-none d-md-inline">
