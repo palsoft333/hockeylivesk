@@ -96,16 +96,16 @@ $content .= '<div class="league-select">
     $content .= '<div class="card my-4 shadow animated--grow-in">
               <div class="card-header">
                 <h6 class="m-0 font-weight-bold text-hl">
-                  Ako bodujeme?
+                  '.LANG_BETS_HOWWESCORE.'
                 </h6>
               </div>
               <div class="card-body">
-                 <p>Užívateľ, ktorému sa podarí uhádnuť tím, ktorý vyhral, má právo na pridelenie týchto bodov:</p>
+                 <p>'.LANG_BETS_HOWWESCORE1.'</p>
                  <ul>
-                  <li><b>10 bodov</b> za uhádnutie presného výsledku zápasu (napr. ak si tipnete 5:3 a zápas skončí 5:3)</li>
-                  <li><b>5 bodov</b> za uhádnutie gólového rozdielu (napr. ak si tipnete 5:3 a zápas skončí 3:1)</li>
-                  <li><b>3 body</b> za uhádnutie gólového stavu jedného z tímov (napr. ak si tipnete 5:3 a zápas skončí 5:0)</li>
-                  <li><b>1 bod</b> ak nie je splnená ani jedna z vyššie uvedených podmienok (uhádnutie výherného tímu)</li>
+                  <li>'.LANG_BETS_HOWWESCORE2.'</li>
+                  <li>'.LANG_BETS_HOWWESCORE3.'</li>
+                  <li>'.LANG_BETS_HOWWESCORE4.'</li>
+                  <li>'.LANG_BETS_HOWWESCORE5.'</li>
                  </ul>
               </div>
             </div>
@@ -113,11 +113,11 @@ $content .= '<div class="league-select">
             <div class="card my-4 shadow animated--grow-in">
               <div class="card-header">
                 <h6 class="m-0 font-weight-bold text-hl">
-                  O čo hráme?
+                  '.LANG_BETS_FORWHAT.'
                 </h6>
               </div>
               <div class="card-body">
-                 <p>Po výhre v jednej z vyhlásených súťaží v danej sezóne si môžete vybrať jednu z nasledujúcich vecných cien:</p>
+                 <p>'.LANG_BETS_FORWHATTEXT.'</p>
                  <div class="card-columns">
                  
                   <div class="card">

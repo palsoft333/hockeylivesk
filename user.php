@@ -68,6 +68,13 @@ if($_GET[profile])
               <div id="suggestions"></div>
             </div>
             <div class="form-group">
+              <label for="lang">'.LANG_USERPROFILE_LANGUAGE.'</label>
+              <select class="custom-select" id="lang" required>
+                <option value="sk"'.($f[lang]=="sk" ? ' selected':'').'>Slovensky</option>
+                <option value="en"'.($f[lang]=="en" ? ' selected':'').'>English</option>
+              </select>
+            </div>
+            <div class="form-group">
               <label for="profilepic">'.LANG_USERPROFILE_PICTURE.'</label>
               <div class="col-auto current-avatar"><img class="img-profile img-thumbnail mr-2 rounded-circle" src="'.$avatar.'" style="width: 70px;"></div>
               <div class="upload-avatar">
@@ -145,7 +152,7 @@ if($_GET[profile])
     $content .= '
     <div class="card shadow my-4 animated--grow-in">
       <div class="card-header">
-        <h6 class="m-0 font-weight-bold text-hl">Posledných '.$num.' komentárov</h6>
+        <h6 class="m-0 font-weight-bold text-hl">'.sprintf(LANG_USERPROFILE_LASTCOMMENTS, $num).'</h6>
       </div>
       <div class="card-body">';
         while($o = mysql_fetch_array($i))
@@ -394,7 +401,7 @@ elseif($id)
     $content .= '
     <div class="card shadow my-4 animated--grow-in">
       <div class="card-header">
-        <h6 class="m-0 font-weight-bold text-hl">Posledných '.$num.' komentárov</h6>
+        <h6 class="m-0 font-weight-bold text-hl">'.sprintf(LANG_USERPROFILE_LASTCOMMENTS, $num).'</h6>
       </div>
       <div class="card-body">';
         while($o = mysql_fetch_array($i))

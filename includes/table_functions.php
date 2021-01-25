@@ -775,6 +775,7 @@ function Render_Playoff_Boxes($league_data, $po_type, $playoff_wins, $conf=FALSE
       $e[team2]=$e[team2short];
       $e[t1]=$e[team1long];
       $e[t2]=$e[team2long];
+      if($_SESSION[lang]!='sk') { $e[t1] = TeamParser($e[t1]); $e[t2] = TeamParser($e[t2]); }
       $e[status1]=$e[goals1];
       $e[status2]=$e[goals2];
       if($e[kedy]=="na programe") $e[status1]=$e[status2]="";

@@ -1,4 +1,5 @@
 <?
+session_start();
 include("db.php");
 include("main_functions.php");
 if(isset($_SESSION[lang])) {
@@ -64,7 +65,7 @@ foreach($page_posts['data'] as $post){
     else $tableclass = " class='bg-light'";
     echo "<table class='w-100 my-0'>
             <tr$tableclass>
-              <td style='width:60%;' class='py-2'><b><a href='".($our==1 ? "/news/".$post_id[0]."-".SEOtitle($story) : "https://www.facebook.com/hockeylive/posts/".$post_id[1])."' ".($our==1 ? "" : " target='_blank'").">".($story ? $story : "Príspevok z nášho Facebooku")."</a></b></td>
+              <td style='width:60%;' class='py-2'><b><a href='".($our==1 ? "/news/".$post_id[0]."-".SEOtitle($story) : "https://www.facebook.com/hockeylive/posts/".$post_id[1])."' ".($our==1 ? "" : " target='_blank'").">".($story ? $story : LANG_FLASH_FROMFB)."</a></b></td>
               <td style='width:40%;' class='text-right'>".date("j.n.Y H:i", $post_time)."</td>
             </tr>
             <tr$tableclass>

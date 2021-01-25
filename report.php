@@ -35,6 +35,7 @@ if(mysql_num_rows($q)>0)
 
   $leaguecolor = $f[color];
   $active_league = $f[league];
+  if($_SESSION[lang]!='sk') { $f[team1long] = TeamParser($f[team1long]); $f[team2long] = TeamParser($f[team2long]); }
   $title = LANG_MATCH1." $f[team1long] - $f[team2long]";
   
   if($e[goalhorn]==1) $content .= '<script src="https://code.responsivevoice.org/responsivevoice.js"></script>';

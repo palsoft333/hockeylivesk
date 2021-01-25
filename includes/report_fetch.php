@@ -33,11 +33,7 @@ if(mysql_num_rows($w)>0)
     }
   $f[other] = substr($f[other], 0, -1);
   }
-
-/*foreach ($f as &$a) {
-  $a = iconv("windows-1250", "utf-8", $a);
-}*/
-   
+  
 echo json_encode($f, JSON_UNESCAPED_UNICODE);
 
 

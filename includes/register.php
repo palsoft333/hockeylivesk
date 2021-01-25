@@ -2,14 +2,6 @@
 session_start();
 include("db.php");
 include("main_functions.php");
-if(isset($_SESSION[lang])) {
-  include("lang/lang_$_SESSION[lang].php");
-}
-else {
-   $_SESSION[lang] = 'sk';
-    include("lang/lang_sk.php");
-}
-
 header('Content-Type: text/html; charset=utf-8');
 
 if(isset($_POST['check']))
@@ -35,7 +27,7 @@ if(isset($_POST['username']) && isset($_POST['password']) && isset($_POST['email
         $email=mysql_real_escape_string($_POST['email']);
         $q=mysql_query("SELECT email FROM e_xoops_users WHERE email='".$email."'");
         if(mysql_num_rows($q)>0) echo "EMAILEXISTS";
-        else $result=mysql_query("INSERT INTO e_xoops_users (uname, email, user_regdate, pass) VALUES ('$username', '$email', '".mktime()."', '$password')");
+        else $result=mysql_query("INSERT INTO e_xoops_users (uname, email, lang, user_regdate, pass) VALUES ('$username', '$email', '".$_SESSION[lang]."', '".mktime()."', '$password')");
         
       } elseif ($responseKeys["score"] < 0.5) {
           echo "CAPTCHAERROR";

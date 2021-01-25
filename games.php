@@ -70,6 +70,8 @@ elseif($gid)
     $linf = mysql_query("SELECT * FROM 2004leagues WHERE id='$b[league]'");
     $linfo = mysql_fetch_array($linf);
     if(strstr($linfo[longname],"U20")) $lowerdiv="U20";
+    if($_SESSION[lang]!='sk') { $kedy = StatusParser($b[kedy]); $t1[longname] = TeamParser($t1[longname]); $t2[longname] = TeamParser($t2[longname]); }
+    else $kedy = $b[kedy];
     $leaguecolor = $linfo[color];
     $active_league = $b[league];
     $title = LANG_MATCHES_DETAIL1.' '.$t1[longname].' vs. '.$t2[longname];
@@ -87,7 +89,7 @@ elseif($gid)
                     <p class="p-fluid mt-3"><b>'.LIVE_GAME_START.':</b> '.date("j.n.Y G:i", strtotime($b[datetime])).'<br>';
                     if($el!=0) $content .= '<b>'.LANG_TEAMSTATS_ARENA.':</b> '.$t1[arena].'<br>';
                     $content .= '<b>'.LANG_MATCHES_BETS.':</b> '.$h[poc].'</p>
-                    <p class="h5 h5-fluid"><b>'.$b[kedy].'</b></p>
+                    <p class="h5 h5-fluid"><b>'.$kedy.'</b></p>
                     '.($b[kedy]=="konečný stav" ? '<p><a href="/report/'.$b[id].$el.'-'.SEOtitle($b[team1long].' vs '.$b[team2long]).'" class="btn btn-sm btn-'.$leaguecolor.' btn-icon-split"><span class="icon text-white-50"><i class="fas fa-ellipsis-h"></i></span><span class="text">'.LANG_TEAMSTATS_INDETAIL.'</span></a></p>':'').'
                   </div>
                   <div class="col-6 col-md-4 d-flex flex-column justify-content-between order-2 order-md-3 text-center animated--grow-in">

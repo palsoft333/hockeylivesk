@@ -107,6 +107,7 @@ $(document).ready( function() {
     }
     var email=$("#email").val();
     var tshort=$("#tshort").val();
+    var lang=$("#lang").val();
     var goalhorn=$('input[name=options]:checked').val();
     if($.trim(email).length>0 && $.trim(tshort).length>0)
       {
@@ -116,7 +117,7 @@ $(document).ready( function() {
         type: "POST",
         url: "/includes/login.php",
         contentType:"application/x-www-form-urlencoded; charset=utf-8",
-        data: {change: "data", goalhorn: goalhorn, email: email, tshort: tshort, avatar: avatar},
+        data: {change: "data", goalhorn: goalhorn, email: email, tshort: tshort, lang: lang, avatar: avatar},
         cache: false,
         success: function(data){
           if(data)

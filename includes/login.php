@@ -97,6 +97,7 @@ if($_POST[change]=="data")
 {
   $email=mysql_real_escape_string($_POST['email']);
   $tshort=mysql_real_escape_string($_POST['tshort']);
+  $lang=mysql_real_escape_string($_POST['lang']);
   $goalhorn=mysql_real_escape_string($_POST['goalhorn']);
   $avatar=mysql_real_escape_string($_POST['avatar']);
   if(strlen($_POST['avatar'])>0)
@@ -116,7 +117,7 @@ if($_POST[change]=="data")
     }
   if(filter_var($email, FILTER_VALIDATE_EMAIL))
     {
-    mysql_query("UPDATE e_xoops_users SET email='$email', user_favteam='$tshort', goalhorn='$goalhorn' WHERE uid='".$_SESSION['logged']."'");
+    mysql_query("UPDATE e_xoops_users SET email='$email', lang='$lang', user_favteam='$tshort', goalhorn='$goalhorn' WHERE uid='".$_SESSION['logged']."'");
     echo "ok";
     }
 }

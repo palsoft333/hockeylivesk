@@ -647,7 +647,7 @@ function ShowComment($item, $from_latest=false)
                         {
                         $q = mysql_query("SELECT * FROM e_xoops_stories WHERE storyid='".$item['main'][10]."'");
                         $f = mysql_fetch_array($q);
-                        $hl = "K článku";
+                        $hl = LANG_USERPROFILE_TOTHESTORY;
                         $hl1 = $f[title];
                         $url = "/news/".$item['main'][10]."-".SEOtitle($f[title]);
                         }
@@ -658,7 +658,7 @@ function ShowComment($item, $from_latest=false)
                         if($el==1) $q = mysql_query("SELECT * FROM el_teams WHERE id='".$ide."'");
                         else $q = mysql_query("SELECT * FROM 2004teams WHERE id='".$ide."'");
                         $f = mysql_fetch_array($q);
-                        $hl = "K tímu";
+                        $hl = LANG_USERPROFILE_TOTHETEAM;
                         $hl1 = $f[longname];
                         $url = "/team/".$item['main'][10]."-".SEOtitle($f[longname]);
                         }
@@ -669,7 +669,8 @@ function ShowComment($item, $from_latest=false)
                         if($el==1) $q = mysql_query("SELECT * FROM el_matches WHERE id='".$ide."'");
                         else $q = mysql_query("SELECT * FROM 2004matches WHERE id='".$ide."'");
                         $f = mysql_fetch_array($q);
-                        $hl = "K zápasu";
+                        $hl = LANG_USERPROFILE_TOTHEGAME;
+                        if($_SESSION[lang]!='sk') { $f[team1long] = TeamParser($f[team1long]); $f[team2long] = TeamParser($f[team2long]); }
                         $hl1 = $f[team1long]." vs. ".$f[team2long];
                         $url = "/game/".$item['main'][10]."-".SEOtitle($f[team1long]." vs ".$f[team2long]);
                         }
@@ -689,7 +690,7 @@ function ShowComment($item, $from_latest=false)
                           $f = mysql_fetch_array($q);
                           $url = "/goalie/".$f[id]."-".SEOtitle($f[name]);
                           }
-                        $hl = "K hráčovi";
+                        $hl = LANG_USERPROFILE_TOTHEPLAYER;
                         $hl1 = $ide;
                         }
                       $comment .='<p class="p-fluid"><a href="'.$url.'">'.$hl.' '.$hl1.'</a></p>';
@@ -1000,6 +1001,21 @@ function TeamParser($name)
   Global $foreign_teams;
   $slovak_teams = array("Bielorusko","Dánsko","Česko","Európa","Fínsko","Francúzsko","Japonsko","Kanada","Kazachstan","Lotyšsko","Maďarsko","Nemecko","Nórsko","Rakúsko","Rusko","Severná Amerika","Slovensko","Slovinsko","Taliansko","Ukrajina","USA","Švajčiarsko","Švédsko");
   $newname = str_replace($slovak_teams,$foreign_teams,$name);
+  return $newname;
+  }
+  
+/*
+* Prekladač stavov tretín zo slovenského jazyka do aktuálne zvoleného jazyka
+* version: 1.0.0 (25.1.2021 - vytvorenie funkcie)
+* @param $name string - slovenský stav tretiny
+* @return $newname string
+*/
+
+function StatusParser($name)
+  {
+  Global $foreign_statuses;
+  $slovak_statuses = array("konečný stav","na programe","pripravte sa","v 1.tretine","po 1.tretine","v 2.tretine","po 2.tretine","v 3.tretine","po 3.tretine","v predlzeni","po predlzeni");
+  $newname = str_replace($slovak_statuses,$foreign_statuses,$name);
   return $newname;
   }
 

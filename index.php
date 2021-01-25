@@ -1,19 +1,68 @@
 <?
 session_start();
+			
+include("includes/db.php");
+include("includes/main_functions.php");
+
+if(isset($_SESSION['logged']))
+  {
+  $la = mysql_query("SELECT lang FROM e_xoops_users WHERE uid='".$_SESSION['logged']."'");
+  $lng = mysql_fetch_array($la);
+  $_SESSION[lang] = $lng[lang];
+  include("includes/lang/lang_".strtolower($_SESSION[lang]).".php");
+  }
+else
+  {
+  $langs = array();
+
+  if(!$_SESSION[lang] && $_SESSION[lang]!="sk" && $_SESSION[lang]!="en")
+    {
+    if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
+        preg_match_all('/([a-z]{1,8}(-[a-z]{1,8})?)\s*(;\s*q\s*=\s*(1|0\.[0-9]+))?/i', $_SERVER['HTTP_ACCEPT_LANGUAGE'], $lang_parse);
+
+        if (count($lang_parse[1])) {
+            $langs = array_combine($lang_parse[1], $lang_parse[4]);
+          
+            foreach ($langs as $lang => $val) {
+                if ($val === '') $langs[$lang] = 1;
+            }
+
+            arsort($langs, SORT_NUMERIC);
+        }
+    }
+    
+    foreach ($langs as $lang => $val) {
+      if (strpos($lang, 'sk') === 0) {
+        $_SESSION[lang] = "sk";
+        break;
+      }
+       else if (strpos($lang, 'en') === 0) {
+        $_SESSION[lang] = "en";
+        break;
+      }
+      else {
+        $_SESSION[lang] = "sk";
+        }
+      }
+    if(count($langs)==0) {
+      $_SESSION[lang] = "sk";
+      }
+    include("includes/lang/lang_".strtolower($_SESSION[lang]).".php");
+    }
+  else
+    {
+    if($_SESSION[lang]=="en" || $_SESSION[lang]=="sk") include("includes/lang/lang_".strtolower($_SESSION[lang]).".php");
+    else include("includes/lang/lang_sk.php");
+    }
+  }
+  
 if($_GET[changeLang] != '' && ($_GET[changeLang] == 'sk' || $_GET[changeLang] == 'en')) {
 			$_SESSION[lang] = $_GET[changeLang];
+			if(isset($_SESSION['logged'])) mysql_query("UPDATE e_xoops_users SET lang='".$_GET[changeLang]."' WHERE uid='".$_SESSION['logged']."'");
 			header("Location: index.php");
 			die();
 			}
-if(isset($_SESSION[lang])) {
-  include("includes/lang/lang_$_SESSION[lang].php");
-}
-else {
-   $_SESSION[lang] = 'sk';
-    include("includes/lang/lang_sk.php");
-}
-include("includes/db.php");
-include("includes/main_functions.php");
+
 switch ($_GET[p]) {
     case "articles":
         include("articles.php");
@@ -355,7 +404,7 @@ elseif($_GET[p]=="teams") echo '  <script type="text/javascript" src="/js/teams_
 elseif($_GET[p]=="fantasy") echo '  <script type="text/javascript" src="/js/fantasy_events.js?v=1.0.0"></script>';
 elseif($_GET[p]=="users" && !$_GET[notif] && !$id) echo '  <script src="/js/croppie.min.js?v=2.6.4"></script>
   <script src="https://code.responsivevoice.org/responsivevoice.js?key=ZN9dlYeg"></script>
-  <script type="text/javascript" src="/js/user_events.js?v=1.0.5"></script>';
+  <script type="text/javascript" src="/js/user_events.js?v=1.0.6"></script>';
 elseif($_GET[p]=="report") echo '  <script type="text/javascript" src="/js/jquery.cookie.js"></script>
   <script src="https://code.responsivevoice.org/responsivevoice.js?key=ZN9dlYeg"></script>
   <script type="text/javascript" src="/js/report_events.php?id='.$id.$el.'"></script>

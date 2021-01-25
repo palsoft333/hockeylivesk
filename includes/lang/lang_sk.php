@@ -74,6 +74,12 @@ define("LANG_USERPROFILE_UPLOAD","Nahrať fotku");
 define("LANG_USERPROFILE_CURRENTLYLOGGED","Aktuálne máte zapnuté automatické prihlásenie na %s zariadeniach.");
 define("LANG_USERPROFILE_LOGOUTFROMALL","Odhlásiť zo všetkých zariadení");
 define("LANG_USERPROFILE_LOGOUTCONF",'Ak sa chcete naozaj odhlásiť zo všetkých zariadení, stlačte tlačidlo "Odhlásiť sa"');
+define("LANG_USERPROFILE_LANGUAGE",'Jazyk');
+define("LANG_USERPROFILE_LASTCOMMENTS",'Posledných %d komentárov');
+define("LANG_USERPROFILE_TOTHESTORY",'K článku');
+define("LANG_USERPROFILE_TOTHETEAM",'K tímu');
+define("LANG_USERPROFILE_TOTHEGAME",'K zápasu');
+define("LANG_USERPROFILE_TOTHEPLAYER",'K hráčovi');
 
 define("LANG_G","G");
 define("LANG_A","A");
@@ -262,6 +268,14 @@ define("LANG_BETS_BET","Tip");
 define("LANG_BETS_LEAGUE","Liga");
 define("LANG_BETS_OPTIONS","Možnosti");
 define("LANG_BETS_CHANGE","Zmeniť tip");
+define("LANG_BETS_HOWWESCORE","Ako bodujeme?");
+define("LANG_BETS_HOWWESCORE1","Užívateľ, ktorému sa podarí uhádnuť tím, ktorý vyhral, má právo na pridelenie týchto bodov:");
+define("LANG_BETS_HOWWESCORE2","<b>10 bodov</b> za uhádnutie presného výsledku zápasu (napr. ak si tipnete 5:3 a zápas skončí 5:3)");
+define("LANG_BETS_HOWWESCORE3","<b>5 bodov</b> za uhádnutie gólového rozdielu (napr. ak si tipnete 5:3 a zápas skončí 3:1)");
+define("LANG_BETS_HOWWESCORE4","<b>3 body</b> za uhádnutie gólového stavu jedného z tímov (napr. ak si tipnete 5:3 a zápas skončí 5:0)");
+define("LANG_BETS_HOWWESCORE5","<b>1 bod</b> ak nie je splnená ani jedna z vyššie uvedených podmienok (uhádnutie výherného tímu)");
+define("LANG_BETS_FORWHAT","O čo hráme?");
+define("LANG_BETS_FORWHATTEXT","Po výhre v jednej z vyhlásených súťaží v danej sezóne si môžete vybrať jednu z nasledujúcich vecných cien:");
 
 define("LANG_GOTOTOP","^ na vrch");
 define("LANG_OTHER_GAMES_LIVE","Ostatné stretnutia");
@@ -283,6 +297,8 @@ define("LANG_NAV_INJURED","Zranení hráči");
 define("LANG_CARDS_GOTD","Zápas dňa");
 define("LANG_CARDS_CALENDAR","Kalendár");
 define("LANG_CARDS_FLASH","Rýchle novinky");
+
+define("LANG_FLASH_FROMFB","Príspevok z nášho Facebooku");
 
 define("LANG_GAMECONT_TODAYS","Dnešné zápasy");
 define("LANG_GAMECONT_NOGAMES","Dnes nie sú na programe žiadne stretnutia");
