@@ -66,7 +66,7 @@ function GetFlashNews() {
       }
     else
       {
-      Notification("Nemôžem načítať rýchle novinky.");
+      Notification(LANG_FLASH_CANNOT);
       }
     }
   });
@@ -111,7 +111,7 @@ $(document).ready( function() {
 
                 function showEvents( contentEl, dateprop ) {
                     hideEvents();
-                    var $events = $( '<div id="custom-content-reveal" class="animated--fade-in list-group border custom-content-reveal h-100 p-2 position-absolute top w-100" style="top:0; left:0; background:rgba(246, 246, 246, 0.9);"><h6 class="font-weight-bold text-center text-success text-uppercase">Zápasy pre ' + dateprop.day + '.'
+                    var $events = $( '<div id="custom-content-reveal" class="animated--fade-in list-group border custom-content-reveal h-100 p-2 position-absolute top w-100" style="top:0; left:0; background:rgba(246, 246, 246, 0.9);"><h6 class="font-weight-bold text-center text-success text-uppercase">'+LANG_CALENDAR_GAMESFOR+' ' + dateprop.day + '.'
 					+ dateprop.monthname + ' ' + dateprop.year + '</h4></div>' ),
                     $close = $( '<div class="p-1 position-absolute" style="right: 0; top: 0;"><button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>' ).on( 'click', hideEvents);
                     $events.append( contentEl.join('') , $close ).insertAfter( $wrapper );

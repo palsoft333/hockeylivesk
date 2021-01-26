@@ -236,8 +236,8 @@ else mysql_query("UPDATE e_xoops_users SET last_login='".mktime()."' WHERE uid='
       <!-- Language dropdown -->
       <div class="dropdown text-center mb-3">
         <button class="btn btn-sm dropdown-toggle text-white-50" type="button" id="langselect" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="border: 1px solid rgba(255,255,255,.15);">
-          <? if($_SESSION[lang]=="sk") echo '<img class="SVK-small flag-iihf" src="/img/blank.png" alt="Slovensky">';
-             else echo '<img class="GBR-small flag-iihf" src="/img/blank.png" alt="English">';
+          <? if($_SESSION[lang]=="sk") echo '<img class="SVK-small flag-iihf rounded-pill" src="/img/blank.png" alt="Slovensky">';
+             else echo '<img class="GBR-small flag-iihf rounded-pill" src="/img/blank.png" alt="English">';
           ?>
         </button>
         <div class="dropdown-menu bg-light" aria-labelledby="langselect">
@@ -400,39 +400,50 @@ else mysql_query("UPDATE e_xoops_users SET last_login='".mktime()."' WHERE uid='
   <script src="/js/main.min.js?v=1.2.2"></script>
 <? 
 if(!$_GET[p] && !$_GET[topicID]) echo '  <script type="text/javascript" src="/js/jquery.calendario.js?v=1.0.5"></script>
+  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION[lang].'.js?v=1.0.0"></script>
   <script type="text/javascript" src="/js/homepage_events.js?v=1.1.2"></script>';
-elseif($_GET[p]=="games") echo '  <script type="text/javascript" src="/js/games_events.js?v=1.0.4"></script>
-  <script src="/js/jquery.emojiarea.min.js?v=1.0.0"></script>
+elseif($_GET[p]=="games")
+  {
+  echo '  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION[lang].'.js?v=1.0.0"></script>
+  <script type="text/javascript" src="/js/games_events.js?v=1.0.4"></script>';
+  if($_GET[gid]) echo '  <script src="/js/jquery.emojiarea.min.js?v=1.0.0"></script>
   <script src="/images/smilies/emojis.js?v=1.0.0"></script>
   <script src="/js/comments.js?v=1.0.1"></script>
   <script src="https://www.google.com/recaptcha/api.js?render=explicit&onload=onRecaptchaLoadCallback"></script>';
+  }
 elseif($_GET[p]=="table") 
   {
   if(strstr($_GET[lid], "playoff")) echo '  <script type="text/javascript" src="/js/games_events.js?v=1.0.4"></script>';
   echo '  <script type="text/javascript" src="/js/table_events.js?v=1.0.1"></script>';
   }
-elseif($_GET[p]=="teams") echo '  <script type="text/javascript" src="/js/teams_events.js?v=1.0.0"></script>
+elseif($_GET[p]=="teams") echo '  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION[lang].'.js?v=1.0.0"></script>
+  <script type="text/javascript" src="/js/teams_events.js?v=1.0.0"></script>
   <script src="/js/jquery.emojiarea.min.js?v=1.0.0"></script>
   <script src="/images/smilies/emojis.js?v=1.0.0"></script>
   <script src="/js/comments.js?v=1.0.1"></script>
   <script src="https://www.google.com/recaptcha/api.js?render=explicit&onload=onRecaptchaLoadCallback"></script>';
-elseif($_GET[p]=="fantasy") echo '  <script type="text/javascript" src="/js/fantasy_events.js?v=1.0.0"></script>';
+elseif($_GET[p]=="fantasy") echo '  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION[lang].'.js?v=1.0.0"></script>
+  <script type="text/javascript" src="/js/fantasy_events.js?v=1.0.0"></script>';
 elseif($_GET[p]=="users" && !$_GET[notif] && !$id) echo '  <script src="/js/croppie.min.js?v=2.6.4"></script>
   <script src="https://code.responsivevoice.org/responsivevoice.js?key=ZN9dlYeg"></script>
+  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION[lang].'.js?v=1.0.0"></script>
   <script type="text/javascript" src="/js/user_events.js?v=1.0.6"></script>';
-elseif($_GET[p]=="report") echo '  <script type="text/javascript" src="/js/jquery.cookie.js"></script>
+elseif($_GET[p]=="report") echo '  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION[lang].'.js?v=1.0.0"></script>
+  <script type="text/javascript" src="/js/jquery.cookie.js"></script>
   <script src="https://code.responsivevoice.org/responsivevoice.js?key=ZN9dlYeg"></script>
   <script type="text/javascript" src="/js/report_events.php?id='.$id.$el.'"></script>
   <script src="/js/jquery.emojiarea.min.js?v=1.0.0"></script>
   <script src="/images/smilies/emojis.js?v=1.0.0"></script>
   <script src="/js/comments.js?v=1.0.1"></script>
   <script src="https://www.google.com/recaptcha/api.js?render=explicit&onload=onRecaptchaLoadCallback"></script>';
-elseif($_GET[p]=="articles") echo '  <script src="/js/jquery.fancybox.min.js?v=3.5.7"></script>
+elseif($_GET[p]=="articles") echo '  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION[lang].'.js?v=1.0.0"></script>
+  <script src="/js/jquery.fancybox.min.js?v=3.5.7"></script>
   <script src="/js/jquery.emojiarea.min.js?v=1.0.0"></script>
   <script src="/images/smilies/emojis.js?v=1.0.0"></script>
   <script src="/js/comments.js?v=1.0.1"></script>
   <script src="https://www.google.com/recaptcha/api.js?render=explicit&onload=onRecaptchaLoadCallback"></script>';
-elseif($_GET[p]=="players") echo '  <script src="/js/jquery.emojiarea.min.js?v=1.0.0"></script>
+elseif($_GET[p]=="players") echo '  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION[lang].'.js?v=1.0.0"></script>
+  <script src="/js/jquery.emojiarea.min.js?v=1.0.0"></script>
   <script src="/images/smilies/emojis.js?v=1.0.0"></script>
   <script src="/js/comments.js?v=1.0.1"></script>
   <script src="https://www.google.com/recaptcha/api.js?render=explicit&onload=onRecaptchaLoadCallback"></script>';

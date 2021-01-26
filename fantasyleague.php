@@ -201,13 +201,13 @@ function time_elapsed_string($datetime, $full = false) {
     $diff->d -= $diff->w * 7;
 
     $string = array(
-        'y' => 'rokmi',
-        'm' => 'mesiacmi',
-        'w' => 'týždňami',
-        'd' => 'dňami',
-        'h' => 'hodinami',
-        'i' => 'minútami',
-        's' => 'sekundami',
+        'y' => LANG_TIME_YEARS,
+        'm' => LANG_TIME_MONTHS,
+        'w' => LANG_TIME_WEEKS,
+        'd' => LANG_TIME_DAYS,
+        'h' => LANG_TIME_HOURS,
+        'i' => LANG_TIME_MINUTES,
+        's' => LANG_TIME_SECONDS,
     );
     foreach ($string as $k => &$v) {
         if ($diff->$k) {
@@ -218,7 +218,9 @@ function time_elapsed_string($datetime, $full = false) {
     }
 
     if (!$full) $string = array_slice($string, 0, 1);
-    return $string ? 'pred '. implode(', ', $string) : 'práve teraz';
+    if(strtolower($_SESSION[lang])=="sk") $hl = LANG_TIME_AGO.' '. implode(', ', $string);
+    else $hl = implode(', ', $string).' '.LANG_TIME_AGO;
+    return $string ? $hl : LANG_TIME_RIGHTNOW;
 }
 
 $content .= '
@@ -388,32 +390,32 @@ if($params[0]=="main")
               {
               $meno = $e[gname];
               $tshort = '<img class="flag-el '.$e[gshort].'-small" src="/images/blank.png" alt="'.$e[gshort].'">';
-              $koho = "brankára";
+              $koho = LANG_FANTASY_AGOALIE;
               }
             elseif($e[pos]=="T")
               {
-              $koho = "celý svoj tím";
+              $koho = LANG_FANTASY_WHOLETEAM;
               $tshort = "";
               $meno = "";
               }
             else
               {
-              if($e[pos]=="F") $koho = "útočníka";
-              if($e[pos]=="D") $koho = "obrancu";
+              if($e[pos]=="F") $koho = LANG_FANTASY_AFORWARD;
+              if($e[pos]=="D") $koho = LANG_FANTASY_ADEFENSE;
               $meno = $e[pname];
               $tshort = '<img class="flag-el '.$e[pshort].'-small" src="/images/blank.png" alt="'.$e[pshort].'">';
               }
             if($e[type]==1)
               {
-              if($e[price]>0) $delta = 'so ziskom <span class="text-success">+'.money_format('%.0n', $e[price]).'</span>';
-              elseif($e[price]<0) $delta = 'so stratou <span class="text-danger">'.money_format('%.0n', $e[price]).'</span>';
-              else $delta = 'bez zisku';
-              $hl = "predal";
+              if($e[price]>0) $delta = LANG_FANTASY_WITHAPROFIT.' <span class="text-success">+'.money_format('%.0n', $e[price]).'</span>';
+              elseif($e[price]<0) $delta = LANG_FANTASY_WITHLOSSOF.' <span class="text-danger">'.money_format('%.0n', $e[price]).'</span>';
+              else $delta = LANG_FANTASY_WITHOUTPROFIT;
+              $hl = LANG_FANTASY_SOLD;
               }
             else
               {
-              $hl = "kúpil";
-              $delta = "za cenu ".money_format('%.0n', $e[price]);
+              $hl = LANG_FANTASY_BOUGHT;
+              $delta = LANG_FANTASY_FORPRICE." ".money_format('%.0n', $e[price]);
               }
             $content .= '<tr>
             <td class="text-nowrap align-top" style="width:15%;">'.time_elapsed_string($e[tstamp]).'</td>
@@ -429,11 +431,11 @@ if($params[0]=="main")
     <div class="card my-4 shadow animated--grow-in">
       <div class="card-header">
         <h6 class="m-0 font-weight-bold text-'.$leaguecolor.'">
-          O čo hráme?
+          '.LANG_BETS_FORWHAT.'
         </h6>
       </div>
       <div class="card-body">
-         <p>Po výhre v jednej z vyhlásených súťaží v danej sezóne si môžete vybrať jednu z nasledujúcich vecných cien:</p>
+         <p>'.LANG_BETS_FORWHATTEXT.'</p>
          <div class="card-columns">
          
           <div class="card">

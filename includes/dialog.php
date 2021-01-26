@@ -200,9 +200,9 @@ elseif($_GET[action]=="sell")
       $q = MySQL_Query("SELECT *, fl_selects.price as uvodna, t2.price as aktual FROM fl_selects JOIN el_goalies t1 ON t1.id=fl_selects.pid JOIN fl_prices_g t2 ON t2.playerid=fl_selects.pid WHERE t1.id='$pid' && uid='$uid'");
       }
     $f = mysql_fetch_array($q);
-    if($f[aktual]>$f[uvodna]) $delta = 'Na transakcii zarobíte: <span class="text-success">'.money_format('%.0n', $f[aktual]-$f[uvodna]).'</span>';
-    elseif($f[aktual]<$f[uvodna]) $delta = 'Na transakcii prerobíte: <span class="text-danger">'.money_format('%.0n', $f[aktual]-$f[uvodna]).'</span>';
-    else $delta = 'Na transakcii neprerobíte';
+    if($f[aktual]>$f[uvodna]) $delta = LANG_FANTASY_YOUWILLEARN.' <span class="text-success">'.money_format('%.0n', $f[aktual]-$f[uvodna]).'</span>';
+    elseif($f[aktual]<$f[uvodna]) $delta = LANG_FANTASY_YOUWILLLOSE.' <span class="text-danger">'.money_format('%.0n', $f[aktual]-$f[uvodna]).'</span>';
+    else $delta = LANG_FANTASY_YOUWILLNOTLOSE;
     echo '
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">

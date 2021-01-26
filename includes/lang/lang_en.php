@@ -5,7 +5,19 @@
 
 --------------------------------------------*/
 
-setlocale(LC_ALL, 'en_EN');
+setlocale(LC_ALL, 'en_EN.UTF8');
+setlocale(LC_NUMERIC, 'C');
+setlocale(LC_MONETARY, 'en_US');
+
+define("LANG_TIME_AGO","ago");
+define("LANG_TIME_YEARS","years");
+define("LANG_TIME_MONTHS","months");
+define("LANG_TIME_WEEKS","weeks");
+define("LANG_TIME_DAYS","days");
+define("LANG_TIME_HOURS","hours");
+define("LANG_TIME_MINUTES","minutes");
+define("LANG_TIME_SECONDS","seconds");
+define("LANG_TIME_RIGHTNOW","just now");
 
 define("LANG_AUTHOR","Author");
 define("LANG_CATEGORY","Category");
@@ -474,6 +486,19 @@ define("LANG_FANTASY_CHANGEQUESTION",'Swap him?');
 define("LANG_FANTASY_AUTOCHANGE",'Automatic pick. Swap?');
 define("LANG_FANTASY_MUSTCHANGE1",'The player will not participate. Replace him with another');
 define("LANG_FANTASY_ROUND",'Round');
+define("LANG_FANTASY_YOUWILLEARN",'You will earn per transaction:');
+define("LANG_FANTASY_YOUWILLLOSE",'You will lose per transaction:');
+define("LANG_FANTASY_YOUWILLNOTLOSE",'You will not lose on this transaction');
+define("LANG_FANTASY_AGOALIE",'a goalie');
+define("LANG_FANTASY_AFORWARD",'a forward');
+define("LANG_FANTASY_ADEFENSE",'a defense');
+define("LANG_FANTASY_WHOLETEAM",'whole team');
+define("LANG_FANTASY_WITHAPROFIT",'with a profit of');
+define("LANG_FANTASY_WITHLOSSOF",'with loss of');
+define("LANG_FANTASY_WITHOUTPROFIT",'without profit');
+define("LANG_FANTASY_SOLD",'sold');
+define("LANG_FANTASY_BOUGHT",'bought');
+define("LANG_FANTASY_FORPRICE",'for the price');
 
 define("LANG_PARTNERS_TITLE",'Partners');
 define("LANG_PARTNERS_TEXT",'Partners of our portal are ranked according to how many visitors they helped point to our site. We cannot thank them enough for this and hope that our users will also find their way to their sites using these links.');

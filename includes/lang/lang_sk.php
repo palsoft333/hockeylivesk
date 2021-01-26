@@ -8,6 +8,16 @@
 setlocale(LC_ALL, 'sk_SK.UTF8');
 setlocale(LC_NUMERIC, 'C');
 
+define("LANG_TIME_AGO","pred");
+define("LANG_TIME_YEARS","rokmi");
+define("LANG_TIME_MONTHS","mesiacmi");
+define("LANG_TIME_WEEKS","týždňami");
+define("LANG_TIME_DAYS","dňami");
+define("LANG_TIME_HOURS","hodinami");
+define("LANG_TIME_MINUTES","minútami");
+define("LANG_TIME_SECONDS","sekundami");
+define("LANG_TIME_RIGHTNOW","práve teraz");
+
 define("LANG_AUTHOR","Autor");
 define("LANG_CATEGORY","Sekcia");
 define("LANG_PUBLISHED","Publikované");
@@ -475,6 +485,19 @@ define("LANG_FANTASY_CHANGEQUESTION",'Zameniť?');
 define("LANG_FANTASY_AUTOCHANGE",'Automatický výber. Zameniť?');
 define("LANG_FANTASY_MUSTCHANGE1",'Hráč sa nezúčastní. Vymeňte ho za iného');
 define("LANG_FANTASY_ROUND",'Kolo');
+define("LANG_FANTASY_YOUWILLEARN",'Na transakcii zarobíte:');
+define("LANG_FANTASY_YOUWILLLOSE",'Na transakcii prerobíte:');
+define("LANG_FANTASY_YOUWILLNOTLOSE",'Na transakcii neprerobíte');
+define("LANG_FANTASY_AGOALIE",'brankára');
+define("LANG_FANTASY_AFORWARD",'útočníka');
+define("LANG_FANTASY_ADEFENSE",'obrancu');
+define("LANG_FANTASY_WHOLETEAM",'celý svoj tím');
+define("LANG_FANTASY_WITHAPROFIT",'so ziskom');
+define("LANG_FANTASY_WITHLOSSOF",'so stratou');
+define("LANG_FANTASY_WITHOUTPROFIT",'bez zisku');
+define("LANG_FANTASY_SOLD",'predal');
+define("LANG_FANTASY_BOUGHT",'kúpil');
+define("LANG_FANTASY_FORPRICE",'za cenu');
 
 define("LANG_PARTNERS_TITLE",'Partneri');
 define("LANG_PARTNERS_TEXT",'Partneri nášho portálu sú zoradení podľa toho, koľko návštevníkom pomohli poukázať na našu stránku. Za to im úprimne ďakujeme a dúfame, že naši užívatelia si takisto nájdu cestu k nim pomocou týchto odkazov.');

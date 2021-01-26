@@ -25,11 +25,11 @@ function onRecaptchaLoadCallback() {
         $.post("/includes/comments.php",{ name:name,uid:uid,what:what,whatid:whatid,replyid:replyid,comment:comment,token:token } ,function(data) {
             if(data=="CAPTCHAERROR")
               {
-              $(".alert").addClass("alert-danger").removeClass("alert-success").html("Vaša registrácia neprešla spam testom. Skúste prosím znovu, alebo nám napíšte <a href='/contact' class='alert-link'>e-mail</a>").slideDown();
+              $(".alert").addClass("alert-danger").removeClass("alert-success").html(LANG_COMMENTS_CAPTCHAERROR+" <a href='/contact' class='alert-link'>"+LANG_MAIL+"</a>").slideDown();
               }
             else
               {
-              $(".alert").addClass("alert-success").removeClass("alert-danger").html("Komentár bol úspešne pridaný.").slideDown();
+              $(".alert").addClass("alert-success").removeClass("alert-danger").html(LANG_COMMENTS_ADDED).slideDown();
               $('#comment').val("");
               $('#comments').html(data);
               }
@@ -68,7 +68,7 @@ $(document).ready(function(){
     var cid=$("#cid").val();
     $.post("/includes/comments.php",{ del:cid } ,function(data) {
      $('#deleteComment').modal('hide');
-     $(".alert").addClass("alert-success").removeClass("alert-danger").html("Komentár bol úspešne vymazaný.").slideDown();
+     $(".alert").addClass("alert-success").removeClass("alert-danger").html(LANG_COMMENTS_REMOVED).slideDown();
      $('#comments').html(data);
       });
     });

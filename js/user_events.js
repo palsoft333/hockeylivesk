@@ -26,8 +26,8 @@ $(document).ready( function() {
     var currentpass=$("#currentpass").val();
     var password=$("#pass").val();
     var passagain=$("#passagain").val();
-    if(password!==passagain) Notification("key text-danger", "Chyba", smallText, 'Heslá sa nezhodujú!', 5000);
-    else if(password.length<6) Notification("key text-danger", "Chyba", smallText, 'Heslo musí mať aspoň 6 znakov!', 5000);
+    if(password!==passagain) Notification("key text-danger", LANG_ERROR, smallText, LANG_USERPROFILE_PASSDIDNTMATCH, 5000);
+    else if(password.length<6) Notification("key text-danger", LANG_ERROR, smallText, LANG_USERPROFILE_PASSATLEAST6, 5000);
     else
       {
       var dataString = 'change=pass&currentpass='+currentpass+'&password='+password;
@@ -43,14 +43,14 @@ $(document).ready( function() {
         success: function(data){
           if(data)
             {
-            Notification("key text-success", "Zmena hesla", smallText, 'Heslo bolo úspešne zmenené.', 5000);
+            Notification("key text-success", LANG_USERPROFILE_PASSCHANGETITLE, smallText, LANG_USERPROFILE_PASSCHANGEOK, 5000);
             $("#currentpass").val("");
             $("#pass").val("");
             $("#passagain").val("");
             }
           else
             {
-            Notification("key text-danger", "Chyba", smallText, 'Nastala chyba pri zmene hesla. Uviedli ste správne súčasné heslo?', 5000);
+            Notification("key text-danger", LANG_ERROR, smallText, LANG_USERPROFILE_PASSCHANGEERROR, 5000);
             }
           }
         });
@@ -122,12 +122,12 @@ $(document).ready( function() {
         success: function(data){
           if(data)
             {
-            Notification("cogs text-success", "Nastavenia", smallText, 'Nastavenia boli úspešne zmenené.', 3000);
+            Notification("cogs text-success", LANG_SETTINGS, smallText, LANG_USERPROFILE_SETTINGSCHANGED, 3000);
             setTimeout(function(){ location.href = "/profile"; }, 3000);
             }
           else
             {
-            Notification("cogs text-danger", "Nastavenia", smallText, 'Nastala chyba pri zmene nastavení.', 5000);
+            Notification("cogs text-danger", LANG_SETTINGS, smallText, LANG_USERPROFILE_SETTINGSERROR, 5000);
             }
           }
         });
@@ -138,7 +138,7 @@ $(document).ready( function() {
   
   $("#sound-1").on('click', function() {
     $("#sound-1").css("color", "#075988");
-    responsiveVoice.speak("Slovensko dáva gól na 2:0", "Slovak Female", {rate: 1.0, onend: function(){ $("#sound-1").css("color", "gray"); }});
+    responsiveVoice.speak(LANG_USERPROFILE_MIKECHECK, LANG_USERPROFILE_VOICE, {rate: 1.0, onend: function(){ $("#sound-1").css("color", "gray"); }});
     return false;
   });
   

@@ -6,7 +6,7 @@ $(document).ready( function() {
   $("#forgotok").on('click', function() {
     var email1=$("#email").val();
     var re1 = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    if(re1.test(email1)==false) $("#alert").html("E-mail je v nesprávnom formáte").removeClass("d-none");
+    if(re1.test(email1)==false) $("#alert").html(LANG_LOGIN_WRONGEMAIL).removeClass("d-none");
     else
       {
       var dataString = 'forgot='+email1;
@@ -22,11 +22,11 @@ $(document).ready( function() {
         success: function(data){
           if(data)
             {
-            $("#alert").removeClass("alert-danger").addClass("alert-success").html("E-mail bol odoslaný").removeClass("d-none");
+            $("#alert").removeClass("alert-danger").addClass("alert-success").html(LANG_LOGIN_EMAILSENT).removeClass("d-none");
             }
           else
             {
-            $("#alert").html("Tento e-mail v našej databáze neexistuje").removeClass("d-none");
+            $("#alert").html(LANG_LOGIN_EMAILDOESNTEXIST).removeClass("d-none");
             }
           }
         });

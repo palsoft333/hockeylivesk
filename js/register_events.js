@@ -17,8 +17,8 @@ $(document).ready( function() {
         var password=$("#pass").val();
         var passagain=$("#passagain").val();
         var email=$("#email").val();
-        if(password!==passagain) $("#alert").html("Heslá sa nezhodujú!").removeClass("d-none");
-        else if(username.length<3) $("#alert").html("Užívateľské meno musí mať aspoň 3 znaky!").removeClass("d-none");
+        if(password!==passagain) $("#alert").html(LANG_USERPROFILE_PASSDIDNTMATCH).removeClass("d-none");
+        else if(username.length<3) $("#alert").html(LANG_REGISTER_USERATLEAST3).removeClass("d-none");
         else
           {
           var dataString = 'username='+username+'&password='+password+'&email='+email+'&token='+token;
@@ -38,15 +38,15 @@ $(document).ready( function() {
                 }
               else if(data=="CAPTCHAERROR")
                 {
-                $("#alert").html("Vaša registrácia neprešla spam testom. Skúste prosím znovu, alebo nám napíšte <a href='/contact' class='alert-link'>e-mail</a>").removeClass("d-none");
+                $("#alert").html(LANG_COMMENTS_CAPTCHAERROR+" <a href='/contact' class='alert-link'>"+LANG_MAIL+"</a>").removeClass("d-none");
                 }
               else if(data=="EMAILEXISTS")
                 {
-                $("#alert").html("Tento e-mail už bol u nás zaregistrovaný. <a href='/login#ModalCenter' class='alert-link'>Nezabudli ste heslo?</a>").removeClass("d-none");
+                $("#alert").html(LANG_REGISTER_ALREADY+" <a href='/login#ModalCenter' class='alert-link'>"+LANG_REGISTER_DIDYOUFORGETPASS+"</a>").removeClass("d-none");
                 }
               else
                 {
-                $("#alert").html("Nesprávne vyplnené polia registrácie!").removeClass("d-none");
+                $("#alert").html(LANG_REGISTER_INCORRECTFIELDS).removeClass("d-none");
                 }
               }
             });
@@ -75,7 +75,7 @@ $(document).ready( function() {
         success: function(data){
           if(data) 
             {
-            $("#alert").html("Zadané užívateľské meno už existuje!").removeClass("d-none");
+            $("#alert").html(LANG_REGISTER_USERTAKEN).removeClass("d-none");
             $(".register-proceed-button").addClass("disabled");
             }
           else 

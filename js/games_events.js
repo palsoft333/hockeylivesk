@@ -54,8 +54,8 @@ function Bet(tipbox, previous) {
               {
               ga('send', 'event', 'User', 'betRemove', gid);
               }
-            if(what=="place") Notification("chart-bar", "Tipovanie", smallText, 'Tip '+tip1+':'+tip2+' bol pridaný', 5000);
-            else if(what=="delete") Notification("eraser", "Tipovanie", smallText, 'Tip bol zmazaný', 5000);
+            if(what=="place") Notification("chart-bar", LANG_GAMES_BETTING, smallText, LANG_GAMES_BET+' '+tip1+':'+tip2+' '+LANG_GAMES_BETADDED, 5000);
+            else if(what=="delete") Notification("eraser", LANG_GAMES_BETTING, smallText, LANG_GAMES_BETREMOVED, 5000);
          }
     });
     }
