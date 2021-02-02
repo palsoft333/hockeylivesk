@@ -184,7 +184,7 @@ function Get_Latest_Stats() {
     $p=0;
     while($f = mysql_fetch_array($q))
       {
-      if(!strstr($f[longname], "Tipsport"))
+      if(!strstr($f[longname], "Tipos"))
         {
         $gname = $f[goaler];
         $a1name = $f[asister1];
@@ -464,7 +464,7 @@ function potw() {
                   <div class="row no-gutters align-items-center">
                     <div class="col mr-2 text-center">
                       <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/includes/player_photo.php?name='.$f[name].'" class="lazy rounded-circle img-thumbnail shadow-sm mb-2 p-1" style="width:100px; height:100px; object-fit: cover; object-position: center top;" alt="'.$f[name].'">
-                      <p class="m-0 font-weight-bold"><img class="flag-'.($potwdata[1]==1 ? 'el':'iihf').' '.$f[teamshort].'-small align-baseline" src="/img/blank.png" alt="'.$f[teamlong].'"> '.$f[name].'</p>
+                      <p class="m-0 font-weight-bold"><img class="flag-'.($potwdata[1]==1 ? 'el':'iihf').' '.$f[teamshort].'-small align-baseline" src="/img/blank.png" alt="'.$f[teamlong].'"> <a href="/player/'.$f[id].$potwdata[1].'-'.SEOtitle($f[name]).'" class="stretched-link text-gray-600">'.$f[name].'</a></p>
                       <p class="m-0 text-xs">'.$hl1.'</p>
                       <p class="h5"><span class="badge badge-pill badge-warning">'.$p.' '.$hl.' ('.$potwdata[2].'G + '.$potwdata[3].'A)</span></p>
                     </div>
