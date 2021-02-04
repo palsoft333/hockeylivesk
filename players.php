@@ -312,6 +312,7 @@ ORDER BY datetime DESC LIMIT 1)dt WHERE dt.id IS NOT NULL");
             if($p==1) $hl = LANG_GAMECONT_POINT;
             else if($p>1 && $p<5) $hl = LANG_GAMECONT_POINTS;
             else $hl = LANG_TEAMSTATS_PTS;
+            $week = (int)date('W',strtotime($potw[datetime]));
             $content .= '
                     <div class="col-auto justify-content-center mx-auto mx-md-3 mb-2 card pl-0 pr-2 order-3 order-md-2 animated--fade-in border-left-'.$leaguecolor.'">
                         <div class="row no-gutters align-items-center">
@@ -322,7 +323,7 @@ ORDER BY datetime DESC LIMIT 1)dt WHERE dt.id IS NOT NULL");
                                 <i class="fas fa-user-shield text-gray-300"></i>
                             </div>
                         </div>
-                        <p class="mb-1 ml-2 small text-center">'.sprintf(LANG_PLAYERS_LASTPOTWTEXT, '<b>'.date('W. \týž\d\eň Y',strtotime($potw[datetime])).'</b>', '<br><img class="'.$potw[teamshort].'-small flag-'.($potw[el]==0 ? 'iihf':'el').'" src="/img/blank.png" alt="'.$potw[teamlong].'"><b>'.$potw[teamlong].'</b>').'</p>
+                        <p class="mb-1 ml-2 small text-center">'.sprintf(LANG_PLAYERS_LASTPOTWTEXT, '<b>'.$week.date('. \týž\d\eň Y',strtotime($potw[datetime])).'</b>', '<br><img class="'.$potw[teamshort].'-small flag-'.($potw[el]==0 ? 'iihf':'el').'" src="/img/blank.png" alt="'.$potw[teamlong].'"><b>'.$potw[teamlong].'</b>').'</p>
                         <p class="h5 text-center"><span class="badge badge-pill badge-'.$leaguecolor.'">'.$p.' '.$hl.' ('.$potw[g].'G + '.$potw[a].'A)</span></p>
                     </div>';
             }
