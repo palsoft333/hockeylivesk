@@ -244,8 +244,7 @@ elseif($pid)
     $data = mysql_fetch_array($q);
     if($data[name]=="MIKUŠ Juraj" || $data[name]=="MIKÚŠ Juraj") 
       {
-      mysql_query("SET NAMES 'latin1'");
-      $coll = " COLLATE latin1_bin";
+      $coll = " COLLATE utf8_bin";
       }
     else $coll="";
     $elinf = mysql_query("SELECT name, max(pos) as pos, max(born) as born, max(hold) as hold, max(kg) as kg, max(cm) as cm FROM el_players WHERE name='$data[name]'$coll ORDER BY id DESC LIMIT 1");

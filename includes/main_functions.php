@@ -118,7 +118,7 @@ function Generate_Menu($active_league = FALSE) {
                       '.(strstr($f[longname], 'NHL') ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/slovaks/'.$f[id].'-'.SEOtitle($f[topic_title]).'"><span itemprop="name">'.LANG_NAV_SLOVAKS.'</span><i class="fas fa-user-shield fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                       '.(strstr($f[longname], 'KHL') ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/slovaks/'.$f[id].'-'.SEOtitle($f[topic_title]).'"><span itemprop="name">'.LANG_NAV_SLOVAKI.'</span><i class="fas fa-user-shield fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                       '.($f[el]>0 ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/injured/'.$f[id].'-'.SEOtitle($f[topic_title]).'"><span itemprop="name">'.LANG_NAV_INJURED.'</span><i class="fas fa-user-injured fa-fw float-right text-gray-500 my-1"></i></a>':'').'
-                      '.($f[id]==131 ? '<a itemprop="url" class="collapse-item font-weight-bold text-success" href="/fantasy/picks"><span itemprop="name">Fantasy MS</span><i class="fas fa-magic fa-fw float-right text-gray-500 my-1"></i></a>':'').'
+                      '.($f[id]==133 ? '<a itemprop="url" class="collapse-item font-weight-bold text-success" href="/fantasy/draft"><span itemprop="name">Fantasy MS</span><i class="fas fa-magic fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                       '.($f[id]==129 ? '<a itemprop="url" class="collapse-item font-weight-bold text-danger" href="/fantasy/main"><span itemprop="name">Fantasy KHL</span><i class="fas fa-magic fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                     </div>
                   </div>
@@ -183,11 +183,17 @@ if($b[el]==1)
     }
   else
     {
-    $kol[kolo]=58;
-    $dev = mysql_query("SELECT ($kol[kolo]-dt.zapasov)*$wpoints+body as ce FROM (SELECT *, goals-ga as diff FROM el_teams WHERE league='$league' && shortname!='S20' ORDER BY body desc, diff desc, goals desc, wins desc, losts asc, ties desc LIMIT 8,8)dt ORDER BY ce DESC LIMIT 1");
+    $kol[kolo]=50;
+    /*$dev = mysql_query("SELECT ($kol[kolo]-dt.zapasov)*$wpoints+body as ce FROM (SELECT *, goals-ga as diff FROM el_teams WHERE league='$league' && shortname!='S20' ORDER BY body desc, diff desc, goals desc, wins desc, losts asc, ties desc LIMIT 8,8)dt ORDER BY ce DESC LIMIT 1");
     $deviaty = mysql_fetch_array($dev);
     $osm = mysql_query("SELECT *, goals-ga as diff FROM el_teams WHERE league='$league' ORDER BY body desc, diff desc, goals desc, wins desc, losts asc, ties desc LIMIT 7,1");
+    $osmy = mysql_fetch_array($osm);*/
+    $dev = mysql_query("SELECT ($kol[kolo]-dt.zapasov)*$wpoints+body as ce FROM (SELECT *, goals-ga as diff FROM el_teams WHERE league='$league' && shortname!='S20' ORDER BY body desc, diff desc, goals desc, wins desc, losts asc, ties desc LIMIT 6,6)dt ORDER BY ce DESC LIMIT 1");
+    $deviaty = mysql_fetch_array($dev);
+    $osm = mysql_query("SELECT *, goals-ga as diff FROM el_teams WHERE league='$league' ORDER BY body desc, diff desc, goals desc, wins desc, losts asc, ties desc LIMIT 5,1");
     $osmy = mysql_fetch_array($osm);
+    $des = mysql_query("SELECT *, goals-ga as diff FROM el_teams WHERE league='$league' ORDER BY body desc, diff desc, goals desc, wins desc, losts asc, ties desc LIMIT 9,1");
+    $desiaty = mysql_fetch_array($des);
     }
 	}
 else { $teams_table="2004teams"; $el="0"; }
@@ -235,7 +241,7 @@ ORDER BY leader asc, body desc, zapasov asc, wins desc, diff desc");*/
 else
   {
   // Tabulka extraligy
-  if(strstr($b[longname], 'Tipsport Liga')) $b[longname] = "Tipsport Liga";
+  if(strstr($b[longname], 'Tipos')) $b[longname] = "Tipos Extraliga";
   if($b[el]==1 && $b[endbasic]==1) $uloha = mysql_query("SELECT *, gf_basic-ga_basic as diff FROM $teams_table WHERE league='$league' && skupina!=1 ORDER BY p_basic desc, diff desc, gf_basic desc, w_basic desc, l_basic asc, t_basic desc");
   else $uloha = mysql_query("(SELECT *, goals-ga as diff, 0 as hore FROM $teams_table WHERE league='$league' && shortname!='S20')
   UNION
@@ -268,12 +274,16 @@ while ($i < mysql_num_rows($uloha))
 	$points = $data[body];
 	if($b[el]==1 && $b[endbasic]==1) $points = $data[p_basic];
   // play-off line
-  if($i==7) $line=" style='border-bottom:1px dashed black !important;'";
+  if(strstr($b[longname], 'Tipos')) {
+    if($i==5 || $i==9) $line=" style='border-bottom:1px dashed black !important;'";
+    }
+  elseif($i==7) $line=" style='border-bottom:1px dashed black !important;'";
 	// clinched playoff
 	//$kol[kolo]=55;
 	if($b[el]==1 && $points > $deviaty[ce]) { $clinch = "<span class='text-success'>*</span>"; $clinchwas=1; }
 	// cannot make playoff's
-	if($b[el]==1 && (($kol[kolo]-$data[zapasov])*$wpoints)+$points < $osmy[body] || $data[shortname]=="S20") { $clinch = "<sup><span class='text-danger font-weight-bold'>x</span></sup>"; $cannotwas=1; }
+	if($b[el]==1 && strstr($b[longname], 'Tipos') && (($kol[kolo]-$data[zapasov])*$wpoints)+$points < $desiaty[body] || $data[shortname]=="S20") { $clinch = "<sup><span class='text-danger font-weight-bold'>x</span></sup>"; $cannotwas=1; }
+	if($b[el]==1 && !strstr($b[longname], 'Tipos') && (($kol[kolo]-$data[zapasov])*$wpoints)+$points < $osmy[body] || $data[shortname]=="S20") { $clinch = "<sup><span class='text-danger font-weight-bold'>x</span></sup>"; $cannotwas=1; }
 	$ttable .= "<tr><td class='text-center'$line'>$p.</td><td$line><a href='/team/$data[id]$el-".SEOtitle($data[longname])."'><img class='flag-".($b[el]==1 ? 'el':'iihf')." ".$data[shortname]."-small mr-1' src='/images/blank.png' alt='".$shortname."'>$shortname</a>$clinch</td><td class='text-center'$line'><b>$points</b></td></tr>";
 	if($pos==$data[shortname] && $b[el]==1) { $a = array($p,$kol[kolo],$wpoints); return $a; }
 	if($pos==$data[shortname] && $b[el]==0) { return $p; }

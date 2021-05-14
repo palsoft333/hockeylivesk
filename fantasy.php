@@ -1,15 +1,15 @@
 <?php
 $params = explode("/", htmlspecialchars($_GET[id]));
 
-$nazov = "Fantasy Junior Championship";
-$menu = "MS U20 2021";
-$skratka = "MS U20";
+$nazov = "Fantasy Championship";
+$menu = "MS 2021";
+$skratka = "MS";
 $manazerov = 10;
-$article_id = 2144;
+$article_id = 2184;
 //$timeout = 480;
-$predraftt = 1; // = draftuje sa do zásobníka. ak 1, upraviť počet manažérov aj v includes/fantasy_functions.php
-$draft_start = "2020-12-16 12:00:00";
-$league_start = "2020-12-25 20:00:00";
+$predraftt = 0; // = draftuje sa do zásobníka. ak 1, upraviť počet manažérov aj v includes/fantasy_functions.php
+$draft_start = "2021-05-04 08:00:00";
+$league_start = "2021-05-19 10:00:00";
 
 /*
 1. nastaviť dátum deadlinu
@@ -36,7 +36,7 @@ $leag = mysql_query("SELECT * FROM 2004leagues WHERE longname LIKE '%$skratka%' 
 $league = mysql_fetch_array($leag);
 $leaguecolor = $league[color];
 $active_league = $league[id];
-//if($uid==2) $uid=2935;
+//if($uid==2) $uid=1319;
 
 // cron job pre vyber random hraca pri necinnosti manazera
 if($_GET[cron]==1)
@@ -242,7 +242,7 @@ if($params[0]=="picks")
     $add="";
     if($uid==$t[uid]) { $add=" bg-gray-200"; }
     // zmazat
-     //$t[body]=0;
+     $t[body]=0;
      //if($t[uid]==2932) $t[body]=$t[body]-1;
     $content .= "<tr><td class='text-center$add'>$i.</td><td class='$add'><a href='#$t[uname]'>$t[uname]</a></td><td class='$add'><b>$t[body]</b></td></tr>";
     $i++;
@@ -363,7 +363,7 @@ if($params[0]=="picks")
       $so = $so+$e[so];
       if($e[pos]!="GK") { $e[wins]=""; $e[so]=""; }
       // zmazat
-//       $e[goals]=$e[asists]=$goals=$asists=$pts=0;
+       $e[goals]=$e[asists]=$goals=$asists=$pts=0;
       $tbody .= '<tr><td class="text-center">'.$i.'.</td><td class="text-center">'.$e[pos].'</td><td class="text-nowrap" style="width:30%;"><img class="flag-iihf '.$e[teamshort].'-small" src="/images/blank.png" alt="'.$e[teamshort].'"> '.$e[name].'</td><td class="text-center">'.$e[goals].'</td><td class="text-center">'.$e[asists].'</td><td class="text-center">'.$e[wins].'</td><td class="text-center">'.$e[so].'</td></tr>';
       $i++;
       }
@@ -378,7 +378,13 @@ if($params[0]=="picks")
           </tfoot>';
     $content .= $thead.$tfoot.'<tbody>'.$tbody.'</tbody></table></div></div>';
     }
-  $content .= '</div>';
+  $content .= '
+    <div class="card shadow my-4">
+        <div class="card-body">
+        '.GenerateComments(4,0).'
+        </div>
+    </div>
+  </div>';
   }
 elseif($params[0]=="draft")
   {
@@ -630,7 +636,7 @@ elseif($params[0]=="draft")
     $content .= '<div class="alert alert-info" role="alert"><i class="fas fa-hourglass-half"></i> '.sprintf(LANG_FANTASY_REMAINING, $min).'</div>
                  <form id="form" method="post" action="/fantasy/draft" enctype="multipart/form-data">';
 
-    //$content .= '<div class="alert alert-warning" role="alert"><i class="fas fa-users"></i> '.sprintf(LANG_FANTASY_ONLYFROMDB, $skratka).'</div>';
+    $content .= '<div class="alert alert-warning" role="alert"><i class="fas fa-users"></i> '.sprintf(LANG_FANTASY_ONLYFROMDB, $skratka).'</div>';
     
     if($countf>0)
       {
@@ -694,8 +700,8 @@ elseif($params[0]=="draft")
     else
     {
     //$content .= '<div class="alert alert-info" role="alert">'.LANG_FANTASY_NOTYOURTURN.'<br><br>'.LANG_FANTASY_MISSED.'</div>';
-    //$content .= '<div class="alert alert-info" role="alert">'.LANG_FANTASY_NOTYOURTURN.'<br><br>'.LANG_FANTASY_MISSEDICON.'</div>';
-    $content .= '<div class="alert alert-info" role="alert"><i class="fas fa-hourglass-half"></i> '.LANG_FANTASY_WAITINGFORROSTERS.'</div>';
+    $content .= '<div class="alert alert-info" role="alert">'.LANG_FANTASY_NOTYOURTURN.'<br><br>'.LANG_FANTASY_MISSEDICON.'</div>';
+    //$content .= '<div class="alert alert-info" role="alert"><i class="fas fa-hourglass-half"></i> '.LANG_FANTASY_WAITINGFORROSTERS.'</div>';
     }
     
     $n = mysql_query("SELECT * FROM ft_predraft WHERE uid='$uid'");
@@ -727,7 +733,6 @@ elseif($params[0]=="draft")
    </div>';
   
     $content .= Show_Drafted();
-    $content .= '</div>';
     }
   }
  
@@ -740,8 +745,15 @@ elseif($params[0]=="draft")
                  <div style='max-width: 1000px;'>";
     $content .= '<div class="alert alert-info" role="alert">'.sprintf(LANG_FANTASY_DRAFTTEXT, $nazov, $manazerov).'</div>';
     $content .= Show_Drafted();
-    $content .= '</div>';
     }
+    
+  $content .= '
+    <div class="card shadow my-4">
+        <div class="card-body">
+        '.GenerateComments(4,0).'
+        </div>
+    </div>
+  </div>';
   }
 elseif($params[0]=="signin")
   {

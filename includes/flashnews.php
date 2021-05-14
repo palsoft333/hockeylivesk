@@ -10,20 +10,23 @@ else {
     include("lang/lang_sk.php");
 }
 
-$ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, "https://graph.facebook.com/v9.0/397829000227/posts?fields=picture%2Cmessage%2Ccreated_time%2Cstory%2Ccomments&access_token=".FB_ACCESS_TOKEN);
+//appsecret_proof:
+//echo hash_hmac('sha256', FB_ACCESS_TOKEN, 'bfa5a8b399abf1c6e95196d6ceffb083');
+
+/*$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, "https://graph.facebook.com/v9.0/397829000227/posts?fields=picture%2Cmessage%2Ccreated_time%2Cstory%2Ccomments&access_token=".FB_ACCESS_TOKEN."&appsecret_proof=f4db2f449d8064964841152ad2135dddbd896c21f5d30472c45801e2fba12754");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 curl_setopt($ch, CURLOPT_TIMEOUT, 20);
 
 $feedData = curl_exec($ch);
 curl_close($ch); 
-$page_posts = json_decode($feedData, true);
+$page_posts = json_decode($feedData, true);*/
 
 // zmenit FB cas na unix cas
-foreach($page_posts['data'] as &$value) {
+/*foreach($page_posts['data'] as &$value) {
     $value['created_time'] = strtotime($value['created_time']);
-}
-//$page_posts['data'] = [];
+}*/
+$page_posts['data'] = [];
 
 // nacitat nasich 5 poslednych rychlych noviniek a zlucit ich s FB feedom
 $s = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());

@@ -430,4 +430,34 @@ a.text-hl:hover, a.text-hl:focus {
   background-color: #d1d3e2!important;
 }
 
+.live {
+  animation: live-pulse 2s infinite;
+}
+
+@-webkit-keyframes live-pulse {
+  0% {
+    -webkit-box-shadow: 0 0 0 0 rgba(0,126,197, 0.4);
+  }
+  70% {
+      -webkit-box-shadow: 0 0 0 10px rgba(0,126,197, 0);
+  }
+  100% {
+      -webkit-box-shadow: 0 0 0 0 rgba(0,126,197, 0);
+  }
+}
+@keyframes live-pulse {
+  0% {
+    -moz-box-shadow: 0 0 0 0 rgba(0,126,197, 0.4);
+    box-shadow: 0 0 0 0 rgba(0,126,197, 0.4);
+  }
+  70% {
+      -moz-box-shadow: 0 0 0 10px rgba(0,126,197, 0);
+      box-shadow: 0 0 0 10px rgba(0,126,197, 0);
+  }
+  100% {
+      -moz-box-shadow: 0 0 0 0 rgba(0,126,197, 0);
+      box-shadow: 0 0 0 0 rgba(0,126,197, 0);
+  }
+}
+
 html { display: block; }

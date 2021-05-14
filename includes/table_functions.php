@@ -257,7 +257,7 @@ function Get_Table($lid, $params, $table_type, $sim, $pos=false) {
   elseif($vyb[el]==1)
     {
     $games_total = 50;
-    $playoff_line = 8;
+    $playoff_line = 6;
     $wpoints = $vyb[points];
     $playoff_wins = 4;
     $orderby = "body desc, diff desc, zapasov asc, goals desc, wins desc, losts asc";
@@ -454,10 +454,12 @@ ORDER BY leader asc, $orderby");*/
     $deviaty = mysql_fetch_array($dev);
     $osm = mysql_query("SELECT *, goals-ga as diff FROM $teams_table WHERE league='$lid' ORDER BY $orderby LIMIT ".$pol.",1");
     $osmy = mysql_fetch_array($osm);
+    $des = mysql_query("SELECT *, goals-ga as diff FROM $teams_table WHERE league='$lid' ORDER BY $orderby LIMIT 9,1");
+    $desiaty = mysql_fetch_array($des);
     $uloha = mysql_query("(SELECT *, goals-ga as diff, 0 as hore FROM $teams_table WHERE league='$lid' && shortname!='S20')
 UNION
 (SELECT *, goals-ga as diff, 1 as hore FROM $teams_table WHERE league='$lid' && shortname='S20') ORDER BY hore asc, $orderby");
-    $out = Insert_to_table($table_name, $uloha, $league_data, $show_clinch, $playoff_line, $sim, $deviaty, $osmy, $games_total, $wpoints);
+    $out = Insert_to_table($table_name, $uloha, $league_data, $show_clinch, $playoff_line, $sim, $deviaty, $osmy, $games_total, $wpoints, $desiaty);
     /*$dev = mysql_query("SELECT ($games_total-dt.zapasov)*$wpoints+body as ce FROM (SELECT *, goals-ga as diff FROM $teams_table WHERE league='$lid' && shortname IN(\"".implode('","',$teams)."\") ORDER BY $orderby LIMIT $playoff_line,8)dt ORDER BY ce DESC LIMIT 1");
     $deviaty = mysql_fetch_array($dev);
     $osm = mysql_query("SELECT *, goals-ga as diff FROM $teams_table WHERE league='$lid' && shortname IN(\"".implode('","',$teams)."\") ORDER BY $orderby LIMIT ".$pol.",1");
@@ -503,7 +505,7 @@ UNION
       {
       $show_clinch=0;
       $uloha = mysql_query("SELECT *, goals-ga as diff FROM $teams_table WHERE league='$lid' ORDER BY $orderby");
-      $out .= Insert_to_table($table_name, $uloha, $league_data, $show_clinch, $playoff_line, $sim, $deviaty, $osmy, $games_total, $wpoints);
+      $out .= Insert_to_table($table_name, $uloha, $league_data, $show_clinch, $playoff_line, $sim, $deviaty, $osmy, $desiaty, $games_total, $wpoints);
       }
     }
   return $out;
@@ -525,7 +527,7 @@ UNION
 * @return $ttable string
 */
   
-function Insert_to_table($table_name, $uloha, $league_data, $show_clinch, $playoff_line, $sim, $deviaty, $osmy, $games_total, $wpoints)
+function Insert_to_table($table_name, $uloha, $league_data, $show_clinch, $playoff_line, $sim, $deviaty, $osmy, $games_total, $wpoints, $desiaty=false)
   {
   Global $leaderwas, $clinchwas, $cannotwas, $relegwas, $npos, $leaguecolor, $json;
   if($playoff_line>0) $pol = $playoff_line-1;
@@ -592,6 +594,7 @@ function Insert_to_table($table_name, $uloha, $league_data, $show_clinch, $playo
     if($data[leader]==1) { $leader="*"; $leaderwas=1; }
     // play-off line
     if($show_clinch==1 && $playoff_line>0 && $i==$pol) $line=" style='border-bottom:1px dashed black !important;'";
+    if($show_clinch==1 && $playoff_line>0 && $i==9 && strstr($league_data[longname], "Tipos")) $line=" style='border-bottom:1px dashed black !important;'";
     // relegation line
     if(strstr($league_data[longname], "MS") && $show_clinch==1 && $playoff_line>0 && $i==6) $line=" style='border-bottom:1px dashed black !important;'";
     // clinched playoff
@@ -608,7 +611,8 @@ function Insert_to_table($table_name, $uloha, $league_data, $show_clinch, $playo
       $ttable["conference"][$table_name][$p]["points"] = $points;
       }
     // cannot make playoff's
-    if($show_clinch==1 && $sim!=1 && (($games_total-$data[zapasov])*$wpoints)+$points < $osmy[body] || $data[shortname]=="S20" && $sim!=1 && $show_clinch==1 || $show_clinch==1 && $sim!=1 && $games_total-$data[zapasov]==0 && $p>$playoff_line) { $bs="<span class='font-italic'>"; $be="</span>"; $clinch = "<sup><span class='text-danger font-weight-bold'>y</span></sup>"; $cannotwas=1; }
+    if($show_clinch==1 && $sim!=1 && strstr($league_data[longname], "Tipos") && (($games_total-$data[zapasov])*$wpoints)+$points < $desiaty[body] || $data[shortname]=="S20" && $sim!=1 && $show_clinch==1 && strstr($league_data[longname], "Tipos") || $show_clinch==1 && $sim!=1 && $games_total-$data[zapasov]==0 && $p>$playoff_line && strstr($league_data[longname], "Tipos")) { $bs="<span class='font-italic'>"; $be="</span>"; $clinch = "<sup><span class='text-danger font-weight-bold'>y</span></sup>"; $cannotwas=1; }
+    if($show_clinch==1 && $sim!=1 && !strstr($league_data[longname], "Tipos") && (($games_total-$data[zapasov])*$wpoints)+$points < $osmy[body] || $data[shortname]=="S20" && $sim!=1 && $show_clinch==1 && !strstr($league_data[longname], "Tipos") || $show_clinch==1 && $sim!=1 && $games_total-$data[zapasov]==0 && $p>$playoff_line && !strstr($league_data[longname], "Tipos")) { $bs="<span class='font-italic'>"; $be="</span>"; $clinch = "<sup><span class='text-danger font-weight-bold'>y</span></sup>"; $cannotwas=1; }
     // relegated to DIV.I
     //if(strstr($league_data[longname], "MS") && $show_clinch==1 && (($games_total-$data[zapasov])*$wpoints)+$data[body] < $reord[6][6] || strstr($league_data[longname], "MS") && $show_clinch==1 && ($data[zapasov]==7 && $i==7)) { $bs="<i>"; $be="</i>"; $clinch = "<sup><span class='text-primary font-weight-bold'>z</span></sup>"; $relegwas=1; }
     if(!$json) $ttable .= "'>$bs<span class='d-none d-md-inline'>$data[longname]</span><span class='d-inline d-md-none'>$data[mediumname]</span>$be</a> $clinch</td><td class='text-center'$line>$data[zapasov]</td><td class='text-center'$line>$wins</td><td class='text-center'$line>$losts</td><td class='text-center'$line>$goals</td><td class='text-center'$line><span class='font-weight-bold'>$points</span></td></tr>";

@@ -2,7 +2,7 @@
 // SVK hraci
 $slovaks = array(
 //"BAČÍK Patrik" => "SBA",
-"BAKOŠ Martin" => "SPA",
+"BAKOŠ Martin" => "SOC",
 //"BARANKA Ivan" => "SBA",
 //"BARTEČKO Ľuboš" => "LEV",
 //"BARTOVIČ Milan" => "SBA",

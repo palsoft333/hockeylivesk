@@ -41,6 +41,7 @@ if($_POST[comment])
             if(substr($whatid, -1)=="p") $url = "\r\nHráč: ".substr($whatid, 0, -1);
             if(substr($whatid, -1)=="g") $url = "\r\nBrankár: ".substr($whatid, 0, -1);
             }
+          if($what==4) { $url = "fantasy/draft#comments"; }
           if($replyid!=0 && $uid!=$_SESSION[logged]) 
             {
             $w = mysql_query("SELECT * FROM comments WHERE id='$replyid'");

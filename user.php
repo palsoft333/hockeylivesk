@@ -329,7 +329,7 @@ elseif($id)
     {
     $f = mysql_fetch_array($q);
     $r = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
-    $r = mysql_query("SELECT shortname, longname, 0 as el FROM 2004teams WHERE shortname='".$f[user_favteam]."' GROUP BY shortname UNION SELECT shortname, longname, 1 as el FROM el_teams WHERE shortname='".$f[user_favteam]."' GROUP BY shortname ORDER BY longname ASC");
+    $r = mysql_query("SELECT id, shortname, longname, 0 as el FROM 2004teams where shortname='".$f[user_favteam]."' UNION SELECT id, shortname, longname, 1 as el FROM el_teams WHERE shortname='".$f[user_favteam]."' ORDER BY id DESC LIMIT 1");
     $t = mysql_fetch_array($r);
     $y = mysql_query("SELECT sum(points) as poc FROM `fl_wallet` WHERE uid='$id' GROUP BY uid");
     if(mysql_num_rows($y)>0) $u = mysql_fetch_array($y);
