@@ -69,6 +69,11 @@ if($id)
       $p = mysql_query("SELECT $players_table.*, CONCAT(YEAR(NOW()),DATE_FORMAT(born,'-%m-%d')) as datum, YEAR(NOW())-YEAR(born) as vek, dt.injury FROM $players_table LEFT JOIN (SELECT name, injury FROM $injury_table WHERE league='$f[league]')dt ON $players_table.name=dt.name WHERE teamshort='$f[shortname]' && league='$f[league]' ORDER BY points DESC, gp ASC, goals DESC, asists DESC, gwg DESC, gtg DESC, shg DESC, ppg DESC, penalty ASC");
       $h = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
       $h = mysql_query("SELECT pd.* FROM 2004playerdiary as pd JOIN(SELECT name FROM $players_table WHERE teamshort='$f[shortname]' && league='$f[league]' GROUP BY name UNION SELECT name FROM $goalies_table WHERE teamshort='$f[shortname]' && league='$f[league]' GROUP BY name)dt ON pd.name=dt.name ORDER BY pd.msg_date DESC, pd.id DESC LIMIT 10");
+      include("includes/slovaks.php");
+      $slovaci = $slovaks;
+      $brankars = $brankari;
+      include("includes/slovaki.php");
+      $slovaks = array_merge($slovaci, $slovaks, $brankars, $brankari);
       }
     else
       {
@@ -168,12 +173,13 @@ if($id)
                     $i=0;
                     while($t = mysql_fetch_array($g))
                       {
-                      $bday=$injury="";
+                      $bday=$injury=$slovak="";
                       if(strtotime($t[datum])==mktime(0,0,0)) $bday = ' <i class="fas fa-birthday-cake" data-toggle="tooltip" data-placement="top" data-html="true" title="Dnes oslavuje <strong>'.$t[vek].'</strong> rokov<br>Blahoželáme!"></i>';
                       if($t[injury]!=NULL) $injury = ' <i class="fas fa-user-injured text-danger" data-toggle="tooltip" data-placement="top" data-html="true" title="Zranený: <strong>'.$t[injury].'</strong>"></i>';
+                      if(array_key_exists($t[name], $slovaks)) $slovak = ' <img class="flag-iihf SVK-small" src="/img/blank.png" alt="Slovák">';
                       $content .= '<tr'.($t[gp]==0 ? ' class="text-gray-500"':'').'>
                       <td class="text-center">GK</td>
-                      <td class="text-nowrap"><a href="/goalie/'.$t[id].'-'.SEOtitle($t[name]).'">'.$t[name].'</a>'.$injury.''.$bday.'</td>
+                      <td class="text-nowrap"><a href="/goalie/'.$t[id].'-'.SEOtitle($t[name]).'">'.$t[name].'</a>'.$slovak.''.$injury.''.$bday.'</td>
                       <td class="text-center">'.$t[gp].'</td>
                       <td class="text-center">'.$t[sog].'</td>
                       <td class="text-center">'.$t[svs].'</td>
@@ -216,7 +222,7 @@ if($id)
                   <tbody>';
                     while($y = mysql_fetch_array($p))
                       {
-                      $bday=$injury="";
+                      $bday=$injury=$slovak="";
                       if($el==0)
                         {
                         if($y[pos]=="LD" || $y[pos]=="RD") $y[pos]="D";
@@ -224,9 +230,10 @@ if($id)
                         }
                       if(strtotime($y[datum])==mktime(0,0,0)) $bday = ' <i class="fas fa-birthday-cake" data-toggle="tooltip" data-placement="top" data-html="true" title="Dnes oslavuje <strong>'.$y[vek].'</strong> rokov<br>Blahoželáme!"></i>';
                       if($y[injury]!=NULL) $injury = ' <i class="fas fa-user-injured text-danger" data-toggle="tooltip" data-placement="top" data-html="true" title="Zranený: <strong>'.$y[injury].'</strong>"></i>';
+                      if(array_key_exists($y[name], $slovaks)) $slovak = ' <img class="flag-iihf SVK-small" src="/img/blank.png" alt="Slovák">';
                       $content .= '<tr'.($el==1 && $y[gp]==0 ? ' class="text-gray-500"':'').'>
                       <td class="text-center">'.$y[pos].'</td>
-                      <td class="text-nowrap"><a href="/player/'.$y[id].$el.'-'.SEOtitle($y[name]).'">'.$y[name].'</a>'.$injury.''.$bday.'</td>';
+                      <td class="text-nowrap"><a href="/player/'.$y[id].$el.'-'.SEOtitle($y[name]).'">'.$y[name].'</a>'.$slovak.''.$injury.''.$bday.'</td>';
                       if($el==1) $content .= '<td class="text-center">'.$y[gp].'</td>';
                       $content .= '<td class="text-center">'.$y[goals].'</td>
                       <td class="text-center">'.$y[asists].'</td>
