@@ -167,9 +167,9 @@ function Get_Latest_Stats() {
     $e = mysql_fetch_array($w);
     if($e[kedy]=="na programe") { $vcera = date('Y-m-d', mktime(0, 0, 0, date('m'), date('d')-2, date('Y'))); $dnes = date('Y-m-d', mktime(0, 0, 0, date('m'), date('d')-1, date('Y'))); }
     }
-  $q = mysql_query("(SELECT ft.*, 2004leagues.longname FROM 2004leagues JOIN (SELECT et.* FROM (SELECT el_goals.*, dt.league FROM el_goals JOIN (SELECT id, league FROM el_matches WHERE kedy = 'konečný stav' && datetime > '$vcera 07:00' && datetime < '$dnes 07:00' ORDER BY datetime)dt ON dt.id=el_goals.matchno)et WHERE goaler IN ($in) OR asister1 IN ($in) OR asister2 IN ($in))ft ON 2004leagues.id=ft.league)
+  $q = mysql_query("(SELECT ft.*, 2004leagues.longname FROM 2004leagues JOIN (SELECT et.* FROM (SELECT el_goals.goaler, el_goals.asister1, el_goals.asister2, el_goals.teamshort, dt.league FROM el_goals JOIN (SELECT id, league FROM el_matches WHERE kedy = 'konečný stav' && datetime > '$vcera 07:00' && datetime < '$dnes 07:00' ORDER BY datetime)dt ON dt.id=el_goals.matchno)et WHERE goaler IN ($in) OR asister1 IN ($in) OR asister2 IN ($in))ft ON 2004leagues.id=ft.league)
   UNION
-  (SELECT gt.*, 2004leagues.longname FROM 2004leagues JOIN (SELECT et.* FROM (SELECT 2004goals.*, dt.league FROM 2004goals JOIN (SELECT id, league FROM 2004matches WHERE kedy = 'konečný stav' && datetime > '$vcera 07:00' && datetime < '$dnes 07:00' ORDER BY datetime)dt ON dt.id=2004goals.matchno)et WHERE teamshort='SVK')gt ON 2004leagues.id=gt.league)");
+  (SELECT gt.*, 2004leagues.longname FROM 2004leagues JOIN (SELECT et.* FROM (SELECT 2004goals.goaler, 2004goals.asister1, 2004goals.asister2, 2004goals.teamshort, dt.league FROM 2004goals JOIN (SELECT id, league FROM 2004matches WHERE kedy = 'konečný stav' && datetime > '$vcera 07:00' && datetime < '$dnes 07:00' ORDER BY datetime)dt ON dt.id=2004goals.matchno)et WHERE teamshort='SVK')gt ON 2004leagues.id=gt.league)");
   if(mysql_num_rows($q)==0)
     {
     $stat .= "<p class='bg-gray-100 border p-2 rounded small'>".LANG_GAMECONT_NOSTATS."</p>
@@ -513,17 +513,17 @@ function ComputePOTW() {
     $pondelok = date('Y-m-d', strtotime('next Monday -1 week', strtotime('this sunday')));
     $nedela = date('Y-m-d', strtotime('this sunday'));
     $potw = "";
-    $w = mysql_query("(SELECT g.*, m.league, 1 as el FROM `el_matches` m JOIN el_goals g ON g.matchno=m.id WHERE datetime > '$pondelok 00:00:00' && datetime < '$nedela 23:59:59')
+    $w = mysql_query("(SELECT g.goaler, g.asister1, g.asister2, g.teamshort, m.league, 1 as el FROM `el_matches` m JOIN el_goals g ON g.matchno=m.id WHERE datetime > '$pondelok 00:00:00' && datetime < '$nedela 23:59:59')
     UNION
-    (SELECT g1.*, m1.league, 0 as el FROM `2004matches` m1 JOIN 2004goals g1 ON g1.matchno=m1.id WHERE datetime > '$pondelok 00:00:00' && datetime < '$nedela 23:59:59')");
+    (SELECT g1.goaler, g1.asister1, g1.asister2, g1.teamshort, m1.league, 0 as el FROM `2004matches` m1 JOIN 2004goals g1 ON g1.matchno=m1.id WHERE datetime > '$pondelok 00:00:00' && datetime < '$nedela 23:59:59')");
     if(mysql_num_rows($w)==0)
       {
       // predosly tyzden
       $pondelok = date('Y-m-d', strtotime('next Monday -1 week', strtotime('last sunday')));
       $nedela = date('Y-m-d', strtotime('last sunday'));
-      $w = mysql_query("(SELECT g.*, m.league, 1 as el FROM `el_matches` m JOIN el_goals g ON g.matchno=m.id WHERE datetime > '$pondelok 00:00:00' && datetime < '$nedela 23:59:59')
+      $w = mysql_query("(SELECT g.goaler, g.asister1, g.asister2, g.teamshort, m.league, 1 as el FROM `el_matches` m JOIN el_goals g ON g.matchno=m.id WHERE datetime > '$pondelok 00:00:00' && datetime < '$nedela 23:59:59')
       UNION
-      (SELECT g1.*, m1.league, 0 as el FROM `2004matches` m1 JOIN 2004goals g1 ON g1.matchno=m1.id WHERE datetime > '$pondelok 00:00:00' && datetime < '$nedela 23:59:59')");
+      (SELECT g1.goaler, g1.asister1, g1.asister2, g1.teamshort, m1.league, 0 as el FROM `2004matches` m1 JOIN 2004goals g1 ON g1.matchno=m1.id WHERE datetime > '$pondelok 00:00:00' && datetime < '$nedela 23:59:59')");
       }
     $stats = array();
     /*

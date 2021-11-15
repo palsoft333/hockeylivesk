@@ -84,8 +84,8 @@ function h2h_reorder1($uloha, $lid, $league_data)
   
 function TeamParser($team)
   {
-  $slovak_teams = array("Bielorusko","Dánsko","Česko","Európa","Fínsko","Francúzsko","Japonsko","Kanada","Kazachstan","Lotyšsko","Maďarsko","Nemecko","Nórsko","Rakúsko","Rusko","Severná Amerika","Slovensko","Slovinsko","Taliansko","Ukrajina","USA","Veľká Británia","Švajčiarsko","Švédsko");
-  $foreign_teams = array("Belarus","Denmark","Czechia","Europe","Finland","France","Japan","Canada","Kazakhstan","Latvia","Hungary","Germany","Norway","Austria","Russia","North America","Slovakia","Slovenia","Italy","Ukraine","USA","Great Britain","Switzerland","Sweden");
+  $slovak_teams = array("Bielorusko","Dánsko","Česko","Čína","Európa","Fínsko","Francúzsko","Japonsko","Južná Kórea","Kanada","Kazachstan","Lotyšsko","Maďarsko","Nemecko","Nórsko","Rakúsko","Rusko","Severná Amerika","Slovensko","Slovinsko","Taliansko","Ukrajina","USA","Veľká Británia","Švajčiarsko","Švédsko");
+  $foreign_teams = array("Belarus","Denmark","Czechia","China","Europe","Finland","France","Japan","South Korea","Canada","Kazakhstan","Latvia","Hungary","Germany","Norway","Austria","Russia","North America","Slovakia","Slovenia","Italy","Ukraine","USA","Great Britain","Switzerland","Sweden");
   $newname = str_replace($slovak_teams,$foreign_teams,$team);
   return $newname;
   }
@@ -112,19 +112,21 @@ if($_GET[team])
   if(strlen($team)!=3) die("Incorrect team shortname");
   $t = $_GET[tournament];
   $year = $_GET[year];
-  if($year<2004 || $year>date("Y")) die("Incorrect tournament year");
   if($t=="WCH") 
     {
+    if($year<2004 || $year>date("Y")) die("Incorrect tournament year");
     $lname = "MS ".$year;
     $el = 0;
     }
   elseif($t=="WJC") 
     {
+    if($year<2021 || $year>date("Y")+1) die("Incorrect tournament year");
     $lname = "MS U20 ".$year;
     $el = 0;
     }
   elseif($t=="OG") 
     {
+    if($year<2006 || $year>date("Y")) die("Incorrect tournament year");
     $lname = "ZOH % ".$year;
     $el = 0;
     }
@@ -544,19 +546,21 @@ elseif($_GET[games])
   {
   $t = $_GET[tournament];
   $year = $_GET[year];
-  if($year<2004 || $year>date("Y")) die("Incorrect tournament year");
   if($t=="WCH") 
     {
+    if($year<2004 || $year>date("Y")) die("Incorrect tournament year");
     $lname = "MS ".$year;
     $el = 0;
     }
   elseif($t=="WJC") 
     {
+    if($year<2021 || $year>date("Y")+1) die("Incorrect tournament year");
     $lname = "MS U20 ".$year;
     $el = 0;
     }
   elseif($t=="OG") 
     {
+    if($year<2006 || $year>date("Y")) die("Incorrect tournament year");
     $lname = "ZOH % ".$year;
     $el = 0;
     }
@@ -606,20 +610,23 @@ elseif($_GET[table])
   {
   $t = $_GET[tournament];
   $year = $_GET[year];
-  if($year<2004 || $year>date("Y")) die("Incorrect tournament year");
   if($t=="WCH") 
     {
+    if($year<2004 || $year>date("Y")) die("Incorrect tournament year");
     $lname = "MS ".$year;
     $el = 0;
     $teams_table = "2004teams";
     }
   elseif($t=="WJC") 
     {
+    if($year<2021 || $year>date("Y")+1) die("Incorrect tournament year");
     $lname = "MS U20 ".$year;
     $el = 0;
+    $teams_table = "2004teams";
     }
   elseif($t=="OG") 
     {
+    if($year<2006 || $year>date("Y")) die("Incorrect tournament year");
     $lname = "ZOH % ".$year;
     $el = 0;
     $teams_table = "2004teams";

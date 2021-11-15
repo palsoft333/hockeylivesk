@@ -24,6 +24,10 @@
     background: url('../img/vlajky/szlh_sprites.png') -36px 0;
 }
 
+.PHC-small {
+    background: url('../img/vlajky/szlh_sprites.png') -54px 0;
+}
+
 .BBS-small {
     background: url('../img/vlajky/szlh_sprites.png') 0 -12px;
 }
@@ -348,6 +352,10 @@
     background: url('../img/vlajky/nhl_sprites.png') 0 -60px;
 }
 
+.SEA-small {
+    background: url('../img/vlajky/nhl_sprites.png') -18px -60px;
+}
+
 /*  IIHF SPRITES */
 
 .NA-small {
@@ -448,4 +456,8 @@
 
 .GBR-small {
     background: url('../img/vlajky/iihf_sprites.png') 0 -44px;
+}
+
+.CHN-small {
+    background: url('../img/vlajky/iihf_sprites.png') -16px -44px;
 }

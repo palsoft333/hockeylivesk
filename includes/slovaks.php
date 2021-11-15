@@ -3,32 +3,33 @@
 $slovaks = array(
 //"CEHLÁRIK Peter" => "BOS",
 "ČERNÁK Erik" => "TBL",
-//"FEHÉRVÁRY Martin" => "WSH",
+"FEHÉRVÁRY Martin" => "WSH",
 //"GÁBORÍK Marián" => "OTT",
 //"DAŇO Marko" => "CBJ",
 //"VIŠŇOVSKÝ Ľubomír" => "NYI",
-"CHÁRA Zdeno" => "WSH",
+"CHÁRA Zdeno" => "NYI",
 //"HOSSA Marián" => "CHI",
 //"HRIVÍK Marek" => "CGY",
 //"HANDZUŠ Michal" => "CHI",
-"JAROŠ Christián" => "SJS",
-"JURČO Tomáš" => "VGK",
+"JAROŠ Christián" => "NJD",
+//"JURČO Tomáš" => "VGK",
 //"KOPECKÝ Tomáš" => "FLA",
 //"MARINČIN Martin" => "TOR",
 //"MESZÁROŠ Andrej" => "BUF",
+"RUŽIČKA Adam" => "CGY",
 "SEKERA Andrej" => "DAL",
 "STUDENIČ Marián" => "NJD",
-"PÁNIK Richard" => "DET",
+"PÁNIK Richard" => "NYI",
 //"KYTNÁR Milan" => "EDM",
 //"VALÁBIK Boris" => "PIT",
 //"JURČINA Milan" => "NYI",
-"TATAR Tomáš" => "MTL"
+"TATAR Tomáš" => "NJD"
 //"SVATOŠ Marek" => "OTT"
 );
 
 // SVK brankari
 $brankari = array(
-"HALÁK Jaroslav" => "BOS"
+"HALÁK Jaroslav" => "VAN"
 //"BUDAJ Peter" => "LAK"
 );
 ?>

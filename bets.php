@@ -132,7 +132,7 @@ $content .= '<div class="league-select">
                     <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/images/ceny/bunda.jpg" class="lazy card-img-top" alt="Prechodná tmavomodrá bunda">
                     <div class="card-body">
                       <h5 class="card-title">Prechodná tmavomodrá bunda</h5>
-                      <p class="card-text"><small class="text-muted">veľkosť L, XL</small></p>
+                      <p class="card-text"><small class="text-muted">veľkosť L</small></p>
                     </div>
                   </div>
                   

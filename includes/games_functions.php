@@ -69,7 +69,7 @@ function Get_Matches($lid, $params, $sel, $potype)
         $e = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
         $e = mysql_query("SELECT dt.*, NULL as tip1, NULL as tip2, NULL as komentar FROM el_playoff JOIN (SELECT * FROM $matches_table WHERE kolo='0' && league='$lid')dt ON (dt.team1short=el_playoff.team1 && dt.team2short=el_playoff.team2 || dt.team2short=el_playoff.team1 && dt.team1short=el_playoff.team2) WHERE el_playoff.potype='$potype' && el_playoff.league='$lid' GROUP BY id ORDER BY datetime");
         }
-			else $e = mysql_query("SELECT id, team1short, team1long, team2short, team2long, goals1, goals2, pp1, pp2, kedy, t1_pres, t2_pres, goal, datetime, kolo, next_refresh, league, active, NULL as tip1, NULL as tip2, NULL as komentar FROM $matches_table WHERE kolo='$act_round' && league='$lid' ORDER BY datetime ASC");
+			else $e = mysql_query("SELECT id, team1short, team1long, team2short, team2long, goals1, goals2, pp1, pp2, kedy, t1_pres, t2_pres, goal, datetime, kolo, next_refresh, fs_tv, league, active, NULL as tip1, NULL as tip2, NULL as komentar FROM $matches_table WHERE kolo='$act_round' && league='$lid' ORDER BY datetime ASC");
 			}
 		else
 			{
@@ -244,7 +244,18 @@ function Get_Matches($lid, $params, $sel, $potype)
     }
   while($g = mysql_fetch_array($e))
     {
-    $opt=$los1=$los2=$goals=$slov=$bets=$suffix=$scroll=$bckg=$kedy="";
+    $opt=$los1=$los2=$goals=$slov=$bets=$suffix=$scroll=$bckg=$kedy=$tv="";
+    // TV live
+    if($g["fs_tv"]!=NULL && $g["fs_tv"]!='[]' && $g["kedy"]!="konečný stav")
+      {
+      $tvarr = json_decode($g["fs_tv"], true);
+      $tvarr = implode("<br>",$tvarr);
+      $tv .= '<div class="row justify-content-center">
+                <div class="col-auto border mb-3 py-1 rounded text-center text-xs">
+                  <p class="m-0"><strong><i class="fas fa-tv"></i> LIVE:</strong><br>'.$tvarr.'</p>
+                </div>
+              </div>';
+      }
     // tipy
     if($uid && strtotime($g[datetime]) > mktime())
       {
@@ -362,6 +373,7 @@ function Get_Matches($lid, $params, $sel, $potype)
                           <div class="h6 h6-fluid mb-0 mt-1 font-weight-bold text-gray-800">'.$g[team2long].'</div>
                         </div>
                       </div>
+                      '.$tv.'
                       '.$goals.'
                       '.$kedy.'
                       '.$bets.'

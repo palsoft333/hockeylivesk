@@ -395,7 +395,7 @@ else mysql_query("UPDATE e_xoops_users SET last_login='".mktime()."' WHERE uid='
   <script src="/vendor/jquery-easing/jquery.easing.min.js"></script>
 
   <!-- Custom scripts for all pages-->
-  <script src="/js/jquery-ui.min.js?v=1.12.1"></script>
+  <script src="/js/jquery-ui.min.js?v=1.13.0"></script>
   <script src="/js/jquery.lazy.min.js"></script>
   <script src="/js/main.min.js?v=1.2.2"></script>
 <? 

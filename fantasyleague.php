@@ -1,8 +1,8 @@
 <?php
 $params = explode("/", htmlspecialchars($_GET[id]));
 
-// pred zaciatkom ligy vyprazdnit tabulku fl_selects
-$league = 129;
+// pred zaciatkom ligy vyprazdnit tabulku fl_prices, fl_prices_g a fl_selects
+$league = 134;
 $uid = $_SESSION['logged'];
 $m = mysql_query("SELECT * FROM 2004leagues WHERE id='$league'");
 $n = mysql_fetch_array($m);
@@ -450,7 +450,7 @@ if($params[0]=="main")
             <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/images/ceny/bunda.jpg" class="lazy card-img-top" alt="Prechodná tmavomodrá bunda">
             <div class="card-body">
               <h5 class="card-title">Prechodná tmavomodrá bunda</h5>
-              <p class="card-text"><small class="text-muted">veľkosť L, XL</small></p>
+              <p class="card-text"><small class="text-muted">veľkosť L</small></p>
             </div>
           </div>
           

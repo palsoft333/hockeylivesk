@@ -108,6 +108,10 @@
               if(!$_GET[topicID])
                 {
                 echo Get_upcomming();
+                echo '
+              <div class="advert-container card shadow mb-4 text-center">
+                <p class="m-auto p-2 small">Kompletný zoznam stávkových kancelárií: <a href="https://stavkova-kancelaria.com/ ">stavkova-kancelaria.com</a></p>
+              </div>';
                 echo Get_Latest_Stats();
                 echo Favourite_Team();
                 echo Sending_Prize();

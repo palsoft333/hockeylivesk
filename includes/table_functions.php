@@ -89,8 +89,8 @@ function Get_Table($lid, $params, $table_type, $sim, $pos=false) {
                   array("league",LANG_TEAMTABLE_LEAGUE)
                   );
         //if(strstr($vyb[longname], 'NHL')) $types[] = array("roundrobin",LANG_TEAMTABLE_ROUNDROBIN);
-        // nasleduje riadk pre COVID sezonu bez konferencii
-        if(strstr($vyb[longname], 'NHL')) array_splice($types, 1, 1);
+        // nasleduje riadok pre COVID sezonu bez konferencii
+        //if(strstr($vyb[longname], 'NHL')) array_splice($types, 1, 1);
         $i=0;
         while($i < count($types))
           {
@@ -175,11 +175,11 @@ function Get_Table($lid, $params, $table_type, $sim, $pos=false) {
     $playoff_line = 8;
     $wpoints = $vyb[points];
     $playoff_wins = 4;
-    $div1_teams = array("SPA", "VIT", "SOC", "JOK", "PET", "SEV");
-    $div2_teams = array("DYN", "DMN", "LOK", "DIR", "CSK", "XXX");
-    $div3_teams = array("AVT", "AKB", "MMG", "NKH", "TRA", "TNN");
-    $div4_teams = array("AVA", "SIB", "AMU", "BAR", "SAL", "KUN");
-    $orderby = "body desc, wins desc, diff desc, zapasov asc";
+    $div1_teams = array("SPA", "VIT", "SOC", "JOK", "PET", "TNN");
+    $div2_teams = array("DYN", "DMN", "LOK", "DIR", "CSK", "SEV");
+    $div3_teams = array("AVT", "AKB", "MMG", "NKH", "TRA", "KUN");
+    $div4_teams = array("AVA", "SIB", "AMU", "BAR", "SAL", "VLA");
+    $orderby = "body desc, wins desc, diff desc, zapasov asc, id asc";
     if($table_type=="conference")
       {
       $conf1_teams = array_merge($div1_teams,$div2_teams);
@@ -207,18 +207,18 @@ function Get_Table($lid, $params, $table_type, $sim, $pos=false) {
   // NHL
   elseif(strstr($vyb[longname], 'NHL'))
     {
-    $games_total = 56;
+    $games_total = 82;
     $playoff_line = 8;
     $wpoints = $vyb[points];
     $playoff_wins = 4;
-    /*$div1_teams = array("STL", "COL", "CHI", "MIN", "DAL", "WPG", "NSH", "XXX");
-    $div2_teams = array("ANA", "SJS", "LAK", "ARI", "VAN", "CGY", "EDM", "VGK");
+    $div1_teams = array("STL", "COL", "CHI", "MIN", "DAL", "WPG", "NSH", "ARI");
+    $div2_teams = array("ANA", "SJS", "LAK", "SEA", "VAN", "CGY", "EDM", "VGK");
     $div3_teams = array("BOS", "MTL", "TBL", "DET", "TOR", "OTT", "FLA", "BUF");
-    $div4_teams = array("PIT", "NYR", "PHI", "CBJ", "WSH", "NJD", "CAR", "NYI");*/
-    $div1_teams = array("CAR", "CHI", "CBJ", "DAL", "DET", "FLA", "NSH", "TBL");
+    $div4_teams = array("PIT", "NYR", "PHI", "CBJ", "WSH", "NJD", "CAR", "NYI");
+    /*$div1_teams = array("CAR", "CHI", "CBJ", "DAL", "DET", "FLA", "NSH", "TBL");
     $div2_teams = array("ANA", "ARI", "COL", "LAK", "MIN", "SJS", "STL", "VGK");
     $div3_teams = array("BOS", "BUF", "NJD", "NYI", "NYR", "PHI", "PIT", "WSH");
-    $div4_teams = array("MTL", "CGY", "EDM", "OTT", "TOR", "VAN", "WPG", "XXX");
+    $div4_teams = array("MTL", "CGY", "EDM", "OTT", "TOR", "VAN", "WPG", "XXX");*/
     $orderby = "body desc, zapasov asc, wins desc, diff desc";
     if($table_type=="conference")
       {
@@ -229,11 +229,10 @@ function Get_Table($lid, $params, $table_type, $sim, $pos=false) {
       }
     if($table_type=="division")
       {
-      // LANG_TEAMTABLE_PACIFIC, LANG_TEAMTABLE_ATLANTIC, LANG_TEAMTABLE_METROPOLITAN
-      $rtable .= Render_Table("Discover Centrálna divízia", $vyb, $table_type, $div1_teams, $wpoints, $games_total, 0, $orderby, $sim);
-      $rtable .= Render_Table("Honda Západná divízia", $vyb, $table_type, $div2_teams, $wpoints, $games_total, 0, $orderby, $sim);
-      $rtable .= Render_Table("MassMutual Východná divízia", $vyb, $table_type, $div3_teams, $wpoints, $games_total, 0, $orderby, $sim);
-      $rtable .= Render_Table("Scotia Severná divízia", $vyb, $table_type, $div4_teams, $wpoints, $games_total, 0, $orderby, $sim);
+      $rtable .= Render_Table(LANG_TEAMTABLE_CENTRAL, $vyb, $table_type, $div1_teams, $wpoints, $games_total, 0, $orderby, $sim);
+      $rtable .= Render_Table(LANG_TEAMTABLE_PACIFIC, $vyb, $table_type, $div2_teams, $wpoints, $games_total, 0, $orderby, $sim);
+      $rtable .= Render_Table(LANG_TEAMTABLE_ATLANTIC, $vyb, $table_type, $div3_teams, $wpoints, $games_total, 0, $orderby, $sim);
+      $rtable .= Render_Table(LANG_TEAMTABLE_METROPOLITAN, $vyb, $table_type, $div4_teams, $wpoints, $games_total, 0, $orderby, $sim);
       }
     if($table_type=="league")
       {
@@ -596,7 +595,7 @@ function Insert_to_table($table_name, $uloha, $league_data, $show_clinch, $playo
     if($show_clinch==1 && $playoff_line>0 && $i==$pol) $line=" style='border-bottom:1px dashed black !important;'";
     if($show_clinch==1 && $playoff_line>0 && $i==9 && strstr($league_data[longname], "Tipos")) $line=" style='border-bottom:1px dashed black !important;'";
     // relegation line
-    if(strstr($league_data[longname], "MS") && $show_clinch==1 && $playoff_line>0 && $i==6) $line=" style='border-bottom:1px dashed black !important;'";
+    //if(strstr($league_data[longname], "MS") && $show_clinch==1 && $playoff_line>0 && $i==6) $line=" style='border-bottom:1px dashed black !important;'";
     // clinched playoff
     if($show_clinch==1 && $sim!=1 && $points > $deviaty[ce] && $p<=$playoff_line) { $bs="<span class='font-weight-bold'>"; $be="</span>"; $clinch = "<sup><span class='text-success font-weight-bold'>x</span></sup>"; $clinchwas=1; }
     if(!$json) $ttable .= "<tr$fav><td class='text-center'$line>$p.</td><td class='text-nowrap'$line><img class='flag-".($league_data[el]==0 ? 'iihf':'el')." ".$data[shortname]."-small' src='/img/blank.png' alt='".$data[longname]."'> $leader<a href='/team/".$data[id].$league_data[el]."-".SEOtitle($data[longname]);
