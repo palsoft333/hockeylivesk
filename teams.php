@@ -69,6 +69,7 @@ if($id)
       $p = mysql_query("SELECT $players_table.*, CONCAT(YEAR(NOW()),DATE_FORMAT(born,'-%m-%d')) as datum, YEAR(NOW())-YEAR(born) as vek, dt.injury FROM $players_table LEFT JOIN (SELECT name, injury FROM $injury_table WHERE league='$f[league]')dt ON $players_table.name=dt.name WHERE teamshort='$f[shortname]' && league='$f[league]' ORDER BY points DESC, gp ASC, goals DESC, asists DESC, gwg DESC, gtg DESC, shg DESC, ppg DESC, penalty ASC");
       $h = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
       $h = mysql_query("SELECT pd.* FROM 2004playerdiary as pd JOIN(SELECT name FROM $players_table WHERE teamshort='$f[shortname]' && league='$f[league]' GROUP BY name UNION SELECT name FROM $goalies_table WHERE teamshort='$f[shortname]' && league='$f[league]' GROUP BY name)dt ON pd.name=dt.name ORDER BY pd.msg_date DESC, pd.id DESC LIMIT 10");
+      $k = mysql_query("SELECT * FROM transfers WHERE from_team='".$f["shortname"]."' || to_team='".$f["shortname"]."' GROUP BY pname, from_team, to_team ORDER BY datetime DESC LIMIT 10");
       include("includes/slovaks.php");
       $slovaci = $slovaks;
       $brankars = $brankari;
@@ -278,6 +279,7 @@ if($id)
                       if($g[msg_type]==7) $icon = '<i class="fas fa-user-injured text-danger"></i>'; //injury
                       if($g[msg_type]==8) $icon = '<i class="fas fa-trophy text-warning"></i>'; //titul
                       if($g[msg_type]==9) $icon = '<i class="fas fa-band-aid rotate-n-15 text-warning"></i>'; //uzdravil sa
+                      if($g[msg_type]==10) $icon = '<i class="fas fa-user-slash text-primary"></i>'; //volny hrac
                       $content .= '<div class="row p-fluid"'.($i%2==1 ? '':' style="background-color: rgba(0,0,0,.05);"').'>
                       <div class="col-5 col-sm-2 order-2 order-sm-1 small pt-1 text-right text-sm-left">'.$datum.'</div>
                       <div class="col-7 col-sm-4 order-1 order-sm-2 pb-2 pb-sm-0">'.$g[name].'</div>
@@ -287,7 +289,52 @@ if($id)
                       }
                   $content .='
                   </div>
-                </div>
+                </div>';
+                if(mysql_num_rows($k)>0) {
+                  $content .= '
+                <div class="card my-4 shadow animated--grow-in">
+                  <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-'.$leaguecolor.'">
+                      '.LANG_TEAMSTATS_LATESTTRANSFERS.'
+                    </h6>
+                  </div>
+                  <div class="card-body">
+                    <div class="row p-fluid font-weight-bold d-none d-sm-flex">
+                        <div class="col-2">'.LANG_DATE.'</div>
+                        <div class="col-3">'.LANG_PLAYERDB_PLAYER.'</div>
+                        <div class="col-3">'.LANG_TEAMSTATS_FROMTEAM.'</div>
+                        <div class="col-1"></div>
+                        <div class="col-3">'.LANG_TEAMSTATS_TOTEAM.'</div>
+                    </div>';
+                  $i=0;
+                  while($l = mysql_fetch_array($k)) {
+                    $datum = date("j.n.Y", strtotime($l["datetime"]));
+                    if(strtotime($l["datetime"])==mktime(0,0,0)) $datum='dnes';
+                    if(strtotime($l["datetime"])==mktime(0,0,0,date("n"),date("j")-1)) $datum='včera';
+                    if($l["status"]=="0" && $l["to_name"]=="") $l["to_name"]=LANG_TEAMSTATS_FREEAGENT;
+                    if($l["pid"]!=NULL) {
+                      if($l["goalie"]==0) $pl = mysql_query("SELECT name FROM el_players WHERE id='".$l["pid"]."'");
+                      else $pl = mysql_query("SELECT name FROM el_goalies WHERE id='".$l["pid"]."'");
+                      $player = mysql_fetch_array($pl);
+                      if($l["goalie"]==0) $url = '/player/'.$l["pid"].'1-'.SEOtitle($player["name"]);
+                      else $url = '/goalie/'.$l["pid"].'-'.SEOtitle($player["name"]);
+                    }
+                    else $player["name"] = $l["pname"];
+                    $content .= '
+                    <div class="row p-fluid"'.($i%2==1 ? '':' style="background-color: rgba(0,0,0,.05);"').'>
+                      <div class="col-5 col-sm-2 order-2 order-sm-1 small pt-1 text-right text-sm-left">'.$datum.'</div>
+                      <div class="col-7 col-sm-3 order-1 order-sm-2 pb-2 pb-sm-0">'.($l["pid"]!=NULL ? '<a href="'.$url.'">'.$player["name"].'</a>':$player["name"]).'</div>
+                      <div class="col-5 col-sm-3 order-3 small bg-white border rounded text-center p-1">'.($l["from_image"]!="" ? '<img src="'.$l["from_image"].'" style="height:24px;"><br>':'').''.$l["from_name"].'</div>
+                      <div class="col-2 col-sm-1 order-4 align-self-center"><i class="fas fa-angle-double-right '.($l["from_team"]==$f["shortname"] ? 'text-danger':'text-success').'"></i></div>
+                      <div class="col-5 col-sm-3 order-5 small bg-white border rounded text-center p-1">'.($l["to_image"]!="" ? '<img src="'.$l["to_image"].'" style="height:24px;"><br>':'').''.$l["to_name"].'</div>
+                    </div>';
+                    $i++;
+                  }
+                  $content .= '
+                  </div>
+                </div>';
+                }
+                $content .= '
               </div>
               <div class="col-12 col-xl-5'.($el==0 ? ' order-first order-xl-last':'').'">
                 <div class="card my-4 shadow animated--grow-in">

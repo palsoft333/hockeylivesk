@@ -23,6 +23,12 @@ if($_GET[injured])
   $iid = explode("-", htmlspecialchars($params[0]));
   $iid=$iid[0];
   }
+if($_GET[transfers]) 
+  {
+  $params = explode("/", htmlspecialchars($_GET[transfers]));
+  $tid = explode("-", htmlspecialchars($params[0]));
+  $tid=$tid[0];
+  }
   
 $locale = explode(";",setlocale(LC_ALL, '0'));
 $locale = explode("=",$locale[0]);
@@ -220,6 +226,71 @@ while ($t = mysql_fetch_array($r))
                   <td style="width:25%;" class="text-nowrap"><a href="/player/'.$t[id].'1-'.SEOTitle($t[name]).'">'.$t[name].'</a></td>
                   <td class="text-center" style="width:12%;">'.$t[pos].'</td>
                   <td style="width:50%;" class="text-nowrap">'.$t[injury].'</td>
+                </tr>';
+      $p++;
+      }
+$content .= "</tbody></table>
+            </div>
+           </div>
+          </div>";
+  }
+// prestupy
+elseif($tid)
+  {
+  $q = mysql_query("SELECT dt.topic_title, 2004leagues.color, 2004leagues.longname FROM 2004leagues JOIN (SELECT * FROM e_xoops_topics)dt ON 2004leagues.topic_id=dt.topic_id WHERE id='$tid'");
+  $f = mysql_fetch_array($q);
+  $lid = $tid;
+  $leaguecolor = $f[color];
+  $active_league = $lid;
+  $title = LANG_PLAYERS_TRANSFERSTITLE." ".$f[topic_title];
+  
+  $content .= "<i class='float-left h1 h1-fluid ll-".LeagueFont($f[longname])." text-gray-600 mr-1'></i>
+               <h1 class='h3 h3-fluid mb-1'>".LANG_PLAYERS_TRANSFERSTITLE."</h1>
+               <h2 class='h6 h6-fluid text-".$leaguecolor." text-uppercase font-weight-bold mb-3'>".$f[longname]."</h2>
+               <div style='max-width: 1000px;'>";
+  
+	$content .= '<div class="card my-4 shadow animated--grow-in">
+              <div class="card-header">
+                <h6 class="m-0 font-weight-bold text-'.$leaguecolor.'">
+                  '.LANG_TEAMSTATS_LATESTTRANSFERS.'
+                  <span class="swipe d-none float-right text-gray-800"><i class="fas fa-hand-point-up"></i> <i class="fas fa-exchange-alt align-text-top text-xs"></i></span>
+                </h6>
+              </div>
+              <div class="card-body">
+                  <table class="table-hover table-light table-striped table-responsive-sm w-100 p-fluid" id="transfers">
+                  <thead><tr>
+                    <th style="width:15%;">'.LANG_DATE.'</th>
+                    <th style="width:25%;">'.LANG_TEAMSTATS_NAME.'</th>
+                    <th style="width:28%;">'.LANG_TEAMSTATS_FROMTEAM.'</th>
+                    <th style="width:4%;"></th>
+                    <th style="width:28%;">'.LANG_TEAMSTATS_TOTEAM.'</th>
+                </tr>
+              </thead>
+              <tbody>';
+
+	$r = mysql_query("SELECT tr.* FROM el_teams t LEFT JOIN transfers tr ON tr.from_team=t.shortname OR tr.to_team=t.shortname WHERE t.league='".$lid."' GROUP BY tr.pname, tr.from_team, tr.to_team ORDER BY datetime DESC LIMIT 50");
+		
+		$p=1;
+while ($t = mysql_fetch_array($r))
+      {
+      $datum = date("j.n.Y", strtotime($t["datetime"]));
+      if(strtotime($t["datetime"])==mktime(0,0,0)) $datum='dnes';
+      if(strtotime($t["datetime"])==mktime(0,0,0,date("n"),date("j")-1)) $datum='včera';
+      if($t["status"]=="0" && $t["to_name"]=="") $t["to_name"]=LANG_TEAMSTATS_FREEAGENT;
+      if($t["pid"]!=NULL) {
+        if($t["goalie"]==0) $pl = mysql_query("SELECT name FROM el_players WHERE id='".$t["pid"]."'");
+        else $pl = mysql_query("SELECT name FROM el_goalies WHERE id='".$t["pid"]."'");
+        $player = mysql_fetch_array($pl);
+        if($t["goalie"]==0) $url = '/player/'.$t["pid"].'1-'.SEOtitle($player["name"]);
+        else $url = '/goalie/'.$t["pid"].'-'.SEOtitle($player["name"]);
+      }
+      else $player["name"] = $t["pname"];
+	$content .= ' <tr>
+                  <td style="width:15%;">'.$datum.'</td>
+                  <td style="width:25%;" class="text-nowrap">'.($t["pid"]!=NULL ? '<a href="'.$url.'">'.$player["name"].'</a>':$player["name"]).'</td>
+                  <td style="width:28%;" class="text-nowrap">'.($t["from_image"]!="" ? '<img src="'.$t["from_image"].'" style="height:16px; vertical-align: -3px;"> ':'').''.$t["from_name"].'</td>
+                  <td class="text-center" style="width:4%;"><i class="fas fa-angle-double-right text-success"></i></td>
+                  <td style="width:28%;" class="text-nowrap">'.($t["to_image"]!="" ? '<img src="'.$t["to_image"].'" style="height:16px; vertical-align: -3px;"> ':'').''.$t["to_name"].'</td>
                 </tr>';
       $p++;
       }

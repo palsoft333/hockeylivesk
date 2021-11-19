@@ -80,6 +80,7 @@
   if($aRow[msg_type]==7) $icon = "<i class='fas fa-user-injured text-danger'></i>"; //injury
   if($aRow[msg_type]==8) $icon = "<i class='fas fa-trophy text-warning'></i>"; //titul
   if($aRow[msg_type]==9) $icon = "<i class='fas fa-band-aid rotate-n-15 text-warning'></i>"; //uzdravil sa
+  if($aRow[msg_type]==10) $icon = "<i class='fas fa-user-slash text-primary'></i>"; //volny hrac
 
     $sOutput .= '["'.$datum.'","'.$icon.' '.$aRow[msg].'"],';
 		
