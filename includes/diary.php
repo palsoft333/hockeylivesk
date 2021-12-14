@@ -71,16 +71,16 @@
   $datum = date("j.n.Y", strtotime($aRow[msg_date]));
   if(strtotime($aRow[msg_date])==mktime(0,0,0)) $datum='dnes';
   if(strtotime($aRow[msg_date])==mktime(0,0,0,date("n"),date("j")-1)) $datum='včera';
-  if($aRow[msg_type]==1) $icon = "<i class='fas fa-exchange-alt text-danger'></i>"; //transfer
+  if($aRow[msg_type]==1) $icon = "<i class='fas fa-exchange-alt text-success'></i>"; //transfer
   if($aRow[msg_type]==2) $icon = "<i class='fas fa-user-plus text-success'></i>"; //pridal sa
   if($aRow[msg_type]==3) $icon = "<i class='fas fa-dice-three text-secondary'></i>"; //hattrick
-  if($aRow[msg_type]==4) $icon = "<i class='fas fa-hockey-puck text-warning'></i>"; //gwg
-  if($aRow[msg_type]==5) $icon = "<i class='fas fa-certificate text-primary'></i>"; //jubilejny gol
+  if($aRow[msg_type]==4) $icon = "<i class='fas fa-certificate text-warning'></i>"; //jubilejny gol
+  if($aRow[msg_type]==5) $icon = "<i class='fas fa-hockey-puck text-primary'></i>"; //gwg
   if($aRow[msg_type]==6) $icon = "<i class='fab fa-creative-commons-zero text-dark'></i>"; //shutout
   if($aRow[msg_type]==7) $icon = "<i class='fas fa-user-injured text-danger'></i>"; //injury
   if($aRow[msg_type]==8) $icon = "<i class='fas fa-trophy text-warning'></i>"; //titul
   if($aRow[msg_type]==9) $icon = "<i class='fas fa-band-aid rotate-n-15 text-warning'></i>"; //uzdravil sa
-  if($aRow[msg_type]==10) $icon = "<i class='fas fa-user-slash text-primary'></i>"; //volny hrac
+  if($aRow[msg_type]==10) $icon = "<i class='fas fa-user-slash text-success'></i>"; //volny hrac
 
     $sOutput .= '["'.$datum.'","'.$icon.' '.$aRow[msg].'"],';
 		

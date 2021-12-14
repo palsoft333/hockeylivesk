@@ -63,17 +63,31 @@ UNION
       // slovaci v akcii
       if(strstr($f[longname], 'NHL') || strstr($f[longname], 'KHL'))
         {
+        $tran1 = $tran2 = array();
+        if(date("n")<8) {
+          $rok = date("Y")-1;
+          $season_start = $rok."-01-08";
+          }
+        else $season_start = date("Y")."-01-08";
+        $tr = mysql_query("SELECT from_team, pname FROM transfers WHERE (from_team='".$f[team1short]."' || from_team='".$f[team2short]."') && datetime>'".$season_start."'");
+        while($tra = mysql_fetch_array($tr))
+          {
+          if($tra[from_team]==$f[team1short]) $tran1[] = $tra[pname];
+          if($tra[from_team]==$f[team2short]) $tran2[] = $tra[pname];
+          }
         if(strstr($f[longname], 'NHL')) { $slovaks = $nhl_players; $brankari = $nhl_goalies; }
         if(strstr($f[longname], 'KHL')) { $slovaks = $khl_players; $brankari = $khl_goalies; }
         $pia1 = array_keys($slovaks, $f[team1short]);
         $gia1 = array_keys($brankari, $f[team1short]);
         $inaction1 = array_merge($pia1, $gia1);
         if(count($zra)>0) $inaction1 = array_diff($inaction1, $zra);
+        if(count($tran1)>0) $inaction1 = array_diff($inaction1, $tran1);
         $inaction1 = array_values($inaction1);
         $pia2 = array_keys($slovaks, $f[team2short]);
         $gia2 = array_keys($brankari, $f[team2short]);
         $inaction2 = array_merge($pia2, $gia2);
         if(count($zra)>0) $inaction2 = array_diff($inaction2, $zra);
+        if(count($tran2)>0) $inaction2 = array_diff($inaction2, $tran2);
         $inaction2 = array_values($inaction2);
         if(count($inaction1)>0 || count($inaction2)>0)
           {
@@ -253,6 +267,50 @@ function Get_Latest_Stats() {
     </div>";
     }
 return $stat;
+}
+
+/*
+* Funkcia pre výpis posledných hráčskych prestupov
+* version: 1.0.0 (23.11.2021 - vytvorenie funkcie)
+* @return $trans string
+*/
+
+function Transfers() {
+    $q = mysql_query("SELECT * FROM `transfers` GROUP BY pname, from_team, to_team ORDER BY `transfers`.`datetime` DESC LIMIT 5");
+    $trans = '
+        <div class="card shadow mb-4">
+            <div class="card-header">
+                <div class="font-weight-bold text-primary text-uppercase">'.LANG_TEAMSTATS_LATESTTRANSFERS.'</div>
+            </div>
+            <div class="card-body">';
+            $i=0;
+            while($l = mysql_fetch_array($q)) {
+            $datum = date("j.n.Y", strtotime($l["datetime"]));
+            if(strtotime($l["datetime"])==mktime(0,0,0)) $datum='dnes';
+            if(strtotime($l["datetime"])==mktime(0,0,0,date("n"),date("j")-1)) $datum='včera';
+            if($l["status"]=="0" && $l["to_name"]=="") $l["to_name"]=LANG_TEAMSTATS_FREEAGENT;
+            if($l["pid"]!=NULL) {
+                if($l["goalie"]==0) $pl = mysql_query("SELECT name FROM el_players WHERE id='".$l["pid"]."'");
+                else $pl = mysql_query("SELECT name FROM el_goalies WHERE id='".$l["pid"]."'");
+                $player = mysql_fetch_array($pl);
+                if($l["goalie"]==0) $url = '/player/'.$l["pid"].'1-'.SEOtitle($player["name"]);
+                else $url = '/goalie/'.$l["pid"].'-'.SEOtitle($player["name"]);
+            }
+            else $player["name"] = $l["pname"];
+            $trans .= '
+            <div class="row p-fluid"'.($i%2==1 ? '':' style="background-color: rgba(0,0,0,.05);"').'>
+                <div class="col-7">'.($l["pid"]!=NULL ? '<a href="'.$url.'">'.$player["name"].'</a>':$player["name"]).'</div>
+                <div class="col-5 small pt-1 text-right">'.$datum.'</div>
+                <div class="col-5 small bg-white border rounded text-center p-2">'.($l["from_image"]!="" ? '<img src="'.$l["from_image"].'" style="height:24px;"><br>':'').''.$l["from_name"].'</div>
+                <div class="col-2 align-self-center text-center"><i class="fas fa-angle-double-right text-success"></i></div>
+                <div class="col-5 small bg-white border rounded text-center p-2">'.($l["to_image"]!="" ? '<img src="'.$l["to_image"].'" style="height:24px;"><br>':'').''.$l["to_name"].'</div>
+            </div>';
+            $i++;
+            }
+    $trans .= '
+            </div>
+        </div>';
+    return $trans;
 }
 
 /*

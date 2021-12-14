@@ -29,7 +29,7 @@ $slovaks = array(
 
 // SVK brankari
 $brankari = array(
-"HALÁK Jaroslav" => "VAN"
-//"BUDAJ Peter" => "LAK"
+"HALÁK Jaroslav" => "VAN",
+"HÚSKA Adam" => "NYR"
 );
 ?>

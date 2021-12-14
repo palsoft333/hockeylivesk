@@ -46,13 +46,13 @@
     if($vyb[el]==1) $tips_table="el_tips";
     else $tips_table="2004tips";
 	$sQuery = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
-	$sQuery = "SELECT SQL_CALC_FOUND_ROWS dt.*, e_xoops_users.uname as uname, e_xoops_users.uid as uid FROM e_xoops_users INNER JOIN (SELECT userid,sum(points) as points, count(id) as poc FROM $tips_table WHERE league='$lid' GROUP BY userid ORDER BY points DESC)dt ON (e_xoops_users.uid=dt.userid)
+	$sQuery = "SELECT SQL_CALC_FOUND_ROWS dt.*, e_xoops_users.uname as uname, e_xoops_users.uid as uid, e_xoops_users.user_avatar as user_avatar FROM e_xoops_users INNER JOIN (SELECT userid,sum(points) as points, count(id) as poc FROM $tips_table WHERE league='$lid' GROUP BY userid ORDER BY points DESC)dt ON (e_xoops_users.uid=dt.userid)
 		$sLimit";
 		}
 	else 
     {
     $sQuery = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
-    $sQuery = "SELECT SQL_CALC_FOUND_ROWS *, f.pocel, g.pocnonel FROM `e_xoops_users` JOIN (SELECT userid, count(id) as pocel FROM el_tips GROUP BY userid) f ON f.userid=e_xoops_users.uid JOIN (SELECT userid, count(id) as pocnonel FROM 2004tips GROUP BY userid) g ON g.userid=e_xoops_users.uid ORDER BY `tip_points` DESC
+    $sQuery = "SELECT SQL_CALC_FOUND_ROWS *, f.pocel, g.pocnonel, e_xoops_users.user_avatar as user_avatar FROM `e_xoops_users` JOIN (SELECT userid, count(id) as pocel FROM el_tips GROUP BY userid) f ON f.userid=e_xoops_users.uid JOIN (SELECT userid, count(id) as pocnonel FROM 2004tips GROUP BY userid) g ON g.userid=e_xoops_users.uid ORDER BY `tip_points` DESC
 		$sLimit";
 		}
 	$rResult = mysql_query( $sQuery ) or die(mysql_error());
@@ -98,8 +98,11 @@
     $uspesnost = round(($points/($pocet_tipov*10))*100,1);
     $startPoint=$_GET['iDisplayStart'];
     $counter=($startPoint) + ($j);
+    
+    if($aRow[user_avatar]!="") $avatar = "<img class='rounded-circle mr-1' src='/images/user_avatars/".$aRow[uid].".".$aRow[user_avatar]."' alt='".$aRow[uname]."' style='width:2rem;height:2rem;vertical-align:-11px;'>";
+    else $avatar = "<i class='text-gray-300 fas fa-user-circle fa-2x mr-1' style='width:2rem;height:2rem;vertical-align:-7px;'></i>";
 
-    $sOutput .= '["'.$counter.'","<a href=\'/bets/'.$aRow[uid].'\'>'.$aRow[uname].'</a>","<b>'.$points.'</b>","'.$pocet_tipov.'","'.$uspesnost.'%"],';
+    $sOutput .= '["'.$counter.'","<a href=\'/bets/'.$aRow[uid].'\'>'.$avatar.''.$aRow[uname].'</a>","<b>'.$points.'</b>","'.$pocet_tipov.'","'.$uspesnost.'%"],';
 		
 		/*
 		 * Optional Configuration:

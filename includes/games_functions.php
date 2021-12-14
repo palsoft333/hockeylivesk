@@ -232,11 +232,12 @@ function Get_Matches($lid, $params, $sel, $potype)
   </nav>
   <div class="row">';
   $poc=0;
+  // vyfiltrovat zranenych hracov
   if(strstr($f[longname], 'NHL') || strstr($f[longname], 'KHL'))
     {
     if(strstr($f[longname], 'NHL')) include('slovaks.php');
     else include('slovaki.php');
-    $z = mysql_query("SELECT * FROM el_injuries WHERE league='$lid'");
+    $z = mysql_query("SELECT * FROM el_injuries WHERE league='".$lid."'");
     while($zr = mysql_fetch_array($z))
       {
       $zra[] = $zr[name];
@@ -245,6 +246,21 @@ function Get_Matches($lid, $params, $sel, $potype)
   while($g = mysql_fetch_array($e))
     {
     $opt=$los1=$los2=$goals=$slov=$bets=$suffix=$scroll=$bckg=$kedy=$tv="";
+    // vyfiltrovat prestupenych hracov
+    if(strstr($f[longname], 'NHL') || strstr($f[longname], 'KHL')) {
+      $tran1 = $tran2 = array();
+      if(date("n")<8) {
+        $rok = date("Y")-1;
+        $season_start = $rok."-01-08";
+        }
+      else $season_start = date("Y")."-01-08";
+      $tr = mysql_query("SELECT from_team, pname FROM transfers WHERE (from_team='".$g[team1short]."' || from_team='".$g[team2short]."') && datetime>'".$season_start."'");
+      while($tra = mysql_fetch_array($tr))
+        {
+        if($tra[from_team]==$g[team1short]) $tran1[] = $tra[pname];
+        if($tra[from_team]==$g[team2short]) $tran2[] = $tra[pname];
+        }
+    }
     // TV live
     if($g["fs_tv"]!=NULL && $g["fs_tv"]!='[]' && $g["kedy"]!="konečný stav")
       {
@@ -278,11 +294,13 @@ function Get_Matches($lid, $params, $sel, $potype)
       $gia1 = array_keys($brankari, $g[team1short]);
       $inaction1 = array_merge($pia1, $gia1);
       if(count($zra)>0) $inaction1 = array_diff($inaction1, $zra);
+      if(count($tran1)>0) $inaction1 = array_diff($inaction1, $tran1);
       $inaction1 = array_values($inaction1);
       $pia2 = array_keys($slovaks, $g[team2short]);
       $gia2 = array_keys($brankari, $g[team2short]);
       $inaction2 = array_merge($pia2, $gia2);
       if(count($zra)>0) $inaction2 = array_diff($inaction2, $zra);
+      if(count($tran2)>0) $inaction2 = array_diff($inaction2, $tran2);
       $inaction2 = array_values($inaction2);
       if(count($inaction1)>0 || count($inaction2)>0)
         {

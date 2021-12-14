@@ -576,7 +576,9 @@ ORDER BY datetime DESC LIMIT 1)dt WHERE dt.id IS NOT NULL");
                             $wid = round(($diff/$l[rozdiel])*100,2).'%';
                             $injured=0;
                             }
-                          if($j[msg_type]==2) $col = 'success';
+                          if($j[msg_type]==2 || $j[msg_type]==1 || $j[msg_type]==10) $col = 'success';
+                          if($j[msg_type]==3) $col = 'secondary';
+                          if($j[msg_type]==4 || $j[msg_type]==8) $col = 'warning';
                           if($j[msg_type]==7) $col = 'danger';
                           if($j[msg_type]!=9) $content .= '<span class="timeline-event bg-'.$col.'" style="width: '.$wid.'; left: '.$pot.'%;" data-toggle="tooltip" data-placement="top" data-html="true" title="'.date("j.n.Y", strtotime($j[msg_date])).' - '.$j[msg].'"></span>';
                           $i++;

@@ -345,7 +345,7 @@ elseif($id)
        
     $content .= "<img class='animated--fade-in float-left img-profile img-thumbnail mr-2 rounded-circle' src='".$avatar."' style='width: 55px;'>
                  <h1 class='h3 h3-fluid mb-1'>".LANG_USERPROFILE_TITLE."</h1>
-                 <h2 class='h6 h6-fluid text-hl text-uppercase font-weight-bold mb-3'>".$f[uname]."</h2>
+                 <h2 class='h6 h6-fluid text-hl text-uppercase font-weight-bold mb-3'>".$f[uname]."".($f[last_login]+300>time() ? '<i class="fas fa-circle live ml-2 rounded-circle text-success" style="font-size: 14px;" data-toggle="tooltip" data-placement="top" title="Online!"></i>':'')."</h2>
                  <div style='max-width: 1000px;'>";
     
     $content .= '
