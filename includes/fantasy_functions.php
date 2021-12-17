@@ -146,7 +146,7 @@ function Show_Drafted()
   if(mysql_num_rows($q)==0) $round=1;
   if($round % 2 == 0) { $narade = $manazerov-$pick+1; $otoc=1; }
   else { $narade = $pick; $otoc=0; }
-  $t = mysql_query("SELECT ft_teams.*, et.uname, et.last_login FROM ft_teams JOIN e_xoops_users et ON ft_teams.uid=et.uid WHERE ft_teams.active='1' ORDER BY pos ASC");
+  $t = mysql_query("SELECT ft_teams.*, et.uname, et.last_login, et.user_avatar FROM ft_teams JOIN e_xoops_users et ON ft_teams.uid=et.uid WHERE ft_teams.active='1' ORDER BY pos ASC");
   while($y = mysql_fetch_array($t))
     {
     if($otoc==0) $odhad = (($y[pos]-$narade-1)*$timeout)+$min;
@@ -171,7 +171,9 @@ function Show_Drafted()
     $avg = $avgtime[$mid]/60;
     if($avg>60) $avg = round($avg/60,0)." ".LANG_FANTASY_HRS;
     else $avg = round($avg,0)." ".LANG_FANTASY_MINS;
-    $drafted .= '<tr><td class="text-center">'.$y[pos].'</td><td><a href="/user/'.$y[uid].'" class="blacklink">'.($y[last_login]+300>time() ? '<i class="fas fa-circle live mr-1 rounded-circle text-success" style="font-size: 14px;" data-toggle="tooltip" data-placement="top" title="Online!"></i>':'').''.$y[uname].'</a></td><td class="text-nowrap">'.$hl.'</b></td><td class="text-nowrap">'.$avg.'</b></td></tr>';
+    if($y[user_avatar]!="") $avatar = "<img class='rounded-circle mr-1' src='/images/user_avatars/".$y[uid].".".$y[user_avatar]."?".filemtime('images/user_avatars/'.$y[uid].'.'.$y[user_avatar])."' alt='".$y[uname]."' style='width:2rem;height:2rem;vertical-align:-11px;'>";
+    else $avatar = "<i class='text-gray-300 fas fa-user-circle fa-2x mr-1' style='width:2rem;height:2rem;vertical-align:-7px;'></i>";
+    $drafted .= '<tr><td class="text-center">'.$y[pos].'</td><td><a href="/user/'.$y[uid].'" class="blacklink">'.$avatar.$y[uname].''.($y[last_login]+300>time() ? '<i class="fas fa-circle live ml-1 rounded-circle text-success" style="font-size: 14px;" data-toggle="tooltip" data-placement="top" title="Online!"></i>':'').'</a></td><td class="text-nowrap">'.$hl.'</b></td><td class="text-nowrap">'.$avg.'</b></td></tr>';
     }
   
   $drafted .= '</tbody></table></div></div></div></div>';

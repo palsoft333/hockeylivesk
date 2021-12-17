@@ -66,6 +66,11 @@ $content .= '<div class="league-select">
                 $content .= '</optgroup>
               </select>
             </div>
+            
+            <div class="animated--grow-in card mt-4 shadow">
+              <div class="card-header"><h6 class="font-weight-bold m-0 text-warning">Sponzor súťaže</h6></div>
+              <div class="bg-warning card-body text-center"><a href="https://howieshockey.sk/" class="stretched-link"><img src="https://howieshockey.sk/store/img/howies-hockey-logo-16070329211.jpg"></a></div>
+            </div>
 
             <div class="card my-4 shadow animated--grow-in">
               <div class="card-header">
@@ -120,6 +125,22 @@ $content .= '<div class="league-select">
                  <p>'.LANG_BETS_FORWHATTEXT.'</p>
                  <div class="card-columns">
                  
+                  <div class="card bg-warning">
+                    <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="https://howieshockey.sk/store/82-large_default/howies-biele-voskovane-textilne-snurky.jpg" class="lazy card-img-top" alt="Textilné šnúrky">
+                    <div class="card-body">
+                      <h5 class="card-title">Howies biele voskované textilné šnúrky</h5>
+                      <p class="card-text"><small class="text-muted">Perfektne navoskované, zalisované končeky</small></p>
+                    </div>
+                  </div>
+                  
+                  <div class="card bg-warning">
+                    <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="https://howieshockey.sk/store/152-large_default/howies-plechovka-na-pasky.jpg" class="lazy card-img-top" alt="Plechovka na pásky">
+                    <div class="card-body">
+                      <h5 class="card-title">Howies Plechovka na pásky</h5>
+                      <p class="card-text"><small class="text-muted">Ochráni pásky pred prachom a nečistotami</small></p>
+                    </div>
+                  </div>
+
                   <div class="card">
                     <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/images/ceny/mikina.jpg" class="lazy card-img-top" alt="Tmavomodrá mikina">
                     <div class="card-body">
@@ -143,6 +164,22 @@ $content .= '<div class="league-select">
                     </div>
                   </div>
                   
+                  <div class="card bg-warning">
+                    <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="https://howieshockey.sk/store/25-large_default/howies-vosk-na-cepel.jpg" class="lazy card-img-top" alt="Vosk na čepeľ">
+                    <div class="card-body">
+                      <h5 class="card-title">Howies Vosk na čepeľ</h5>
+                      <p class="card-text"><small class="text-muted">Pomáha chrániť pred usádzaním snehu na čepeli</small></p>
+                    </div>
+                  </div>
+                  
+                  <div class="card bg-warning">
+                    <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="https://howieshockey.sk/store/23-large_default/howies-biela-textilna-hokejova-paska.jpg" class="lazy card-img-top" alt="Hokejová páska">
+                    <div class="card-body">
+                      <h5 class="card-title">Howies Biela textilná hokejová páska</h5>
+                      <p class="card-text"><small class="text-muted">Najkvalitnejšia hokejová páska na svete!</small></p>
+                    </div>
+                  </div>
+                  
                   <div class="card">
                     <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/images/ceny/ciapka.jpg" class="lazy card-img-top" alt="zimná čiapka">
                     <div class="card-body">
@@ -163,11 +200,27 @@ $content .= '<div class="league-select">
                       <h5 class="card-title">Odznaky s hokejovým logom</h5>
                     </div>
                   </div>
-                  
+                                   
                   <div class="card">
                     <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/images/ceny/pero.jpg" class="lazy card-img-top" alt="Pero">
                     <div class="card-body">
                       <h5 class="card-title">Pero</h5>
+                    </div>
+                  </div>
+                  
+                  <div class="card bg-warning">
+                    <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="https://howieshockey.sk/store/1430-large_default/howies-tricko.jpg" class="lazy card-img-top bg-white" alt="Tričko">
+                    <div class="card-body">
+                      <h5 class="card-title">Tričko s logom Howies</h5>
+                      <p class="card-text"><small class="text-muted">Tričko Howies je vyrobené zo 100% bavlny</small></p>
+                    </div>
+                  </div>
+                  
+                  <div class="card bg-warning">
+                    <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="https://howieshockey.sk/store/223-large_default/howies-eliminator-zapachu.jpg" class="lazy card-img-top" alt="Tričko">
+                    <div class="card-body">
+                      <h5 class="card-title">Howies Eliminátor zápachu</h5>
+                      <p class="card-text"><small class="text-muted">Howies deodorizátor hokejovej výstroje je špeciálne navrhnutý tak, aby bojoval proti zápachom vašej výstroje všetkých druhov.</small></p>
                     </div>
                   </div>
                   

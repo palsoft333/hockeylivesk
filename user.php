@@ -18,7 +18,7 @@ if($_GET[profile])
     $r = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
     $r = mysql_query("SELECT shortname, longname FROM 2004teams WHERE shortname='".$f[user_favteam]."' GROUP BY shortname UNION SELECT shortname, longname FROM el_teams WHERE shortname='".$f[user_favteam]."' GROUP BY shortname ORDER BY longname ASC");
     $t = mysql_fetch_array($r);
-    if($f[user_avatar]!="") $avatar = '/images/user_avatars/'.$_SESSION['logged'].'.'.$f[user_avatar];
+    if($f[user_avatar]!="") $avatar = '/images/user_avatars/'.$_SESSION['logged'].'.'.$f[user_avatar]."?".filemtime('images/user_avatars/'.$_SESSION['logged'].'.'.$f[user_avatar]);
     else $avatar = '/img/players/no_photo.jpg';
     $leaguecolor = "hl";
     $title = LANG_NAV_USERHOMEPAGE;
@@ -201,7 +201,7 @@ if($_GET[notif])
     $q = mysql_query("SELECT * FROM e_xoops_users WHERE uid='".$_SESSION['logged']."'");
     $f = mysql_fetch_array($q);
     $w = mysql_query("SELECT * FROM user_notifications WHERE uid='".$_SESSION['logged']."' ORDER BY datetime DESC LIMIT 20");
-    if($f[user_avatar]!="") $avatar = '/images/user_avatars/'.$_SESSION['logged'].'.'.$f[user_avatar];
+    if($f[user_avatar]!="") $avatar = '/images/user_avatars/'.$_SESSION['logged'].'.'.$f[user_avatar]."?".filemtime('images/user_avatars/'.$_SESSION['logged'].'.'.$f[user_avatar]);
     else $avatar = '/img/players/no_photo.jpg';
 
     $leaguecolor = "hl";
@@ -329,7 +329,7 @@ elseif($id)
     {
     $f = mysql_fetch_array($q);
     $r = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
-    $r = mysql_query("SELECT id, shortname, longname, 0 as el FROM 2004teams where shortname='".$f[user_favteam]."' UNION SELECT id, shortname, longname, 1 as el FROM el_teams WHERE shortname='".$f[user_favteam]."' ORDER BY id DESC LIMIT 1");
+    $r = mysql_query("SELECT id, shortname, longname, 0 as el FROM 2004teams where shortname='".$f[user_favteam]."' && RIGHT(longname, 3)!='U20' UNION SELECT id, shortname, longname, 1 as el FROM el_teams WHERE shortname='".$f[user_favteam]."' ORDER BY id DESC LIMIT 1");
     $t = mysql_fetch_array($r);
     $y = mysql_query("SELECT sum(points) as poc FROM `fl_wallet` WHERE uid='$id' GROUP BY uid");
     if(mysql_num_rows($y)>0) $u = mysql_fetch_array($y);
@@ -339,7 +339,7 @@ elseif($id)
       $i = mysql_query("SELECT * FROM (SELECT @rank:=@rank+1 AS rank, uid, tip_points FROM e_xoops_users ORDER BY tip_points DESC)dt WHERE dt.uid='".$id."'");
       $o = mysql_fetch_array($i);
       }
-    if($f[user_avatar]!="") $avatar = '/images/user_avatars/'.$id.'.'.$f[user_avatar];
+    if($f[user_avatar]!="") $avatar = '/images/user_avatars/'.$id.'.'.$f[user_avatar]."?".filemtime('images/user_avatars/'.$id.'.'.$f[user_avatar]);
     else $avatar = '/img/players/no_photo.jpg';
     $title = LANG_USERPROFILE_TITLE." ".$f[uname];
        

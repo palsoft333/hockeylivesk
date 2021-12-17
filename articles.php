@@ -72,7 +72,11 @@ if(mysql_num_rows($q)>0)
     </div>
   </div>';
 
-  mysql_query("UPDATE e_xoops_stories SET counter=counter+1 WHERE storyid = '$id[0]'");
+  if(!in_array($id[0], $_SESSION["visited_articles"])) {
+    mysql_query("UPDATE e_xoops_stories SET counter=counter+1 WHERE storyid='".$id[0]."'");
+    $_SESSION["visited_articles"][] = $id[0];
+    }
+
   }
 else
   {

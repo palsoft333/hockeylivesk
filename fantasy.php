@@ -1,15 +1,15 @@
 <?php
 $params = explode("/", htmlspecialchars($_GET[id]));
 
-$nazov = "Fantasy Championship";
-$menu = "MS 2021";
-$skratka = "MS";
+$nazov = "Fantasy Junior Championship";
+$menu = "MS U20 2022";
+$skratka = "MS U20";
 $manazerov = 10;
-$article_id = 2184;
+$article_id = 2245;
 //$timeout = 480;
-$predraftt = 0; // = draftuje sa do zásobníka. ak 1, upraviť počet manažérov aj v includes/fantasy_functions.php
-$draft_start = "2021-05-04 08:00:00";
-$league_start = "2021-05-19 10:00:00";
+$predraftt = 1; // = draftuje sa do zásobníka. ak 1, upraviť počet manažérov aj v includes/fantasy_functions.php
+$draft_start = "2021-12-16 10:00:00";
+$league_start = "2021-12-26 18:00:00";
 
 /*
 1. nastaviť dátum deadlinu
@@ -36,7 +36,7 @@ $leag = mysql_query("SELECT * FROM 2004leagues WHERE longname LIKE '%$skratka%' 
 $league = mysql_fetch_array($leag);
 $leaguecolor = $league[color];
 $active_league = $league[id];
-//if($uid==2) $uid=1319;
+//if($uid==2) $uid=2959;
 
 // cron job pre vyber random hraca pri necinnosti manazera
 if($_GET[cron]==1)
@@ -151,7 +151,7 @@ if($params[0]=="picks")
                <div style='max-width: 1000px;'>";
 
   $r = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
-  $r = mysql_query("SELECT ft.*, e_xoops_users.uname FROM e_xoops_users JOIN (SELECT et.*, 2004players.goals, 2004players.asists, SUM(wins)*2+SUM(so)*2+SUM(goals)+SUM(asists) as body FROM 2004players RIGHT JOIN (SELECT dt.pid, dt.uid, ft_choices.* FROM ft_choices RIGHT JOIN (SELECT * FROM ft_players)dt ON dt.pid=ft_choices.id)et ON et.pid=2004players.id GROUP BY uid ORDER BY body DESC)ft ON ft.uid=e_xoops_users.uid");
+  $r = mysql_query("SELECT ft.*, e_xoops_users.uname, e_xoops_users.user_avatar FROM e_xoops_users JOIN (SELECT et.*, 2004players.goals, 2004players.asists, SUM(wins)*2+SUM(so)*2+SUM(goals)+SUM(asists) as body FROM 2004players RIGHT JOIN (SELECT dt.pid, dt.uid, ft_choices.* FROM ft_choices RIGHT JOIN (SELECT * FROM ft_players)dt ON dt.pid=ft_choices.id)et ON et.pid=2004players.id GROUP BY uid ORDER BY body DESC)ft ON ft.uid=e_xoops_users.uid");
   //$content .= '<div class="alert alert-info">Keďže nastala na prvej priečke rovnosť bodov medzi dvoma manažérmi, museli sme zaviesť rozhodovacie pravidlo, ktorým je viac bodov jednotlivých draftovaných hráčov (bez brankárov). Tento rozstrel vyhral v pomere 66:58 manažér <b>lukias24</b>, ktorému gratulujeme! Aby sa ale <b>dodys</b> nehneval, takisto si môže vybrať z našich vecných cien :)</div>';
    
   if($uid)
@@ -244,7 +244,9 @@ if($params[0]=="picks")
     // zmazat
      //$t[body]=0;
      //if($t[uid]==2932) $t[body]=$t[body]-1;
-    $content .= "<tr><td class='text-center$add'>$i.</td><td class='$add'><a href='#$t[uname]'>$t[uname]</a></td><td class='$add'><b>$t[body]</b></td></tr>";
+    if($t[user_avatar]!="") $avatar = "<img class='rounded-circle mr-1' src='/images/user_avatars/".$t[uid].".".$t[user_avatar]."' alt='".$t[uname]."' style='width:2rem;height:2rem;vertical-align:-11px;'>";
+    else $avatar = "<i class='text-gray-300 fas fa-user-circle fa-2x mr-1' style='width:2rem;height:2rem;vertical-align:-7px;'></i>";
+    $content .= "<tr><td class='text-center$add'>$i.</td><td class='$add'><a href='#$t[uname]'>".$avatar."$t[uname]</a></td><td class='$add'><b>$t[body]</b></td></tr>";
     $i++;
     }
   $content .= '</tbody></table>
@@ -632,11 +634,11 @@ elseif($params[0]=="draft")
       $p = mysql_fetch_array($o);
       if(mysql_num_rows($o)==0) $min = $timeout;
       else $min = floor((strtotime($p[tme])-mktime())/60);
-    $content .= '<p class="p-fluid">Základný draft hráčov sa skončil a teraz sa čaká na oficiálne súpisky jednotlivých tímov Majstrovstiev sveta. Ak sa niektorý z hráčov neobjaví v konečnej zostave, bude tu uvedený šedou farbou a môžete si kliknutím na ikonku pri jeho mene vybrať náhradného hráča.</p>';
-    /*$content .= '<div class="alert alert-info" role="alert"><i class="fas fa-hourglass-half"></i> '.sprintf(LANG_FANTASY_REMAINING, $min).'</div>
-                 <form id="form" method="post" action="/fantasy/draft" enctype="multipart/form-data">';*/
+    //$content .= '<p class="p-fluid">Základný draft hráčov sa skončil a teraz sa čaká na oficiálne súpisky jednotlivých tímov Majstrovstiev sveta. Ak sa niektorý z hráčov neobjaví v konečnej zostave, bude tu uvedený šedou farbou a môžete si kliknutím na ikonku pri jeho mene vybrať náhradného hráča.</p>';
+    $content .= '<div class="alert alert-info" role="alert"><i class="fas fa-hourglass-half"></i> '.sprintf(LANG_FANTASY_REMAINING, $min).'</div>
+                 <form id="form" method="post" action="/fantasy/draft" enctype="multipart/form-data">';
 
-    $content .= '<div class="alert alert-warning" role="alert"><i class="fas fa-users"></i> '.sprintf(LANG_FANTASY_ONLYFROMDB, $skratka).'</div>';
+    //$content .= '<div class="alert alert-warning" role="alert"><i class="fas fa-users"></i> '.sprintf(LANG_FANTASY_ONLYFROMDB, $skratka).'</div>';
     
     if($countf>0)
       {
@@ -700,8 +702,8 @@ elseif($params[0]=="draft")
     else
     {
     //$content .= '<div class="alert alert-info" role="alert">'.LANG_FANTASY_NOTYOURTURN.'<br><br>'.LANG_FANTASY_MISSED.'</div>';
-    //$content .= '<div class="alert alert-info" role="alert">'.LANG_FANTASY_NOTYOURTURN.'<br><br>'.LANG_FANTASY_MISSEDICON.'</div>';
-    $content .= '<div class="alert alert-info" role="alert"><i class="fas fa-hourglass-half"></i> '.LANG_FANTASY_WAITINGFORROSTERS.'</div>';
+    $content .= '<div class="alert alert-info" role="alert">'.LANG_FANTASY_NOTYOURTURN.'<br><br>'.LANG_FANTASY_MISSEDICON.'</div>';
+    //$content .= '<div class="alert alert-info" role="alert"><i class="fas fa-hourglass-half"></i> '.LANG_FANTASY_WAITINGFORROSTERS.'</div>';
     }
     
     $n = mysql_query("SELECT * FROM ft_predraft WHERE uid='$uid'");

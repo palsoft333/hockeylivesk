@@ -180,6 +180,10 @@ define("LANG_TEAMSTATS_PIM","Minút vylúčení");
 define("LANG_TEAMSTATS_PPG","Góly v presilovkách");
 define("LANG_TEAMSTATS_SHG","Góly v oslabeniach");
 define("LANG_TEAMSTATS_GWG","Víťazné góly");
+define("LANG_TEAMSTATS_LATESTTRANSFERS","Posledné hráčske prestupy");
+define("LANG_TEAMSTATS_FROMTEAM","Z tímu");
+define("LANG_TEAMSTATS_TOTEAM","Do tímu");
+define("LANG_TEAMSTATS_FREEAGENT","Voľný hráč");
 
 define("LANG_TEAMTABLE_DIVISIONS","divízie");
 define("LANG_TEAMTABLE_CONFERENCES","konferencie");
@@ -263,6 +267,7 @@ define("LANG_PLAYERS_SLOVAKSTITLE","Slováci účinkujúci v lige");
 define("LANG_PLAYERS_INJURED","Zranený");
 define("LANG_PLAYERS_LASTPOTW","Naposledy hráčom týždňa");
 define("LANG_PLAYERS_LASTPOTWTEXT","%s v drese %s s bilanciou"); // *20.11.2020 v drese HC Slovan Bratislava s bilanciou* 5 bodov
+define("LANG_PLAYERS_TRANSFERSTITLE","Zoznam posledných prestupov v lige");
 
 define("LANG_BETS_BEST","Tabuľka najlepších");
 define("LANG_BETS_SHOWFOR","Zobraziť pre ligu");
@@ -286,6 +291,7 @@ define("LANG_BETS_HOWWESCORE4","<b>3 body</b> za uhádnutie gólového stavu jed
 define("LANG_BETS_HOWWESCORE5","<b>1 bod</b> ak nie je splnená ani jedna z vyššie uvedených podmienok (uhádnutie výherného tímu)");
 define("LANG_BETS_FORWHAT","O čo hráme?");
 define("LANG_BETS_FORWHATTEXT","Po výhre v jednej z vyhlásených súťaží v danej sezóne si môžete vybrať jednu z nasledujúcich vecných cien:");
+define("LANG_BETS_GOTOPROFILE","Prejsť na profil užívateľa %s");
 
 define("LANG_GOTOTOP","^ na vrch");
 define("LANG_OTHER_GAMES_LIVE","Ostatné stretnutia");
@@ -303,6 +309,7 @@ define("LANG_NAV_STATS","Štatistiky");
 define("LANG_NAV_SLOVAKS","Slováci v NHL");
 define("LANG_NAV_SLOVAKI","Slováci v KHL");
 define("LANG_NAV_INJURED","Zranení hráči");
+define("LANG_NAV_TRANSFERS","Prestupy");
 
 define("LANG_CARDS_GOTD","Zápas dňa");
 define("LANG_CARDS_CALENDAR","Kalendár");

@@ -40,7 +40,7 @@ $script_end .= '<script type="text/javascript">
 } );
 	</script>';
 	
-if($user) $bets .= '<a class="btn btn-hl" href="/user/'.$user.'"><i class="fas fa-user mr-2"></i>Prejsť na profil užívateľa '.$f[uname].'</a>';
+if($user) $bets .= '<a class="btn btn-hl" href="/user/'.$user.'"><i class="fas fa-user mr-2"></i>'.sprintf(LANG_BETS_GOTOPROFILE, $f[uname]).'</a>';
 
 $bets .= '  <div class="card my-4 shadow animated--grow-in">
               <div class="card-header">

@@ -350,7 +350,7 @@ elseif($pid)
                <h2 class='h6 h6-fluid text-".$leaguecolor." text-uppercase font-weight-bold mb-3'>".($data[jersey]>0 ? '#'.$data[jersey].' ' : '').$data[name]."</h2>
                <div style='max-width: 1000px;'>";
     
-    $draft = Show_Draft_Button($data[name],$pid);
+    //$draft = Show_Draft_Button($data[name],$pid);
     
     $content .= '
     <div class="player-info">

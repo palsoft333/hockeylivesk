@@ -181,6 +181,10 @@ define("LANG_TEAMSTATS_PIM","Penalty in minutes");
 define("LANG_TEAMSTATS_PPG","Powerplay goals");
 define("LANG_TEAMSTATS_SHG","Shorthanded goals");
 define("LANG_TEAMSTATS_GWG","Game Winning Goals");
+define("LANG_TEAMSTATS_LATESTTRANSFERS","Latest player transfers");
+define("LANG_TEAMSTATS_FROMTEAM","From team");
+define("LANG_TEAMSTATS_TOTEAM","To team");
+define("LANG_TEAMSTATS_FREEAGENT","Free agent");
 
 define("LANG_TEAMTABLE_DIVISIONS","divisions");
 define("LANG_TEAMTABLE_CONFERENCES","conferences");
@@ -264,6 +268,7 @@ define("LANG_PLAYERS_SLOVAKSTITLE","Slovaks performing in the league");
 define("LANG_PLAYERS_INJURED","Injured");
 define("LANG_PLAYERS_LASTPOTW","Player of the week last on");
 define("LANG_PLAYERS_LASTPOTWTEXT","%s in a jersey of %s with"); // *20.11.2020 v drese HC Slovan Bratislava s bilanciou* 5 bodov
+define("LANG_PLAYERS_TRANSFERSTITLE","List of last transfers in the league");
 
 define("LANG_BETS_BEST","Best betters");
 define("LANG_BETS_SHOWFOR","Show for league");
@@ -287,6 +292,7 @@ define("LANG_BETS_HOWWESCORE4","<b>3 points</b> for guessing the goal status of 
 define("LANG_BETS_HOWWESCORE5","<b>1 point</b> if none of the above conditions are met (guessing the winning team)");
 define("LANG_BETS_FORWHAT","What are we playing for?");
 define("LANG_BETS_FORWHATTEXT","After winning one of the announced competitions in a given season, you can choose one among the following prizes:");
+define("LANG_BETS_GOTOPROFILE","View %s's profile");
 
 define("LANG_GOTOTOP","^ to the top");
 define("LANG_OTHER_GAMES_LIVE","Other games");
@@ -304,6 +310,7 @@ define("LANG_NAV_STATS","Statistics");
 define("LANG_NAV_SLOVAKS","Slovaks in NHL");
 define("LANG_NAV_SLOVAKI","Slovaks in KHL");
 define("LANG_NAV_INJURED","Injured players");
+define("LANG_NAV_TRANSFERS","Transfers");
 
 define("LANG_CARDS_GOTD","Game of the day");
 define("LANG_CARDS_CALENDAR","Calendar");

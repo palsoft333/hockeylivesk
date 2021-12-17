@@ -99,7 +99,7 @@
     $startPoint=$_GET['iDisplayStart'];
     $counter=($startPoint) + ($j);
     
-    if($aRow[user_avatar]!="") $avatar = "<img class='rounded-circle mr-1' src='/images/user_avatars/".$aRow[uid].".".$aRow[user_avatar]."' alt='".$aRow[uname]."' style='width:2rem;height:2rem;vertical-align:-11px;'>";
+    if($aRow[user_avatar]!="") $avatar = "<img class='rounded-circle mr-1' src='/images/user_avatars/".$aRow[uid].".".$aRow[user_avatar]."?".filemtime('../images/user_avatars/'.$aRow[uid].'.'.$aRow[user_avatar])."' alt='".$aRow[uname]."' style='width:2rem;height:2rem;vertical-align:-11px;'>";
     else $avatar = "<i class='text-gray-300 fas fa-user-circle fa-2x mr-1' style='width:2rem;height:2rem;vertical-align:-7px;'></i>";
 
     $sOutput .= '["'.$counter.'","<a href=\'/bets/'.$aRow[uid].'\'>'.$avatar.''.$aRow[uname].'</a>","<b>'.$points.'</b>","'.$pocet_tipov.'","'.$uspesnost.'%"],';

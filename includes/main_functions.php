@@ -117,9 +117,9 @@ function Generate_Menu($active_league = FALSE) {
                       <a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/stats/'.$f[id].'-'.SEOtitle($f[topic_title]).'"><span itemprop="name">'.LANG_NAV_STATS.'</span><i class="fas fa-chart-bar fa-fw float-right text-gray-500 my-1"></i></a>
                       '.(strstr($f[longname], 'NHL') ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/slovaks/'.$f[id].'-'.SEOtitle($f[topic_title]).'"><span itemprop="name">'.LANG_NAV_SLOVAKS.'</span><i class="fas fa-user-shield fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                       '.(strstr($f[longname], 'KHL') ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/slovaks/'.$f[id].'-'.SEOtitle($f[topic_title]).'"><span itemprop="name">'.LANG_NAV_SLOVAKI.'</span><i class="fas fa-user-shield fa-fw float-right text-gray-500 my-1"></i></a>':'').'
-                      '.($f[el]>0 ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/injured/'.$f[id].'-'.SEOtitle($f[topic_title]).'"><span itemprop="name">'.LANG_NAV_INJURED.'</span><i class="fas fa-user-injured fa-fw float-right text-gray-500 my-1"></i></a>':'').'
+                      '.($f[el]>0 && $f[topic_id]!=60 ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/injured/'.$f[id].'-'.SEOtitle($f[topic_title]).'"><span itemprop="name">'.LANG_NAV_INJURED.'</span><i class="fas fa-user-injured fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                       '.($f[el]>0 ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/transfers/'.$f[id].'-'.SEOtitle($f[topic_title]).'"><span itemprop="name">'.LANG_NAV_TRANSFERS.'</span><i class="fas fa-exchange-alt fa-fw float-right text-gray-500 my-1"></i></a>':'').'
-                      '.($f[id]==133 ? '<a itemprop="url" class="collapse-item font-weight-bold text-success" href="/fantasy/picks"><span itemprop="name">Fantasy MS</span><i class="fas fa-magic fa-fw float-right text-gray-500 my-1"></i></a>':'').'
+                      '.($f[id]==141 ? '<a itemprop="url" class="collapse-item font-weight-bold text-success" href="/fantasy/draft"><span itemprop="name">Fantasy MS</span><i class="fas fa-magic fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                       '.($f[id]==134 ? '<a itemprop="url" class="collapse-item font-weight-bold text-danger" href="/fantasy/main"><span itemprop="name">Fantasy KHL</span><i class="fas fa-magic fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                     </div>
                   </div>
@@ -637,12 +637,12 @@ function ShowComment($item, $from_latest=false)
                 <div class="media d-block d-sm-flex">';
     if($item['main'][3]==0) $comment .= '    
                 <div class="align-self-start mr-3 text-center float-left float-sm-none">
-                    <img class="img-thumbnail rounded-circle align-self-start" src="'.($item['main'][5]!='' ? '/images/user_avatars/'.$item['main'][3].'.'.$item['main'][5] : '/img/players/no_photo.jpg').'" style="width: 50px; height: 50px;">
+                    <img class="img-thumbnail rounded-circle align-self-start" src="'.($item['main'][5]!='' ? '/images/user_avatars/'.$item['main'][3].'.'.$item['main'][5].'?'.filemtime('images/user_avatars/'.$item['main'][3].'.'.$item['main'][5]) : '/img/players/no_photo.jpg').'" style="width: 50px; height: 50px;">
                     <div class="text-muted text-center message-author"><small>'.$item['main'][1].'</small></div>
                 </div>';
     else $comment .= '    
                 <a href="/user/'.$item['main'][3].'-'.SEOtitle($nick).'" class="align-self-start mr-3 text-center float-left float-sm-none">
-                    <img class="img-thumbnail rounded-circle align-self-start" src="'.($item['main'][5]!='' ? '/images/user_avatars/'.$item['main'][3].'.'.$item['main'][5] : '/img/players/no_photo.jpg').'" style="width: 50px; height: 50px;">
+                    <img class="img-thumbnail rounded-circle align-self-start" src="'.($item['main'][5]!='' ? '/images/user_avatars/'.$item['main'][3].'.'.$item['main'][5].'?'.filemtime('images/user_avatars/'.$item['main'][3].'.'.$item['main'][5]) : '/img/players/no_photo.jpg').'" style="width: 50px; height: 50px;">
                     <div class="text-muted text-center message-author"><small>'.$item['main'][1].'</small></div>
                 </a>';
     $comment .='
@@ -949,7 +949,7 @@ function User_Menu()
     {
     $q = mysql_query("SELECT * FROM e_xoops_users WHERE uid='$_SESSION[logged]'");
     $f = mysql_fetch_array($q);
-    if($f[user_avatar]!="") $avatar = '<img class="img-profile rounded-circle" src="/images/user_avatars/'.$_SESSION[logged].'.'.$f[user_avatar].'" alt="'.$f[uname].'">';
+    if($f[user_avatar]!="") $avatar = '<img class="img-profile rounded-circle" src="/images/user_avatars/'.$_SESSION[logged].'.'.$f[user_avatar].'?'.filemtime('images/user_avatars/'.$_SESSION['logged'].'.'.$f[user_avatar]).'" alt="'.$f[uname].'">';
     else $avatar = '<i class="fas fa-user-circle fa-2x"></i>';
     $usermenu .= '
             <li class="nav-item dropdown no-arrow">
