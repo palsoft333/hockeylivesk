@@ -292,6 +292,8 @@ define("LANG_BETS_HOWWESCORE5","<b>1 bod</b> ak nie je splnená ani jedna z vyš
 define("LANG_BETS_FORWHAT","O čo hráme?");
 define("LANG_BETS_FORWHATTEXT","Po výhre v jednej z vyhlásených súťaží v danej sezóne si môžete vybrať jednu z nasledujúcich vecných cien:");
 define("LANG_BETS_GOTOPROFILE","Prejsť na profil užívateľa %s");
+define("LANG_BETS_BUYMEABEERTEXT","Ak sa vám naše %s páči, kúpte nám pivo:<br><a href='https://www.buymeacoffee.com/palsoft'><img src='https://img.buymeacoffee.com/button-api/?text=%s&emoji=🍺&slug=palsoft&button_colour=%s&font_colour=000000&font_family=Poppins&outline_colour=000000&coffee_colour=ffffff' class='my-1'></a><br>Aj v budúcnosti tak budeme môcť pre našich výhercov prinášať vecné ceny do šúťaží, za čo vám ďakujeme.");
+define("LANG_BETS_BUYMEABEER","Kúpte nám pivo");
 
 define("LANG_GOTOTOP","^ na vrch");
 define("LANG_OTHER_GAMES_LIVE","Ostatné stretnutia");

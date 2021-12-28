@@ -436,6 +436,7 @@ if($params[0]=="main")
         </h6>
       </div>
       <div class="card-body">
+         <p>'.sprintf(LANG_BETS_BUYMEABEERTEXT, "Fantasy KHL", LANG_BETS_BUYMEABEER, "e74a3b").'</p>
          <p>'.LANG_BETS_FORWHATTEXT.'</p>
          <div class="card-columns">
          

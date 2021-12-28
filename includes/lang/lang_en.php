@@ -293,6 +293,8 @@ define("LANG_BETS_HOWWESCORE5","<b>1 point</b> if none of the above conditions a
 define("LANG_BETS_FORWHAT","What are we playing for?");
 define("LANG_BETS_FORWHATTEXT","After winning one of the announced competitions in a given season, you can choose one among the following prizes:");
 define("LANG_BETS_GOTOPROFILE","View %s's profile");
+define("LANG_BETS_BUYMEABEERTEXT","If you like our %s, buy us a beer:<br><a href='https://www.buymeacoffee.com/palsoft'><img src='https://img.buymeacoffee.com/button-api/?text=%s&emoji=🍺&slug=palsoft&button_colour=%s&font_colour=000000&font_family=Poppins&outline_colour=000000&coffee_colour=ffffff' class='my-1'></a><br>In the future we will be able to bring prizes for our winners for which we thank you.");
+define("LANG_BETS_BUYMEABEER","Buy us a beer");
 
 define("LANG_GOTOTOP","^ to the top");
 define("LANG_OTHER_GAMES_LIVE","Other games");

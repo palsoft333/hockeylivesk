@@ -351,6 +351,7 @@ else mysql_query("UPDATE e_xoops_users SET last_login='".mktime()."' WHERE uid='
               <a href="https://www.instagram.com/hockeylive.sk" target="_blank" rel="noopener" class="text-danger"><i class="fa-2x fa-instagram-square fab"></i></a>
               <a href="https://www.facebook.com/hockeylive" target="_blank" rel="noopener" class="ml-2"><i class="fa-2x fa-facebook-square fab"></i></a>
               <a href="https://www.github.com/palsoft333/hockeylivesk" target="_blank" rel="noopener" class="ml-2 text-secondary"><i class="fa-2x fa-github-square fab"></i></a>
+              <a href="https://www.buymeacoffee.com/palsoft"><img src="https://img.buymeacoffee.com/button-api/?text=<? echo LANG_BETS_BUYMEABEER; ?>&emoji=🍺&slug=palsoft&button_colour=0091e6&font_colour=ffffff&font_family=Poppins&outline_colour=ffffff&coffee_colour=FFDD00" style="height: 25px; vertical-align: -3px;" class="ml-2"></a>
             </div>
           </div>
         </div>

@@ -113,6 +113,7 @@ $content .= '<div class="league-select">
                   <li>'.LANG_BETS_HOWWESCORE4.'</li>
                   <li>'.LANG_BETS_HOWWESCORE5.'</li>
                  </ul>
+                 <p>'.sprintf(LANG_BETS_BUYMEABEERTEXT, "tipovanie", LANG_BETS_BUYMEABEER, "0091e6").'</p>
               </div>
             </div>
             

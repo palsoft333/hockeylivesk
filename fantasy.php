@@ -503,8 +503,11 @@ if($params[0]=="picks")
             </div>
            </div>';
              
-  $content .= "<div class='alert alert-info'>".sprintf(LANG_FANTASY_CHANGEPLAYERS, "<a href='mailto:redxakcia@hockeyx-lixve.sk'
-    onmouseover='this.href=this.href.replace(/x/g,\"\");'>")."</a></span>.</div>
+  $content .= "
+      <div class='alert alert-info'>
+        <p>".sprintf(LANG_FANTASY_CHANGEPLAYERS, "<a href='mailto:redxakcia@hockeyx-lixve.sk' onmouseover='this.href=this.href.replace(/x/g,\"\");'>")."</a></span>.</p>
+        <p>".sprintf(LANG_BETS_BUYMEABEERTEXT, $nazov, LANG_BETS_BUYMEABEER, "1cc88a")."</p>
+      </div>
     </div>
    </div>";
    
