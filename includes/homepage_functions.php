@@ -432,6 +432,33 @@ ORDER BY datetime DESC LIMIT 1");
 }
 
 /*
+* Funkcia pre výpis práve prihlásených užívateľov
+* @return $online string
+*/
+
+function Users_Online() {
+  $q = mysql_query("SELECT * FROM `e_xoops_users` WHERE last_login>UNIX_TIMESTAMP()-300");
+  if(mysql_num_rows($q)>0)
+    {
+    $on = array();
+    while($f = mysql_fetch_array($q))
+      {
+      $on[] = '<a href="/user/'.$f[uid].'">'.$f[uname].'</a>';
+      }
+    $online = '
+      <div class="card shadow mb-4">
+        <div class="card-header">
+          <div class="font-weight-bold text-primary text-uppercase">'.LANG_USERSONLINE.'</div>
+        </div>
+        <div class="card-body">
+          <p class="p-fluid">'.LANG_CURRENTLYONLINE.': '.implode(", ", $on).'</p>
+        </div>
+      </div>';
+    }
+  return $online;
+}
+
+/*
 * Funkcia pre výpis vecnej ceny, ktorá sa práve odosiela víťazovi
 * version: 1.0.0 (7.1.2021 - vytvorenie funkcie)
 * @return $sending string
@@ -774,7 +801,7 @@ function gotd()
     
     if($gotdid[1]==1) { $mtable = "el_matches"; $ttable = "el_teams"; }
     else { $mtable = "2004matches"; $ttable = "2004teams"; }
-    $q = mysql_query("SELECT m.*, DATE_FORMAT(m.datetime, '%e.%c.%Y o %H:%i') as datum, t1.id as t1id, t2.id as t2id, t1.longname as t1long, t2.longname as t2long FROM $mtable m LEFT JOIN $ttable t1 ON t1.shortname=m.team1short && t1.league=m.league LEFT JOIN $ttable t2 ON t2.shortname=m.team2short && t2.league=m.league WHERE m.id='".$gotdid[0]."'");
+    $q = mysql_query("SELECT m.*, DATE_FORMAT(m.datetime, '%e.%c.%Y o %k:%i') as datum, t1.id as t1id, t2.id as t2id, t1.longname as t1long, t2.longname as t2long FROM $mtable m LEFT JOIN $ttable t1 ON t1.shortname=m.team1short && t1.league=m.league LEFT JOIN $ttable t2 ON t2.shortname=m.team2short && t2.league=m.league WHERE m.id='".$gotdid[0]."'");
     
     $gotf = mysql_fetch_array($q);
     if($gotdid[1]==1) $g = mysql_query("SELECT count(id) as poc, ROUND(sum(tip1)/count(id),2) as vys1, ROUND(sum(tip2)/count(id),2) as vys2 FROM el_tips WHERE matchid='".$gotdid[0]."'");

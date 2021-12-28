@@ -31,6 +31,9 @@ var LANG_FANTASY_CONFIRMTEAM = "Potvrďte svoj tím.";
 var LANG_FANTASY_PICKANOTHER = "Zvoľte si ďalšieho hráča.";
 var LANG_FANTASY_CONFIRMBUTTON = "Potvrdiť môj výber";
 var LANG_FANTASY_ERRORSAVING = "Nastala chyba pri ukladaní vášho tímu.";
+var LANG_FANTASY_ALREADYPICKED = "Tohto hráča ste si už vybrali. Vyberte si prosím iného.";
+var LANG_FANTASY_PICKSACTIVE = "Vaše draftové výbery sú aktívne.";
+var LANG_FANTASY_PICKSINACTIVE = "Vaše draftové výbery nie sú kompletné. Draftujte všetkých 10 pozícií.";
 
 var LANG_COMMENTS_CAPTCHAERROR = "Vaša registrácia neprešla spam testom. Skúste prosím znovu, alebo nám napíšte";
 var LANG_COMMENTS_ADDED = "Komentár bol úspešne pridaný.";

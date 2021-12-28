@@ -115,10 +115,26 @@
                 echo Get_Latest_Stats();
                 echo Transfers();
                 echo Favourite_Team();
+                echo Users_Online();
                 echo Sending_Prize();
                 echo '
               <div class="advert-container card shadow">
                 <p class="m-auto p-2 small">Najlepšie <a href="http://casino-hry.sk/">Slovenské Online Casino</a> recenzie a hry zadarmo</p>
+              </div>
+          
+              <div class="card shadow mt-4 articleBanner d-none d-xl-block">
+                <div class="card-body">
+                  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                  <ins class="adsbygoogle"
+                       style="display:block"
+                       data-ad-client="ca-pub-8860983069832222"
+                       data-ad-slot="1141079059"
+                       data-ad-format="auto"
+                       data-full-width-responsive="true"></ins>
+                  <script>
+                       (adsbygoogle = window.adsbygoogle || []).push({});
+                  </script>
+                </div>
               </div>';
                 }
               else

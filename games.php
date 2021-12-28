@@ -78,7 +78,8 @@ elseif($gid)
     $content .= '<i class="float-left h1 h1-fluid ll-'.LeagueFont($linfo[longname]).' text-gray-600 mr-1"></i>
                <h1 class="h3 h3-fluid mb-1">'.LANG_MATCHES_DETAIL1.' '.$t1[longname].' vs. '.$t2[longname].'</h1>
                <h2 class="h6 h6-fluid text-'.$leaguecolor.' text-uppercase font-weight-bold mb-3">'.$linfo[longname].'</h2>
-               <div style="max-width: 1000px;" class="match-detail">
+                <div class="row">
+                    <div class="col-12 match-detail" style="max-width: 1000px;">
                 <div class="row my-4">
                   <div class="col-6 col-md-4 d-flex flex-column justify-content-between order-1 text-center animated--grow-in">
                     <div><img src="/images/vlajky/'.$b[team1short].'_big.gif" alt="'.$b[team1long].'" class="img-fluid'.$suffix.'"></div>
@@ -510,7 +511,22 @@ elseif($gid)
               }
             }
             </script>
-          </div>';
+        </div> <!-- end col -->
+        <div class="col-auto flex-grow-1 flex-shrink-1 d-none d-xl-block">
+                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8860983069832222"
+                    crossorigin="anonymous"></script>
+                <!-- HL reklama na podstránkach XL zariadenie -->
+                <ins class="adsbygoogle"
+                    style="display:block"
+                    data-ad-client="ca-pub-8860983069832222"
+                    data-ad-slot="3044717777"
+                    data-ad-format="auto"
+                    data-full-width-responsive="true"></ins>
+                <script>
+                    (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+        </div> <!-- end col -->
+        </div> <!-- end row -->';
     }
   else
     {

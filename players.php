@@ -50,7 +50,8 @@ if($sid)
   $content .= "<i class='float-left h1 h1-fluid ll-".LeagueFont($f[longname])." text-gray-600 mr-1'></i>
                <h1 class='h3 h3-fluid mb-1'>".LANG_PLAYERS_SLOVAKSTITLE."</h1>
                <h2 class='h6 h6-fluid text-".$leaguecolor." text-uppercase font-weight-bold mb-3'>".$f[longname]."</h2>
-               <div style='max-width: 1000px;'>";
+               <div class='row'>
+                <div class='col-12' style='max-width: 1000px;'>";
   
 	$content .= '<div class="card my-4 shadow animated--grow-in">
               <div class="card-header">
@@ -173,10 +174,25 @@ while ($t = mysql_fetch_array($r))
                 </tr>';
       $p++;
       }
-$content .= "</tbody></table>
+$content .= '</tbody></table>
             </div>
            </div>
-          </div>";
+        </div> <!-- end col -->
+        <div class="col-auto flex-grow-1 flex-shrink-1 d-none d-xl-block mt-4">
+                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8860983069832222"
+                    crossorigin="anonymous"></script>
+                <!-- HL reklama na podstránkach XL zariadenie -->
+                <ins class="adsbygoogle"
+                    style="display:block"
+                    data-ad-client="ca-pub-8860983069832222"
+                    data-ad-slot="3044717777"
+                    data-ad-format="auto"
+                    data-full-width-responsive="true"></ins>
+                <script>
+                    (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+        </div> <!-- end col -->
+        </div> <!-- end row -->';
     }
   }
 // zraneni hraci
@@ -247,7 +263,8 @@ elseif($tid)
   $content .= "<i class='float-left h1 h1-fluid ll-".LeagueFont($f[longname])." text-gray-600 mr-1'></i>
                <h1 class='h3 h3-fluid mb-1'>".LANG_PLAYERS_TRANSFERSTITLE."</h1>
                <h2 class='h6 h6-fluid text-".$leaguecolor." text-uppercase font-weight-bold mb-3'>".$f[longname]."</h2>
-               <div style='max-width: 1000px;'>";
+               <div class='row'>
+                <div class='col-12' style='max-width: 1000px;'>";
   
 	$content .= '<div class="card my-4 shadow animated--grow-in">
               <div class="card-header">
@@ -294,10 +311,25 @@ while ($t = mysql_fetch_array($r))
                 </tr>';
       $p++;
       }
-$content .= "</tbody></table>
+$content .= '</tbody></table>
             </div>
            </div>
-          </div>";
+        </div> <!-- end col -->
+        <div class="col-auto flex-grow-1 flex-shrink-1 d-none d-xl-block mt-4">
+                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8860983069832222"
+                    crossorigin="anonymous"></script>
+                <!-- HL reklama na podstránkach XL zariadenie -->
+                <ins class="adsbygoogle"
+                    style="display:block"
+                    data-ad-client="ca-pub-8860983069832222"
+                    data-ad-slot="3044717777"
+                    data-ad-format="auto"
+                    data-full-width-responsive="true"></ins>
+                <script>
+                    (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+        </div> <!-- end col -->
+        </div> <!-- end row -->';
   }
 // statistika hraca
 elseif($pid)
@@ -348,7 +380,8 @@ elseif($pid)
     $content .= "<i class='float-left h1 h1-fluid ll-".LeagueFont($data[longname])." text-gray-600 mr-1'></i>
                <h1 class='h3 h3-fluid mb-1'>".LANG_PLAYERSTATS_TITLE."</h1>
                <h2 class='h6 h6-fluid text-".$leaguecolor." text-uppercase font-weight-bold mb-3'>".($data[jersey]>0 ? '#'.$data[jersey].' ' : '').$data[name]."</h2>
-               <div style='max-width: 1000px;'>";
+                 <div class='row'>
+                    <div class='col-12' style='max-width: 1000px;'>";
     
     //$draft = Show_Draft_Button($data[name],$pid);
     
@@ -623,7 +656,22 @@ ORDER BY datetime DESC LIMIT 1)dt WHERE dt.id IS NOT NULL");
   } );
           </script>';
       }
-    $content .= '</div>';
+    $content .= '   </div> <!-- end col -->
+   <div class="col-auto flex-grow-1 flex-shrink-1 d-none d-xl-block">
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8860983069832222"
+            crossorigin="anonymous"></script>
+        <!-- HL reklama na podstránkach XL zariadenie -->
+        <ins class="adsbygoogle"
+            style="display:block"
+            data-ad-client="ca-pub-8860983069832222"
+            data-ad-slot="3044717777"
+            data-ad-format="auto"
+            data-full-width-responsive="true"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+   </div> <!-- end col -->
+   </div> <!-- end row -->';
     }
   else
     {
@@ -656,7 +704,8 @@ elseif($gid)
     $content .= "<i class='float-left h1 h1-fluid ll-".LeagueFont($data[longname])." text-gray-600 mr-1'></i>
                <h1 class='h3 h3-fluid mb-1'>".LANG_PLAYERSTATS_TITLEGOALIE."</h1>
                <h2 class='h6 h6-fluid text-".$leaguecolor." text-uppercase font-weight-bold mb-3'>".($data[jersey]>0 ? '#'.$data[jersey].' ' : '').$data[name]."</h2>
-               <div style='max-width: 1000px;'>";
+                 <div class='row'>
+                    <div class='col-12' style='max-width: 1000px;'>";
     
     $content .= '<div class="player-info">
                   <div class="row">
@@ -791,7 +840,23 @@ $script_end = '<script type="text/javascript">
   } );
           </script>';
       }
-    $content .= '</div>';
+    $content .= '   
+    </div> <!-- end col -->
+   <div class="col-auto flex-grow-1 flex-shrink-1 d-none d-xl-block">
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8860983069832222"
+            crossorigin="anonymous"></script>
+        <!-- HL reklama na podstránkach XL zariadenie -->
+        <ins class="adsbygoogle"
+            style="display:block"
+            data-ad-client="ca-pub-8860983069832222"
+            data-ad-slot="3044717777"
+            data-ad-format="auto"
+            data-full-width-responsive="true"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+   </div> <!-- end col -->
+   </div> <!-- end row -->';
     }
   else
     {

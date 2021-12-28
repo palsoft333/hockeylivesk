@@ -101,7 +101,8 @@ if($id)
     $content .= "<i class='float-left h1 h1-fluid ll-".LeagueFont($e[longname])." text-gray-600 mr-1'></i>
                  <h1 class='h3 h3-fluid mb-1'>".$f[longname]."</h1>
                  <h2 class='h6 h6-fluid text-".$leaguecolor." text-uppercase font-weight-bold mb-3'>".$e[longname]."</h2>
-                 <div style='max-width: 1000px;'>
+                 <div class='row'>
+                    <div class='col-12' style='max-width: 1000px;'>
                  <p class='d-flex justify-content-center justify-content-md-start p-fluid'>".($el==1 ? LANG_TEAMSTATS_SEASON : LANG_TEAMSTATS_LEAGUE).$select."</p>";
 
     $content .= '<div class="row">
@@ -403,8 +404,23 @@ $content .= '
             </div>';
 
 
-          $content .='</div>
-    ';
+          $content .='
+    </div> <!-- end col -->
+   <div class="col-auto flex-grow-1 flex-shrink-1 d-none d-xl-block">
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8860983069832222"
+            crossorigin="anonymous"></script>
+        <!-- HL reklama na podstránkach XL zariadenie -->
+        <ins class="adsbygoogle"
+            style="display:block"
+            data-ad-client="ca-pub-8860983069832222"
+            data-ad-slot="3044717777"
+            data-ad-format="auto"
+            data-full-width-responsive="true"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+   </div> <!-- end col -->
+   </div> <!-- end row -->';
     }
 // nebol vybrany ziaden tim
   }

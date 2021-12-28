@@ -49,6 +49,9 @@ var LANG_FANTASY_CONFIRMTEAM = "Confirm your team.";
 var LANG_FANTASY_PICKANOTHER = "Choose another player.";
 var LANG_FANTASY_CONFIRMBUTTON = "Confirm my selection";
 var LANG_FANTASY_ERRORSAVING = "There was an error saving your team.";
+var LANG_FANTASY_ALREADYPICKED = "You have already selected this player. Please choose another.";
+var LANG_FANTASY_PICKSACTIVE = "Your draft picks are active.";
+var LANG_FANTASY_PICKSINACTIVE = "Your draft picks are not complete. Please draft all 10 positions.";
 
 var LANG_COMMENTS_CAPTCHAERROR = "Your registration did not pass the spam test. Please try again or send us an";
 var LANG_COMMENTS_ADDED = "Comment added successfully.";

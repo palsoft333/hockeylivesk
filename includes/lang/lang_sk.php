@@ -326,6 +326,9 @@ define("LANG_GAMECONT_POINT","bod");
 define("LANG_GAMECONT_POINTS","body");
 define("LANG_GAMECONT_NOPOTW","Momentálne nemáme žiadneho hráča týždňa");
 
+define("LANG_USERSONLINE","Užívatelia online");
+define("LANG_CURRENTLYONLINE","Momentálne prihlásení užívatelia");
+
 define("LANG_NAV_MAINMENU","Hlavné menu");
 define("LANG_NAV_LOGIN","Prihlásiť sa");
 define("LANG_NAV_LOGIN2","Prihlásenie");
@@ -505,6 +508,13 @@ define("LANG_FANTASY_WITHOUTPROFIT",'bez zisku');
 define("LANG_FANTASY_SOLD",'predal');
 define("LANG_FANTASY_BOUGHT",'kúpil');
 define("LANG_FANTASY_FORPRICE",'za cenu');
+define("LANG_FANTASY_REMAINING1",'Zostáva ešte');
+define("LANG_FANTASY_PICKSACTIVE",'Vaše draftové výbery sú aktívne.');
+define("LANG_FANTASY_PICKSINACTIVE",'Vaše draftové výbery nie sú kompletné. Draftujte všetkých 10 pozícií.');
+define("LANG_FANTASY_PICKSTITLE3",'Vaše draftové výbery');
+define("LANG_FANTASY_ONLYFROMROSTERS",'Zostavy tímov na %s sú známe. Draft povoľuje vybrať hráčov iba zo <a href="/news/%d" class="alert-link">známych zostáv</a>');
+define("LANG_FANTASY_ONLYFROMDB1",'Zostavy tímov pre %s budú známe neskôr. Draftujte hráčov, o ktorých si myslíte, že by sa mohli zúčastniť.');
+define("LANG_FANTASY_PICKPLACEHOLDER",'Začnite písať meno hráča...');
 
 define("LANG_PARTNERS_TITLE",'Partneri');
 define("LANG_PARTNERS_TEXT",'Partneri nášho portálu sú zoradení podľa toho, koľko návštevníkom pomohli poukázať na našu stránku. Za to im úprimne ďakujeme a dúfame, že naši užívatelia si takisto nájdu cestu k nim pomocou týchto odkazov.');

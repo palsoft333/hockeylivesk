@@ -244,7 +244,8 @@ if($params[0]=="main")
     $content .= "<i class='float-left h1 h1-fluid ll-".LeagueFont($n[longname])." text-gray-600 mr-1'></i>
                  <h1 class='h3 h3-fluid mb-1'>".LANG_FANTASY_TITLE."</h1>
                  <h2 class='h6 h6-fluid text-".$leaguecolor." text-uppercase font-weight-bold mb-3'>".$n[longname]."</h2>
-                 <div style='max-width: 1000px;'>";
+                 <div class='row'>
+                    <div class='col-12' style='max-width: 1000px;'>";
     
     $content .= '<nav aria-label="Fantasy navigation">
                   <ul class="pagination pagination-sm">
@@ -556,7 +557,8 @@ if($params[0]=="main")
     $content .= "<i class='float-left h1 h1-fluid ll-".LeagueFont($n[longname])." text-gray-600 mr-1'></i>
                  <h1 class='h3 h3-fluid mb-1'>".LANG_FANTASY_TITLE."</h1>
                  <h2 class='h6 h6-fluid text-".$leaguecolor." text-uppercase font-weight-bold mb-3'>".$n[longname]."</h2>
-                 <div style='max-width: 1000px;'>";
+                 <div class='row'>
+                    <div class='col-12' style='max-width: 1000px;'>";
     
     $content .= '
     <div class="row">
@@ -593,7 +595,23 @@ if($params[0]=="main")
       });
   </script>";
     }
-  $content .= "</div>";
+  $content .= '        
+    </div> <!-- end col -->
+    <div class="col-auto flex-grow-1 flex-shrink-1 d-none d-xl-block">
+            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8860983069832222"
+                crossorigin="anonymous"></script>
+            <!-- HL reklama na podstránkach XL zariadenie -->
+            <ins class="adsbygoogle"
+                style="display:block"
+                data-ad-client="ca-pub-8860983069832222"
+                data-ad-slot="3044717777"
+                data-ad-format="auto"
+                data-full-width-responsive="true"></ins>
+            <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+    </div> <!-- end col -->
+    </div> <!-- end row -->';
   }
   
 // zostava ineho manazera
@@ -608,7 +626,8 @@ if($params[0]=="roster")
   $content .= "<i class='float-left h1 h1-fluid ll-".LeagueFont($n[longname])." text-gray-600 mr-1'></i>
                <h1 class='h3 h3-fluid mb-1'>".LANG_FANTASY_TITLE."</h1>
                <h2 class='h6 h6-fluid text-".$leaguecolor." text-uppercase font-weight-bold mb-3'>".$n[longname]."</h2>
-               <div style='max-width: 1000px;'>";
+                 <div class='row'>
+                    <div class='col-12' style='max-width: 1000px;'>";
   
   $content .= '<nav aria-label="Fantasy navigation">
                   <ul class="pagination pagination-sm">
@@ -638,7 +657,23 @@ if($params[0]=="roster")
     {
     $content .= '<div class="message" style="text-align:center;">Tento užívateľ nehrá Fantasy ligu.</div>';
     }
-  $content .= '</div>';
+  $content .= '   
+  </div> <!-- end col -->
+   <div class="col-auto flex-grow-1 flex-shrink-1 d-none d-xl-block">
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8860983069832222"
+            crossorigin="anonymous"></script>
+        <!-- HL reklama na podstránkach XL zariadenie -->
+        <ins class="adsbygoogle"
+            style="display:block"
+            data-ad-client="ca-pub-8860983069832222"
+            data-ad-slot="3044717777"
+            data-ad-format="auto"
+            data-full-width-responsive="true"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+   </div> <!-- end col -->
+   </div> <!-- end row -->';
   }
 
 // moja zostava
@@ -652,7 +687,8 @@ if($params[0]=="select")
   $content .= "<i class='float-left h1 h1-fluid ll-".LeagueFont($n[longname])." text-gray-600 mr-1'></i>
                <h1 class='h3 h3-fluid mb-1'>".LANG_FANTASY_TITLE."</h1>
                <h2 class='h6 h6-fluid text-".$leaguecolor." text-uppercase font-weight-bold mb-3'>".$n[longname]."</h2>
-               <div style='max-width: 1000px;'>";
+                 <div class='row mb-4'>
+                    <div class='col-12' style='max-width: 1000px;'>";
                
   $content .= '<nav aria-label="Fantasy navigation">
                   <ul class="pagination pagination-sm">
@@ -694,7 +730,22 @@ if($params[0]=="select")
     
     '.Generate_Roster($uid).'
   
-  </div>';
+   </div> <!-- end col -->
+   <div class="col-auto flex-grow-1 flex-shrink-1 d-none d-xl-block">
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8860983069832222"
+            crossorigin="anonymous"></script>
+        <!-- HL reklama na podstránkach XL zariadenie -->
+        <ins class="adsbygoogle"
+            style="display:block"
+            data-ad-client="ca-pub-8860983069832222"
+            data-ad-slot="3044717777"
+            data-ad-format="auto"
+            data-full-width-responsive="true"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+   </div> <!-- end col -->
+   </div> <!-- end row -->';
                 
   $script_end .= "
   <script>  

@@ -1,5 +1,17 @@
 <?
 session_start();
+
+// save picks for new version of draft
+if($_GET[save]==1)
+  {
+  include("db.php");
+  $uid = $_SESSION['logged'];
+  $options = json_decode($_GET[json], true);
+  mysql_query("INSERT INTO ft_predraft (uid, predraft) VALUES ('$uid', '$_GET[json]') ON DUPLICATE KEY UPDATE predraft='$_GET[json]'") or die(mysql_error());
+  //if(count($options)==10) PreDraft();
+  mysql_close($link);
+  }
+
 if($_GET[predraft]==1)
   {
   $manazerov = 10;
@@ -172,8 +184,8 @@ function Show_Drafted()
     if($avg>60) $avg = round($avg/60,0)." ".LANG_FANTASY_HRS;
     else $avg = round($avg,0)." ".LANG_FANTASY_MINS;
     if($y[user_avatar]!="") $avatar = "<img class='rounded-circle mr-1' src='/images/user_avatars/".$y[uid].".".$y[user_avatar]."?".filemtime('images/user_avatars/'.$y[uid].'.'.$y[user_avatar])."' alt='".$y[uname]."' style='width:2rem;height:2rem;vertical-align:-11px;'>";
-    else $avatar = "<i class='text-gray-300 fas fa-user-circle fa-2x mr-1' style='width:2rem;height:2rem;vertical-align:-7px;'></i>";
-    $drafted .= '<tr><td class="text-center">'.$y[pos].'</td><td><a href="/user/'.$y[uid].'" class="blacklink">'.$avatar.$y[uname].''.($y[last_login]+300>time() ? '<i class="fas fa-circle live ml-1 rounded-circle text-success" style="font-size: 14px;" data-toggle="tooltip" data-placement="top" title="Online!"></i>':'').'</a></td><td class="text-nowrap">'.$hl.'</b></td><td class="text-nowrap">'.$avg.'</b></td></tr>';
+    else $avatar = "<i class='text-gray-300 fas fa-user-circle fa-2x mr-1' style='vertical-align:-7px;'></i>";
+    $drafted .= '<tr><td class="text-center">'.$y[pos].'</td><td class="text-nowrap"><a href="/user/'.$y[uid].'" class="blacklink">'.$avatar.$y[uname].''.($y[last_login]+300>time() ? '<i class="fas fa-circle live ml-1 rounded-circle text-success" style="font-size: 14px;" data-toggle="tooltip" data-placement="top" title="Online!"></i>':'').'</a></td><td class="text-nowrap">'.$hl.'</b></td><td class="text-nowrap">'.$avg.'</b></td></tr>';
     }
   
   $drafted .= '</tbody></table></div></div></div></div>';
