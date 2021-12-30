@@ -4,25 +4,16 @@ session_start();
 // save picks for new version of draft
 if($_GET[save]==1)
   {
-  include("db.php");
-  $uid = $_SESSION['logged'];
-  $options = json_decode($_GET[json], true);
-  mysql_query("INSERT INTO ft_predraft (uid, predraft) VALUES ('$uid', '$_GET[json]') ON DUPLICATE KEY UPDATE predraft='$_GET[json]'") or die(mysql_error());
-  //if(count($options)==10) PreDraft();
-  mysql_close($link);
-  }
-
-if($_GET[predraft]==1)
-  {
   $manazerov = 10;
   include("db.php");
   $uid = $_SESSION['logged'];
   $options = json_decode($_GET[json], true);
-  mysql_query("INSERT INTO ft_predraft (uid, predraft) VALUES ('$uid', '$_GET[json]')") or die(mysql_error());
-  PreDraft();
+  mysql_query("INSERT INTO ft_predraft (uid, predraft) VALUES ('$uid', '$_GET[json]') ON DUPLICATE KEY UPDATE predraft='$_GET[json]'") or die(mysql_error());
+  $key = array_search(0, array_column($options, 'pid'));
+  if(!$key && $key!==0 && count($options)==10) PreDraft();
   mysql_close($link);
   }
-  
+
 function PreDraft()
   {
   Global $manazerov;
@@ -59,15 +50,19 @@ function PreDraft()
         $w = mysql_query("SELECT * FROM ft_players WHERE pid='$pid'");
         if(mysql_num_rows($w)>0) 
           {
-          $e = mysql_query("SELECT * FROM ft_choices WHERE id='$pid'");
-          $r = mysql_fetch_array($e);
-          $subject = LANG_FANTASY_MAILSUBJECT;
-          $message = sprintf(LANG_FANTASY_MAILTEXT1, $nazov, $r[name], $menu, $nazov);
-          $headers = 'From: '.SITE_MAIL. "\r\n" .
-          'Reply-To: '.SITE_MAIL. "\r\n" .
-          'X-Mailer: PHP/' . phpversion();
-          mail(ADMIN_MAIL, "Predraft čaká", "Kolo: $round, Výber: $pick, Konfliktný hráč: $r[name], Užívateľ na ťahu: $u[uname] ($u[email])", $headers);
-          mail($u[email], $subject, $message, $headers);
+          $mail = mysql_query("SELECT * FROM ft_teams WHERE pos='".$narade."' && last_mail_round='".$round."'");
+          if(mysql_num_rows($mail)==0) {
+            $e = mysql_query("SELECT * FROM ft_choices WHERE id='$pid'");
+            $r = mysql_fetch_array($e);
+            $subject = LANG_FANTASY_MAILSUBJECT;
+            $message = sprintf(LANG_FANTASY_MAILTEXT1, $nazov, $r[name], $menu, $nazov);
+            $headers = 'From: '.SITE_MAIL. "\r\n" .
+            'Reply-To: '.SITE_MAIL. "\r\n" .
+            'X-Mailer: PHP/' . phpversion();
+            mail(ADMIN_MAIL, "Predraft čaká", "Kolo: $round, Výber: $pick, Konfliktný hráč: $r[name], Užívateľ na ťahu: $u[uname] ($u[email])", $headers);
+            mail($u[email], $subject, $message, $headers);
+            mysql_query("UPDATE ft_teams SET last_mail_round='".$round."' WHERE pos='".$narade."'");
+            }
           }
         else
           {
@@ -82,14 +77,19 @@ function PreDraft()
     }
   else
     {
-    $subject = LANG_FANTASY_MAILSUBJECT;
-    $message = sprintf(LANG_FANTASY_MAILTEXT2, $nazov, $menu, $nazov);
-    $headers = 'From: '.SITE_MAIL. "\r\n" .
-    'Reply-To: '.SITE_MAIL. "\r\n" .
-    'X-Mailer: PHP/' . phpversion();
-    mail(ADMIN_MAIL, "Predraft čaká", "Kolo: $round, Výber: $pick, Užívateľ na ťahu: $u[uname] ($u[email])", $headers);
-    mail($u[email], $subject, $message, $headers);
-    echo "ok";
+    $mail = mysql_query("SELECT * FROM ft_teams WHERE pos='".$narade."' && last_mail_round='".$round."'");
+    if(mysql_num_rows($mail)==0) {
+      $subject = LANG_FANTASY_MAILSUBJECT;
+      $message = sprintf(LANG_FANTASY_MAILTEXT2, $nazov, $menu, $nazov);
+      $headers = 'From: '.SITE_MAIL. "\r\n" .
+      'Reply-To: '.SITE_MAIL. "\r\n" .
+      'X-Mailer: PHP/' . phpversion();
+      mail(ADMIN_MAIL, "Predraft čaká", "Kolo: $round, Výber: $pick, Užívateľ na ťahu: $u[uname] ($u[email])", $headers);
+      mail($u[email], $subject, $message, $headers);
+      mysql_query("UPDATE ft_teams SET last_mail_round='".$round."' WHERE pos='".$narade."'");
+      echo "ok";
+      }
+    else echo "ok";
     }
   }
 

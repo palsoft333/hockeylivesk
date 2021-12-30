@@ -7,9 +7,9 @@ include("main_functions.php");
 if($_GET[term]) $term = mysql_real_escape_string($_GET[term]);
 else exit;
 
-if($_GET[f]>0 && $_GET[d]>0) $ppos = "";
-elseif($_GET[f]>0 && $_GET[d]==0) $ppos = "(pos='F' || pos='C' || pos='CE' || pos='RW' || pos='LW') && ";
-elseif($_GET[f]==0 && $_GET[d]>0) $ppos = "(pos='D' || pos='RD' || pos='LD') && ";
+if($_GET[f]>0 && $_GET[d]>0) $ppos = "pos!='GK' && ";
+elseif($_GET[f]>0 && $_GET[d]==0) $ppos = "(pos='F' || pos='C' || pos='CE' || pos='RW' || pos='LW') && pos!='GK' && ";
+elseif($_GET[f]==0 && $_GET[d]>0) $ppos = "(pos='D' || pos='RD' || pos='LD') && pos!='GK' && ";
 elseif($_GET[f]==0 && $_GET[d]==0) $ppos = "pos='false' && ";
 if($_GET[g]>0) $gpos="GK";
 else $gpos="false";
