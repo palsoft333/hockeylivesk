@@ -424,7 +424,7 @@ elseif($_GET[p]=="teams") echo '  <script type="text/javascript" src="/includes/
   <script src="/js/comments.js?v=1.0.1"></script>
   <script src="https://www.google.com/recaptcha/api.js?render=explicit&onload=onRecaptchaLoadCallback"></script>';
 elseif($_GET[p]=="fantasy") echo '  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION[lang].'.js?v=1.0.0"></script>
-  <script type="text/javascript" src="/js/fantasy_events.js?v=1.0.0"></script>
+  <script type="text/javascript" src="/js/fantasy_events.js?v=1.0.2"></script>
   <script src="/js/jquery.emojiarea.min.js?v=1.0.0"></script>
   <script src="/images/smilies/emojis.js?v=1.0.0"></script>
   <script src="/js/comments.js?v=1.0.1"></script>

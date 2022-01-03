@@ -6,6 +6,7 @@ $menu = "MS U20 2022";
 $skratka = "MS U20";
 $manazerov = 10;
 $article_id = 2245;
+$league_id = 141;
 //$timeout = 480;
 $predraftt = 1; // = draftuje sa do zásobníka. ak 1, upraviť počet manažérov aj v includes/fantasy_functions.php
 $knownrosters = 1; // = su zname zostavy (do ft_choices pridat hracov, ktori sa zucastnia)
@@ -41,7 +42,7 @@ $leag = mysql_query("SELECT * FROM 2004leagues WHERE longname LIKE '%$skratka%' 
 $league = mysql_fetch_array($leag);
 $leaguecolor = $league[color];
 $active_league = $league[id];
-//if($uid==2) $uid=3003;
+//if($uid==2) $uid=1319;
 
 // cron job pre vyber random hraca pri necinnosti manazera
 if($_GET[cron]==1)
@@ -344,7 +345,8 @@ if($params[0]=="draft")
 if($params[0]=="picks")
   {
   $title = "$nazov - ".LANG_FANTASY_PICKSTITLE;
-  $content .= "<i class='float-left h1 h1-fluid ll-".LeagueFont($league[longname])." text-gray-600 mr-1'></i>
+  $content .= "  <div class='modal fade' id='dialog' tabindex='-1' role='dialog' aria-labelledby='dialogTitle' aria-hidden='true'></div>
+                <i class='float-left h1 h1-fluid ll-".LeagueFont($league[longname])." text-gray-600 mr-1'></i>
                <h1 class='h3 h3-fluid mb-1'>".$nazov."</h1>
                <h2 class='h6 h6-fluid text-".$leaguecolor." text-uppercase font-weight-bold mb-3'>".LANG_FANTASY_PICKSTITLE1."</h2>
                 <div class='row'>
@@ -368,21 +370,37 @@ if($params[0]=="picks")
       </div>
       <div class="card-body">
         <h5 class="card-title text-'.$leaguecolor.' h5-fluid">'.LANG_FANTASY_FORWARDS.'</h5>
-        <div class="row">';
+        <div class="row no-gutters">';
+          $dnes = date("Y-m-d", mktime());
+          $excl = mysql_query("SELECT * FROM `2004matches` WHERE datetime > '$dnes 00:00:00' && datetime < now() && kedy='na programe' && league='".$league_id."'");
+          while($exclude = mysql_fetch_array($excl))
+            {
+            $exc[] = $exclude[team1short];
+            $exc[] = $exclude[team2short];
+            }
           $y = mysql_query("SELECT ft_players.*, t1.*, t2.goals, t2.asists, t2.goals+t2.asists as points, IF(t1.pos='F',1,IF(t1.pos='D',2,3)) as zor FROM ft_players JOIN ft_choices t1 ON t1.id=ft_players.pid LEFT JOIN 2004players t2 ON ft_players.pid=t2.id WHERE uid='$uid' ORDER BY zor ASC, ft_players.id ASC");
           while($u = mysql_fetch_array($y))
             {
-            $players[] = array($u[teamshort], $u[name], $u[pos], $u[goals], $u[asists], $u[points], $u[wins], $u[so]);
+            $players[] = array($u[teamshort], $u[name], $u[pos], $u[goals], $u[asists], $u[points], $u[wins], $u[so], $u[pid]);
             }
           $i=0;
           while($i < 6)
             {
             $content .= '
-             <div class="col text-center">
-              <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/includes/player_photo.php?name='.$players[$i][1].'" class="lazy rounded-circle img-thumbnail" style="width:100px; height:100px; max-width:100px;">
-              <p class="p-fluid"><span class="font-weight-bold"><img class="flag-iihf '.$players[$i][0].'-small" src="/images/blank.png" alt="'.$players[$i][0].'"> '.$players[$i][1].'</span><br>
-              '.LANG_PLAYERSTATS_F.'<br>
-              <span class="badge badge-pill badge-'.$leaguecolor.'">'.$players[$i][3].'+'.$players[$i][4].'</span></p>
+             <div class="col text-center mb-3">
+              <div class="card h-100 '.($i==0 ? 'mr-1':($i==5 ? 'ml-1':'mx-1')).'">
+                <div class="card-header p-fluid font-weight-bold p-1">
+                  <img class="flag-iihf '.$players[$i][0].'-small" src="/images/blank.png" alt="'.$players[$i][0].'"> '.$players[$i][1].'
+                </div>
+                <div class="card-body">
+                  <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/includes/player_photo.php?name='.$players[$i][1].'" class="lazy rounded-circle img-thumbnail" style="width:100px; height:100px; max-width:100px;">
+                  <p class="p-fluid">'.LANG_PLAYERSTATS_F.'<br>
+                  <span class="badge badge-pill badge-'.$leaguecolor.'">'.$players[$i][3].'+'.$players[$i][4].'</span></p>
+                </div>
+                <div class="footer">
+                  '.(in_array($players[$i][0], $exc) ? '<span data-toggle="tooltip" data-placement="bottom" title="Momentálne sa nedá vymeniť. Hrá zápas."><a href="#" class="btn btn-sm btn-block btn-secondary disabled"><i class="fas fa-ban"></i></a></span>':'<a href="#" class="btn btn-sm btn-block btn-light change-player" data-pid="'.$players[$i][8].'" data-toggle="tooltip" data-placement="bottom" title="Vymeniť hráča"><i class="fas fa-retweet"></i></a>').'
+                </div>
+              </div>
              </div>';
             $i++;
             }
@@ -393,11 +411,20 @@ if($params[0]=="picks")
           while($i < 9)
             {
             $content .= '
-             <div class="col text-center">
-              <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/includes/player_photo.php?name='.$players[$i][1].'" class="lazy rounded-circle img-thumbnail" style="width:100px; height:100px; max-width:100px;">
-              <p class="p-fluid"><span class="font-weight-bold"><img class="flag-iihf '.$players[$i][0].'-small" src="/images/blank.png" alt="'.$players[$i][0].'"> '.$players[$i][1].'</span><br>
-              '.LANG_PLAYERSTATS_D.'<br>
-              <span class="badge badge-pill badge-'.$leaguecolor.'">'.$players[$i][3].'+'.$players[$i][4].'</span></p>
+             <div class="col text-center mb-3">
+              <div class="card h-100">
+                <div class="card-header p-fluid font-weight-bold p-1">
+                  <img class="flag-iihf '.$players[$i][0].'-small" src="/images/blank.png" alt="'.$players[$i][0].'"> '.$players[$i][1].'
+                </div>
+                <div class="card-body">
+                  <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/includes/player_photo.php?name='.$players[$i][1].'" class="lazy rounded-circle img-thumbnail" style="width:100px; height:100px; max-width:100px;">
+                  <p class="p-fluid">'.LANG_PLAYERSTATS_D.'<br>
+                  <span class="badge badge-pill badge-'.$leaguecolor.'">'.$players[$i][3].'+'.$players[$i][4].'</span></p>
+                </div>
+                <div class="footer">
+                  '.(in_array($players[$i][0], $exc) ? '<span data-toggle="tooltip" data-placement="bottom" title="Momentálne sa nedá vymeniť. Hrá zápas."><a href="#" class="btn btn-sm btn-block btn-secondary disabled"><i class="fas fa-ban"></i></a></span>':'<a href="#" class="btn btn-sm btn-block btn-light change-player" data-pid="'.$players[$i][8].'" data-toggle="tooltip" data-placement="bottom" title="Vymeniť hráča"><i class="fas fa-retweet"></i></a>').'
+                </div>
+              </div>
              </div>';
             $i++;
             }
@@ -405,13 +432,21 @@ if($params[0]=="picks")
         </div>
         <h5 class="card-title text-'.$leaguecolor.' h5-fluid">'.LANG_TEAMSTATS_GOALIES.'</h5>
         <div class="row">
-          <div class="col text-center">
-            <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/images/vlajky/'.$players[9][0].'_big.gif" class="lazy rounded-circle img-thumbnail" style="width:100px; height:100px; max-width:100px;">
-            <p class="p-fluid"><span class="font-weight-bold">'.$players[9][1].'</span><br>
-            <span class="badge badge-pill badge-'.$leaguecolor.'">'.$players[$i][6].' '.LANG_MATCHES_WINS1.'</span><br>
-            <span class="badge badge-pill badge-'.$leaguecolor.'">'.$players[$i][7].' '.LANG_FANTASY_SO.'</span>
-            '.$butt.'</p>
+         <div class="col text-center mb-3">
+          <div class="card h-100">
+            <div class="card-header p-fluid font-weight-bold p-1">
+              '.$players[9][1].'
+            </div>
+            <div class="card-body">
+              <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/images/vlajky/'.$players[9][0].'_big.gif" class="lazy rounded-circle img-thumbnail" style="width:100px; height:100px; max-width:100px;">
+              <p class="p-fluid">'.LANG_PLAYERSTATS_GK.'<br>
+                <span class="badge badge-pill badge-'.$leaguecolor.'">'.$players[$i][6].' '.LANG_MATCHES_WINS1.'</span><br>
+                <span class="badge badge-pill badge-'.$leaguecolor.'">'.$players[$i][7].' '.LANG_FANTASY_SO.'</span>
+              </p>
+            </div>
           </div>
+         </div>
+         
         </div>
       </div>
     </div>';

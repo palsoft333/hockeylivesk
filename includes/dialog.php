@@ -12,7 +12,87 @@ else {
 
 $uid = $_SESSION['logged'];
 
-// registracia do fantasy
+// vymena hraca vo Fantasy Championship
+if($_GET[action]=="change")
+  {
+  // vymena potvrdena
+  if($_GET[action]=="change" && $_GET[newpid] && $_GET[oldpid])
+    {
+    $newpid = mysql_real_escape_string($_GET['newpid']);
+    $oldpid = mysql_real_escape_string($_GET['oldpid']);
+    $q = MySQL_Query("SELECT f.*, p.name, p.pos, p.goals, p.asists, p.points, p.league FROM `ft_players` f LEFT JOIN 2004players p ON p.id=f.pid WHERE pid='$oldpid' && uid='$uid'");
+    if(mysql_num_rows($q)>0)
+      {
+      $f = mysql_fetch_array($q);
+      $w = MySQL_Query("SELECT * FROM 2004players WHERE id='".$newpid."'");
+      $e = mysql_fetch_array($w);
+      if($e[points]<=$f[points]) {
+        mysql_query("UPDATE ft_players SET pid='".$newpid."' WHERE pid='".$oldpid."' && uid='$uid'");
+        mysql_query("INSERT INTO ft_changes (uid, old_pid, new_pid) VALUES ('$uid', '$oldpid', '$newpid')");
+        $headers = 'From: '.SITE_MAIL. "\r\n" .
+            'Reply-To: '.SITE_MAIL. "\r\n" .
+            'X-Mailer: PHP/' . phpversion();
+        $count++;
+        mail(ADMIN_MAIL, "Vymenený hráč", "user ID: ".$uid.". Starý hráč: ".$f[name].", Nový hráč: ".$e[name], $headers);
+        echo "ok";
+        }
+      }
+    }
+  else
+    {
+    $pid = mysql_real_escape_string($_GET['pid']);
+    $q = MySQL_Query("SELECT f.*, p.name, p.pos, p.goals, p.asists, p.points, p.league FROM `ft_players` f LEFT JOIN 2004players p ON p.id=f.pid WHERE pid='$pid' && uid='$uid'");
+    $f = mysql_fetch_array($q);
+    echo '
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="dialogTitle">Výmena hráča</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="'.LANG_CLOSE.'">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body text-center">
+          <p class="font-weight-bold h5 h5-fluid">'.$f[name].'</p>
+          <img src="/includes/player_photo.php?name='.$f[name].'" class="rounded-circle img-thumbnail" style="width:100px; height:100px;">
+          <p>
+            Nazbieral bodov: <strong>'.$f[points].'</strong> ('.$f[goals].'G + '.$f[asists].'A)
+          </p>
+          <p>Vybrať si môžete hráča, ktorý nazbieral rovnako, alebo menej bodov:</p>
+            <select name="newpid" id="newpid" size="1" class="custom-select">
+              <option value="0">Vyberte si nového hráča:</option>';
+              $dnes = date("Y-m-d", mktime());
+              $excl = mysql_query("SELECT * FROM `2004matches` WHERE datetime > '$dnes 00:00:00' && datetime < now() && kedy='na programe' && league='".$f[league]."'");
+              while($exclude = mysql_fetch_array($excl))
+                {
+                $exc[] = $exclude[team1short];
+                $exc[] = $exclude[team2short];
+                }
+              if($f[pos]=="D" || $f[pos]=="LD" || $f[pos]=="RD") $pos="D";
+              if($f[pos]=="F" || $f[pos]=="CE" || $f[pos]=="RW" || $f[pos]=="LW") $pos="F";
+              $w = MySQL_Query("SELECT * FROM 2004players WHERE league='".$f[league]."' && pos='".$pos."' && id NOT IN (SELECT pid FROM ft_players) && points<=".$f[points]." ORDER BY teamlong, name");
+              $teampred = "";
+              while($e = mysql_fetch_array($w))
+                {
+                if($teampred!=$e[teamlong]) echo '<optgroup label="'.$e[teamlong].'">';
+                if(in_array($e[teamshort], $exc)) $dis=' disabled style="color:#d8d8d8;"';
+                else $dis='';
+                echo '<option value="'.$e[id].'"'.$dis.'>('.$e[points].'b) '.$e[name].''.($dis!='' ? ' (práve hrá)':'').'</option>';
+                $teampred = $e[teamlong];
+                }
+              echo '</optgroup></select>
+          <input type="hidden" name="oldpid" id="oldpid" value="'.$pid.'">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">'.LANG_CLOSE.'</button>
+          <button type="button" class="btn btn-hl change">Vymeniť</button>
+        </div>
+      </div>
+    </div>';
+    }
+  }
+
+// registracia do Fantasy KHL
 if($_GET[action]=="signin")
   {
   $lid = mysql_real_escape_string($_GET['lid']);
@@ -21,7 +101,7 @@ if($_GET[action]=="signin")
   echo "ok";
   }
 
-// kupa hraca vo fantasy a cennik
+// kupa hraca vo Fantasy KHL a cennik
 if($_GET[action]=="buy" || $_GET[action]=="pricelist")
   {
   // tim vybrany, vyber hraca
@@ -157,7 +237,7 @@ ORDER BY zor ASC, price DESC");
     </div>';
     }
   }
-// predaj hraca vo fantasy
+// predaj hraca vo Fantasy KHL
 elseif($_GET[action]=="sell")
   {
   // predaj potvrdeny
@@ -231,7 +311,7 @@ elseif($_GET[action]=="sell")
     </div>';
     }
   }
-// predaj celeho timu
+// predaj celeho timu vo Fantasy KHL
 elseif($_GET[action]=="sellteam")
   {
   // predaj potvrdeny
@@ -285,7 +365,7 @@ elseif($_GET[action]=="sellteam")
     </div>';
     }
   }
-// automaticke doplnenie hracov
+// automaticke doplnenie hracov vo Fantasy KHL
 elseif($_GET[action]=="automat")
   {
   // doplnenie potvrdene
