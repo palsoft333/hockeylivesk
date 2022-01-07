@@ -974,6 +974,284 @@ $script_end = '<script type="text/javascript">
 } );
 </script>';
   }
+// najlepsi strelci
+elseif($_GET[shooters])
+  {
+  $title = LANG_PLAYERS_SHOOTERSTITLE;
+  $leaguecolor = "hl";
+
+    if(!$_POST[league]) {
+        $_POST[ok]=1;
+        $m = MySQL_Query("SELECT * FROM 2004leagues WHERE el='1' && active='1' ORDER BY id ASC LIMIT 1");
+        $n = mysql_fetch_array($m);
+        $_POST[league]=$n[id];
+    }
+
+    if($_POST[ok]) {
+        $league = $_POST[league];
+        $p = mysql_query("SELECT * FROM 2004leagues WHERE id='$league'");
+        $po = mysql_fetch_array($p);
+
+        $content .= "
+               <i class='float-left h1 h1-fluid ll-".LeagueFont($po[longname])." text-gray-600 mr-1'></i>
+               <h1 class='h3 h3-fluid mb-1'>".LANG_PLAYERS_SHOOTERSTITLE."</h1>
+               <h2 class='h6 h6-fluid text-".$leaguecolor." text-uppercase font-weight-bold mb-3'>".$po[longname]."</h2>
+                <div class='row'>
+                    <div class='col-12' style='max-width: 1000px;'>";
+
+        // playoff
+        if($po[endbasic]==1) {
+            $po_teams = "";
+            $poteams = mysql_query("SELECT * FROM el_playoff WHERE played='0' && league='$league'");
+            while($pot = mysql_fetch_array($poteams)) {
+                $po_teams .= "teamshort='$pot[team1]' || teamshort='$pot[team2]' || ";
+            }
+            $po_teams = substr($po_teams, 0, -4);
+            $q = MySQL_Query("SELECT et.*, COUNT(et.goaler) as poc, DATE_FORMAT(et.datetime, '%e.%c.%Y') as datum, ft.injury FROM (SELECT el_goals.*, dt.datetime FROM el_goals JOIN (SELECT * FROM el_matches WHERE league='$league' && kedy='konečný stav' ORDER BY id ASC)dt ON dt.id=el_goals.matchno WHERE goaler!='' && time<'60.00' && ($po_teams) GROUP BY el_goals.goaler, el_goals.matchno ORDER BY datetime DESC)et LEFT JOIN(SELECT name, injury FROM el_injuries WHERE league='$league')ft ON et.goaler=ft.name WHERE ft.injury IS NULL GROUP BY et.goaler ORDER BY poc DESC LIMIT 20");
+        }
+        // non-playoff
+        else {
+            $q = MySQL_Query("SELECT et.*, COUNT(et.goaler) as poc, DATE_FORMAT(et.datetime, '%e.%c.%Y') as datum, ft.injury FROM (SELECT el_goals.*, dt.datetime FROM el_goals JOIN (SELECT * FROM el_matches WHERE league='$league' && kedy='konečný stav' ORDER BY id ASC)dt ON dt.id=el_goals.matchno WHERE goaler!='' && time<'60.00' GROUP BY el_goals.goaler, el_goals.matchno ORDER BY datetime DESC)et LEFT JOIN(SELECT name, injury FROM el_injuries WHERE league='$league')ft ON et.goaler=ft.name WHERE ft.injury IS NULL GROUP BY et.goaler ORDER BY poc DESC LIMIT 20");
+            $q1 = MySQL_Query("SELECT *, el_players.name as name, ft.injury FROM el_players LEFT JOIN(SELECT name, injury FROM el_injuries WHERE league='$league')ft ON el_players.name=ft.name WHERE ft.injury IS NULL && league='$league' GROUP BY el_players.name ORDER BY points DESC LIMIT 20");
+        }
+        
+        $e = MySQL_Query("SELECT DATE_FORMAT(tstamp, '%e.%c.%Y o %k:%i') as datum FROM el_matches WHERE league='$league' ORDER BY tstamp DESC LIMIT 1");
+        $r = mysql_fetch_array($e);
+        
+        $dat = explode(" o ",$r[datum]);
+        if($dat[0]==date("j.n.Y")) $r[datum]="dnes o $dat[1]";
+        if($dat[0]==date("j.n.Y", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")))) $r[datum]="včera o $dat[1]";
+
+        $content .= "
+    <div class='alert alert-info'>
+        <p class='p-fluid'><i class='fas fa-question-circle mr-2'></i>".LANG_PLAYERS_SHOOTERSTEXT1."</p>
+        <p class='p-fluid'>".LANG_PLAYERS_SHOOTERSTEXT2."</p>
+        <p class='text-xs m-0'>".LANG_PLAYERS_NOTES.":<br>
+            <hr class='mt-0'>
+            <ul class='text-xs'>
+                <li>".sprintf(LANG_PLAYERS_NOTE1, "<b>".$r[datum]."</b>")."</li>
+                <li>".LANG_PLAYERS_NOTE2."</li>
+            </ul>
+        </p>
+    </div>
+
+    <form name='form' method='post' action='/shooters' enctype='multipart/form-data' class='text-center mb-4'>".LANG_BETS_SHOWFOR.": 
+        <select name='league' size='1' class='custom-select custom-select-sm w-auto ml-2'>";
+        $uloha1 = MySQL_Query("SELECT * FROM 2004leagues WHERE el='1' && active='1' ORDER BY id ASC");
+        while($data1 = MySQL_Fetch_Array($uloha1)) {
+            if($data1[id]==$_POST[league]) $sel=" selected";
+            else $sel="";
+            $content .= "<option value='$data1[id]'$sel>$data1[longname]</option>";
+        }
+        $content .= "
+        </select>
+        <input type='submit' name='ok' value='OK' class='btn btn-primary btn-sm'>
+    </form>
+
+    <div class='card my-4 shadow animated--grow-in'>
+        <div class='card-header'>
+            <h6 class='m-0 font-weight-bold text-".$leaguecolor."'>
+                ".LANG_PLAYERS_BESTSHOOTERS."
+                <span class='swipe d-none float-right text-gray-800'><i class='fas fa-hand-point-up'></i> <i class='fas fa-exchange-alt align-text-top text-xs'></i></span>
+            </h6>
+        </div>
+        <div class='card-body p-fluid'>
+
+        <ul class='nav nav-tabs' id='myTab' role='tablist'>
+            <li class='nav-item'>
+                <a class='nav-link active' id='goals-tab' data-toggle='tab' href='#goals-panel' role='tab' aria-controls='goals' aria-selected='true'>".LANG_TEAMSTATS_GOALS."</a>
+            </li>
+            <li class='nav-item'>
+                <a class='nav-link' id='points-tab' data-toggle='tab' href='#points-panel' role='tab' aria-controls='points' aria-selected='false'>".LANG_PLAYERS_CANPOINTS."</a>
+            </li>
+        </ul>
+
+        <div class='tab-content' id='myTabContent'>
+            <div class='tab-pane fade show active' id='goals-panel' role='tabpanel' aria-labelledby='goals-tab'>
+                <table class='table table-striped table-hover table-sm table-responsive-sm w-100 border'>
+                    <thead>
+                        <tr>
+                            <th class='mdl-data-table__cell--non-numeric'>".LANG_PLAYERSTATS_TEAM."</th>
+                            <th class='mdl-data-table__cell--non-numeric'>".LANG_PLAYERDB_PLAYER."</th>
+                            <th class='mdl-data-table__cell--non-numeric'>".LANG_PLAYERS_SCORED."</th>
+                            <th class='mdl-data-table__cell--non-numeric'>".LANG_PLAYERS_LASTTIME."</th>
+                            <th class='mdl-data-table__cell--non-numeric'>".LANG_MATCHES_STREAK."</th>
+                            <th class='mdl-data-table__cell--numeric'>".LANG_PLAYERS_RATE."</th>
+                        </tr>
+                    </thead>
+                    <tbody>";
+
+  $kurzy = utf8_encode(file_get_contents('strelci_kurzy.xml'));
+  
+  $i=0;
+  while($f = mysql_fetch_array($q))
+    {
+    $j=0;
+    $dal=$nedal=0;
+    $times = mysql_query("SELECT * FROM el_matches WHERE league='$league' && kedy='konečný stav' && (team1short='$f[teamshort]' || team2short='$f[teamshort]') ORDER BY datetime DESC");
+    $kol = mysql_num_rows($times);
+    while($j < mysql_num_rows($times))
+      {
+      $w = mysql_fetch_array($times);
+      $jetam = mysql_query("SELECT * FROM el_goals WHERE matchno='$w[id]' && goaler='$f[goaler]' && time<'60.00' LIMIT 1");
+      if(mysql_num_rows($jetam)>0) 
+         {
+         if($j==0) $dal++;
+         else 
+            {
+            if($dal>0) $dal++;
+            else break;
+            }
+         }
+      else
+         {
+         if($j==0) $nedal++;
+         else 
+            {
+            if($nedal>0) $nedal++;
+            else break;
+            }
+         }
+      $j++;
+      }
+    if($dal > $nedal) $hl = sprintf(LANG_PLAYERS_SCOREDTIMES, $dal);
+    if($nedal > $dal) 
+      {
+      if($nedal > 3) $hl = "<font color='red'><b>".sprintf(LANG_PLAYERS_NOTSCOREDTIMES, $nedal)."</b></font>";
+      else $hl = sprintf(LANG_PLAYERS_NOTSCOREDTIMES, $nedal);
+      }
+    if($f[datum]==date("j.n.Y")) $f[datum]="<b>".LANG_TIME_TODAY."</b>";
+    if($f[datum]==date("j.n.Y", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")))) $f[datum]="<b>".LANG_TIME_YESTERDAY."</b>";
+    $pom = round(($f[poc]/$kol)*100,1);
+    
+    // prehladanie kurzov zo suboru
+    $odd="";
+    if($pos = stripos($kurzy, "Góly ".$f[goaler]." do rozhodnutia|"))
+      {
+      $pos2 = strpos($kurzy, "<br>",$pos);
+      $odd = substr($kurzy, $pos, $pos2-$pos);
+      $odd = explode("|", $odd);
+      $odd = $odd[1];
+      }
+
+    $content .= "<tr>
+                    <td class='mdl-data-table__cell--non-numeric'><img class='flag-el $f[teamshort]-small' src='/images/blank.png' alt='$f[teamlong]'> $f[teamlong]</td>
+                    <td class='mdl-data-table__cell--non-numeric'>$f[goaler]$injury</td>
+                    <td class='mdl-data-table__cell--non-numeric'>$f[poc]/$kol ($pom%)</td>
+                    <td class='mdl-data-table__cell--non-numeric'>$f[datum]</td>
+                    <td class='mdl-data-table__cell--non-numeric'>$hl</td>
+                    <td class='mdl-data-table__cell--numeric'>$odd</td>
+                </tr>";
+    $i++;
+    } 
+
+    $content .= "</tbody>
+    </table>
+  </div>
+
+  <div class='tab-pane fade' id='points-panel' role='tabpanel' aria-labelledby='points-tab'>
+     <table class='table table-striped table-hover table-sm table-responsive-sm w-100 border'>
+        <thead>
+            <tr>
+                <th class='mdl-data-table__cell--non-numeric'>".LANG_PLAYERSTATS_TEAM."</th>
+                <th class='mdl-data-table__cell--non-numeric'>".LANG_PLAYERDB_PLAYER."</th>
+                <th class='mdl-data-table__cell--non-numeric'>".LANG_PLAYERS_POINTS."</th>
+                <th class='mdl-data-table__cell--non-numeric'>".LANG_PLAYERS_LASTTIME."</th>
+                <th class='mdl-data-table__cell--non-numeric'>".LANG_MATCHES_STREAK."</th>
+                <th class='mdl-data-table__cell--numeric'>".LANG_PLAYERS_RATE."</th>
+            </tr>
+        </thead>
+        <tbody>";
+ 
+  $i=0;
+  while($p = mysql_fetch_array($q1))
+    {
+    $j=0;
+    $dal=$nedal=0;
+    $times = mysql_query("SELECT * FROM el_matches WHERE league='$league' && kedy='konečný stav' && (team1short='$p[teamshort]' || team2short='$p[teamshort]') ORDER BY datetime DESC");
+    $kol = mysql_num_rows($times);
+    while($j < mysql_num_rows($times))
+      {
+      $w = mysql_fetch_array($times);
+      $jetam = mysql_query("SELECT * FROM el_goals WHERE matchno='$w[id]' && (goaler='$p[name]' || asister1='$p[name]' || asister2='$p[name]') && time<'60.00' LIMIT 1");
+      if(mysql_num_rows($jetam)>0) 
+         {
+         if($j==0) $dal++;
+         else 
+            {
+            if($dal>0) $dal++;
+            else break;
+            }
+         }
+      else
+         {
+         if($j==0) $nedal++;
+         else 
+            {
+            if($nedal>0) $nedal++;
+            else break;
+            }
+         }
+      $j++;
+      }
+    if($dal > $nedal) $hl = sprintf(LANG_PLAYERS_POINTSTIMES, $dal);
+    if($nedal > $dal) 
+      {
+      if($nedal > 3) $hl = "<font color='red'><b>".sprintf(LANG_PLAYERS_NOTPOINTSTIMES, $nedal)."</b></font>";
+      else $hl = sprintf(LANG_PLAYERS_NOTPOINTSTIMES, $nedal);
+      }
+    if($p[datum]==date("j.n.Y")) $p[datum]="<b>".LANG_TIME_TODAY."</b>";
+    if($p[datum]==date("j.n.Y", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")))) $p[datum]="<b>".LANG_TIME_YESTERDAY."</b>";
+    $pom = round(($p[points]/$kol)*100,1);
+    
+    // prehladanie kurzov zo suboru
+    $odd="";
+    if($pos = stripos($kurzy, "Kanadské body ".$p[name]." do rozhodnutia|"))
+      {
+      $pos2 = strpos($kurzy, "<br>",$pos);
+      $odd = substr($kurzy, $pos, $pos2-$pos);
+      $odd = explode("|", $odd);
+      $odd = $odd[1];
+      }
+
+    $content .= "<tr>
+                    <td class='mdl-data-table__cell--non-numeric'><img class='flag-el $p[teamshort]-small' src='/images/blank.png' alt='$p[teamlong]'> $p[teamlong]</td>
+                    <td class='mdl-data-table__cell--non-numeric'>$p[name]$injury</td>
+                    <td class='mdl-data-table__cell--non-numeric'>$p[points]/$kol ($pom%)</td>
+                    <td class='mdl-data-table__cell--non-numeric'>$p[datum]</td>
+                    <td class='mdl-data-table__cell--non-numeric'>$hl</td>
+                    <td class='mdl-data-table__cell--numeric'>$odd</td>
+                </tr>";
+    $i++;
+    } 
+
+    $content .=  "</tbody>
+    </table>
+  </div>
+</div>
+	
+    </div> <!-- end card-body -->
+    </div> <!-- end card -->";
+    }
+
+    $content .= '  
+    </div> <!-- end col -->
+    <div class="col-auto flex-grow-1 flex-shrink-1 d-none d-xl-block">
+            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8860983069832222"
+                crossorigin="anonymous"></script>
+            <!-- HL reklama na podstránkach XL zariadenie -->
+            <ins class="adsbygoogle"
+                style="display:block"
+                data-ad-client="ca-pub-8860983069832222"
+                data-ad-slot="3044717777"
+                data-ad-format="auto"
+                data-full-width-responsive="true"></ins>
+            <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+    </div> <!-- end col -->
+    </div> <!-- end row -->';
+  }
 // nebol vybrany ziaden hrac
 else
   {

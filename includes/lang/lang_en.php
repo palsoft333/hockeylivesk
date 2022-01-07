@@ -18,6 +18,8 @@ define("LANG_TIME_HOURS","hours");
 define("LANG_TIME_MINUTES","minutes");
 define("LANG_TIME_SECONDS","seconds");
 define("LANG_TIME_RIGHTNOW","just now");
+define("LANG_TIME_TODAY","today");
+define("LANG_TIME_YESTERDAY","yesterday");
 
 define("LANG_AUTHOR","Author");
 define("LANG_CATEGORY","Category");
@@ -269,6 +271,22 @@ define("LANG_PLAYERS_INJURED","Injured");
 define("LANG_PLAYERS_LASTPOTW","Player of the week last on");
 define("LANG_PLAYERS_LASTPOTWTEXT","%s in a jersey of %s with"); // *20.11.2020 v drese HC Slovan Bratislava s bilanciou* 5 bodov
 define("LANG_PLAYERS_TRANSFERSTITLE","List of last transfers in the league");
+define("LANG_PLAYERS_SHOOTERSTITLE","Betting tool");
+define("LANG_PLAYERS_SHOOTERSTEXT1","If you are interested in betting on hockey games or individual goal scorers, this tool will definitely come in handy for you. In order to find that some of the top scorers have not scored or recorder a point for a longer time, we have compiled a table of top scorers from each league and highlighted those who have not scored a goal at least 4 games in a row, so there is a good chance they could score in the next game.");
+define("LANG_PLAYERS_SHOOTERSTEXT2","For inspiration, we also present the latest odds from the betting company Tipsport, which indicate the odds for a given shooter / point scorer.");
+define("LANG_PLAYERS_NOTES","Notes");
+define("LANG_PLAYERS_NOTE1","The last games for this league were calculated %s. All games played after this time are not included yet!"); // %s = dnes o 7:20
+define("LANG_PLAYERS_NOTE2","The odds for shooters are updated daily at <b>7:00</b>, <b>11:00</b> and <b>16:00</b> CET from the betting company Tipsport.sk.");
+define("LANG_PLAYERS_BESTSHOOTERS","Top scorers of the league");
+define("LANG_PLAYERS_CANPOINTS","Points");
+define("LANG_PLAYERS_SCORED","Scored");
+define("LANG_PLAYERS_LASTTIME","Last time");
+define("LANG_PLAYERS_RATE","Odds");
+define("LANG_PLAYERS_SCOREDTIMES","scored %dx in a row"); // dal 2x po sebe
+define("LANG_PLAYERS_NOTSCOREDTIMES","didn't score %dx in a row"); // nedal 2x po sebe
+define("LANG_PLAYERS_POINTS","Recorded a point");
+define("LANG_PLAYERS_POINTSTIMES","recorded a point %dx in a row"); // bodoval 2x po sebe
+define("LANG_PLAYERS_NOTPOINTSTIMES","didn't record a point %dx in a row"); // nebodoval 2x po sebe
 
 define("LANG_BETS_BEST","Best betters");
 define("LANG_BETS_SHOWFOR","Show for league");
@@ -302,6 +320,7 @@ define("LANG_OTHER_GAMES_LIVE","Other games");
 define("LANG_NAV_HOME","Home");
 define("LANG_NAV_MAINPAGE","Main page");
 define("LANG_NAV_PLAYERDB","Player database");
+define("LANG_NAV_SHOOTERS","Shooters");
 define("LANG_NAV_IMPERSSUM","Contact");
 define("LANG_NAV_LIVE","LIVE commentary");
 define("LANG_NAV_NEWS","News");
@@ -475,7 +494,7 @@ define("LANG_FANTASY_GOAL",'Goal');
 define("LANG_FANTASY_ASSIST",'Assist');
 define("LANG_FANTASY_GKWIN",'Goalies win');
 define("LANG_FANTASY_GKSO",'Goalies shutout');
-define("LANG_FANTASY_CHANGEPLAYERS",'You can change players during a tournament for a player who has scored <b>as many or fewer points</b>. If you would like to make such a change, please email us at %s');
+define("LANG_FANTASY_CHANGEPLAYERS",'You can change players during a tournament for a player who has scored <b>as many or fewer points</b>. If you would like to make such a change, click on an arrow icon in your roster card');
 define("LANG_FANTASY_TEAMOFMANAGER",'Team of manager');
 define("LANG_FANTASY_ORDEROFMANAGERS",'Order of managers');
 define("LANG_FANTASY_RANK",'Rank');

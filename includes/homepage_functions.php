@@ -331,9 +331,9 @@ function Favourite_Team() {
 UNION
 SELECT team1short, team1long, team2short, team2long, goals1, goals2, kedy, datetime FROM `2004matches` WHERE (team1short='".$f[user_favteam]."' || team2short='".$f[user_favteam]."') && datetime > NOW()
 ORDER BY datetime LIMIT 1");
-    $e = mysql_query("SELECT team1short, team1long, team2short, team2long, goals1, goals2, kedy, datetime FROM `el_matches` WHERE (team1short='".$f[user_favteam]."' || team2short='".$f[user_favteam]."') && datetime < NOW()
+    $e = mysql_query("SELECT team1short, team1long, team2short, team2long, goals1, goals2, kedy, datetime FROM `el_matches` WHERE (team1short='".$f[user_favteam]."' || team2short='".$f[user_favteam]."') && datetime < NOW() && kedy='konečný stav'
 UNION
-SELECT team1short, team1long, team2short, team2long, goals1, goals2, kedy, datetime FROM `2004matches` WHERE (team1short='".$f[user_favteam]."' || team2short='".$f[user_favteam]."') && datetime < NOW()
+SELECT team1short, team1long, team2short, team2long, goals1, goals2, kedy, datetime FROM `2004matches` WHERE (team1short='".$f[user_favteam]."' || team2short='".$f[user_favteam]."') && datetime < NOW() && kedy='konečný stav'
 ORDER BY datetime DESC LIMIT 1");
     $favteam = '<div class="card shadow py-2 mb-4">
                   <div class="card-body">
@@ -769,7 +769,7 @@ function gotd()
   $gotdid = ComputeGOTD();
   
   $gotd = '<div class="card border-left-primary shadow h-100 py-2">
-            <div class="card-body">
+            <div class="card-body d-flex flex-column">
               <div class="row no-gutters align-items-center">
                 <div class="col mr-2">
                   <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">'.LANG_CARDS_GOTD.'</div>
@@ -780,31 +780,57 @@ function gotd()
               </div>';
   
   if($gotdid[0]!=0)
-    {
-    if($gotdid[1]==1)
-      {
-      $gotq = mysql_query("SELECT m.*, DATE_FORMAT(m.datetime, '%e.%c.%Y o %H:%i') as datum, t1.id as t1id, t2.id as t2id, t1.longname as t1long, t2.longname as t2long FROM el_matches m LEFT JOIN el_teams t1 ON t1.shortname=m.team1short && t1.league=m.league LEFT JOIN el_teams t2 ON t2.shortname=m.team2short && t2.league=m.league WHERE m.id='".$gotdid[0]."'");
-      $g = mysql_query("SELECT count(id) as poc, ROUND(sum(tip1)/count(id),2) as vys1, ROUND(sum(tip2)/count(id),2) as vys2 FROM el_tips WHERE matchid='".$gotdid[0]."'");
-      $k = mysql_query("select userid, komentar, dt.uname as nick from el_tips JOIN (SELECT uid, uname FROM e_xoops_users)dt ON dt.uid=userid where length(komentar) = (select max(length(komentar)) from el_tips WHERE matchid='$gotdid[0]') && matchid='$gotdid[0]'");
-      $l = mysql_fetch_array($k);
-      }
-    else 
-      {
-      $gotq = mysql_query("SELECT m.*, DATE_FORMAT(m.datetime, '%e.%c.%Y o %H:%i') as datum, t1.id as t1id, t2.id as t2id, t1.longname as t1long, t2.longname as t2long FROM 2004matches m LEFT JOIN 2004teams t1 ON t1.shortname=m.team1short && t1.league=m.league LEFT JOIN 2004teams t2 ON t2.shortname=m.team2short && t2.league=m.league WHERE m.id='".$gotdid[0]."'");
-      $g = mysql_query("SELECT count(id) as poc, ROUND(sum(tip1)/count(id),2) as vys1, ROUND(sum(tip2)/count(id),2) as vys2 FROM 2004tips WHERE matchid='".$gotdid[0]."'");
-      $k = mysql_query("select userid, komentar, dt.uname as nick from 2004tips JOIN (SELECT uid, uname FROM e_xoops_users)dt ON dt.uid=userid where length(komentar) = (select max(length(komentar)) from 2004tips WHERE matchid='$gotdid[0]') && matchid='$gotdid[0]'");
-      $l = mysql_fetch_array($k);
-      $st = " shadow-sm";
-      }
-    $gotf = mysql_fetch_array($gotq);
-    $h = mysql_fetch_array($g);
-    
-    if($gotdid[1]==1) { $mtable = "el_matches"; $ttable = "el_teams"; }
-    else { $mtable = "2004matches"; $ttable = "2004teams"; }
-    $q = mysql_query("SELECT m.*, DATE_FORMAT(m.datetime, '%e.%c.%Y o %k:%i') as datum, t1.id as t1id, t2.id as t2id, t1.longname as t1long, t2.longname as t2long FROM $mtable m LEFT JOIN $ttable t1 ON t1.shortname=m.team1short && t1.league=m.league LEFT JOIN $ttable t2 ON t2.shortname=m.team2short && t2.league=m.league WHERE m.id='".$gotdid[0]."'");
+    {   
+    if($gotdid[1]==1) { $mtable = "el_matches"; $ttable = "el_teams"; $st=""; }
+    else { $mtable = "2004matches"; $ttable = "2004teams"; $st = " shadow-sm"; }
+    $q = mysql_query("SELECT m.*, DATE_FORMAT(m.datetime, '%e.%c.%Y o %k:%i') as datum, t1.id as t1id, t2.id as t2id, t1.longname as t1long, t2.longname as t2long, l.longname as league_name FROM $mtable m LEFT JOIN $ttable t1 ON t1.shortname=m.team1short && t1.league=m.league LEFT JOIN $ttable t2 ON t2.shortname=m.team2short && t2.league=m.league LEFT JOIN 2004leagues l ON l.id=m.league WHERE m.id='".$gotdid[0]."'");
     
     $gotf = mysql_fetch_array($q);
-    if($gotdid[1]==1) $g = mysql_query("SELECT count(id) as poc, ROUND(sum(tip1)/count(id),2) as vys1, ROUND(sum(tip2)/count(id),2) as vys2 FROM el_tips WHERE matchid='".$gotdid[0]."'");
+    if($gotdid[1]==1) {
+      $g = mysql_query("SELECT count(id) as poc, ROUND(sum(tip1)/count(id),2) as vys1, ROUND(sum(tip2)/count(id),2) as vys2 FROM el_tips WHERE matchid='".$gotdid[0]."'");
+      // slovaci v akcii
+      include('slovaks.php');
+      $nhl_players=$slovaks;
+      $nhl_goalies=$brankari;
+      include('slovaki.php');
+      $khl_players=$slovaks;
+      $khl_goalies=$brankari;
+      $slov = "";
+      if(strstr($gotf[league_name], 'NHL') || strstr($gotf[league_name], 'KHL'))
+        {
+        $tran1 = $tran2 = array();
+        if(date("n")<8) {
+          $rok = date("Y")-1;
+          $season_start = $rok."-01-08";
+          }
+        else $season_start = date("Y")."-01-08";
+        $tr = mysql_query("SELECT from_team, pname FROM transfers WHERE (from_team='".$gotf[team1short]."' || from_team='".$gotf[team2short]."') && datetime>'".$season_start."'");
+        while($tra = mysql_fetch_array($tr))
+          {
+          if($tra[from_team]==$gotf[team1short]) $tran1[] = $tra[pname];
+          if($tra[from_team]==$gotf[team2short]) $tran2[] = $tra[pname];
+          }
+        if(strstr($gotf[league_name], 'NHL')) { $slovaks = $nhl_players; $brankari = $nhl_goalies; }
+        if(strstr($gotf[league_name], 'KHL')) { $slovaks = $khl_players; $brankari = $khl_goalies; }
+        $pia1 = array_keys($slovaks, $gotf[team1short]);
+        $gia1 = array_keys($brankari, $gotf[team1short]);
+        $inaction1 = array_merge($pia1, $gia1);
+        if(count($zra)>0) $inaction1 = array_diff($inaction1, $zra);
+        if(count($tran1)>0) $inaction1 = array_diff($inaction1, $tran1);
+        $inaction1 = array_values($inaction1);
+        $pia2 = array_keys($slovaks, $gotf[team2short]);
+        $gia2 = array_keys($brankari, $gotf[team2short]);
+        $inaction2 = array_merge($pia2, $gia2);
+        if(count($zra)>0) $inaction2 = array_diff($inaction2, $zra);
+        if(count($tran2)>0) $inaction2 = array_diff($inaction2, $tran2);
+        $inaction2 = array_values($inaction2);
+        if(count($inaction1)>0 || count($inaction2)>0)
+          {
+          $c = count($inaction1)+count($inaction2);
+          $slov = '<p class="m-0"><span class="font-weight-bold">'.LANG_MATCHES_SLOVAKS.':</span> '.(count($inaction1)>0 ? implode(", ",$inaction1):'').(count($inaction2)>0 ? (count($inaction1)>0 ? ', '.implode(", ",$inaction2):implode(", ",$inaction2)):'').'</p>';
+          }
+        }
+    }
     else $g = mysql_query("SELECT count(id) as poc, ROUND(sum(tip1)/count(id),2) as vys1, ROUND(sum(tip2)/count(id),2) as vys2 FROM 2004tips WHERE matchid='".$gotdid[0]."'");
     $h = mysql_fetch_array($g);
     if($gotdid[1]==1) $k = mysql_query("select userid, komentar, dt.uname as nick from el_tips JOIN (SELECT uid, uname FROM e_xoops_users)dt ON dt.uid=userid where length(komentar) = (select max(length(komentar)) from el_tips WHERE matchid='$gotdid[0]') && matchid='$gotdid[0]'");
@@ -828,8 +854,9 @@ function gotd()
                     <p class="m-0"><span class="font-weight-bold">'.LIVE_GAME_START.':</span> '.$gotf[datum].'</p>
                     <p class="m-0"><span class="font-weight-bold">'.LANG_MATCHES_AVGBET.':</span> '.$h[vys1].' : '.$h[vys2].'</p>
                     <p class="m-0"><span class="font-weight-bold">'.LANG_MATCHES_BETS.':</span> '.$h[poc].'</p>
+                    '.$slov.'
                   </div>
-                  <div class="text-center">
+                  <div class="align-items-end d-flex flex-fill justify-content-center">
                     <a href="/'.($gotf[active]==1 ? 'report':'game').'/'.$gotf[id].$gotdid[1].'-'.SEOtitle($gotf[team1long].' vs '.$gotf[team2long]).'" class="btn btn-light btn-icon-split">
                       <span class="icon text-gray-600">
                         <i class="fas fa-search"></i>

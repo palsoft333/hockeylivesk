@@ -230,6 +230,11 @@ else mysql_query("UPDATE e_xoops_users SET last_login='".mktime()."' WHERE uid='
           <span><? echo LANG_NAV_PLAYERDB; ?></span></a>
       </li>
 
+      <li class="nav-item<? if($_GET[p]=="players" && $_GET[shooters]) echo " active"; ?>">
+        <a class="nav-link" href="/shooters">
+          <span><? echo LANG_NAV_SHOOTERS; ?></span></a>
+      </li>
+
       <!-- Divider -->
       <hr class="sidebar-divider d-none d-md-block">
       

@@ -17,6 +17,8 @@ define("LANG_TIME_HOURS","hodinami");
 define("LANG_TIME_MINUTES","minútami");
 define("LANG_TIME_SECONDS","sekundami");
 define("LANG_TIME_RIGHTNOW","práve teraz");
+define("LANG_TIME_TODAY","dnes");
+define("LANG_TIME_YESTERDAY","včera");
 
 define("LANG_AUTHOR","Autor");
 define("LANG_CATEGORY","Sekcia");
@@ -268,6 +270,22 @@ define("LANG_PLAYERS_INJURED","Zranený");
 define("LANG_PLAYERS_LASTPOTW","Naposledy hráčom týždňa");
 define("LANG_PLAYERS_LASTPOTWTEXT","%s v drese %s s bilanciou"); // *20.11.2020 v drese HC Slovan Bratislava s bilanciou* 5 bodov
 define("LANG_PLAYERS_TRANSFERSTITLE","Zoznam posledných prestupov v lige");
+define("LANG_PLAYERS_SHOOTERSTITLE","Pomôcka pre stávkarov");
+define("LANG_PLAYERS_SHOOTERSTEXT1","Ak sa zaujímate o stávkovanie na hokejové zápasy, či jednotlivých strelcov gólov, táto pomôcka vám príde určite vhod. Aby sme mohli skonštatovať, že niektorí z najlepších strelcov už dlho neskóroval, prípadne nebodoval, zostrojili sme tabuľku najlepších strelcov z každej ligy a zvýraznili tých, ktorí nestrelili gól aspoň 4 zápasy po sebe, čiže je veľká šanca, že by mohli skórovať v najbližšom zápase.");
+define("LANG_PLAYERS_SHOOTERSTEXT2","Pre inšpiráciu uvádzame aj najnovšie kurzy zo stávkovej spoločnosti Tipsport, ktoré udávajú kurz na daného strelca / bodovača.");
+define("LANG_PLAYERS_NOTES","Poznámky");
+define("LANG_PLAYERS_NOTE1","Naposledy boli zarátané zápasy tejto ligy %s. Všetky zápasy odohrané po tomto čase ešte nie sú zarátané!"); // %s = dnes o 7:20
+define("LANG_PLAYERS_NOTE2","Kurzy strelcov sa aktualizujú denne o <b>7:00</b>, <b>11:00</b> a <b>16:00</b> zo stávkovej kancelárie Tipsport.sk.");
+define("LANG_PLAYERS_BESTSHOOTERS","Najlepší strelci ligy");
+define("LANG_PLAYERS_CANPOINTS","Kanadské body");
+define("LANG_PLAYERS_SCORED","Dal gól v zápase");
+define("LANG_PLAYERS_LASTTIME","Naposledy");
+define("LANG_PLAYERS_RATE","Kurz");
+define("LANG_PLAYERS_SCOREDTIMES","dal %dx po sebe"); // dal 2x po sebe
+define("LANG_PLAYERS_NOTSCOREDTIMES","nedal %dx po sebe"); // nedal 2x po sebe
+define("LANG_PLAYERS_POINTS","Bodoval v zápase");
+define("LANG_PLAYERS_POINTSTIMES","bodoval %dx po sebe"); // bodoval 2x po sebe
+define("LANG_PLAYERS_NOTPOINTSTIMES","nebodoval %dx po sebe"); // nebodoval 2x po sebe
 
 define("LANG_BETS_BEST","Tabuľka najlepších");
 define("LANG_BETS_SHOWFOR","Zobraziť pre ligu");
@@ -292,7 +310,7 @@ define("LANG_BETS_HOWWESCORE5","<b>1 bod</b> ak nie je splnená ani jedna z vyš
 define("LANG_BETS_FORWHAT","O čo hráme?");
 define("LANG_BETS_FORWHATTEXT","Po výhre v jednej z vyhlásených súťaží v danej sezóne si môžete vybrať jednu z nasledujúcich vecných cien:");
 define("LANG_BETS_GOTOPROFILE","Prejsť na profil užívateľa %s");
-define("LANG_BETS_BUYMEABEERTEXT","Ak sa vám naše %s páči, kúpte nám pivo:<br><a href='https://www.buymeacoffee.com/palsoft'><img src='https://img.buymeacoffee.com/button-api/?text=%s&emoji=🍺&slug=palsoft&button_colour=%s&font_colour=000000&font_family=Poppins&outline_colour=000000&coffee_colour=ffffff' class='my-1'></a><br>Aj v budúcnosti tak budeme môcť pre našich výhercov prinášať vecné ceny do šúťaží, za čo vám ďakujeme.");
+define("LANG_BETS_BUYMEABEERTEXT","Ak sa vám naše %s páči, kúpte nám pivo:<br><a href='https://www.buymeacoffee.com/palsoft'><img src='https://img.buymeacoffee.com/button-api/?text=%s&emoji=🍺&slug=palsoft&button_colour=%s&font_colour=000000&font_family=Poppins&outline_colour=000000&coffee_colour=ffffff' class='my-1 img-fluid'></a><br>Aj v budúcnosti tak budeme môcť pre našich výhercov prinášať vecné ceny do šúťaží, za čo vám ďakujeme.");
 define("LANG_BETS_BUYMEABEER","Kúpte nám pivo");
 
 define("LANG_GOTOTOP","^ na vrch");
@@ -301,6 +319,7 @@ define("LANG_OTHER_GAMES_LIVE","Ostatné stretnutia");
 define("LANG_NAV_HOME","Domov");
 define("LANG_NAV_MAINPAGE","Hlavná stránka");
 define("LANG_NAV_PLAYERDB","Databáza hráčov");
+define("LANG_NAV_SHOOTERS","Strelci");
 define("LANG_NAV_IMPERSSUM","Kontakt");
 define("LANG_NAV_LIVE","LIVE komentár");
 define("LANG_NAV_NEWS","Novinky");
@@ -474,7 +493,7 @@ define("LANG_FANTASY_GOAL",'Gól');
 define("LANG_FANTASY_ASSIST",'Asistencia');
 define("LANG_FANTASY_GKWIN",'Výhra brankárov');
 define("LANG_FANTASY_GKSO",'Čisté konto brankárov');
-define("LANG_FANTASY_CHANGEPLAYERS",'Hráčov si môžete počas priebehu turnaja vymeniť za takého hráča, ktorý nahral <b>rovnako alebo menej bodov</b>. Ak chcete takúto zmenu vykonať, napíšte nám ju do %s mailu');
+define("LANG_FANTASY_CHANGEPLAYERS",'Hráčov si môžete počas priebehu turnaja vymeniť za takého hráča, ktorý nahral <b>rovnako alebo menej bodov</b>. Ak chcete takúto zmenu vykonať, kliknite na šípku výmeny v karte svojej zostavy');
 define("LANG_FANTASY_TEAMOFMANAGER",'Tím manažéra');
 define("LANG_FANTASY_ORDEROFMANAGERS",'Vylosované poradie manažérov');
 define("LANG_FANTASY_RANK",'Por.');
