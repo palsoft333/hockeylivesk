@@ -75,8 +75,8 @@ UNION
           if($tra[from_team]==$f[team1short]) $tran1[] = $tra[pname];
           if($tra[from_team]==$f[team2short]) $tran2[] = $tra[pname];
           }
-        if(strstr($f[longname], 'NHL')) { $slovaks = $nhl_players; $brankari = $nhl_goalies; }
         if(strstr($f[longname], 'KHL')) { $slovaks = $khl_players; $brankari = $khl_goalies; }
+        if(strstr($f[longname], 'NHL')) { $slovaks = $nhl_players; $brankari = $nhl_goalies; }
         $pia1 = array_keys($slovaks, $f[team1short]);
         $gia1 = array_keys($brankari, $f[team1short]);
         $inaction1 = array_merge($pia1, $gia1);
@@ -647,7 +647,7 @@ function ComputePOTW() {
 
 /*
 * Funkcia pre výpočet zápasu dňa
-* version: 1.5.0 (23.11.2015 - funguje na základe starej verzie - prenesené do novej)
+* version: 2.0.0 (13.1.2022 - prekopaná stará verzia funkcie)
 * @return $gotdid array (matchid, el)
 */
 
@@ -660,101 +660,163 @@ function ComputeGOTD()
     $f = mysql_fetch_array($z);
     $gotdid = array($f[matchid], $f[el]);
     }
-  else
-    {
-    $teraz = date("Y-m-d", mktime ());
-    $a = mysql_query("SELECT dt.*, et.position FROM ((SELECT team1long, team2long, datetime, league FROM 2004matches WHERE datetime LIKE '$teraz%') UNION (SELECT team1long, team2long, datetime, league FROM el_matches WHERE datetime LIKE '$teraz%') ORDER BY datetime ASC)dt JOIN (SELECT id, position FROM 2004leagues)et ON et.id=dt.league ORDER BY et.position LIMIT 1");
-    if(mysql_num_rows($a)==0) 
-      {
-      $teraz2 = date("Y-m-d H:i:s", mktime ());
-      $a = mysql_query("SELECT dt.*, et.position FROM ((SELECT team1long, team2long, datetime, league FROM 2004matches WHERE datetime > '$teraz') UNION (SELECT team1long, team2long, datetime, league FROM el_matches WHERE datetime > '$teraz') ORDER BY datetime ASC)dt JOIN (SELECT id, position FROM 2004leagues)et ON et.id=dt.league ORDER BY dt.datetime, et.position LIMIT 1");
-      }
+  else {
+    // vybrat dnesnu najdolezitejsiu ligu v poradi TURNAJ -> EXTRALIGA -> NHL -> KHL
+    $dnes = date("Y-m-d", mktime());
+    $zajtra = date('Y-m-d', mktime(0, 0, 0, date('m'), date('d')+1, date('Y')));
+    $a = mysql_query("SELECT dt.*, et.zor FROM ((SELECT team1long, team2long, datetime, league FROM 2004matches WHERE datetime > '$dnes 07:00:00' && datetime < '$zajtra 07:00:00') UNION (SELECT team1long, team2long, datetime, league FROM el_matches WHERE datetime > '$dnes 07:00:00' && datetime < '$zajtra 07:00:00') ORDER BY datetime ASC)dt JOIN (SELECT id, IF(el=0,1,IF(topic_id=60,2,IF(topic_id=68,3,IF(topic_id=71,4,0)))) as zor FROM 2004leagues)et ON et.id=dt.league ORDER BY et.zor LIMIT 1;");
     $f = mysql_fetch_array($a);
     $lid = $f[league];
 
     // zistenie ci sa jedna o EL
     $q = mysql_query("SELECT * FROM 2004leagues WHERE id='$lid'");
-    $f = mysql_fetch_array($q); 
+    $f = mysql_fetch_array($q);
     $teraz = date("Y-m-d H:i:s", mktime ());
     // JEDNA SA O EL
     if($f[el]==1)
       {
-      $teamtable = "el_teams";
-      if($f[active]==1) $a = mysql_query("SELECT * FROM el_matches WHERE datetime >= '$teraz' && league='$lid' ORDER BY datetime ASC LIMIT 0,1");
-      else $a = mysql_query("SELECT * FROM el_matches WHERE kolo='1' && league='$lid' ORDER BY datetime ASC LIMIT 0,1");
-      $b = mysql_fetch_array($a);
-      $act_round = $b[kolo];
-      $teraz = date("Y-m-d", mktime ());
-      if($act_round==0) $e = mysql_query("SELECT * FROM el_matches WHERE kolo='0' && datetime LIKE '$teraz%' && league='$lid' ORDER BY datetime ASC");
-      else $e = mysql_query("SELECT * FROM el_matches WHERE kolo='$act_round' && league='$lid' ORDER BY datetime ASC");
-      $el=1;
-      }
-    // NEJEDNA SA O EL
-    else 
-      {
-      $teamtable = "2004teams";
-      if(!$_GET[sel])
-        {
-        $a = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
-        $a = mysql_query("SELECT DATE_FORMAT(datetime, '%Y-%m-%d') as datum FROM 2004matches WHERE league='$lid' GROUP BY datum ORDER BY datetime ASC LIMIT 1");
-        $b = mysql_fetch_array($a);
-        $_GET[sel] = $b[datum];
+      if(date("n")<8) {
+        $rok = date("Y")-1;
+        $season_start = $rok."-01-08";
         }
-      else
-        {
-        $a = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
-        $a = mysql_query("SELECT DATE_FORMAT(datetime, '%Y-%m-%d') as datum FROM 2004matches WHERE league='$lid'  && datetime LIKE '$_GET[sel]%' GROUP BY datum ORDER BY datetime ASC LIMIT 1");
-        $b = mysql_fetch_array($a);
+      else $season_start = date("Y")."-01-08";
+      include('slovaks.php');
+      $nhl_players=$slovaks;
+      $nhl_goalies=$brankari;
+      include('slovaki.php');
+      $khl_players=$slovaks;
+      $khl_goalies=$brankari;
+      $a = mysql_query("SELECT * FROM el_matches WHERE datetime > '$dnes 07:00:00' && datetime < '$zajtra 07:00:00' && league='$lid'");
+      if($f[topic_id]==68 || $f[topic_id]==71) {
+        // NHL a KHL
+        if($f[topic_id]==68) { $slovaks = $nhl_players; $brankari = $nhl_goalies; }
+        if($f[topic_id]==71) { $slovaks = $khl_players; $brankari = $khl_goalies; }
+        $games_with_slovaks = array();
+        while($b = mysql_fetch_array($a)) {
+          $tran1 = $tran2 = array();
+          $tr = mysql_query("SELECT from_team, pname FROM transfers WHERE (from_team='".$b[team1short]."' || from_team='".$b[team2short]."') && datetime>'".$season_start."'");
+          while($tra = mysql_fetch_array($tr))
+            {
+            if($tra[from_team]==$b[team1short]) $tran1[] = $tra[pname];
+            if($tra[from_team]==$b[team2short]) $tran2[] = $tra[pname];
+            }
+          $pia1 = array_keys($slovaks, $b[team1short]);
+          $gia1 = array_keys($brankari, $b[team1short]);
+          $inaction1 = array_merge($pia1, $gia1);
+          if(count($zra)>0) $inaction1 = array_diff($inaction1, $zra);
+          if(count($tran1)>0) $inaction1 = array_diff($inaction1, $tran1);
+          $inaction1 = array_values($inaction1);
+          $pia2 = array_keys($slovaks, $b[team2short]);
+          $gia2 = array_keys($brankari, $b[team2short]);
+          $inaction2 = array_merge($pia2, $gia2);
+          if(count($zra)>0) $inaction2 = array_diff($inaction2, $zra);
+          if(count($tran2)>0) $inaction2 = array_diff($inaction2, $tran2);
+          $inaction2 = array_values($inaction2);
+          $slovaks_sum = count($inaction1)+count($inaction2);
+          if($slovaks_sum>0) $games_with_slovaks[] = $b[id];
         }
-      $da = explode("-", $b[datum]);
-      $hl = "hrací deň - $da[2].$da[1].";
-      if(!$uid) $e = mysql_query("SELECT id, team1short, team1long, team2short, team2long, goals1, goals2, pp1, pp2, kedy, t1_pres, t2_pres, goal, datetime, NULL as kolo, next_refresh, league, active, NULL as tip1, NULL as tip2 FROM 2004matches WHERE league='$lid' && datetime LIKE '$_GET[sel]%' ORDER BY datetime ASC");
-      else $e = mysql_query("SELECT 2004matches.id, 2004matches.team1short, 2004matches.team1long, 2004matches.team2short, 2004matches.team2long, 2004matches.goals1, 2004matches.goals2, 2004matches.pp1, 2004matches.pp2, 2004matches.kedy, 2004matches.t1_pres, 2004matches.t2_pres, 2004matches.goal, 2004matches.datetime, NULL as kolo, 2004matches.next_refresh, 2004matches.league, 2004matches.active, dt.tip1, dt.tip2 FROM 2004matches LEFT JOIN (SELECT matchid, userid, tip1, tip2 FROM 2004tips WHERE userid='$uid')dt ON (dt.matchid=2004matches.id) WHERE league='$lid' && datetime LIKE '$_GET[sel]%' ORDER BY datetime ASC");
-      $el=0;
+        if(count($games_with_slovaks)>0) {
+          // vyber lubovolny zapas so slovakmi
+          $rand = array_rand($games_with_slovaks, 1);
+          $gotdid = array($games_with_slovaks[$rand], 1);
+        }
+        else {
+          // vyber lubovolny zapas dna
+          $a = mysql_query("SELECT * FROM el_matches WHERE datetime > '$dnes 07:00:00' && datetime < '$zajtra 07:00:00' && league='$lid' ORDER BY rand() LIMIT 1");
+          $b = mysql_fetch_array($a);
+          $gotdid = array($b[id], 1);
+        }
       }
-    // VYPIS ZAPASOV
-    $k=0;
-    while(list($mid,$t1s, $t1l, $t2s, $t2l, $g1, $g2, $pp1, $pp2, $kedy, $pres1, $pres2, $goal, $datetime, $kolo,  $next_refresh, $league, $act, $tip1, $tip2) = mysql_fetch_array($e)) 
-      {
-      $i=0;
-      $tim = mysql_query("SELECT *, goals-ga as diff FROM $teamtable WHERE league='$lid' ORDER BY body desc, diff desc, goals desc, wins desc, losts asc, ties desc");
-      while($i < mysql_num_rows($tim))
-        {
-        $ti = mysql_fetch_array($tim);
-        if($t1s==$ti[shortname])
+      else {
+        // EXTRALIGA
+        $k=0;
+        while($b = mysql_fetch_array($a)) 
           {
-          $t1p=$i+1;
-          break;
+          $i=0;
+          $tim = mysql_query("SELECT *, goals-ga as diff FROM el_teams WHERE league='$lid' ORDER BY body desc, diff desc, goals desc, wins desc, losts asc, ties desc");
+          while($i < mysql_num_rows($tim))
+            {
+            $ti = mysql_fetch_array($tim);
+            if($b[team1short]==$ti[shortname])
+              {
+              $t1p=$i+1;
+              break;
+              }
+            $i++;
+            }
+          $j=0;
+          $tim = mysql_query("SELECT *, goals-ga as diff FROM el_teams WHERE league='$lid' ORDER BY body desc, diff desc, goals desc, wins desc, losts asc, ties desc");
+          while($j < mysql_num_rows($tim))
+            {
+            $ti = mysql_fetch_array($tim);
+            if($b[team2short]==$ti[shortname])
+              {
+              $t2p=$j+1;
+              break;
+              }
+            $j++;
+            }
+          $rozdiel = abs($t1p-$t2p);
+          $pozicia = round(($t1p+$t2p)/2, 1);
+          $vysl = round(($rozdiel+$pozicia)/2, 1);
+          $cis[$k] = array($vysl, $b[id], 1);
+          $k++;
           }
-        $i++;
-        }
-      $j=0;
-      $tim = mysql_query("SELECT *, goals-ga as diff FROM $teamtable WHERE league='$lid' ORDER BY body desc, diff desc, goals desc, wins desc, losts asc, ties desc");
-      while($j < mysql_num_rows($tim))
-        {
-        $ti = mysql_fetch_array($tim);
-        if($t2s==$ti[shortname])
-          {
-          $t2p=$j+1;
-          break;
-          }
-        $j++;
-        }
-      $rozdiel = abs($t1p-$t2p);
-      $pozicia = round(($t1p+$t2p)/2, 1);
-      $vysl = round(($rozdiel+$pozicia)/2, 1);
-      $cis[$k] = array($vysl, $mid, $f[el]);
-      $k++;
+      sort($cis);
+      $gotdid = array($cis[0][1], 1);
       }
-
-    sort($cis);
-
-    $teraz = date("Y-m-d", mktime ());
-    mysql_query("INSERT INTO gotd (datetime, matchid, el) VALUES ('$teraz', '".$cis[0][1]."', '$f[el]')");
-    $gotdid = array($cis[0][1], $f[el]);
     }
-  return $gotdid;
+    // NEJEDNA SA O EL
+    else {
+      $a = mysql_query("SELECT * FROM 2004matches WHERE datetime > '$dnes 07:00:00' && datetime < '$zajtra 07:00:00' && league='$lid' && (team1short='SVK' || team2short='SVK')");
+      if(mysql_num_rows($a)>0) {
+        // hra Slovensko
+        $b = mysql_fetch_array($a);
+        $gotdid = array($b[id], 0);
+      }
+      else {
+        // nehra Slovensko
+        $a = mysql_query("SELECT * FROM 2004matches WHERE datetime > '$dnes 07:00:00' && datetime < '$zajtra 07:00:00' && league='$lid'");
+        $k=0;
+        while($b = mysql_fetch_array($a)) 
+          {
+          $i=0;
+          $tim = mysql_query("SELECT *, goals-ga as diff FROM 2004teams WHERE league='$lid' ORDER BY body desc, diff desc, goals desc, wins desc, losts asc, ties desc");
+          while($i < mysql_num_rows($tim))
+            {
+            $ti = mysql_fetch_array($tim);
+            if($b[team1short]==$ti[shortname])
+              {
+              $t1p=$i+1;
+              break;
+              }
+            $i++;
+            }
+          $j=0;
+          $tim = mysql_query("SELECT *, goals-ga as diff FROM 2004teams WHERE league='$lid' ORDER BY body desc, diff desc, goals desc, wins desc, losts asc, ties desc");
+          while($j < mysql_num_rows($tim))
+            {
+            $ti = mysql_fetch_array($tim);
+            if($b[team2short]==$ti[shortname])
+              {
+              $t2p=$j+1;
+              break;
+              }
+            $j++;
+            }
+          $rozdiel = abs($t1p-$t2p);
+          $pozicia = round(($t1p+$t2p)/2, 1);
+          $vysl = round(($rozdiel+$pozicia)/2, 1);
+          $cis[$k] = array($vysl, $b[id], 1);
+          $k++;
+          }
+        sort($cis);
+        $gotdid = array($cis[0][1], 0);
+      }
+    }
   }
+  return $gotdid;
+}
 
 /*
 * Funkcia pre zobrazenie zápasu dňa
