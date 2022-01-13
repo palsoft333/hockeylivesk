@@ -286,6 +286,7 @@ define("LANG_PLAYERS_NOTSCOREDTIMES","nedal %dx po sebe"); // nedal 2x po sebe
 define("LANG_PLAYERS_POINTS","Bodoval v zápase");
 define("LANG_PLAYERS_POINTSTIMES","bodoval %dx po sebe"); // bodoval 2x po sebe
 define("LANG_PLAYERS_NOTPOINTSTIMES","nebodoval %dx po sebe"); // nebodoval 2x po sebe
+define("LANG_PLAYERS_INJUREDSINCE","Zranený od");
 
 define("LANG_BETS_BEST","Tabuľka najlepších");
 define("LANG_BETS_SHOWFOR","Zobraziť pre ligu");

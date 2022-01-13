@@ -224,13 +224,14 @@ elseif($iid)
                     <th style="width:11%;">'.LANG_PLAYERSTATS_TEAM.'</th>
                     <th style="width:25%;">'.LANG_TEAMSTATS_NAME.'</th>
                     <th class="text-center" style="width:12%;">'.LANG_PLAYERSTATS_POS.'</th>
-                    <th style="width:50%;">'.LANG_PLAYERS_INJURY.'</th>
+                    <th style="width:30%;">'.LANG_PLAYERS_INJURY.'</th>
+                    <th style="width:20%;">'.LANG_PLAYERS_INJUREDSINCE.'</th>
                 </tr>
               </thead>
               <tbody>';
 
   $r = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
-	$r = mysql_query("SELECT *, et.id as pid, et.pos as pos FROM el_injuries JOIN(SELECT name, id, pos FROM el_players WHERE league='$lid' GROUP BY name)et ON el_injuries.name=et.name WHERE league='$lid' ORDER BY teamshort ASC, et.name ASC");
+	$r = mysql_query("SELECT i.*, et.id as pid, et.pos as pos, max(d.msg_date) as date_from FROM el_injuries i JOIN(SELECT name, id, pos FROM el_players WHERE league='$lid' GROUP BY name)et ON i.name=et.name LEFT JOIN 2004playerdiary d ON d.name=i.name && d.msg_type='7' WHERE i.league='$lid' GROUP BY i.name ORDER BY i.teamshort ASC, et.name ASC");
 		
 		$p=1;
 while ($t = mysql_fetch_array($r))
@@ -239,9 +240,10 @@ while ($t = mysql_fetch_array($r))
 	$content .= ' <tr>
                   <td class="text-center" style="width:2%;">'.$p.'.</td>
                   <td style="width:11%;" class="text-nowrap"><img class="flag-el '.$t[teamshort].'-small" src="/images/blank.png" alt="'.$t[teamshort].'"> '.$t[teamshort].'</td>
-                  <td style="width:25%;" class="text-nowrap"><a href="/player/'.$t[id].'1-'.SEOTitle($t[name]).'">'.$t[name].'</a></td>
+                  <td style="width:25%;" class="text-nowrap"><a href="/player/'.$t[pid].'1-'.SEOTitle($t[name]).'">'.$t[name].'</a></td>
                   <td class="text-center" style="width:12%;">'.$t[pos].'</td>
-                  <td style="width:50%;" class="text-nowrap">'.$t[injury].'</td>
+                  <td style="width:30%;" class="text-nowrap">'.$t[injury].'</td>
+                  <td style="width:20%;" class="text-nowrap">'.date("j.n.Y", strtotime($t[date_from])).'</td>
                 </tr>';
       $p++;
       }

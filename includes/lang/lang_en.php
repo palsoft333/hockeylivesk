@@ -287,6 +287,7 @@ define("LANG_PLAYERS_NOTSCOREDTIMES","didn't score %dx in a row"); // nedal 2x p
 define("LANG_PLAYERS_POINTS","Recorded a point");
 define("LANG_PLAYERS_POINTSTIMES","recorded a point %dx in a row"); // bodoval 2x po sebe
 define("LANG_PLAYERS_NOTPOINTSTIMES","didn't record a point %dx in a row"); // nebodoval 2x po sebe
+define("LANG_PLAYERS_INJUREDSINCE","Injured since");
 
 define("LANG_BETS_BEST","Best betters");
 define("LANG_BETS_SHOWFOR","Show for league");

@@ -198,7 +198,7 @@ ORDER BY zor ASC, price DESC");
       }
     if(mysql_num_rows($tod)>0)
       {
-      $excl = mysql_query("SELECT * FROM `el_matches` WHERE datetime > '$dnes 07:00:00' && datetime < now() && league='$lid'");
+      $excl = mysql_query("SELECT * FROM `el_matches` WHERE datetime > '$dnes 07:00:00' && datetime < now() && kedy!='konečný stav' && league='$lid'");
       while($exclude = mysql_fetch_array($excl))
         {
         $exc[] = $exclude[team1short];
