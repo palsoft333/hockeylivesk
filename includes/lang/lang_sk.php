@@ -537,6 +537,7 @@ define("LANG_FANTASY_PICKSTITLE3",'Vaše draftové výbery');
 define("LANG_FANTASY_ONLYFROMROSTERS",'Zostavy tímov na %s sú známe. Draft povoľuje vybrať hráčov iba zo <a href="/news/%d" class="alert-link">známych zostáv</a>');
 define("LANG_FANTASY_ONLYFROMDB1",'Zostavy tímov pre %s budú známe neskôr. Draftujte hráčov, o ktorých si myslíte, že by sa mohli zúčastniť.');
 define("LANG_FANTASY_PICKPLACEHOLDER",'Začnite písať meno hráča...');
+define("LANG_FANTASY_ALREADYTOOLTIP",'Zistili sme, že tento hráč by mohol byť draftovaný iným manažérom pred Vami. Odporúčame vymeniť si ho.');
 
 define("LANG_PARTNERS_TITLE",'Partneri');
 define("LANG_PARTNERS_TEXT",'Partneri nášho portálu sú zoradení podľa toho, koľko návštevníkom pomohli poukázať na našu stránku. Za to im úprimne ďakujeme a dúfame, že naši užívatelia si takisto nájdu cestu k nim pomocou týchto odkazov.');

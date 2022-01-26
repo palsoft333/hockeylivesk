@@ -401,7 +401,7 @@ else mysql_query("UPDATE e_xoops_users SET last_login='".mktime()."' WHERE uid='
   <script src="/vendor/jquery-easing/jquery.easing.min.js"></script>
 
   <!-- Custom scripts for all pages-->
-  <script src="/js/jquery-ui.min.js?v=1.13.0"></script>
+  <script src="/js/jquery-ui.min.js?v=1.13.1"></script>
   <script src="/js/jquery.lazy.min.js"></script>
   <script src="/js/main.min.js?v=1.2.2"></script>
 <? 
@@ -464,11 +464,11 @@ if($_GET[p]=="stats" || $_GET[p]=="players" || $_GET[p]=="teams" || $_GET[p]=="b
 echo $script_end;
 ?>
   <link href="/vendor/fontawesome-free/css/all.min.css?v=5.13.0" rel="stylesheet" type="text/css">
-  <link href="/css/league-logos.css?v=1.0.6" rel="stylesheet" type="text/css">
+  <link href="/css/league-logos.css?v=1.0.7" rel="stylesheet" type="text/css">
   <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
 
   <link href="/css/template.min.css?v=1.0.2" rel="stylesheet">
-  <link href="/css/main.css?v=1.2.5" rel="stylesheet">
+  <link href="/css/main.css?v=1.2.6" rel="stylesheet">
 </body>
 
 </html>

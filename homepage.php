@@ -86,8 +86,22 @@
           <!-- Page Heading -->
           <div class="d-flex align-items-center justify-content-between mb-4">
             <h1 class="d-none d-lg-block h3 mb-0 text-gray-800"><? echo LANG_NAV_NEWS; ?></h1>
-            <div class="banner468x60"><a href="http://www.autodielyonline24.sk/"><img src="/images/autodielyonline24_468x60.gif" width="100%" border="0" alt="AUTOdielyonline24.sk" title="Lacné náhradne diely a autosúčiastky online ."></a></div>
-            <div class="d-none d-lg-block col-3"></div>
+            <div class="banner468x60">
+            <!--<div class="banner468x60 col-12 col-xl-5">-->
+                <!--<a href="http://www.autodielyonline24.sk/"><img src="/images/autodielyonline24_468x60.gif" width="100%" border="0" alt="AUTOdielyonline24.sk" title="Lacné náhradne diely a autosúčiastky online ."></a>-->
+                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8860983069832222"
+                    crossorigin="anonymous"></script>
+                <!-- HL hlavná stránka top -->
+                <ins class="adsbygoogle"
+                    style="display:inline-block;width:728px;height:90px"
+                    data-ad-client="ca-pub-8860983069832222"
+                    data-ad-slot="8007937220"></ins>
+                <script>
+                    (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+            </div>
+            <!--<div class="d-none d-lg-block col-3"></div>-->
+            <div class="d-none d-lg-block"></div>
           </div>
 
           <!-- Content Row -->

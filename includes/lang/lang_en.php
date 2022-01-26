@@ -538,6 +538,7 @@ define("LANG_FANTASY_PICKSTITLE3",'Your draft picks');
 define("LANG_FANTASY_ONLYFROMROSTERS",'Team lineups for %s are known. Draft allows you to select players only from <a href="/news/%d" class="alert-link">known lineups</a>');
 define("LANG_FANTASY_ONLYFROMDB1",'Team lineups for %s will be known later. Draft players you think could participate.');
 define("LANG_FANTASY_PICKPLACEHOLDER",'Start typing the player\'s name...');
+define("LANG_FANTASY_ALREADYTOOLTIP",'We have detected that this player could be drafted by another manager before you. We recommend replacing him.');
 
 define("LANG_PARTNERS_TITLE",'Partners');
 define("LANG_PARTNERS_TEXT",'Partners of our portal are ranked according to how many visitors they helped point to our site. We cannot thank them enough for this and hope that our users will also find their way to their sites using these links.');

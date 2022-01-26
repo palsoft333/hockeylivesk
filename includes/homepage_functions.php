@@ -639,6 +639,8 @@ function ComputePOTW() {
     if($stats[0][7]==1) $e = mysql_query("SELECT * FROM el_players WHERE league='".$stats[0][3]."' && name='".$stats[0][5]."' ORDER BY id DESC LIMIT 1");
     else $e = mysql_query("SELECT * FROM 2004players WHERE league='".$stats[0][3]."' && name='".$stats[0][5]."' ORDER BY id DESC LIMIT 1");
     $r = mysql_fetch_array($e);
+    if($stats[0][1]=="") $stats[0][1]=0;
+    if($stats[0][2]=="") $stats[0][2]=0;
     mysql_query("INSERT INTO potw (datetime, pid, el, g, a) VALUES ('$teraz', '".$r[id]."', '".$stats[0][7]."', '".$stats[0][1]."', '".$stats[0][2]."')");
     $potwdata = array($r[id], $stats[0][7], $stats[0][1], $stats[0][2]);
     }
@@ -665,6 +667,14 @@ function ComputeGOTD()
     $dnes = date("Y-m-d", mktime());
     $zajtra = date('Y-m-d', mktime(0, 0, 0, date('m'), date('d')+1, date('Y')));
     $a = mysql_query("SELECT dt.*, et.zor FROM ((SELECT team1long, team2long, datetime, league FROM 2004matches WHERE datetime > '$dnes 07:00:00' && datetime < '$zajtra 07:00:00') UNION (SELECT team1long, team2long, datetime, league FROM el_matches WHERE datetime > '$dnes 07:00:00' && datetime < '$zajtra 07:00:00') ORDER BY datetime ASC)dt JOIN (SELECT id, IF(el=0,1,IF(topic_id=60,2,IF(topic_id=68,3,IF(topic_id=71,4,0)))) as zor FROM 2004leagues)et ON et.id=dt.league ORDER BY et.zor LIMIT 1;");
+    if(mysql_num_rows($a)==0) {
+      // nehra sa, najdi najblizsi hraci den
+      $ne = mysql_query("SELECT datetime FROM el_matches WHERE datetime > '$dnes 07:00:00' UNION SELECT datetime FROM 2004matches WHERE datetime > '$dnes 07:00:00' LIMIT 1");
+      $nea = mysql_fetch_array($ne);
+      $dnes = date("Y-m-d", strtotime($nea[datetime]));
+      $zajtra = date('Y-m-d', strtotime($nea[datetime])+86400);
+      $a = mysql_query("SELECT dt.*, et.zor FROM ((SELECT team1long, team2long, datetime, league FROM 2004matches WHERE datetime > '$dnes 07:00:00' && datetime < '$zajtra 07:00:00') UNION (SELECT team1long, team2long, datetime, league FROM el_matches WHERE datetime > '$dnes 07:00:00' && datetime < '$zajtra 07:00:00') ORDER BY datetime ASC)dt JOIN (SELECT id, IF(el=0,1,IF(topic_id=60,2,IF(topic_id=68,3,IF(topic_id=71,4,0)))) as zor FROM 2004leagues)et ON et.id=dt.league ORDER BY et.zor LIMIT 1;");
+    }
     $f = mysql_fetch_array($a);
     $lid = $f[league];
 
@@ -814,6 +824,7 @@ function ComputeGOTD()
         $gotdid = array($cis[0][1], 0);
       }
     }
+  mysql_query("INSERT INTO gotd (datetime, matchid, el) VALUES ('$dnes', '".$gotdid[0]."', '".$gotdid[1]."')");
   }
   return $gotdid;
 }

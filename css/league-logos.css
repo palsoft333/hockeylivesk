@@ -67,3 +67,13 @@
 .ll-dcup:before { content: '\e805'; } /* '' */
 .ll-kauflandcup:before { content: '\e806'; } /* '' */
 .ll-arosa:before { content: '\e807'; } /* '' */
+
+.sidebar .ll-olympics {
+    font-size: 50% !important;
+    margin-right: 0.75rem !important;
+}
+
+.sidebar.toggled .ll-olympics {
+    font-size: 70% !important;
+    margin-right: 0.75rem !important;
+}

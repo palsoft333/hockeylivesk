@@ -171,7 +171,7 @@ function Get_Table($lid, $params, $table_type, $sim, $pos=false) {
   // KHL
   if(strstr($vyb[longname], 'KHL'))
     {
-    $games_total = 60;
+    $games_total = 56;
     $playoff_line = 8;
     $wpoints = $vyb[points];
     $playoff_wins = 4;
@@ -371,15 +371,19 @@ function Render_Table($table_name, $league_data, $table_type, $teams, $wpoints, 
       $osmy = mysql_fetch_array($osm);
       
       if(strstr($league_data[longname], 'NHL')) $lim=3;
-      else $lim=1;
+      else $lim=0;
       
-      $uloha = mysql_query("(SELECT dt.* FROM ((SELECT *, goals-ga as diff, 1 as leader FROM $teams_table WHERE league='$lid' && shortname IN(\"".implode('","',$div1)."\") ORDER BY $orderby LIMIT $lim)
+      if(strstr($league_data[longname], 'NHL')) $uloha = mysql_query("(SELECT dt.* FROM ((SELECT *, goals-ga as diff, 1 as leader FROM $teams_table WHERE league='$lid' && shortname IN(\"".implode('","',$div1)."\") ORDER BY $orderby LIMIT $lim)
 UNION
 (SELECT *, goals-ga as diff, 1 as leader FROM $teams_table WHERE league='$lid' && shortname IN(\"".implode('","',$div2)."\") ORDER BY $orderby LIMIT $lim))dt)
 UNION
 (SELECT *, goals-ga as diff, 2 as leader FROM $teams_table WHERE league='$lid' && shortname IN(\"".implode('","',$div1)."\") ORDER BY $orderby LIMIT $lim,$div1_count)
 UNION
 (SELECT *, goals-ga as diff, 2 as leader FROM $teams_table WHERE league='$lid' && shortname IN(\"".implode('","',$div2)."\") ORDER BY $orderby LIMIT $lim,$div2_count)
+ORDER BY leader asc, $orderby");
+      else $uloha = mysql_query("(SELECT *, goals-ga as diff, 2 as leader, ($games_total-zapasov)*$wpoints+body as points_doable FROM $teams_table WHERE league='$lid' && shortname IN(\"".implode('","',$div1)."\") ORDER BY $orderby)
+UNION
+(SELECT *, goals-ga as diff, 2 as leader, ($games_total-zapasov)*$wpoints+body as points_doable FROM $teams_table WHERE league='$lid' && shortname IN(\"".implode('","',$div2)."\") ORDER BY $orderby)
 ORDER BY leader asc, $orderby");
       $out = Insert_to_table($table_name, $uloha, $league_data, $show_clinch, $playoff_line, $sim, $deviaty, $osmy, $games_total, $wpoints);
       }

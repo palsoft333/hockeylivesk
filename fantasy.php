@@ -1,18 +1,18 @@
 <?php
 $params = explode("/", htmlspecialchars($_GET[id]));
 
-$nazov = "Fantasy Junior Championship";
-$menu = "MS U20 2022";
-$skratka = "MS U20";
+$nazov = "Fantasy Olympics";
+$menu = "ZOH 2022";
+$skratka = "ZOH";
 $manazerov = 10;
-$article_id = 2245;
-$league_id = 141;
+$article_id = 2269;
+$league_id = 138;
 //$timeout = 480;
 $predraftt = 1; // = draftuje sa do zásobníka. ak 1, upraviť počet manažérov aj v includes/fantasy_functions.php
 $knownrosters = 1; // = su zname zostavy (do ft_choices pridat hracov, ktori sa zucastnia)
-$article_rosters = 2240;
-$draft_start = "2021-12-30 09:00:00";
-$league_start = "2021-12-06 18:00:00";
+$article_rosters = 2266;
+$draft_start = "2022-01-25 20:10:00";
+$league_start = "2022-02-09 09:40:00";
 
 /*
 1. nastaviť dátum deadlinu
@@ -42,7 +42,7 @@ $leag = mysql_query("SELECT * FROM 2004leagues WHERE longname LIKE '%$skratka%' 
 $league = mysql_fetch_array($leag);
 $leaguecolor = $league[color];
 $active_league = $league[id];
-//if($uid==2) $uid=1319;
+if($uid==2) $uid=1397;
 
 // cron job pre vyber random hraca pri necinnosti manazera
 if($_GET[cron]==1)
@@ -151,7 +151,6 @@ if($_GET[cron]==1)
 
 if($params[0]=="draft")
   {
-  //$uid = 1319;
   // odosle info o dostupnych zostavach do draft_autocomplete.php
   if($knownrosters==1) $_SESSION["knownrosters"]=1;
   else $_SESSION["knownrosters"]=0;
@@ -246,10 +245,11 @@ if($params[0]=="draft")
         <form id="picks-form">';
         $i=1;
         while($i<11) {
-            $player=$isvalid=$readonly=$icon=$hidden='';
+            $player=$isvalid=$readonly=$icon=$hidden=$tooltip='';
             $j=0;
             // naplnit kola uz vybratymi hracmi
             while($j < count($picks)) {
+                $already=0;
                 if($picks[$j][round]==$i) {
                     // zistit, ci manazer uz dane kolo nedraftoval
                     $x = mysql_query("SELECT * FROM ft_players WHERE uid='".$uid."' && round='".$i."'");
@@ -275,7 +275,30 @@ if($params[0]=="draft")
                         $icon = '';
                     }
                     else {
+                        // zobrazit upozornenie, ak tohto hraca uz ma naplanovaneho draftovat niekto pred nim
+                        $user_po = mysql_query("SELECT pos FROM ft_teams WHERE uid='".$uid."'");
+                        $user_pos = mysql_fetch_array($user_po);
+                        $k=0;
+                        while($k < $i) {
+                          $zp = mysql_query("SELECT p.uid, t.pos, JSON_UNQUOTE(JSON_EXTRACT(JSON_EXTRACT(CAST(predraft as CHAR), '$[".$k."]'),'$.pid')) as pid, JSON_UNQUOTE(JSON_EXTRACT(JSON_EXTRACT(CAST(predraft as CHAR), '$[".$k."]'),'$.round')) as round FROM ft_predraft p LEFT JOIN ft_teams t ON t.uid=p.uid WHERE p.uid!='".$uid."' ORDER BY pos");
+                          while($zph = mysql_fetch_array($zp)) {
+                            if(($k+1) % 2 == 0 && ($k+1)==$zph[round] && $zph[pos]>$user_pos[pos] && $zph[pid]==$picks[$j][pid]) {
+                              $already=1;
+                              break;
+                            }
+                            if(($k+1) % 2 != 0 && ($k+1)==$zph[round] && $zph[pos]<$user_pos[pos] && $zph[pid]==$picks[$j][pid]) {
+                              $already=1;
+                              break;
+                            }
+                          }
+                        if($already==1) break;
+                        $k++;
+                        }
                         $isvalid = " is-valid";
+                        if($already==1) {
+                          $isvalid .= " is-doubt";
+                          $tooltip = 'data-toggle="tooltip" data-placement="top" title="'.LANG_FANTASY_ALREADYTOOLTIP.'" ';
+                        }
                         $readonly = " readonly";
                         $icon = '<a href="#" class="btn btn-danger btn-sm remove-pick" data-pick="'.$i.'"><i class="fas fa-times-circle"></i></a>';
                     }
@@ -286,7 +309,7 @@ if($params[0]=="draft")
         <div class="row">
             <div class="col-12 col-lg-2 align-self-center">'.$i.'.'.LANG_ROUND.'</div>
             <div class="col-10 col-lg-9">
-                <input class="form-control pick-player'.$isvalid.'" type="text" data-pick="'.$i.'" placeholder="'.LANG_FANTASY_PICKPLACEHOLDER.'" value="'.$player.'"'.$readonly.'>
+                <input class="form-control pick-player'.$isvalid.'" '.$tooltip.'type="text" data-pick="'.$i.'" placeholder="'.LANG_FANTASY_PICKPLACEHOLDER.'" value="'.$player.'"'.$readonly.'>
                 <input type="hidden" id="pick-'.$i.'" value="'.$hidden.'">
             </div>
             <div class="col-2 col-lg-1 align-self-center"><span class="pick-icon">'.$icon.'</span></div>
