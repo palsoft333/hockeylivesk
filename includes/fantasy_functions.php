@@ -9,6 +9,26 @@ if($_GET[save]==1)
   $uid = $_SESSION['logged'];
   $options = json_decode($_GET[json], true);
   mysql_query("INSERT INTO ft_predraft (uid, predraft) VALUES ('$uid', '$_GET[json]') ON DUPLICATE KEY UPDATE predraft='$_GET[json]'") or die(mysql_error());
+  // check if change of already drafted player isn't happening
+  $w = mysql_query("SELECT * FROM ft_players");
+  // only if draft hasn't finished
+  if(mysql_num_rows($w)<100) {
+    $q = mysql_query("SELECT * FROM ft_players WHERE uid='".$uid."' ORDER BY round");
+    while($f = mysql_fetch_array($q)) {
+      $i=0;
+      while($i < count($options)) {
+        if($options[$i]["round"]==$f[round]) {
+          // change already drafted player
+          $e = mysql_query("SELECT * FROM ft_players WHERE pid='".$options[$i][pid]."'");
+          if($options[$i][pid]!=$f[pid] && mysql_num_rows($e)==0) {
+            mysql_query("UPDATE ft_players SET pid='".$options[$i][pid]."', type='0' WHERE round='".$options[$i]["round"]."' && uid='".$uid."'");
+            mysql_query("INSERT INTO ft_changes (uid, old_pid, new_pid, tstamp) VALUES ('".$uid."', '".$f[pid]."', '".$options[$i][pid]."', NOW())");
+          }
+        }
+      $i++;
+      }
+    }
+  }
   $key = array_search(0, array_column($options, 'pid'));
   if(!$key && $key!==0 && count($options)==10) PreDraft();
   mysql_close($link);
@@ -255,18 +275,11 @@ function Show_Drafted()
     if($pi==$manazerov) $line=" border-bottom:1px dashed black !important;";
     if($e[type]==2) $add1=' class="bg-gray-500"';
     if($e[pos]!="GK") { $link1='<a href="/player/'.$e[pid].'0-'.SEOtitle($e[hrac]).'">'; $link2="</a>"; }
-    if($e[type]!=0 && !$uid || $e[type]!=0 && $e[uid]!=$uid)
+    if($e[type]!=0)
       {
       if($e[type]==1) { $icon = "robot"; $hl = LANG_FANTASY_AUTOPICK; }
       if($e[type]==2) { $icon = "ban"; $hl = LANG_FANTASY_MUSTCHANGE; }
       $add='<i class="fas fa-'.$icon.' float-right  mr-1" data-toggle="tooltip" data-placement="top" title="'.$hl.'"></i>';
-      }
-    if($uid && $e[uid]==$uid && strtotime($league_start)>mktime())
-      {
-      if($e[type]==0) $hl = LANG_FANTASY_CHANGEQUESTION;
-      if($e[type]==1) $hl = LANG_FANTASY_AUTOCHANGE;
-      if($e[type]==2) $hl = LANG_FANTASY_MUSTCHANGE1;
-      if($e[pos]!="GK") $add='<i class="fas fa-sync-alt float-right mr-1" data-toggle="tooltip" data-placement="top" title="'.$hl.'" onclick="location.href=\'/database/newdraft/'.$e[pid].'\'"></i>';
       }
     if($uid==$e[uid]) $add1 = " class='bg-gray-300'";
     $drafted .= '<tr'.$add1.'><td class="text-center" style="width:5%;'.$line.'">'.$li.'</td><td class="text-center" style="width:10%;'.$line.'">'.$e[round].'</td><td style="width:20%;'.$line.'">'.$e[nick].'</td><td class="text-center" style="width:10%;'.$line.'">'.$e[pos].'</td><td class="text-nowrap" style="width:40%;'.$line.'"><img class="flag-iihf '.$e[tshort].'-small" src="/images/blank.png" alt="'.$e[tshort].'"> '.$link1.$e[hrac].$link2.$add.'</td></tr>';
