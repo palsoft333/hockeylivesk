@@ -12,7 +12,7 @@ $predraftt = 1; // = draftuje sa do zásobníka. ak 1, upraviť počet manažér
 $knownrosters = 1; // = su zname zostavy (do ft_choices pridat hracov, ktori sa zucastnia)
 $article_rosters = 2266;
 $draft_start = "2022-01-25 20:10:00";
-$league_start = "2022-02-09 09:40:00";
+$league_start = "2022-02-03 10:00:00";
 
 /*
 1. nastaviť dátum deadlinu
@@ -42,7 +42,7 @@ $leag = mysql_query("SELECT * FROM 2004leagues WHERE longname LIKE '%$skratka%' 
 $league = mysql_fetch_array($leag);
 $leaguecolor = $league[color];
 $active_league = $league[id];
-if($uid==2) $uid=1397;
+//if($uid==2) $uid=2935;
 
 // cron job pre vyber random hraca pri necinnosti manazera
 if($_GET[cron]==1)

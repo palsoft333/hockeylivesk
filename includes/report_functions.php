@@ -3,15 +3,25 @@
 * Funkcia pre generovanie rozšírených štatistík NHL zápasov
 * version: 1.0.0 (11.11.2016 - prekopaná stará funkcia pre potreby novej verzie stránky)
 * @param $mid integer - ID zápasu aj s EL identifikátorom
+* @param $el integer - extraliga 0/1
 * @return $estats string
 */
-function Generate_extrastats($mid) {
+function Generate_extrastats($mid, $el) {
   Global $f,$estats;
 
-  $e = mysql_query("SELECT t1.*,t2.league, t3.longname FROM el_matchstats t1 JOIN el_matches t2 ON t2.id=t1.matchid JOIN 2004leagues t3 ON t3.id=t2.league WHERE matchid='$mid'");
+  if($el==1) {
+    $matchstats_table = "el_matchstats";
+    $matches_table = "el_matches";
+    }
+  else {
+    $matchstats_table = "2004matchstats";
+    $matches_table = "2004matches";
+  }
+  $e = mysql_query("SELECT t1.*,t2.league, t3.longname FROM $matchstats_table t1 JOIN $matches_table t2 ON t2.id=t1.matchid JOIN 2004leagues t3 ON t3.id=t2.league WHERE matchid='$mid'");
   $es = mysql_fetch_array($e);
   if(strstr($es[longname], "KHL")) include("xadm/2005/frames/khl_name_parser.php");
   if(strstr($es[longname], "NHL")) include("xadm/2005/frames/nhl_name_parser.php");
+  if($el==0) include("xadm/2005/frames/iihf_name_parser.php");
   
   $es[goalie2] = json_decode($es[goalie2]);
   $es[goalie1] = json_decode($es[goalie1]);
@@ -63,7 +73,7 @@ function Generate_extrastats($mid) {
   $i=0;
   while($i < count($es[goalie1]))
     {
-    if(!strstr($es[longname], "KHL") && !strstr($es[longname], "NHL")) $goalie = $es[goalie1][$i];
+    if(!strstr($es[longname], "KHL") && !strstr($es[longname], "NHL") && $el!=0) $goalie = $es[goalie1][$i];
     else $goalie = ParseName($es[goalie1][$i]);
     if($i==0) $estats .= '<tr><td class="align-top" style="width:21%;"'.$prid1.'><b>'.$f[team1long].'</b></td>';
     else $estats .= '<tr>';
@@ -79,7 +89,7 @@ function Generate_extrastats($mid) {
     $i=0;
   while($i < count($es[goalie2]))
     {
-    if(!strstr($es[longname], "KHL") && !strstr($es[longname], "NHL")) $goalie = $es[goalie2][$i];
+    if(!strstr($es[longname], "KHL") && !strstr($es[longname], "NHL") && $el!=0) $goalie = $es[goalie2][$i];
     else $goalie = ParseName($es[goalie2][$i]);
     if($i==0) $estats .= '<tr><td class="align-top" style="width:21%;"'.$prid2.'><b>'.$f[team2long].'</b></td>';
     else $estats .= '<tr>';

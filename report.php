@@ -12,8 +12,8 @@ $content = "";
 $el = substr($id, -1);
 $dl = strlen($id);
 $id = substr($id, 0, $dl-1);
-if($el==1) $matches_table = "el_matches";
-else { $matches_table = "2004matches"; $suffix = ' shadow-sm'; }
+if($el==1) { $matches_table = "el_matches"; $matchstats_table = "el_matchstats"; }
+else { $matches_table = "2004matches"; $matchstats_table = "2004matchstats"; $suffix = ' shadow-sm'; }
 
 $q = mysql_query("SELECT m.*, l.color, l.longname, DATE_FORMAT(m.datetime, '%e.%c.%Y %k:%i') as datum FROM $matches_table m LEFT JOIN 2004leagues l ON l.id=m.league WHERE m.id='$id'");
 if(mysql_num_rows($q)>0)
@@ -26,12 +26,9 @@ if(mysql_num_rows($q)>0)
     $e = mysql_fetch_array($w);
     }
     
-  if($el==1)
-    {
-    $ms = mysql_query("SELECT * FROM el_matchstats WHERE matchid='$f[id]'");
-    if(mysql_num_rows($ms)>0) Generate_extrastats($f[id]); 
-    $es=1;
-    }
+  $ms = mysql_query("SELECT * FROM $matchstats_table WHERE matchid='$f[id]'");
+  if(mysql_num_rows($ms)>0) Generate_extrastats($f[id], $el); 
+  $es=1;
 
   $leaguecolor = $f[color];
   $active_league = $f[league];

@@ -103,8 +103,8 @@ $(document).ready( function() {
         var id = ui.item.value.split('-');
         if(id[0]==0 || id[0]==1) location.href = "/player/"+id[1];
         if(id[0]==2 || id[0]==3) location.href = "/team/"+id[1];
-        if(id[0]==4) location.href = "/goalie/"+id[1];
-        if(id[0]==5) location.href = "/table/"+id[1];
+        if(id[0]==4 || id[0]==5) location.href = "/goalie/"+id[1];
+        if(id[0]==6) location.href = "/table/"+id[1];
         return false;
       }
     }).autocomplete( "instance" )._renderItem = function( ul, item ) {

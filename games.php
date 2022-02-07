@@ -32,6 +32,7 @@ elseif($gid)
     $teams_table = "el_teams";
     $players_table = "el_players";
     $goals_table = "el_goals";
+    $goalies_table = "el_goalies";
     }
 	elseif($el==0)
     {
@@ -41,6 +42,7 @@ elseif($gid)
     $teams_table = "2004teams";
     $players_table = "2004players";
     $goals_table = "2004goals";
+    $goalies_table = "2004goalies";
     }
 	else
     {
@@ -413,10 +415,8 @@ elseif($gid)
                     <div class="border-bottom">'.$p2[name].' <span class="badge badge-'.$color2.'">'.$p2[goals].'+'.$p2[asists].'</span></div>
                   </div>
                 </div>';
-                if($el==1)
-                  {
-                  $goa1 = mysql_query("SELECT *, ROUND((svs/sog)*100,1) as svp FROM el_goalies WHERE league='$b[league]' && teamshort='$b[team1short]' && IF(gp=1 && (svs/sog)=1, 1, 0)=0 ORDER BY svp DESC LIMIT 1");
-                  $goa2 = mysql_query("SELECT *, ROUND((svs/sog)*100,1) as svp FROM el_goalies WHERE league='$b[league]' && teamshort='$b[team2short]' && IF(gp=1 && (svs/sog)=1, 1, 0)=0 ORDER BY svp DESC LIMIT 1");
+                  $goa1 = mysql_query("SELECT *, ROUND((svs/sog)*100,1) as svp FROM $goalies_table WHERE league='$b[league]' && teamshort='$b[team1short]' && IF(gp=1 && (svs/sog)=1, 1, 0)=0 ORDER BY svp DESC LIMIT 1");
+                  $goa2 = mysql_query("SELECT *, ROUND((svs/sog)*100,1) as svp FROM $goalies_table WHERE league='$b[league]' && teamshort='$b[team2short]' && IF(gp=1 && (svs/sog)=1, 1, 0)=0 ORDER BY svp DESC LIMIT 1");
                   $goalie1 = mysql_fetch_array($goa1);
                   $goalie2 = mysql_fetch_array($goa2);
                   if($goalie1[svp]>$goalie2[svp]) { $color1="success"; $color2="danger"; }
@@ -434,7 +434,6 @@ elseif($gid)
                     <div class="border-bottom">'.$goalie2[name].' <span class="badge badge-'.$color2.'">'.$goalie2[svp].'%</span></div>
                   </div>
                 </div>';
-                  }
                 if($h[vys1]>$h[vys2]) { $color1="success"; $color2="danger"; }
                 elseif($h[vys1]<$h[vys2]) { $color1="danger"; $color2="success"; }
                 else $color1=$color2="success";

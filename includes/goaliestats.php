@@ -17,8 +17,8 @@
 	
 	
 		/* DB table to use */
-	$sTable = "el_goalies";
-
+	if($el==1) $sTable = "el_goalies";
+	else $sTable = "2004goalies";
 	
 	/* 
 	 * Paging
@@ -93,7 +93,7 @@
 	$sQuery = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
 	$sQuery = "
 		SELECT SQL_CALC_FOUND_ROWS id, teamshort, name, sum(gp) as gp, sum(sog) as sog, sum(svs) as svs, sum(ga) as ga, sum(so) as so, (sum(svs)/sum(sog))*100 as svsp, sum(ga)/sum(gp) as gaa, sum(pim) as penalty FROM $sTable
-		$sWhere && IF(gp=1 && (svs/sog)=1, 1, 0)=0 && gp!=0
+		$sWhere ".($el==1 ? '&& IF(gp=1 && (svs/sog)=1, 1, 0)=0 && gp!=0':'')."
 		GROUP BY name, league
 		$sOrder
 		$sLimit
@@ -140,7 +140,7 @@
 			if ( $aColumns[$i] == "name" )
 			{
 				/* Special output formatting for 'version' */
-				$sOutput .= '"<img class=\'flag-'.($el==0 ? 'iihf':'el').' '.$aRow[teamshort].'-small\' src=\'/images/blank.png\' alt=\''.$aRow[teamlong].'\'> <a href=\'/goalie/'.$aRow[id].'-'.SEOtitle($aRow[name]).'\'>'.str_replace('"', '\"', $aRow[ $aColumns[$i] ]).'</a>",';
+				$sOutput .= '"<img class=\'flag-'.($el==0 ? 'iihf':'el').' '.$aRow[teamshort].'-small\' src=\'/images/blank.png\' alt=\''.$aRow[teamlong].'\'> <a href=\'/goalie/'.$aRow[id].$el.'-'.SEOtitle($aRow[name]).'\'>'.str_replace('"', '\"', $aRow[ $aColumns[$i] ]).'</a>",';
 				//$sOutput .= iconv("windows-1250", "utf-8", $aRow[ $aColumns[$i] ]);
 			}
 			else if ( $aColumns[$i] != ' ' )

@@ -12,6 +12,10 @@ if($lid)
   {
   $sel = mysql_query("SELECT * FROM 2004leagues WHERE id='$lid'");
   $vyb = mysql_fetch_array($sel);
+  if($_SESSION[logged]) {
+      $q = mysql_query("SELECT user_favteam FROM e_xoops_users WHERE uid='".$_SESSION[logged]."'");
+      $f = mysql_fetch_array($q);
+  }
   $locale = explode(";",setlocale(LC_ALL, '0'));
   $locale = explode("=",$locale[0]);
   $locale = $locale[1];
@@ -20,6 +24,7 @@ if($lid)
     $players_table = "el_players";
     $matches_table = "el_matches";
     $goals_table = "el_goals";
+    $goalies_table = "el_goalies";
     $title = LANG_STATS_TITLE.' '.$vyb[longname];
     $hl = LANG_STATS_TITLE;
     $incr = 6;
@@ -31,6 +36,7 @@ if($lid)
     $players_table = "2004players";
     $matches_table = "2004matches";
     $goals_table = "2004goals";
+    $goalies_table = "2004goalies";
     $title = LANG_STATS_TITLE2.' '.$vyb[longname];
     $hl = LANG_STATS_TITLE2;
     $hid = ', {"bVisible": false, "aTargets": [ 4 ] }'; 
@@ -57,6 +63,7 @@ if($lid)
 	$("#players").dataTable( {
 			"fnRowCallback": function( nRow, aData, iDisplayIndex ) {
 				$("td:eq('.$incr.')", nRow).html( "<b>"+aData['.$sortby.']+"</b>" );
+                '.($_SESSION[logged] ? 'if(aData[2]=="'.$f[user_favteam].'") $(nRow).addClass("bg-gray-400");':'').'
 			return nRow;
 		},
 		"bProcessing": true,
@@ -74,6 +81,7 @@ if($lid)
 	$("#goalies").dataTable( {
 			"fnRowCallback": function( nRow, aData, iDisplayIndex ) {
 				$("td:eq(5)", nRow).html( "<b>"+aData[7]+"</b>" );
+                '.($_SESSION[logged] ? 'if(aData[2]=="'.$f[user_favteam].'") $(nRow).addClass("bg-gray-400");':'').'
 			return nRow;
 		},
         
@@ -86,7 +94,7 @@ if($lid)
     "aoColumns": [{ "sWidth": "5%", className: "text-center" }, { "sWidth": "31%", className: "text-nowrap" }, { "sWidth": "8%", className: "text-center" }, { "sWidth": "8%", className: "text-center" }, { "sWidth": "8%", className: "text-center" }, { "sWidth": "8%", className: "text-center" }, { "sWidth": "8%", className: "text-center" }, { "sWidth": "8%", className: "text-center" }, { "sWidth": "8%", className: "text-center" }, { "sWidth": "8%", className: "text-center" }, { "sWidth": "8%", className: "text-center" }, { "sWidth": "8%", className: "text-center" }],
 		"sPaginationType": "full_numbers",
 		"bJQueryUI": false,
-		"sAjaxSource": "/includes/goaliestats.php?lid='.$lid.'"
+		"sAjaxSource": "/includes/goaliestats.php?lid='.$lid.'&el='.$vyb[el].'"
 	}
 	 );
 	 
@@ -141,11 +149,8 @@ $content .= '<div class="card my-4 shadow animated--grow-in">
                       </tr>
                     </tbody></table>
               </div>
-             </div>';
-	
-			if($vyb[el]==1 || $vyb[el]==3) 
-      {
-      $content .= '
+             </div>
+             
       <div class="card my-4 shadow animated--grow-in">
         <div class="card-header">
           <h6 class="m-0 font-weight-bold text-'.$leaguecolor.'">
@@ -177,6 +182,8 @@ $content .= '<div class="card my-4 shadow animated--grow-in">
         </div>
       </div>';
       
+      if($vyb[el]==1) {
+      
       $content .= '
       <div class="card my-4 shadow animated--grow-in">
         <div class="card-header">
@@ -202,9 +209,9 @@ $content .= '<div class="card my-4 shadow animated--grow-in">
             </tbody></table>
         </div>
       </div>';
-		}
-
-    $content .= '  
+      }
+       
+   $content .= '
    </div> <!-- end col -->
    <div class="col-auto flex-grow-1 flex-shrink-1 d-none d-xl-block mt-4">
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8860983069832222"

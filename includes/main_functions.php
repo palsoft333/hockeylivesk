@@ -119,7 +119,7 @@ function Generate_Menu($active_league = FALSE) {
                       '.(strstr($f[longname], 'KHL') ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/slovaks/'.$f[id].'-'.SEOtitle($f[topic_title]).'"><span itemprop="name">'.LANG_NAV_SLOVAKI.'</span><i class="fas fa-user-shield fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                       '.($f[el]>0 && $f[topic_id]!=60 ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/injured/'.$f[id].'-'.SEOtitle($f[topic_title]).'"><span itemprop="name">'.LANG_NAV_INJURED.'</span><i class="fas fa-user-injured fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                       '.($f[el]>0 ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/transfers/'.$f[id].'-'.SEOtitle($f[topic_title]).'"><span itemprop="name">'.LANG_NAV_TRANSFERS.'</span><i class="fas fa-exchange-alt fa-fw float-right text-gray-500 my-1"></i></a>':'').'
-                      '.($f[id]==138 ? '<a itemprop="url" class="collapse-item font-weight-bold text-info" href="/fantasy/draft"><span itemprop="name">Fantasy ZOH</span><i class="fas fa-magic fa-fw float-right text-gray-500 my-1"></i></a>':'').'
+                      '.($f[id]==138 ? '<a itemprop="url" class="collapse-item font-weight-bold text-info" href="/fantasy/picks"><span itemprop="name">Fantasy ZOH</span><i class="fas fa-magic fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                       '.($f[id]==134 ? '<a itemprop="url" class="collapse-item font-weight-bold text-danger" href="/fantasy/main"><span itemprop="name">Fantasy KHL</span><i class="fas fa-magic fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                     </div>
                   </div>
@@ -683,15 +683,15 @@ function ShowComment($item, $from_latest=false)
                         $ide = substr($item['main'][10], 0, -1);
                         if($el=="p") 
                           {
-                          $q = mysql_query("SELECT id, 0 as el FROM `el_players` WHERE name='".$ide."' UNION SELECT id, 1 as el FROM `2004players` WHERE name='".$ide."' ORDER BY id DESC");
+                          $q = mysql_query("SELECT id, 1 as el FROM `el_players` WHERE name='".$ide."' UNION SELECT id, 0 as el FROM `2004players` WHERE name='".$ide."' ORDER BY id DESC");
                           $f = mysql_fetch_array($q);
                           $url = "/player/".$f[id].$f[el]."-".SEOtitle($f[name]);
                           }
                         else 
                           {
-                          $q = mysql_query("SELECT * FROM el_goalies WHERE name='".$ide."' ORDER BY id DESC");
+                          $q = mysql_query("SELECT id, 1 as el FROM `el_goalies` WHERE name='".$ide."' UNION SELECT id, 0 as el FROM `2004goalies` WHERE name='".$ide."' ORDER BY id DESC");
                           $f = mysql_fetch_array($q);
-                          $url = "/goalie/".$f[id]."-".SEOtitle($f[name]);
+                          $url = "/goalie/".$f[id].$f[el]."-".SEOtitle($f[name]);
                           }
                         $hl = LANG_USERPROFILE_TOTHEPLAYER;
                         $hl1 = $ide;

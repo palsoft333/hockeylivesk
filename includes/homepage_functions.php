@@ -294,7 +294,7 @@ function Transfers() {
                 else $pl = mysql_query("SELECT name FROM el_goalies WHERE id='".$l["pid"]."'");
                 $player = mysql_fetch_array($pl);
                 if($l["goalie"]==0) $url = '/player/'.$l["pid"].'1-'.SEOtitle($player["name"]);
-                else $url = '/goalie/'.$l["pid"].'-'.SEOtitle($player["name"]);
+                else $url = '/goalie/'.$l["pid"].'1-'.SEOtitle($player["name"]);
             }
             else $player["name"] = $l["pname"];
             $trans .= '
@@ -853,7 +853,7 @@ function gotd()
               </div>';
   
   if($gotdid[0]!=0)
-    {   
+    {
     if($gotdid[1]==1) { $mtable = "el_matches"; $ttable = "el_teams"; $st=""; }
     else { $mtable = "2004matches"; $ttable = "2004teams"; $st = " shadow-sm"; }
     $q = mysql_query("SELECT m.*, DATE_FORMAT(m.datetime, '%e.%c.%Y o %k:%i') as datum, t1.id as t1id, t2.id as t2id, t1.longname as t1long, t2.longname as t2long, l.longname as league_name FROM $mtable m LEFT JOIN $ttable t1 ON t1.shortname=m.team1short && t1.league=m.league LEFT JOIN $ttable t2 ON t2.shortname=m.team2short && t2.league=m.league LEFT JOIN 2004leagues l ON l.id=m.league WHERE m.id='".$gotdid[0]."'");
@@ -868,7 +868,7 @@ function gotd()
       include('slovaki.php');
       $khl_players=$slovaks;
       $khl_goalies=$brankari;
-      $slov = "";
+      $slov=$tv="";
       if(strstr($gotf[league_name], 'NHL') || strstr($gotf[league_name], 'KHL'))
         {
         $tran1 = $tran2 = array();
@@ -905,6 +905,12 @@ function gotd()
         }
     }
     else $g = mysql_query("SELECT count(id) as poc, ROUND(sum(tip1)/count(id),2) as vys1, ROUND(sum(tip2)/count(id),2) as vys2 FROM 2004tips WHERE matchid='".$gotdid[0]."'");
+    if($gotf["fs_tv"]!=NULL && $gotf["fs_tv"]!='[]')
+      {
+      $tvarr = json_decode($gotf["fs_tv"], true);
+      $tvarr = implode(", ",$tvarr);
+      $tv .= '<p class="m-0"><span class="font-weight-bold">LIVE:</span> '.$tvarr.'</p>';
+      }
     $h = mysql_fetch_array($g);
     if($gotdid[1]==1) $k = mysql_query("select userid, komentar, dt.uname as nick from el_tips JOIN (SELECT uid, uname FROM e_xoops_users)dt ON dt.uid=userid where length(komentar) = (select max(length(komentar)) from el_tips WHERE matchid='$gotdid[0]') && matchid='$gotdid[0]'");
     else $k = mysql_query("select userid, komentar, dt.uname as nick from 2004tips JOIN (SELECT uid, uname FROM e_xoops_users)dt ON dt.uid=userid where length(komentar) = (select max(length(komentar)) from 2004tips WHERE matchid='$gotdid[0]') && matchid='$gotdid[0]'");
@@ -928,6 +934,7 @@ function gotd()
                     <p class="m-0"><span class="font-weight-bold">'.LANG_MATCHES_AVGBET.':</span> '.$h[vys1].' : '.$h[vys2].'</p>
                     <p class="m-0"><span class="font-weight-bold">'.LANG_MATCHES_BETS.':</span> '.$h[poc].'</p>
                     '.$slov.'
+                    '.$tv.'
                   </div>
                   <div class="align-items-end d-flex flex-fill justify-content-center">
                     <a href="/'.($gotf[active]==1 ? 'report':'game').'/'.$gotf[id].$gotdid[1].'-'.SEOtitle($gotf[team1long].' vs '.$gotf[team2long]).'" class="btn btn-light btn-icon-split">

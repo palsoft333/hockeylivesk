@@ -301,7 +301,7 @@ while ($t = mysql_fetch_array($r))
         else $pl = mysql_query("SELECT name FROM el_goalies WHERE id='".$t["pid"]."'");
         $player = mysql_fetch_array($pl);
         if($t["goalie"]==0) $url = '/player/'.$t["pid"].'1-'.SEOtitle($player["name"]);
-        else $url = '/goalie/'.$t["pid"].'-'.SEOtitle($player["name"]);
+        else $url = '/goalie/'.$t["pid"].'1-'.SEOtitle($player["name"]);
       }
       else $player["name"] = $t["pname"];
 	$content .= ' <tr>
@@ -684,12 +684,17 @@ ORDER BY datetime DESC LIMIT 1)dt WHERE dt.id IS NOT NULL");
 // statistika brankara
 elseif($gid)
   {
-  $q = mysql_query("SELECT g.*, l.color, l.longname FROM el_goalies g LEFT JOIN 2004leagues l ON l.id=g.league WHERE g.id='$gid'");
+	$el = substr($gid, -1);
+	$dl = strlen($gid);
+	$ide = substr($gid, 0, $dl-1);
+  if($el==1) $goalies_table = "el_goalies";
+  else $goalies_table = "2004goalies";
+  $q = mysql_query("SELECT g.*, l.color, l.longname FROM $goalies_table g LEFT JOIN 2004leagues l ON l.id=g.league WHERE g.id='$ide'");
   if(mysql_num_rows($q)>0)
     {
     $comm_id = $gid;
     $data = mysql_fetch_array($q);
-    $elinf = mysql_query("SELECT max(born) as born, max(hold) as hold, max(kg) as kg, max(cm) as cm FROM el_goalies WHERE name='$data[name]' ORDER BY id DESC LIMIT 1");
+    $elinf = mysql_query("SELECT max(born) as born, max(hold) as hold, max(kg) as kg, max(cm) as cm FROM $goalies_table WHERE name='$data[name]' ORDER BY id DESC LIMIT 1");
     $elinfo = mysql_fetch_array($elinf);
     $title = "Štatistika brankára ".$data[name];
     $leaguecolor = $data[color];
@@ -726,73 +731,151 @@ elseif($gid)
         $content .= '</ul>
                     </div>
                 </div>';
+                
+    $w = mysql_query("SELECT 2004goalies.*, l.longname, t.id as tid FROM 2004goalies JOIN 2004leagues l ON l.id=2004goalies.league JOIN 2004teams t ON t.shortname=2004goalies.teamshort && t.league=2004goalies.league WHERE name='$data[name]' ORDER BY league ASC, 2004goalies.id ASC");
+    if(mysql_num_rows($w)>0)
+        {
+        $name = mysql_query("SELECT sum(gp), sum(sog), sum(svs), sum(ga), sum(so), sum(pim) FROM 2004goalies WHERE name='$data[name]'");
+        $sumar = mysql_fetch_array($name);
+        $content .= '<div class="card my-4 shadow animated--grow-in">
+                  <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-'.$leaguecolor.'">
+                      '.LANG_PLAYERSTATS_NATIONAL.'
+                      <span class="swipe d-none float-right text-gray-800"><i class="fas fa-hand-point-up"></i> <i class="fas fa-exchange-alt align-text-top text-xs"></i></span>
+                    </h6>
+                  </div>
+                  <div class="card-body">
+                      <table class="table-hover table-light table-striped table-responsive-sm w-100 p-fluid" id="club">
+                      <thead><tr>
+                        <th class="text-nowrap" style="width:22%;">'.LANG_TEAMSTATS_SEASON.'</th>
+                        <th class="text-nowrap" style="width:22%;">'.LANG_PLAYERSTATS_TEAM.'</th>
+                        <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_GAMES.'">GP</th>
+                        <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_SOG.'">SOG</th>
+                        <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_SVS.'">SVS</th>
+                        <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_SVP.'">SV%</th>
+                        <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_GA.'">GA</th>
+                        <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_GAA.'">GAA</th>
+                        <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_SO.'">SO</th>
+                        <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_PIM.'">PIM</th>
+                    </tr>
+                  </thead>
+                  <tbody>';
+        $i=$k=0;
+        $svpp=0;
+        $gaap=0;
+        while($f = mysql_fetch_array($w))
+          {
+          $svp = round(($f[svs]/$f[sog])*100,1);
+          $gaa = round(($f[ga]/$f[gp]),2);
+          $svpp = $svp+$svpp;
+          $gaap = $gaa+$gaap;
+          $content .= '<tr>
+              <td class="text-nowrap" style="width:22%;"><a href="/games/'.$f[league].'-'.SEOTitle($f[longname]).'">'.$f[longname].'</a></td>
+              <td class="text-nowrap" style="width:22%;"><a href="/team/'.$f[tid].'0-'.SEOTitle($f[teamlong]).'">'.$f[teamlong].'</a></td>
+              <td class="text-center" style="width:7%;">'.$f[gp].'</td>
+              <td class="text-center" style="width:7%;">'.$f[sog].'</td>
+              <td class="text-center" style="width:7%;">'.$f[svs].'</td>
+              <td class="text-center font-weight-bold" style="width:7%;">'.$svp.'%</td>
+              <td class="text-center" style="width:7%;">'.$f[ga].'</td>
+              <td class="text-center" style="width:7%;">'.$gaa.'</td>
+              <td class="text-center" style="width:7%;">'.$f[so].'</td>
+              <td class="text-center" style="width:7%;">'.$f[pim].'</td>
+            </tr>';
+          $i++;
+          if($f[gp]>0) $k++;
+          }
+        $content .= '</tbody>
+            <tfoot class="font-weight-bold">
+            <tr>
+              <td colspan="2">'.LANG_BETS_OVERALL.'</td>
+              <td class="text-center" style="width:7%;">'.$sumar[0].'</td>
+              <td class="text-center" style="width:7%;">'.$sumar[1].'</td>
+              <td class="text-center" style="width:7%;">'.$sumar[2].'</td>
+              <td class="text-center" style="width:7%;">'.round($svpp/$k,1).'%</td>
+              <td class="text-center" style="width:7%;">'.$sumar[3].'</td>
+              <td class="text-center" style="width:7%;">'.round($gaap/$k,1).'</td>
+              <td class="text-center" style="width:7%;">'.$sumar[4].'</td>
+              <td class="text-center" style="width:7%;">'.$sumar[5].'</td>
+            </tr>
+          </tfoot>
+          </table>
+         </div>
+       </div>';
+        }
+                
     $w = mysql_query("SELECT el_goalies.*, l.longname, t.id as tid FROM el_goalies JOIN 2004leagues l ON l.id=el_goalies.league JOIN el_teams t ON t.shortname=el_goalies.teamshort && t.league=el_goalies.league WHERE name='$data[name]' ORDER BY league ASC, el_goalies.id ASC");
-    $name = mysql_query("SELECT sum(gp), sum(sog), sum(svs), sum(ga), sum(so), sum(pim) FROM el_goalies WHERE name='$data[name]'");
-    $sumar = mysql_fetch_array($name);
-    $content .= '<div class="card my-4 shadow animated--grow-in">
-              <div class="card-header">
-                <h6 class="m-0 font-weight-bold text-'.$leaguecolor.'">
-                  '.LANG_PLAYERSTATS_CLUB.'
-                  <span class="swipe d-none float-right text-gray-800"><i class="fas fa-hand-point-up"></i> <i class="fas fa-exchange-alt align-text-top text-xs"></i></span>
-                </h6>
-              </div>
-              <div class="card-body">
-                  <table class="table-hover table-light table-striped table-responsive-sm w-100 p-fluid" id="club">
-                  <thead><tr>
-                    <th class="text-nowrap" style="width:22%;">'.LANG_TEAMSTATS_SEASON.'</th>
-                    <th class="text-nowrap" style="width:22%;">'.LANG_PLAYERSTATS_TEAM.'</th>
-                    <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_GAMES.'">GP</th>
-                    <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_SOG.'">SOG</th>
-                    <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_SVS.'">SVS</th>
-                    <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_SVP.'">SV%</th>
-                    <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_GA.'">GA</th>
-                    <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_GAA.'">GAA</th>
-                    <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_SO.'">SO</th>
-                    <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_PIM.'">PIM</th>
-                </tr>
-              </thead>
-              <tbody>';
-    $i=0;
-    $svpp=0;
-    $gaap=0;
-    while($f = mysql_fetch_array($w))
-      {
-      $svp = round(($f[svs]/$f[sog])*100,1);
-      $gaa = round(($f[ga]/$f[gp]),2);
-      $svpp = $svp+$svpp;
-      $gaap = $gaa+$gaap;
-      $content .= '<tr>
-          <td class="text-nowrap" style="width:22%;"><a href="/games/'.$f[league].'-'.SEOTitle($f[longname]).'">'.$f[longname].'</a></td>
-          <td class="text-nowrap" style="width:22%;"><a href="/team/'.$f[tid].'1-'.SEOTitle($f[teamlong]).'">'.$f[teamlong].'</a></td>
-          <td class="text-center" style="width:7%;">'.$f[gp].'</td>
-          <td class="text-center" style="width:7%;">'.$f[sog].'</td>
-          <td class="text-center" style="width:7%;">'.$f[svs].'</td>
-          <td class="text-center font-weight-bold" style="width:7%;">'.$svp.'%</td>
-          <td class="text-center" style="width:7%;">'.$f[ga].'</td>
-          <td class="text-center" style="width:7%;">'.$gaa.'</td>
-          <td class="text-center" style="width:7%;">'.$f[so].'</td>
-          <td class="text-center" style="width:7%;">'.$f[pim].'</td>
-        </tr>';
-      $i++;
-      }
-    $content .= '</tbody>
-        <tfoot class="font-weight-bold">
-        <tr>
-          <td colspan="2">'.LANG_BETS_OVERALL.'</td>
-          <td class="text-center" style="width:7%;">'.$sumar[0].'</td>
-          <td class="text-center" style="width:7%;">'.$sumar[1].'</td>
-          <td class="text-center" style="width:7%;">'.$sumar[2].'</td>
-          <td class="text-center" style="width:7%;">'.round($svpp/$i,1).'%</td>
-          <td class="text-center" style="width:7%;">'.$sumar[3].'</td>
-          <td class="text-center" style="width:7%;">'.round($gaap/$i,1).'</td>
-          <td class="text-center" style="width:7%;">'.$sumar[4].'</td>
-          <td class="text-center" style="width:7%;">'.$sumar[5].'</td>
-        </tr>
-      </tfoot>
-      </table>
-     </div>
-   </div>
- </div>';
+    if(mysql_num_rows($w)>0)
+        {
+        $name = mysql_query("SELECT sum(gp), sum(sog), sum(svs), sum(ga), sum(so), sum(pim) FROM el_goalies WHERE name='$data[name]'");
+        $sumar = mysql_fetch_array($name);
+        $content .= '<div class="card my-4 shadow animated--grow-in">
+                  <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-'.$leaguecolor.'">
+                      '.LANG_PLAYERSTATS_CLUB.'
+                      <span class="swipe d-none float-right text-gray-800"><i class="fas fa-hand-point-up"></i> <i class="fas fa-exchange-alt align-text-top text-xs"></i></span>
+                    </h6>
+                  </div>
+                  <div class="card-body">
+                      <table class="table-hover table-light table-striped table-responsive-sm w-100 p-fluid" id="club">
+                      <thead><tr>
+                        <th class="text-nowrap" style="width:22%;">'.LANG_TEAMSTATS_SEASON.'</th>
+                        <th class="text-nowrap" style="width:22%;">'.LANG_PLAYERSTATS_TEAM.'</th>
+                        <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_GAMES.'">GP</th>
+                        <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_SOG.'">SOG</th>
+                        <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_SVS.'">SVS</th>
+                        <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_SVP.'">SV%</th>
+                        <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_GA.'">GA</th>
+                        <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_GAA.'">GAA</th>
+                        <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_SO.'">SO</th>
+                        <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_PIM.'">PIM</th>
+                    </tr>
+                  </thead>
+                  <tbody>';
+        $i=$k=0;
+        $svpp=0;
+        $gaap=0;
+        while($f = mysql_fetch_array($w))
+          {
+          $svp = round(($f[svs]/$f[sog])*100,1);
+          $gaa = round(($f[ga]/$f[gp]),2);
+          $svpp = $svp+$svpp;
+          $gaap = $gaa+$gaap;
+          $content .= '<tr>
+              <td class="text-nowrap" style="width:22%;"><a href="/games/'.$f[league].'-'.SEOTitle($f[longname]).'">'.$f[longname].'</a></td>
+              <td class="text-nowrap" style="width:22%;"><a href="/team/'.$f[tid].'1-'.SEOTitle($f[teamlong]).'">'.$f[teamlong].'</a></td>
+              <td class="text-center" style="width:7%;">'.$f[gp].'</td>
+              <td class="text-center" style="width:7%;">'.$f[sog].'</td>
+              <td class="text-center" style="width:7%;">'.$f[svs].'</td>
+              <td class="text-center font-weight-bold" style="width:7%;">'.$svp.'%</td>
+              <td class="text-center" style="width:7%;">'.$f[ga].'</td>
+              <td class="text-center" style="width:7%;">'.$gaa.'</td>
+              <td class="text-center" style="width:7%;">'.$f[so].'</td>
+              <td class="text-center" style="width:7%;">'.$f[pim].'</td>
+            </tr>';
+          $i++;
+          if($f[gp]>0) $k++;
+          }
+        $content .= '</tbody>
+            <tfoot class="font-weight-bold">
+            <tr>
+              <td colspan="2">'.LANG_BETS_OVERALL.'</td>
+              <td class="text-center" style="width:7%;">'.$sumar[0].'</td>
+              <td class="text-center" style="width:7%;">'.$sumar[1].'</td>
+              <td class="text-center" style="width:7%;">'.$sumar[2].'</td>
+              <td class="text-center" style="width:7%;">'.round($svpp/$k,1).'%</td>
+              <td class="text-center" style="width:7%;">'.$sumar[3].'</td>
+              <td class="text-center" style="width:7%;">'.round($gaap/$k,1).'</td>
+              <td class="text-center" style="width:7%;">'.$sumar[4].'</td>
+              <td class="text-center" style="width:7%;">'.$sumar[5].'</td>
+            </tr>
+          </tfoot>
+          </table>
+         </div>
+       </div>';
+         }
+   
+   $content .= '
+  </div>';
     $h = mysql_query("SELECT * FROM 2004playerdiary WHERE name='$data[name]' ORDER BY msg_date DESC");
     if(mysql_num_rows($h)>0)
       {
@@ -1009,11 +1092,11 @@ elseif($_GET[shooters])
                 $po_teams .= "teamshort='$pot[team1]' || teamshort='$pot[team2]' || ";
             }
             $po_teams = substr($po_teams, 0, -4);
-            $q = MySQL_Query("SELECT et.*, COUNT(et.goaler) as poc, DATE_FORMAT(et.datetime, '%e.%c.%Y') as datum, ft.injury FROM (SELECT el_goals.*, dt.datetime FROM el_goals JOIN (SELECT * FROM el_matches WHERE league='$league' && kedy='konečný stav' ORDER BY id ASC)dt ON dt.id=el_goals.matchno WHERE goaler!='' && time<'60.00' && ($po_teams) GROUP BY el_goals.goaler, el_goals.matchno ORDER BY datetime DESC)et LEFT JOIN(SELECT name, injury FROM el_injuries WHERE league='$league')ft ON et.goaler=ft.name WHERE ft.injury IS NULL GROUP BY et.goaler ORDER BY poc DESC LIMIT 20");
+            $q = MySQL_Query("SELECT et.*, COUNT(et.goaler) as poc, DATE_FORMAT(et.datetime, '%e.%c.%Y') as datum, ft.injury FROM (SELECT el_goals.*, dt.datetime, IF(dt.team1short=el_goals.teamshort,dt.team1long,dt.team2long) as teamlong FROM el_goals JOIN (SELECT * FROM el_matches WHERE league='$league' && kedy='konečný stav' ORDER BY id ASC)dt ON dt.id=el_goals.matchno WHERE goaler!='' && time<'60.00' && ($po_teams) GROUP BY el_goals.goaler, el_goals.matchno ORDER BY datetime DESC)et LEFT JOIN(SELECT name, injury FROM el_injuries WHERE league='$league')ft ON et.goaler=ft.name WHERE ft.injury IS NULL GROUP BY et.goaler ORDER BY poc DESC LIMIT 20");
         }
         // non-playoff
         else {
-            $q = MySQL_Query("SELECT et.*, COUNT(et.goaler) as poc, DATE_FORMAT(et.datetime, '%e.%c.%Y') as datum, ft.injury FROM (SELECT el_goals.*, dt.datetime FROM el_goals JOIN (SELECT * FROM el_matches WHERE league='$league' && kedy='konečný stav' ORDER BY id ASC)dt ON dt.id=el_goals.matchno WHERE goaler!='' && time<'60.00' GROUP BY el_goals.goaler, el_goals.matchno ORDER BY datetime DESC)et LEFT JOIN(SELECT name, injury FROM el_injuries WHERE league='$league')ft ON et.goaler=ft.name WHERE ft.injury IS NULL GROUP BY et.goaler ORDER BY poc DESC LIMIT 20");
+            $q = MySQL_Query("SELECT et.*, COUNT(et.goaler) as poc, DATE_FORMAT(et.datetime, '%e.%c.%Y') as datum, ft.injury FROM (SELECT el_goals.*, dt.datetime, IF(dt.team1short=el_goals.teamshort,dt.team1long,dt.team2long) as teamlong FROM el_goals JOIN (SELECT * FROM el_matches WHERE league='$league' && kedy='konečný stav' ORDER BY id ASC)dt ON dt.id=el_goals.matchno WHERE goaler!='' && time<'60.00' GROUP BY el_goals.goaler, el_goals.matchno ORDER BY datetime DESC)et LEFT JOIN(SELECT name, injury FROM el_injuries WHERE league='$league')ft ON et.goaler=ft.name WHERE ft.injury IS NULL GROUP BY et.goaler ORDER BY poc DESC LIMIT 20");
             $q1 = MySQL_Query("SELECT *, el_players.name as name, ft.injury FROM el_players LEFT JOIN(SELECT name, injury FROM el_injuries WHERE league='$league')ft ON el_players.name=ft.name WHERE ft.injury IS NULL && league='$league' GROUP BY el_players.name ORDER BY points DESC LIMIT 20");
         }
         

@@ -29,7 +29,7 @@ if($id)
     $players_table = "2004players";
     $matches_table = "2004matches";
     $injury_table = "el_injuries";
-    $goalies_table = "el_goalies";
+    $goalies_table = "2004goalies";
     $title1 = LANG_TEAMSTATS_LEAGUE;
     $title2 = LANG_TEAMSTATS_APPEAR;
     }
@@ -84,6 +84,7 @@ if($id)
       $seasson = $e[longname];
       $suffix = ' class="shadow-sm"';
       $pos = $a;
+      $g = mysql_query("SELECT $goalies_table.*, (svs/sog)*100 as svsp, ga/gp as gaa, CONCAT(YEAR(NOW()),DATE_FORMAT(born,'-%m-%d')) as datum, YEAR(NOW())-YEAR(born) as vek, dt.injury FROM $goalies_table LEFT JOIN (SELECT name, injury FROM $injury_table WHERE league='$f[league]')dt ON $goalies_table.name=dt.name WHERE teamshort='$f[shortname]' && league='$f[league]' ORDER BY svsp DESC, gaa ASC");
       $p = mysql_query("SELECT $players_table.*, dt.injury FROM $players_table LEFT JOIN (SELECT name, injury FROM $injury_table WHERE league='$f[league]')dt ON $players_table.name=dt.name WHERE $players_table.teamshort='$f[shortname]' && $players_table.league='$f[league]' ORDER BY points DESC, goals DESC, asists DESC, gwg DESC, gtg DESC, shg DESC, ppg DESC, penalty ASC");
       $h = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
       if($lowerdiv) $h = mysql_query("SELECT pd.* FROM 2004playerdiary as pd JOIN(SELECT p.*, l.longname FROM $players_table p LEFT JOIN 2004leagues l ON l.id=p.league WHERE p.teamshort='$f[shortname]' && l.longname LIKE '%".$lowerdiv."%' GROUP BY p.name)dt ON pd.name=dt.name ORDER BY pd.msg_date DESC, pd.id DESC LIMIT 10");
@@ -148,7 +149,7 @@ if($id)
                   
             <div class="row">
               <div class="col-12 col-xl-7">';
-                if($el==1) {
+                if(mysql_num_rows($g)>0) {
     $content .= '<div class="card my-4 shadow animated--grow-in">
                   <div class="card-header">
                     <h6 class="m-0 font-weight-bold text-'.$leaguecolor.'">
@@ -179,9 +180,9 @@ if($id)
                       if(strtotime($t[datum])==mktime(0,0,0)) $bday = ' <i class="fas fa-birthday-cake" data-toggle="tooltip" data-placement="top" data-html="true" title="Dnes oslavuje <strong>'.$t[vek].'</strong> rokov<br>Blahoželáme!"></i>';
                       if($t[injury]!=NULL) $injury = ' <i class="fas fa-user-injured text-danger" data-toggle="tooltip" data-placement="top" data-html="true" title="Zranený: <strong>'.$t[injury].'</strong>"></i>';
                       if(array_key_exists($t[name], $slovaks)) $slovak = ' <img class="flag-iihf SVK-small" src="/img/blank.png" alt="Slovák">';
-                      $content .= '<tr'.($t[gp]==0 ? ' class="text-gray-500"':'').'>
+                      $content .= '<tr'.($el==1 && $t[gp]==0 ? ' class="text-gray-500"':'').'>
                       <td class="text-center">GK</td>
-                      <td class="text-nowrap"><a href="/goalie/'.$t[id].'-'.SEOtitle($t[name]).'">'.$t[name].'</a>'.$slovak.''.$injury.''.$bday.'</td>
+                      <td class="text-nowrap"><a href="/goalie/'.$t[id].$el.'-'.SEOtitle($t[name]).'">'.$t[name].'</a>'.$slovak.''.$injury.''.$bday.'</td>
                       <td class="text-center">'.$t[gp].'</td>
                       <td class="text-center">'.$t[sog].'</td>
                       <td class="text-center">'.$t[svs].'</td>
@@ -318,7 +319,7 @@ if($id)
                       else $pl = mysql_query("SELECT name FROM el_goalies WHERE id='".$l["pid"]."'");
                       $player = mysql_fetch_array($pl);
                       if($l["goalie"]==0) $url = '/player/'.$l["pid"].'1-'.SEOtitle($player["name"]);
-                      else $url = '/goalie/'.$l["pid"].'-'.SEOtitle($player["name"]);
+                      else $url = '/goalie/'.$l["pid"].'1-'.SEOtitle($player["name"]);
                     }
                     else $player["name"] = $l["pname"];
                     $content .= '

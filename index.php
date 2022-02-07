@@ -403,7 +403,7 @@ else mysql_query("UPDATE e_xoops_users SET last_login='".mktime()."' WHERE uid='
   <!-- Custom scripts for all pages-->
   <script src="/js/jquery-ui.min.js?v=1.13.1"></script>
   <script src="/js/jquery.lazy.min.js"></script>
-  <script src="/js/main.min.js?v=1.2.2"></script>
+  <script src="/js/main.min.js?v=1.2.3"></script>
 <? 
 if(!$_GET[p] && !$_GET[topicID]) echo '  <script type="text/javascript" src="/js/jquery.calendario.js?v=1.0.5"></script>
   <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION[lang].'.js?v=1.0.0"></script>
