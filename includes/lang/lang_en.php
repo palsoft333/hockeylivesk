@@ -20,6 +20,7 @@ define("LANG_TIME_SECONDS","seconds");
 define("LANG_TIME_RIGHTNOW","just now");
 define("LANG_TIME_TODAY","today");
 define("LANG_TIME_YESTERDAY","yesterday");
+define("LANG_AGE_YEARS","years");
 
 define("LANG_AUTHOR","Author");
 define("LANG_CATEGORY","Category");
@@ -238,6 +239,11 @@ define("LANG_REPORT_PP2","At 5 on 3 powerplay");
 define("LANG_REPORT_SH1","At 4 on 5 shorthanded");
 define("LANG_REPORT_SH2","At 3 on 5 shorthanded");
 define("LANG_REPORT_PS","Penalty shot");
+define("LANG_REPORT_GAMESTATS","Game statistics");
+define("LANG_REPORT_SAVES","Saves");
+define("LANG_REPORT_SHOTS","shots");
+define("LANG_REPORT_FACEOFFS","Faceoffs");
+define("LANG_REPORT_SPECTATORS","Spectators");
 
 define("LANG_STATS_TITLE","Statistics of league");
 define("LANG_STATS_TITLE2","Statistics of tournament");
@@ -340,7 +346,7 @@ define("LANG_CARDS_FLASH","Flash news");
 
 define("LANG_FLASH_FROMFB","Post from our Facebook");
 
-define("LANG_GAMECONT_TODAYS","Today games");
+define("LANG_GAMECONT_TODAYS","Today's games");
 define("LANG_GAMECONT_NOGAMES","There are no games planned for today");
 define("LANG_GAMECONT_STATS","Last player performances");
 define("LANG_GAMECONT_NOSTATS","No point was achieved by Slovak player in the latest games. We keep our fingers crossed for the next games.");
@@ -563,6 +569,6 @@ define('LANG_PRIVACY_TEXT13','Changes in terms of privacy policy');
 define('LANG_PRIVACY_TEXT14','All changes to the terms of privacy will be posted on this page.<br>These Terms apply as of 16.5.2018.');
 define('LANG_PRIVACY_TEXT15','If you have any questions, please <a href="/contact" class="email">contact us</a>.');
 
-$foreign_teams = array("Belarus","Denmark","Czechia","Europe","Finland","France","Japan","Canada","Kazakhstan","Latvia","Hungary","Germany","Norway","Austria","Russia","North America","Slovakia","Slovenia","Italy","Ukraine","USA","Switzerland","Sweden");
+$foreign_teams = array("Belarus","Denmark","China","Czechia","Europe","Finland","France","Japan","Canada","Kazakhstan","Latvia","Hungary","Germany","Norway","Austria","Russia","North America","Slovakia","Slovenia","Italy","Ukraine","USA","Switzerland","Sweden");
 $foreign_statuses = array("final result","scheduled","get ready","in the 1st period","after 1st period","in the 2nd period","after 2nd period","in the 3rd period","after 3rd period","overtime","after overtime");
 ?>

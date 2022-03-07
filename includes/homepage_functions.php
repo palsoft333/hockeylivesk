@@ -115,6 +115,11 @@ UNION
         $fav = mysql_fetch_array($fa);
         if($fav[user_favteam]!="0" && ($fav[user_favteam]==$f[team1short] || $fav[user_favteam]==$f[team2short])) $favor=' bg-gray-200 rounded';
         }
+      // preklad timov
+      if($_SESSION[lang]!='sk') {
+          $f[team1long] = TeamParser($f[team1long]);
+          $f[team2long] = TeamParser($f[team2long]);
+      }
       // vypis
       $cas = date("G:i", strtotime($f[datetime]));
       if(strtotime($f[datetime]) > mktime()) $score = '<a href="/game/'.$f[id].$f[el].'-'.SEOtitle($f[team1long]." vs ".$f[team2long]).'" class="btn btn-light btn-circle btn-sm"><i class="fas fa-search"></i></a>';
@@ -703,7 +708,12 @@ function ComputeGOTD()
         if($f[topic_id]==71) { $slovaks = $khl_players; $brankari = $khl_goalies; }
         $games_with_slovaks = array();
         while($b = mysql_fetch_array($a)) {
-          $tran1 = $tran2 = array();
+          $zra = $tran1 = $tran2 = array();
+          $z = mysql_query("SELECT * FROM el_injuries WHERE league='".$lid."'");
+          while($zr = mysql_fetch_array($z))
+            {
+            $zra[] = $zr[name];
+            }
           $tr = mysql_query("SELECT from_team, pname FROM transfers WHERE (from_team='".$b[team1short]."' || from_team='".$b[team2short]."') && datetime>'".$season_start."'");
           while($tra = mysql_fetch_array($tr))
             {
@@ -838,7 +848,6 @@ function ComputeGOTD()
 
 function gotd()
   {
-  Global $lid;
   $gotdid = ComputeGOTD();
   
   $gotd = '<div class="card border-left-primary shadow h-100 py-2">
@@ -877,6 +886,11 @@ function gotd()
           $season_start = $rok."-01-08";
           }
         else $season_start = date("Y")."-01-08";
+        $z = mysql_query("SELECT * FROM el_injuries WHERE league='".$gotf[league]."'");
+        while($zr = mysql_fetch_array($z))
+          {
+          $zra[] = $zr[name];
+          }
         $tr = mysql_query("SELECT from_team, pname FROM transfers WHERE (from_team='".$gotf[team1short]."' || from_team='".$gotf[team2short]."') && datetime>'".$season_start."'");
         while($tra = mysql_fetch_array($tr))
           {

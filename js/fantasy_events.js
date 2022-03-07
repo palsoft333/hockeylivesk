@@ -35,7 +35,9 @@
             var pickdata = $('#pick-'+i).val();
             if(pickdata!="") {
                 var data = pickdata.split('-');
-                picks.push({ "pid" : data[2], "round" : i });
+                if(data[0]=="GK") var gk=1;
+                else var gk=0;
+                picks.push({ "pid" : data[2], "round" : i, "gk" : gk });
             }
         }
         $('#picks').val(JSON.stringify(picks));
@@ -116,7 +118,9 @@
             var pickdata = $('#pick-'+i).val();
             if(pickdata!="") {
                 var data = pickdata.split('-');
-                picks.push({ "pid" : data[2], "round" : i });
+                if(data[0]=="GK") var gk=1;
+                else var gk=0;
+                picks.push({ "pid" : data[2], "round" : i, "gk" : gk });
             }
         }
         $('#picks').val(JSON.stringify(picks));

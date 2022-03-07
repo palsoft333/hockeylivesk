@@ -9,7 +9,7 @@ $article_id = 2269;
 $league_id = 138;
 //$timeout = 480;
 $predraftt = 1; // = draftuje sa do zásobníka. ak 1, upraviť počet manažérov aj v includes/fantasy_functions.php
-$knownrosters = 1; // = su zname zostavy (do ft_choices pridat hracov, ktori sa zucastnia)
+$knownrosters = 0; // = su zname zostavy (do ft_choices pridat hracov, ktori sa zucastnia)
 $article_rosters = 2266;
 $draft_start = "2022-01-25 20:10:00";
 $league_start = "2022-02-03 10:00:00";
@@ -75,15 +75,29 @@ if($_GET[cron]==1)
     
   function PickGoalie($uid)
     {
-    Global $round;
-    $y = mysql_query("SELECT * FROM `ft_choices` WHERE pos='GK' && id NOT IN (SELECT pid FROM ft_players) ORDER BY rand() LIMIT 1");
+    Global $round, $skratka, $knownrosters;
+    if($knownrosters==0) {
+      $m = mysql_query("SELECT * FROM 2004leagues WHERE longname LIKE '%$skratka%' && active='1'");
+      $n = mysql_fetch_array($m);
+      $b = mysql_query("SELECT shortname FROM 2004teams WHERE league='$n[id]'");
+      $i=0;
+      while($v = mysql_fetch_array($b))
+        {
+        $team[$i] = "'$v[shortname]'";
+        $i++;
+        }
+      $teams = implode($team, ",");
+      $y = mysql_query("SELECT * FROM 2004goalies WHERE teamshort IN ($teams) && name NOT IN (SELECT c.name FROM `ft_players` JOIN ft_choices c ON ft_players.pid=c.id) ORDER BY rand() LIMIT 1");
+    }
+    else $y = mysql_query("SELECT * FROM `ft_choices` WHERE pos='GK' && id NOT IN (SELECT pid FROM ft_players) ORDER BY rand() LIMIT 1");
     $u = mysql_fetch_array($y);
+    if($knownrosters==0) mysql_query("REPLACE INTO ft_choices (id, teamshort, teamlong, pos, name) VALUES ('$u[id]', '$u[teamshort]', '$u[teamlong]', 'GK', '$u[name]')");
     mysql_query("INSERT INTO ft_players (uid, pid, round, type) VALUES ('$uid', '$u[id]', '$round', '1')");
     }
     
   function PickPlayer($uid, $pos)
     {
-    Global $round, $predraftt, $skratka;
+    Global $round, $predraftt, $skratka, $knownrosters;
     $m = mysql_query("SELECT * FROM 2004leagues WHERE longname LIKE '%$skratka%' && active='1'");
     $n = mysql_fetch_array($m);
     $b = mysql_query("SELECT shortname FROM 2004teams WHERE league='$n[id]'");
@@ -98,7 +112,7 @@ if($_GET[cron]==1)
     else $ttable = "2004players";
     $c = mysql_query("SELECT * FROM $ttable WHERE pos='$pos' && teamshort IN ($teams) && name NOT IN (SELECT c.name FROM `ft_players` JOIN ft_choices c ON ft_players.pid=c.id) ORDER BY rand() LIMIT 1");
     $x = mysql_fetch_array($c);
-    mysql_query("INSERT INTO ft_choices (id, teamshort, teamlong, pos, name) VALUES ('$x[id]', '$x[teamshort]', '$x[teamlong]', '$x[pos]', '$x[name]')");
+    if($knownrosters==0) mysql_query("REPLACE INTO ft_choices (id, teamshort, teamlong, pos, name) VALUES ('$x[id]', '$x[teamshort]', '$x[teamlong]', '$x[pos]', '$x[name]')");
     mysql_query("INSERT INTO ft_players (uid, pid, round, type) VALUES ('$uid', '$x[id]', '$round', '1')");
     }
     
@@ -193,7 +207,7 @@ if($params[0]=="draft")
         $n = mysql_fetch_array($m);
         $picks = json_decode($n[predraft], true);
     }
-    else $picks = array(0=>array('pid'=>0,'round'=>1), 1=>array('pid'=>0,'round'=>2),2=>array('pid'=>0,'round'=>3),3=>array('pid'=>0,'round'=>4),4=>array('pid'=>0,'round'=>5),5=>array('pid'=>0,'round'=>6),6=>array('pid'=>0,'round'=>7),7=>array('pid'=>0,'round'=>8),8=>array('pid'=>0,'round'=>9),9=>array('pid'=>0,'round'=>10));
+    else $picks = array(0=>array('pid'=>0,'round'=>1,'gk'=>0), 1=>array('pid'=>0,'round'=>2,'gk'=>0),2=>array('pid'=>0,'round'=>3,'gk'=>0),3=>array('pid'=>0,'round'=>4,'gk'=>0),4=>array('pid'=>0,'round'=>5,'gk'=>0),5=>array('pid'=>0,'round'=>6,'gk'=>0),6=>array('pid'=>0,'round'=>7,'gk'=>0),7=>array('pid'=>0,'round'=>8,'gk'=>0),8=>array('pid'=>0,'round'=>9,'gk'=>0),9=>array('pid'=>0,'round'=>10,'gk'=>0));
 
     // zistit obsadene pozicie
     $k=0;
@@ -211,9 +225,9 @@ if($params[0]=="draft")
         // overit, ci uz hrac nebol draftovany manazerom pred nim *alebo* samotnym manazerom v skorsom kole *alebo* sa hrac nezucastni
         $c = mysql_query("SELECT * FROM ft_players WHERE pid='".$picks[$k][pid]."' && (uid!='".$uid."' || uid='".$uid."' && round<'".$picks[$k][round]."' || type='2')");
         if(mysql_num_rows($c)==0) {
-            $q = mysql_query("SELECT * FROM 2004players WHERE id='".$picks[$k][pid]."'");
+            $q = mysql_query("SELECT * FROM ft_choices WHERE id='".$picks[$k][pid]."'");
             $f = mysql_fetch_array($q);
-            if($picks[$k][pid]>60000 && $picks[$k][pid]<60020) $numgk--;
+            if($f[pos]=="GK") $numgk--;
             if($f[pos]=="D" || $f[pos]=="LD" || $f[pos]=="RD") $numd--;
             if($f[pos]=="F" || $f[pos]=="CE" || $f[pos]=="RW" || $f[pos]=="LW") $numf--;
         }
@@ -240,7 +254,7 @@ if($params[0]=="draft")
         <div class="row text-center mb-3 p-fluid">
             <div class="col-4 border rounded bg-gray-100 p-1"><span id="numf" class="font-weight-bold h5 text-primary">'.$numf.'</span><br>'.LANG_FANTASY_FORWARDS1.'</div>
             <div class="col-4 border rounded bg-gray-100 p-1"><span id="numd" class="font-weight-bold h5 text-success">'.$numd.'</span><br>'.LANG_FANTASY_DEFENSE1.'</div>
-            <div class="col-4 border rounded bg-gray-100 p-1"><span id="numgk" class="font-weight-bold h5 text-danger">'.$numgk.'</span><br>'.LANG_FANTASY_GOALIETEAM.'</div>
+            <div class="col-4 border rounded bg-gray-100 p-1"><span id="numgk" class="font-weight-bold h5 text-danger">'.$numgk.'</span><br>'.LANG_PLAYERSTATS_GK.'</div>
         </div>
         <form id="picks-form">';
         $i=1;
@@ -258,12 +272,12 @@ if($params[0]=="draft")
                         $z = mysql_fetch_array($x);
                         $picks[$j][pid] = $z[pid];
                     }
-                    if($picks[$j][pid]>60000 && $picks[$j][pid]<60020) { $b = mysql_query("SELECT * FROM ft_choices WHERE id='".$picks[$j][pid]."'"); $pos = "GK"; }
+                    if($picks[$j][gk]==1) { $b = mysql_query("SELECT * FROM 2004goalies WHERE id='".$picks[$j][pid]."'"); $pos = "GK"; }
                     else $b = mysql_query("SELECT * FROM 2004players WHERE id='".$picks[$j][pid]."'");
                     $v = mysql_fetch_array($b);
                     if($v[pos]=="D" || $v[pos]=="LD" || $v[pos]=="RD") $pos = "D";
                     if($v[pos]=="F" || $v[pos]=="CE" || $v[pos]=="RW" || $v[pos]=="LW") $pos = "F";
-                    if(mysql_num_rows($b)>0) $player = '('.$v[pos].') '.$v[name];
+                    if(mysql_num_rows($b)>0) $player = '('.$pos.') '.$v[name];
                     else $player = '';
                     $hidden = $pos."-0-".$picks[$j][pid];
                     // overit, ci uz hrac nebol draftovany manazerom pred nim *alebo* samotnym manazerom v skorsom kole *alebo* sa hrac nezucastni
@@ -282,11 +296,11 @@ if($params[0]=="draft")
                         while($k < $i) {
                           $zp = mysql_query("SELECT p.uid, t.pos, JSON_UNQUOTE(JSON_EXTRACT(JSON_EXTRACT(CAST(predraft as CHAR), '$[".$k."]'),'$.pid')) as pid, JSON_UNQUOTE(JSON_EXTRACT(JSON_EXTRACT(CAST(predraft as CHAR), '$[".$k."]'),'$.round')) as round FROM ft_predraft p LEFT JOIN ft_teams t ON t.uid=p.uid WHERE p.uid!='".$uid."' ORDER BY pos");
                           while($zph = mysql_fetch_array($zp)) {
-                            if(($k+1) % 2 == 0 && ($k+1)==$zph[round] && $zph[pos]>$user_pos[pos] && $zph[pid]==$picks[$j][pid]) {
+                            if(($k+1) % 2 == 0 && ($k+1)==$zph[round] && $zph[pos]<$user_pos[pos] && $zph[pid]==$picks[$j][pid]) {
                               $already=1;
                               break;
                             }
-                            if(($k+1) % 2 != 0 && ($k+1)==$zph[round] && $zph[pos]<$user_pos[pos] && $zph[pid]==$picks[$j][pid]) {
+                            if(($k+1) % 2 != 0 && ($k+1)==$zph[round] && $zph[pos]>$user_pos[pos] && $zph[pid]==$picks[$j][pid]) {
                               $already=1;
                               break;
                             }
@@ -375,8 +389,7 @@ if($params[0]=="picks")
                 <div class='row'>
                     <div class='col-12' style='max-width: 1000px;'>";
 
-  $r = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
-  $r = mysql_query("SELECT ft.*, e_xoops_users.uname, e_xoops_users.user_avatar FROM e_xoops_users JOIN (SELECT et.*, 2004players.goals, 2004players.asists, SUM(wins)*2+SUM(so)*2+SUM(goals)+SUM(asists) as body FROM 2004players RIGHT JOIN (SELECT dt.pid, dt.uid, ft_choices.* FROM ft_choices RIGHT JOIN (SELECT * FROM ft_players)dt ON dt.pid=ft_choices.id)et ON et.pid=2004players.id GROUP BY uid ORDER BY body DESC)ft ON ft.uid=e_xoops_users.uid");
+  $r = mysql_query("SELECT t.uid, t.points, t.prev_points, u.uname, u.user_avatar FROM ft_teams t LEFT JOIN e_xoops_users u ON u.uid=t.uid WHERE t.active='1' ORDER BY t.points DESC, t.pos ASC");
   //$content .= '<div class="alert alert-info">Keďže nastala na prvej priečke rovnosť bodov medzi dvoma manažérmi, museli sme zaviesť rozhodovacie pravidlo, ktorým je viac bodov jednotlivých draftovaných hráčov (bez brankárov). Tento rozstrel vyhral v pomere 66:58 manažér <b>lukias24</b>, ktorému gratulujeme! Aby sa ale <b>dodys</b> nehneval, takisto si môže vybrať z našich vecných cien :)</div>';
    
   if($uid)
@@ -401,10 +414,10 @@ if($params[0]=="picks")
             $exc[] = $exclude[team1short];
             $exc[] = $exclude[team2short];
             }
-          $y = mysql_query("SELECT ft_players.*, t1.*, t2.goals, t2.asists, t2.goals+t2.asists as points, IF(t1.pos='F',1,IF(t1.pos='D',2,3)) as zor FROM ft_players JOIN ft_choices t1 ON t1.id=ft_players.pid LEFT JOIN 2004players t2 ON ft_players.pid=t2.id WHERE uid='$uid' ORDER BY zor ASC, ft_players.id ASC");
+          $y = mysql_query("SELECT ft_players.*, ft_players.g+ft_players.a as points, t1.*, IF(t1.pos='F',1,IF(t1.pos='D',2,3)) as zor FROM ft_players JOIN ft_choices t1 ON t1.id=ft_players.pid WHERE uid='$uid' ORDER BY zor ASC, ft_players.id ASC");
           while($u = mysql_fetch_array($y))
             {
-            $players[] = array($u[teamshort], $u[name], $u[pos], $u[goals], $u[asists], $u[points], $u[wins], $u[so], $u[pid]);
+            $players[] = array($u[teamshort], $u[name], $u[pos], $u[g], $u[a], $u[points], $u[w], $u[so], $u[pid]);
             }
           $i=0;
           while($i < 6)
@@ -416,7 +429,7 @@ if($params[0]=="picks")
                   <img class="flag-iihf '.$players[$i][0].'-small" src="/images/blank.png" alt="'.$players[$i][0].'"> '.$players[$i][1].'
                 </div>
                 <div class="card-body">
-                  <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/includes/player_photo.php?name='.$players[$i][1].'" class="lazy rounded-circle img-thumbnail" style="width:100px; height:100px; max-width:100px;">
+                  <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/includes/player_photo.php?name='.$players[$i][1].'" class="lazy rounded-circle img-thumbnail" style="width:100px; height:100px; max-width:100px; object-fit: cover; object-position: center top;">
                   <p class="p-fluid">'.LANG_PLAYERSTATS_F.'<br>
                   <span class="badge badge-pill badge-'.$leaguecolor.'">'.$players[$i][3].'+'.$players[$i][4].'</span></p>
                 </div>
@@ -440,7 +453,7 @@ if($params[0]=="picks")
                   <img class="flag-iihf '.$players[$i][0].'-small" src="/images/blank.png" alt="'.$players[$i][0].'"> '.$players[$i][1].'
                 </div>
                 <div class="card-body">
-                  <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/includes/player_photo.php?name='.$players[$i][1].'" class="lazy rounded-circle img-thumbnail" style="width:100px; height:100px; max-width:100px;">
+                  <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/includes/player_photo.php?name='.$players[$i][1].'" class="lazy rounded-circle img-thumbnail" style="width:100px; height:100px; max-width:100px; object-fit: cover; object-position: center top;">
                   <p class="p-fluid">'.LANG_PLAYERSTATS_D.'<br>
                   <span class="badge badge-pill badge-'.$leaguecolor.'">'.$players[$i][3].'+'.$players[$i][4].'</span></p>
                 </div>
@@ -461,11 +474,14 @@ if($params[0]=="picks")
               '.$players[9][1].'
             </div>
             <div class="card-body">
-              <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/images/vlajky/'.$players[9][0].'_big.gif" class="lazy rounded-circle img-thumbnail" style="width:100px; height:100px; max-width:100px;">
+              <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/includes/player_photo.php?name='.$players[$i][1].'" class="lazy rounded-circle img-thumbnail" style="width:100px; height:100px; max-width:100px; object-fit: cover; object-position: center top;">
               <p class="p-fluid">'.LANG_PLAYERSTATS_GK.'<br>
                 <span class="badge badge-pill badge-'.$leaguecolor.'">'.$players[$i][6].' '.LANG_MATCHES_WINS1.'</span><br>
                 <span class="badge badge-pill badge-'.$leaguecolor.'">'.$players[$i][7].' '.LANG_FANTASY_SO.'</span>
               </p>
+            </div>
+            <div class="footer">
+              '.(in_array($players[$i][0], $exc) ? '<span data-toggle="tooltip" data-placement="bottom" title="Momentálne sa nedá vymeniť. Hrá zápas."><a href="#" class="btn btn-sm btn-block btn-secondary disabled"><i class="fas fa-ban"></i></a></span>':'<a href="#" class="btn btn-sm btn-block btn-light change-player" data-pid="'.$players[$i][8].'" data-toggle="tooltip" data-placement="bottom" title="Vymeniť brankára"><i class="fas fa-retweet"></i></a>').'
             </div>
           </div>
          </div>
@@ -500,11 +516,11 @@ if($params[0]=="picks")
     $add="";
     if($uid==$t[uid]) { $add=" bg-gray-200"; }
     // zmazat
-     //$t[body]=0;
-     //if($t[uid]==2932) $t[body]=$t[body]-1;
+     //$t[points]=0;
+     //if($t[uid]==2932) $t[points]=$t[points]-1;
     if($t[user_avatar]!="") $avatar = "<img class='rounded-circle mr-1' src='/images/user_avatars/".$t[uid].".".$t[user_avatar]."' alt='".$t[uname]."' style='width:2rem;height:2rem;vertical-align:-11px;'>";
     else $avatar = "<i class='text-gray-300 fas fa-user-circle fa-2x mr-1' style='width:2rem;height:2rem;vertical-align:-7px;'></i>";
-    $content .= "<tr><td class='text-center$add'>$i.</td><td class='$add'><a href='#$t[uname]'>".$avatar."$t[uname]</a></td><td class='$add'><b>$t[body]</b></td></tr>";
+    $content .= "<tr><td class='text-center$add'>$i.</td><td class='$add'><a href='#$t[uname]'>".$avatar."$t[uname]</a></td><td class='$add'><b>$t[points]</b></td></tr>";
     $i++;
     }
   $content .= '</tbody></table>
@@ -576,13 +592,16 @@ if($params[0]=="picks")
               </tr>
             </thead>
             <tbody>';
-  $q = mysql_query("SELECT ft_changes.*, p.teamshort as old_tshort, p.name as old_name, p2.teamshort as new_tshort, p2.name as new_name, u.uname FROM `ft_changes` JOIN 2004players p ON ft_changes.old_pid=p.id JOIN ft_choices p2 ON ft_changes.new_pid=p2.id JOIN e_xoops_users u ON ft_changes.uid=u.uid ORDER BY tstamp DESC LIMIT 10");
+  $q = mysql_query("SELECT ft_changes.*, p.gk, u.uname FROM `ft_changes` JOIN ft_players p ON ft_changes.old_pid=p.pid JOIN e_xoops_users u ON ft_changes.uid=u.uid ORDER BY tstamp DESC LIMIT 10");
   while($f = mysql_fetch_array($q))
     {
+    if($f[gk]==1) $p = mysql_query("SELECT g1.teamshort as old_tshort, g1.name as old_name, g2.teamshort as new_tshort, g2.name as new_name FROM 2004goalies g1 LEFT JOIN 2004goalies g2 ON g2.id='".$f[new_pid]."' WHERE g1.id='".$f[old_pid]."'");
+    else $p = mysql_query("SELECT p1.teamshort as old_tshort, p1.name as old_name, p2.teamshort as new_tshort, p2.name as new_name FROM 2004players p1 LEFT JOIN 2004players p2 ON p2.id='".$f[new_pid]."' WHERE p1.id='".$f[old_pid]."'");
+    $o = mysql_fetch_array($p);
     if(date('Y-m-d',strtotime($f[tstamp]))==date("Y-m-d", mktime())) $hl="dnes o <b>".date('G:i', strtotime($f[tstamp]))."</b>";
     elseif(date('Y-m-d',strtotime($f[tstamp]))==date('Y-m-d', mktime(0, 0, 0, date('m'), date('d')-1, date('Y')))) $hl="včera o ".date('G:i', strtotime($f[tstamp]));
     else $hl=date('j.n.',strtotime($f[tstamp])). " ".LANG_AT." ".date('G:i', strtotime($f[tstamp]));
-    $content .= '<tr><td class="text-nowrap">'.$hl.'</td><td><a href="/user/'.$f[uid].'">'.$f[uname].'</a></td><td class="text-nowrap"><img class="flag-iihf '.$f[old_tshort].'-small" src="/images/blank.png" alt="'.$f[old_tshort].'"> <a href="/player/'.$f[old_pid].'0-'.SEOtitle($f[old_name]).'">'.$f[old_name].'</a></td><td class="text-nowrap"><img class="flag-iihf '.$f[new_tshort].'-small" src="/images/blank.png" alt="'.$f[new_tshort].'"> <a href="/player/'.$f[new_pid].'0-'.SEOtitle($f[new_name]).'">'.$f[new_name].'</a></td></tr>';
+    $content .= '<tr><td class="text-nowrap">'.$hl.'</td><td><a href="/user/'.$f[uid].'">'.$f[uname].'</a></td><td class="text-nowrap"><img class="flag-iihf '.$o[old_tshort].'-small" src="/images/blank.png" alt="'.$o[old_tshort].'"> <a href="/'.($f[gk]==1 ? 'goalie':'player').'/'.$f[old_pid].'0-'.SEOtitle($o[old_name]).'">'.$o[old_name].'</a></td><td class="text-nowrap"><img class="flag-iihf '.$o[new_tshort].'-small" src="/images/blank.png" alt="'.$o[new_tshort].'"> <a href="/'.($f[gk]==1 ? 'goalie':'player').'/'.$f[new_pid].'0-'.SEOtitle($o[new_name]).'">'.$o[new_name].'</a></td></tr>';
     }
   $content .= '</tbody></table></div></div></div></div>';
   
@@ -612,22 +631,22 @@ if($params[0]=="picks")
                   <th class="text-center">'.LANG_MATCHES_SO.'</th>
                 </tr>
               </thead>';
-    $w = mysql_query("SELECT ft_players.*, t1.*, t2.goals, t2.asists, t2.goals+t2.asists as points, IF(t1.pos='F',1,IF(t1.pos='D',2,3)) as zor FROM ft_players JOIN ft_choices t1 ON t1.id=ft_players.pid LEFT JOIN 2004players t2 ON ft_players.pid=t2.id WHERE uid='$f[uid]' ORDER BY zor ASC, points DESC, goals DESC, asists DESC, wins DESC, so DESC");
+    $w = mysql_query("SELECT ft_players.*, ft_players.g+ft_players.a as points, t1.*, IF(t1.pos='F',1,IF(t1.pos='D',2,3)) as zor FROM ft_players JOIN ft_choices t1 ON t1.id=ft_players.pid WHERE uid='$f[uid]' ORDER BY zor ASC, points DESC, g DESC, a DESC, w DESC, so DESC");
     $i = 1;
     $pts=$goals=$asists=$wins=$so=0;
     while($e = mysql_fetch_array($w))
       {
       // tiez prec
-      //if($e[name]=="VAN RIEMSDYK James") $e[asists]=$e[asists]-1;
-      $pts = $pts+$e[goals]+$e[asists]+($e[wins]*2)+($e[so]*2);
-      $goals = $goals+$e[goals];
-      $asists = $asists+$e[asists];
-      $wins = $wins+$e[wins];
+      //if($e[name]=="VAN RIEMSDYK James") $e[a]=$e[a]-1;
+      $pts = $pts+$e[g]+$e[a]+($e[w]*2)+($e[so]*2);
+      $goals = $goals+$e[g];
+      $asists = $asists+$e[a];
+      $wins = $wins+$e[w];
       $so = $so+$e[so];
-      if($e[pos]!="GK") { $e[wins]=""; $e[so]=""; }
+      if($e[pos]!="GK") { $e[w]=""; $e[so]=""; }
       // zmazat
-       //$e[goals]=$e[asists]=$goals=$asists=$pts=0;
-      $tbody .= '<tr><td class="text-center">'.$i.'.</td><td class="text-center">'.$e[pos].'</td><td class="text-nowrap" style="width:30%;"><img class="flag-iihf '.$e[teamshort].'-small" src="/images/blank.png" alt="'.$e[teamshort].'"> '.$e[name].'</td><td class="text-center">'.$e[goals].'</td><td class="text-center">'.$e[asists].'</td><td class="text-center">'.$e[wins].'</td><td class="text-center">'.$e[so].'</td></tr>';
+       //$e[g]=$e[a]=$goals=$asists=$pts=0;
+      $tbody .= '<tr><td class="text-center">'.$i.'.</td><td class="text-center">'.$e[pos].'</td><td class="text-nowrap" style="width:30%;"><img class="flag-iihf '.$e[teamshort].'-small" src="/images/blank.png" alt="'.$e[teamshort].'"> '.$e[name].'</td><td class="text-center">'.$e[g].'</td><td class="text-center">'.$e[a].'</td><td class="text-center">'.$e[w].'</td><td class="text-center">'.$e[so].'</td></tr>';
       $i++;
       }
     $tfoot = '<tfoot class="alert-'.$leaguecolor.' font-weight-bold">

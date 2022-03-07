@@ -19,6 +19,7 @@ define("LANG_TIME_SECONDS","sekundami");
 define("LANG_TIME_RIGHTNOW","práve teraz");
 define("LANG_TIME_TODAY","dnes");
 define("LANG_TIME_YESTERDAY","včera");
+define("LANG_AGE_YEARS","rokov");
 
 define("LANG_AUTHOR","Autor");
 define("LANG_CATEGORY","Sekcia");
@@ -237,6 +238,11 @@ define("LANG_REPORT_PP2","V presilovke 5 na 3");
 define("LANG_REPORT_SH1","V oslabení 4 na 5");
 define("LANG_REPORT_SH2","V oslabení 3 na 5");
 define("LANG_REPORT_PS","Trestné strieľanie");
+define("LANG_REPORT_GAMESTATS","Zápasové štatistiky");
+define("LANG_REPORT_SAVES","Zákroky");
+define("LANG_REPORT_SHOTS","strely");
+define("LANG_REPORT_FACEOFFS","Vhadzovania");
+define("LANG_REPORT_SPECTATORS","Divákov");
 
 define("LANG_STATS_TITLE","Štatistika ligy");
 define("LANG_STATS_TITLE2","Štatistika turnaja");

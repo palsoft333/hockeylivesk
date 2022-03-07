@@ -385,6 +385,16 @@ $p++;
 			{
 			// SKONCILI SKUPINY A ZOBRAZI SA FINALNE UMIESTNENIE
 			$n = mysql_query("SELECT * FROM 2004teams WHERE league='$b[id]' ORDER BY final_pos ASC");
+            $teamsnum = mysql_num_rows($n);
+            $i=1;
+            $finalpos=array();
+			while($h = mysql_fetch_array($n))
+				{
+                $posi = $h[final_pos];
+                if($posi>0) $finalpos[$posi] = array($h[id], $h[longname], $h[shortname]);
+                $i++;
+                }
+            echo $pos;
 			$ttable .= "<table class='w-100 table-striped table-hover'>
 			<thead>
         <tr> 
@@ -397,7 +407,7 @@ $p++;
       </thead>
       <tbody>";
 			$c=1;
-			while($h = mysql_fetch_array($n))
+			while($c <= $teamsnum)
 				{
 				$line="";
 				if($c==1) $ci = "<img src='https://www.hockey-live.sk/img/medal_gold_3.png' class='align-top' alt='".LANG_TEAMTABLE_GOLD."' title='".LANG_TEAMTABLE_GOLD."'>";
@@ -405,16 +415,16 @@ $p++;
 				elseif($c==3) $ci = "<img src='https://www.hockey-live.sk/img/medal_bronze_3.png' class='align-top' alt='".LANG_TEAMTABLE_BRONZE."' title='".LANG_TEAMTABLE_BRONZE."'>";
         else $ci = "$c.";
         if($c==14) $line=" style='border-bottom:1px dashed black !important;'";
-				if($h[final_pos]) 
+				if(array_key_exists($c, $finalpos))
 					{
-					if($_SESSION[lang] != 'sk') $h[longname] = TeamParser($h[longname]);
-					$ttable .= "<tr><td class='text-center'$line>$ci</td><td$line><a href='/team/$h[id]$el-".SEOtitle($h[longname])."'>$h[longname]</a></td></tr>";
+                    if($pos==$finalpos[$c][2]) return $c;
+					if($_SESSION[lang] != 'sk') $finalpos[$c][1] = TeamParser($finalpos[$c][1]);
+					$ttable .= "<tr><td class='text-center'$line>$ci</td><td$line><a href='/team/".$finalpos[$c][0].$el."-".SEOtitle($finalpos[$c][1])."'>".$finalpos[$c][1]."</a></td></tr>";
 					}
 				else
 					{
 					$ttable .= "<tr><td class='text-center'$line>$ci</td><td$line>&nbsp;</td></tr>";
 					}
-				if($pos==$h[shortname]) return $c;
 				$c++;
 				}
 			$ttable .= "</tbody>
@@ -1002,7 +1012,7 @@ function User_Menu()
 function TeamParser($name)
   {
   Global $foreign_teams;
-  $slovak_teams = array("Bielorusko","Dánsko","Česko","Európa","Fínsko","Francúzsko","Japonsko","Kanada","Kazachstan","Lotyšsko","Maďarsko","Nemecko","Nórsko","Rakúsko","Rusko","Severná Amerika","Slovensko","Slovinsko","Taliansko","Ukrajina","USA","Švajčiarsko","Švédsko");
+  $slovak_teams = array("Bielorusko","Dánsko","Čína","Česko","Európa","Fínsko","Francúzsko","Japonsko","Kanada","Kazachstan","Lotyšsko","Maďarsko","Nemecko","Nórsko","Rakúsko","Rusko","Severná Amerika","Slovensko","Slovinsko","Taliansko","Ukrajina","USA","Švajčiarsko","Švédsko");
   $newname = str_replace($slovak_teams,$foreign_teams,$name);
   return $newname;
   }

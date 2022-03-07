@@ -49,24 +49,24 @@ function Generate_extrastats($mid, $el) {
   $estats = '<div class="card my-4 shadow animated--grow-in">
                   <div class="card-body">
                     <p class="swipe d-none mb-1 text-right text-gray-800"><i class="fas fa-hand-point-up"></i> <i class="fas fa-exchange-alt align-text-top text-xs"></i></p>
-                    <div class="h5 h5-fluid">Zápasové štatistiky</div>
+                    <div class="h5 h5-fluid">'.LANG_REPORT_GAMESTATS.'</div>
                     <table class="table-hover table-light table-striped table-responsive-sm w-100 p-fluid"">
                       <thead>
                         <tr>
                           <th colspan="3"></th>
-                          <th colspan="'.($ot>0 ? '4':'3').'" class="text-center">Zákroky</th>
+                          <th colspan="'.($ot>0 ? '4':'3').'" class="text-center">'.LANG_REPORT_SAVES.'</th>
                           <th colspan="2"></th>
                         </tr>
                         <tr>
                           <th></th>
-                          <th class="text-nowrap">Brankár</th>
-                          <th class="text-center">Góly/strely</th>
+                          <th class="text-nowrap">'.LANG_FANTASY_GOALIE.'</th>
+                          <th class="text-center">'.LANG_TEAMSTATS_GOALS.'/'.LANG_REPORT_SHOTS.'</th>
                           <th class="text-center">1</th>
                           <th class="text-center">2</th>
                           <th class="text-center">3</th>
                           '.($ot>0 ? '<th class="text-center">OT</th>':'').'
-                          <th class="text-center">Vhadzovania</th>
-                          <th class="text-center">Divákov</th>
+                          <th class="text-center">'.LANG_REPORT_FACEOFFS.'</th>
+                          <th class="text-center">'.LANG_REPORT_SPECTATORS.'</th>
                         </tr>
                   </thead>
                   <tbody>';

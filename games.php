@@ -108,6 +108,7 @@ elseif($gid)
                     $z1=$z2=0;
                     while($j = mysql_fetch_array($i))
                       {
+                      if($_SESSION[lang]!='sk') { $j[team1long] = TeamParser($j[team1long]); $j[team2long] = TeamParser($j[team2long]); }
                       if($j[roz]==1)
                         {
                         $lastt1[$z1] = array($j[team1short], $j[team1long], $j[team2short], $j[team2long], $j[goals1], $j[goals2], $j[datetime], $j[id]);
@@ -178,6 +179,7 @@ elseif($gid)
                     else $i = mysql_query("SELECT * FROM $matches_table WHERE (team1short='$b[team1short]' && team2short='$b[team2short]' && kedy='konečný stav') || (team1short='$b[team2short]' && team2short='$b[team1short]' && kedy='konečný stav') ORDER BY datetime DESC LIMIT 5");
                     while($j = mysql_fetch_array($i))
                       {
+                      if($_SESSION[lang]!='sk') { $j[team1long] = TeamParser($j[team1long]); $j[team2long] = TeamParser($j[team2long]); }
                       $h2h[] = array($j[team1short], $j[team1long], $j[team2short], $j[team2long], $j[goals1], $j[goals2], $j[datetime], $j[id]);
                       }
                     $h2h = array_reverse($h2h);

@@ -9,6 +9,21 @@ if($_GET[save]==1)
   $uid = $_SESSION['logged'];
   $options = json_decode($_GET[json], true);
   mysql_query("INSERT INTO ft_predraft (uid, predraft) VALUES ('$uid', '$_GET[json]') ON DUPLICATE KEY UPDATE predraft='$_GET[json]'") or die(mysql_error());
+  // save picks to ft_choices when there is no known rosters
+  if($_SESSION["knownrosters"]==0) {
+    $i=0;
+    while($i < count($options)) {
+      if($options[$i]["gk"]==1) $sp = mysql_query("SELECT * FROM 2004goalies WHERE id='".$options[$i]["pid"]."'");
+      else $sp = mysql_query("SELECT * FROM 2004players WHERE id='".$options[$i]["pid"]."'");
+      $selp = mysql_fetch_array($sp);
+      if($options[$i]["gk"]==1) $pos = "GK";
+      else $pos = $selp[pos];
+      if($pos=="LD" || $pos=="RD") $pos="D";
+      if($pos=="CE" || $pos=="RW" || $pos=="LW") $pos="F";
+      mysql_query("REPLACE INTO `ft_choices` (`id`, `teamshort`, `teamlong`, `pos`, `name`) VALUES ('".$selp[id]."', '".$selp[teamshort]."', '".$selp[teamlong]."', '".$pos."', '".$selp[name]."')");
+      $i++;
+    }
+  }
   // check if change of already drafted player isn't happening
   $w = mysql_query("SELECT * FROM ft_players");
   // only if draft hasn't finished
@@ -21,8 +36,19 @@ if($_GET[save]==1)
           // change already drafted player
           $e = mysql_query("SELECT * FROM ft_players WHERE pid='".$options[$i][pid]."'");
           if($options[$i][pid]!=$f[pid] && mysql_num_rows($e)==0) {
-            mysql_query("UPDATE ft_players SET pid='".$options[$i][pid]."', type='0' WHERE round='".$options[$i]["round"]."' && uid='".$uid."'");
+            $pla = mysql_fetch_array($e);
+            mysql_query("UPDATE ft_players SET pid='".$options[$i][pid]."', type='0', gk='".$pla[gk]."', g='0', a='0', w='0', so='0' WHERE round='".$options[$i]["round"]."' && uid='".$uid."'");
             mysql_query("INSERT INTO ft_changes (uid, old_pid, new_pid, tstamp) VALUES ('".$uid."', '".$f[pid]."', '".$options[$i][pid]."', NOW())");
+            if($_SESSION["knownrosters"]==0) {
+                if($pla[gk]==1) $sp = mysql_query("SELECT * FROM 2004goalies WHERE id='".$options[$i][pid]."'");
+                else $sp = mysql_query("SELECT * FROM 2004players WHERE id='".$options[$i][pid]."'");
+                $selp = mysql_fetch_array($sp);
+                if($pla[gk]==1) $pos = "GK";
+                else $pos = $selp[pos];
+                if($pos=="LD" || $pos=="RD") $pos="D";
+                if($pos=="CE" || $pos=="RW" || $pos=="LW") $pos="F";
+                mysql_query("REPLACE INTO `ft_choices` (`id`, `teamshort`, `teamlong`, `pos`, `name`) VALUES ('".$selp[id]."', '".$selp[teamshort]."', '".$selp[teamlong]."', '".$pos."', '".$selp[name]."')");
+            }
           }
         }
       $i++;
@@ -86,7 +112,19 @@ function PreDraft()
           }
         else
           {
-          mysql_query("INSERT INTO ft_players (uid, pid, round) VALUES ('$u[uid]', '$pid', '$round')");
+          $pl = mysql_query("SELECT * FROM ft_choices WHERE id='$pid'");
+          $pla = mysql_fetch_array($pl);
+          if($pla[pos]=="GK") $gk=1;
+          else $gk=0;
+          mysql_query("INSERT INTO ft_players (uid, pid, round, gk) VALUES ('$u[uid]', '$pid', '$round', '$gk')");
+          if($_SESSION["knownrosters"]==0) {
+              if($gk==1) $sp = mysql_query("SELECT * FROM 2004goalies WHERE id='".$pid."'");
+              else $sp = mysql_query("SELECT * FROM 2004players WHERE id='".$pid."'");
+              $selp = mysql_fetch_array($sp);
+              if($gk==1) $pos = "GK";
+              else $pos = $selp[pos];
+              mysql_query("REPLACE INTO `ft_choices` (`id`, `teamshort`, `teamlong`, `pos`, `name`) VALUES ('".$selp[id]."', '".$selp[teamshort]."', '".$selp[teamlong]."', '".$pos."', '".$selp[name]."');");
+          }
           echo "ok";
           PreDraft();
           }
@@ -274,7 +312,8 @@ function Show_Drafted()
     $line=$link1=$link2=$add=$add1="";
     if($pi==$manazerov) $line=" border-bottom:1px dashed black !important;";
     if($e[type]==2) $add1=' class="bg-gray-500"';
-    if($e[pos]!="GK") { $link1='<a href="/player/'.$e[pid].'0-'.SEOtitle($e[hrac]).'">'; $link2="</a>"; }
+    if($e[pos]=="GK") { $link1='<a href="/goalie/'.$e[pid].'0-'.SEOtitle($e[hrac]).'">'; $link2="</a>"; }
+    else { $link1='<a href="/player/'.$e[pid].'0-'.SEOtitle($e[hrac]).'">'; $link2="</a>"; }
     if($e[type]!=0)
       {
       if($e[type]==1) { $icon = "robot"; $hl = LANG_FANTASY_AUTOPICK; }

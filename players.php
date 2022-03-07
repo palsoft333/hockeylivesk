@@ -161,7 +161,7 @@ while ($t = mysql_fetch_array($r))
 	$content .= '<tr>
                   <td class="text-center" style="width:2%;">'.$p.'.</td>
                   <td style="width:11%;" class="text-nowrap"><img class="flag-el '.$t[teamshort].'-small" src="/images/blank.png" alt="'.$t[teamshort].'"> '.$t[teamshort].'</td>
-                  <td style="width:25%;" class="text-nowrap"><a href="/goalie/'.$t[id].'-'.SEOTitle($t[name]).'">'.$t[name].'</a>'.$injury.'</td>
+                  <td style="width:25%;" class="text-nowrap"><a href="/goalie/'.$t[id].'1-'.SEOTitle($t[name]).'">'.$t[name].'</a>'.$injury.'</td>
                   <td class="text-center" style="width:6%;">G</td>
                   <td class="text-center" style="width:7%;">'.$t[gp].'</td>
                   <td class="text-center" style="width:7%;">'.$t[sog].'</td>
@@ -374,7 +374,7 @@ elseif($pid)
     else $hl1=LANG_PLAYERSTATS_RHOLD;
     $pinfo = array();
     if($elinfo[pos] && $elinfo[pos]!="") $pinfo[] = $hl;
-    if($elinfo[born] && $elinfo[born]!="1970-01-01") $pinfo[] = date_diff(date_create($elinfo[born]), date_create('today'))->y.' rokov';
+    if($elinfo[born] && $elinfo[born]!="1970-01-01") $pinfo[] = date_diff(date_create($elinfo[born]), date_create('today'))->y.' '.LANG_AGE_YEARS;
     if($elinfo[cm] && $elinfo[cm]!=0) $pinfo[] = $elinfo[cm].' cm';
     if($elinfo[kg] && $elinfo[kg]!=0) $pinfo[] = $elinfo[kg].' kg';
     if($elinfo[hold] && $elinfo[hold]!="") $pinfo[] = $hl1;
@@ -703,7 +703,7 @@ elseif($gid)
     else $hl1=LANG_PLAYERSTATS_RHOLD;
     $pinfo = array();
     $pinfo[] = LANG_PLAYERSTATS_GK;
-    if($elinfo[born] && $elinfo[born]!="1970-01-01") $pinfo[] = date_diff(date_create($elinfo[born]), date_create('today'))->y.' rokov';
+    if($elinfo[born] && $elinfo[born]!="1970-01-01") $pinfo[] = date_diff(date_create($elinfo[born]), date_create('today'))->y.' '.LANG_AGE_YEARS;
     if($elinfo[cm] && $elinfo[cm]!=0) $pinfo[] = $elinfo[cm].' cm';
     if($elinfo[kg] && $elinfo[kg]!=0) $pinfo[] = $elinfo[kg].' kg';
     if($elinfo[hold] && $elinfo[hold]!="") $pinfo[] = $hl1;

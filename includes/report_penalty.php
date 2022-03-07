@@ -1,4 +1,5 @@
 <?
+session_start();
 include("db.php");
 if(isset($_SESSION[lang])) {
   include("lang/lang_$_SESSION[lang].php");
