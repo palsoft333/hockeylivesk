@@ -82,16 +82,72 @@ if(mysql_num_rows($q)>0)
     '.($es==1 ? $estats : '').'
     
     <div class="report-goals">
+      <div class="card my-4 shadow animated--grow-in">
+        <div class="card-header">
+          <h6 class="m-0 font-weight-bold">
+            '.LANG_TEAMSTATS_GOALS.'
+          </h6>
+        </div>
+        <div class="card-body d-flex" style="min-height: '.(42*($f[goals1]+$f[goals2])).'px;">
+          <div class="align-self-center flex-fill text-center">
+            <div class="spinner-border text-gray-400" role="status">
+              <span class="sr-only">Loading...</span>
+            </div>
+          </div>
+        </div>
+       </div>
     </div>
     
     <div class="row report-penalties">
       <div class="col-md-6 report-pen1">
+        <div class="card my-4 shadow animated--grow-in">
+          <div class="card-header">
+            <h6 class="m-0 font-weight-bold">
+              '.LANG_PENALTY.' <img class="flag-'.($el==0 ? 'iihf':'el').' '.$f[team1short].'-small" src="/img/blank.png" alt="'.$f[team1long].'"> '.$f[team1long].'
+            </h6>
+          </div>
+          <div class="card-body">
+            <div class="text-center">
+              <div class="spinner-border text-gray-400" role="status">
+                <span class="sr-only">Loading...</span>
+              </div>
+            </div>
+          </div>
+         </div>
       </div>
       <div class="col-md-6 report-pen2">
+        <div class="card my-4 shadow animated--grow-in">
+          <div class="card-header">
+            <h6 class="m-0 font-weight-bold">
+              '.LANG_PENALTY.' <img class="flag-'.($el==0 ? 'iihf':'el').' '.$f[team2short].'-small" src="/img/blank.png" alt="'.$f[team2long].'"> '.$f[team2long].'
+            </h6>
+          </div>
+          <div class="card-body">
+            <div class="text-center">
+              <div class="spinner-border text-gray-400" role="status">
+                <span class="sr-only">Loading...</span>
+              </div>
+            </div>
+          </div>
+         </div>
       </div>
     </div>
     
     <div class="report-desc">
+      <div class="card my-4 shadow animated--grow-in">
+        <div class="card-header">
+          <h6 class="m-0 font-weight-bold">
+            '.LANG_MATCH_DESCRIPTION.'
+          </h6>
+        </div>
+        <div class="card-body">
+          <div class="text-center">
+            <div class="spinner-border text-gray-400" role="status">
+              <span class="sr-only">Loading...</span>
+            </div>
+          </div>
+        </div>
+       </div>
     </div>
     <div class="card shadow my-4">
         <div class="card-body">

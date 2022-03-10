@@ -1092,11 +1092,16 @@ elseif($_GET[shooters])
                 $po_teams .= "teamshort='$pot[team1]' || teamshort='$pot[team2]' || ";
             }
             $po_teams = substr($po_teams, 0, -4);
-            $q = MySQL_Query("SELECT et.*, COUNT(et.goaler) as poc, DATE_FORMAT(et.datetime, '%e.%c.%Y') as datum, ft.injury FROM (SELECT el_goals.*, dt.datetime, IF(dt.team1short=el_goals.teamshort,dt.team1long,dt.team2long) as teamlong FROM el_goals JOIN (SELECT * FROM el_matches WHERE league='$league' && kedy='konečný stav' ORDER BY id ASC)dt ON dt.id=el_goals.matchno WHERE goaler!='' && time<'60.00' && ($po_teams) GROUP BY el_goals.goaler, el_goals.matchno ORDER BY datetime DESC)et LEFT JOIN(SELECT name, injury FROM el_injuries WHERE league='$league')ft ON et.goaler=ft.name WHERE ft.injury IS NULL GROUP BY et.goaler ORDER BY poc DESC LIMIT 20");
+            // v riadnom hracom case
+            //$q = MySQL_Query("SELECT et.*, COUNT(et.goaler) as poc, DATE_FORMAT(et.datetime, '%e.%c.%Y') as datum, ft.injury FROM (SELECT el_goals.*, dt.datetime, IF(dt.team1short=el_goals.teamshort,dt.team1long,dt.team2long) as teamlong FROM el_goals JOIN (SELECT * FROM el_matches WHERE league='$league' && kedy='konečný stav' ORDER BY id ASC)dt ON dt.id=el_goals.matchno WHERE goaler!='' && time<'60.00' && ($po_teams) GROUP BY el_goals.goaler, el_goals.matchno ORDER BY datetime DESC)et LEFT JOIN(SELECT name, injury FROM el_injuries WHERE league='$league')ft ON et.goaler=ft.name WHERE ft.injury IS NULL GROUP BY et.goaler ORDER BY poc DESC LIMIT 20");
+            $q = MySQL_Query("SELECT et.*, COUNT(et.goaler) as poc, DATE_FORMAT(et.datetime, '%e.%c.%Y') as datum, ft.injury FROM (SELECT el_goals.*, dt.datetime, IF(dt.team1short=el_goals.teamshort,dt.team1long,dt.team2long) as teamlong FROM el_goals JOIN (SELECT * FROM el_matches WHERE league='$league' && kedy='konečný stav' ORDER BY id ASC)dt ON dt.id=el_goals.matchno WHERE goaler!='' && ($po_teams) GROUP BY el_goals.goaler, el_goals.matchno ORDER BY datetime DESC)et LEFT JOIN(SELECT name, injury FROM el_injuries WHERE league='$league')ft ON et.goaler=ft.name WHERE ft.injury IS NULL GROUP BY et.goaler ORDER BY poc DESC LIMIT 20");
+            $q1 = MySQL_Query("SELECT *, el_players.name as name, ft.injury FROM el_players LEFT JOIN(SELECT name, injury FROM el_injuries WHERE league='$league')ft ON el_players.name=ft.name WHERE ft.injury IS NULL && league='$league' && ($po_teams) GROUP BY el_players.name ORDER BY points DESC LIMIT 20");
         }
         // non-playoff
         else {
-            $q = MySQL_Query("SELECT et.*, COUNT(et.goaler) as poc, DATE_FORMAT(et.datetime, '%e.%c.%Y') as datum, ft.injury FROM (SELECT el_goals.*, dt.datetime, IF(dt.team1short=el_goals.teamshort,dt.team1long,dt.team2long) as teamlong FROM el_goals JOIN (SELECT * FROM el_matches WHERE league='$league' && kedy='konečný stav' ORDER BY id ASC)dt ON dt.id=el_goals.matchno WHERE goaler!='' && time<'60.00' GROUP BY el_goals.goaler, el_goals.matchno ORDER BY datetime DESC)et LEFT JOIN(SELECT name, injury FROM el_injuries WHERE league='$league')ft ON et.goaler=ft.name WHERE ft.injury IS NULL GROUP BY et.goaler ORDER BY poc DESC LIMIT 20");
+            // v riadnom hracom case
+            //$q = MySQL_Query("SELECT et.*, COUNT(et.goaler) as poc, DATE_FORMAT(et.datetime, '%e.%c.%Y') as datum, ft.injury FROM (SELECT el_goals.*, dt.datetime, IF(dt.team1short=el_goals.teamshort,dt.team1long,dt.team2long) as teamlong FROM el_goals JOIN (SELECT * FROM el_matches WHERE league='$league' && kedy='konečný stav' ORDER BY id ASC)dt ON dt.id=el_goals.matchno WHERE goaler!='' && time<'60.00' GROUP BY el_goals.goaler, el_goals.matchno ORDER BY datetime DESC)et LEFT JOIN(SELECT name, injury FROM el_injuries WHERE league='$league')ft ON et.goaler=ft.name WHERE ft.injury IS NULL GROUP BY et.goaler ORDER BY poc DESC LIMIT 20");
+            $q = MySQL_Query("SELECT et.*, COUNT(et.goaler) as poc, DATE_FORMAT(et.datetime, '%e.%c.%Y') as datum, ft.injury FROM (SELECT el_goals.*, dt.datetime, IF(dt.team1short=el_goals.teamshort,dt.team1long,dt.team2long) as teamlong FROM el_goals JOIN (SELECT * FROM el_matches WHERE league='$league' && kedy='konečný stav' ORDER BY id ASC)dt ON dt.id=el_goals.matchno WHERE goaler!='' GROUP BY el_goals.goaler, el_goals.matchno ORDER BY datetime DESC)et LEFT JOIN(SELECT name, injury FROM el_injuries WHERE league='$league')ft ON et.goaler=ft.name WHERE ft.injury IS NULL GROUP BY et.goaler ORDER BY poc DESC LIMIT 20");
             $q1 = MySQL_Query("SELECT *, el_players.name as name, ft.injury FROM el_players LEFT JOIN(SELECT name, injury FROM el_injuries WHERE league='$league')ft ON el_players.name=ft.name WHERE ft.injury IS NULL && league='$league' GROUP BY el_players.name ORDER BY points DESC LIMIT 20");
         }
         
@@ -1178,7 +1183,8 @@ elseif($_GET[shooters])
     while($j < mysql_num_rows($times))
       {
       $w = mysql_fetch_array($times);
-      $jetam = mysql_query("SELECT * FROM el_goals WHERE matchno='$w[id]' && goaler='$f[goaler]' && time<'60.00' LIMIT 1");
+      //$jetam = mysql_query("SELECT * FROM el_goals WHERE matchno='$w[id]' && goaler='$f[goaler]' && time<'60.00' LIMIT 1");
+      $jetam = mysql_query("SELECT * FROM el_goals WHERE matchno='$w[id]' && goaler='$f[goaler]' LIMIT 1");
       if(mysql_num_rows($jetam)>0) 
          {
          if($j==0) $dal++;
@@ -1258,7 +1264,8 @@ elseif($_GET[shooters])
     while($j < mysql_num_rows($times))
       {
       $w = mysql_fetch_array($times);
-      $jetam = mysql_query("SELECT * FROM el_goals WHERE matchno='$w[id]' && (goaler='$p[name]' || asister1='$p[name]' || asister2='$p[name]') && time<'60.00' LIMIT 1");
+      //$jetam = mysql_query("SELECT * FROM el_goals WHERE matchno='$w[id]' && (goaler='$p[name]' || asister1='$p[name]' || asister2='$p[name]') && time<'60.00' LIMIT 1");
+      $jetam = mysql_query("SELECT * FROM el_goals WHERE matchno='$w[id]' && (goaler='$p[name]' || asister1='$p[name]' || asister2='$p[name]') LIMIT 1");
       if(mysql_num_rows($jetam)>0) 
          {
          if($j==0) $dal++;
