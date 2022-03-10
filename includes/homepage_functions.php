@@ -173,12 +173,16 @@ function Get_Latest_Stats() {
                 <div class="col mr-2">';
   include('slovaks.php');
   $nhl_slovaks = $slovaks;
+  $nhl_goalies = $brankari;
   include('slovaki.php');
   $slovaks = array_merge($nhl_slovaks, $slovaks);
+  $brankari = array_merge($nhl_goalies, $brankari);
   $vcera = date('Y-m-d', mktime(0, 0, 0, date('m'), date('d')-1, date('Y')));
   $dnes = date("Y-m-d", mktime());
   array_walk($slovaks, create_function('&$i,$k','$i="\'$k\'";'));
+  array_walk($brankari, create_function('&$i,$k','$i="\'$k\'";'));
   $in = implode($slovaks,",");
+  $in_goalies = implode($brankari,",");
   $w = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
   $w = mysql_query("SELECT * FROM el_matches WHERE datetime > '$vcera 07:00' && datetime < '$dnes 07:00' GROUP BY kedy");
   if(mysql_num_rows($w)==1)
@@ -189,7 +193,25 @@ function Get_Latest_Stats() {
   $q = mysql_query("(SELECT ft.*, 2004leagues.longname FROM 2004leagues JOIN (SELECT et.* FROM (SELECT el_goals.goaler, el_goals.asister1, el_goals.asister2, el_goals.teamshort, dt.league FROM el_goals JOIN (SELECT id, league FROM el_matches WHERE kedy = 'konečný stav' && datetime > '$vcera 07:00' && datetime < '$dnes 07:00' ORDER BY datetime)dt ON dt.id=el_goals.matchno)et WHERE goaler IN ($in) OR asister1 IN ($in) OR asister2 IN ($in))ft ON 2004leagues.id=ft.league)
   UNION
   (SELECT gt.*, 2004leagues.longname FROM 2004leagues JOIN (SELECT et.* FROM (SELECT 2004goals.goaler, 2004goals.asister1, 2004goals.asister2, 2004goals.teamshort, dt.league FROM 2004goals JOIN (SELECT id, league FROM 2004matches WHERE kedy = 'konečný stav' && datetime > '$vcera 07:00' && datetime < '$dnes 07:00' ORDER BY datetime)dt ON dt.id=2004goals.matchno)et WHERE teamshort='SVK')gt ON 2004leagues.id=gt.league)");
-  if(mysql_num_rows($q)==0)
+  
+  $g = mysql_query("(SELECT m.id, m.league, m.team1short, m.team2short, l.longname, ms.goalie1, ms.goalie2, 
+  IF(JSON_UNQUOTE(JSON_EXTRACT(goalie1, '$[0]')) IN ($in_goalies),1,
+    IF(JSON_UNQUOTE(JSON_EXTRACT(goalie1, '$[1]')) IN ($in_goalies),2,
+      IF(JSON_UNQUOTE(JSON_EXTRACT(goalie2, '$[0]')) IN ($in_goalies),3,4)
+      )
+    ) as kde, ms.g1_goals, ms.g1_shots, ms.g2_goals, ms.g2_shots
+  FROM el_matches m LEFT JOIN el_matchstats ms ON ms.matchid=m.id LEFT JOIN 2004leagues l ON l.id=m.league WHERE m.kedy = 'konečný stav' && m.datetime > '$vcera 07:00' && m.datetime < '$dnes 07:00' && (JSON_UNQUOTE(JSON_EXTRACT(goalie1, '$[0]')) IN ($in_goalies) || JSON_UNQUOTE(JSON_EXTRACT(goalie1, '$[1]')) IN ($in_goalies) || JSON_UNQUOTE(JSON_EXTRACT(goalie2, '$[0]')) IN ($in_goalies) || JSON_UNQUOTE(JSON_EXTRACT(goalie2, '$[1]')) IN ($in_goalies)))
+  UNION
+(SELECT m.id, m.league, m.team1short, m.team2short, l.longname, ms.goalie1, ms.goalie2, 
+  IF(JSON_UNQUOTE(JSON_EXTRACT(goalie1, '$[0]')) IN (SELECT name FROM `2004goalies` WHERE teamshort='SVK' GROUP BY name),1,
+    IF(JSON_UNQUOTE(JSON_EXTRACT(goalie1, '$[1]')) IN (SELECT name FROM `2004goalies` WHERE teamshort='SVK' GROUP BY name),2,
+      IF(JSON_UNQUOTE(JSON_EXTRACT(goalie2, '$[0]')) IN (SELECT name FROM `2004goalies` WHERE teamshort='SVK' GROUP BY name),3,4)
+      )
+    ) as kde, ms.g1_goals, ms.g1_shots, ms.g2_goals, ms.g2_shots
+  FROM 2004matches m LEFT JOIN 2004matchstats ms ON ms.matchid=m.id LEFT JOIN 2004leagues l ON l.id=m.league WHERE m.kedy = 'konečný stav' && m.datetime > '$vcera 07:00' && m.datetime < '$dnes 07:00' && (JSON_UNQUOTE(JSON_EXTRACT(goalie1, '$[0]')) IN (SELECT name FROM `2004goalies` WHERE teamshort='SVK' GROUP BY name) || JSON_UNQUOTE(JSON_EXTRACT(goalie1, '$[1]')) IN (SELECT name FROM `2004goalies` WHERE teamshort='SVK' GROUP BY name) || JSON_UNQUOTE(JSON_EXTRACT(goalie2, '$[0]')) IN (SELECT name FROM `2004goalies` WHERE teamshort='SVK' GROUP BY name) || JSON_UNQUOTE(JSON_EXTRACT(goalie2, '$[1]')) IN (SELECT name FROM `2004goalies` WHERE teamshort='SVK' GROUP BY name)))
+  ");
+      
+  if(mysql_num_rows($q)==0 && mysql_num_rows($g)==0)
     {
     $stat .= "<p class='bg-gray-100 border p-2 rounded small'>".LANG_GAMECONT_NOSTATS."</p>
               </div>
@@ -199,6 +221,82 @@ function Get_Latest_Stats() {
     }
   else
     {
+    $gstats = array();
+    $p=0;
+    while($go = mysql_fetch_array($g))
+      {
+      if(!strstr($go[longname], "Tipos"))
+        {
+        $g1json = json_decode($go[goalie1], true);
+        $g1_goalsjson = json_decode($go[g1_goals], true);
+        $g1_shotsjson = json_decode($go[g1_shots], true);
+        $g2json = json_decode($go[goalie2], true);
+        $g2_goalsjson = json_decode($go[g2_goals], true);
+        $g2_shotsjson = json_decode($go[g2_shots], true);
+        if($go[kde]==1) { $gname = $g1json[0]; $goals = $g1_goalsjson[0]; $shots = $g1_shotsjson[0]; $tshort = $go[team1short]; }
+        elseif($go[kde]==2) { $gname = $g1json[1]; $goals = $g1_goalsjson[1]; $shots = $g1_shotsjson[1]; $tshort = $go[team1short]; }
+        elseif($go[kde]==3) { $gname = $g2json[0]; $goals = $g2_goalsjson[0]; $shots = $g2_shotsjson[0]; $tshort = $go[team2short]; }
+        else { $gname = $g2json[1]; $goals = $g2_goalsjson[1]; $shots = $g2_shotsjson[1]; $tshort = $go[team2short]; }
+        $gstats[$gname][0]=$shots; $gstats[$gname][1]=$goals; $gstats[$gname][2]=($shots-$goals)/$shots; $gstats[$gname][3]=$go[league]; $gstats[$gname][4]=$go[longname]; $gstats[$gname][5]=$gname; $gstats[$gname][6]=$tshort;
+        $p++;
+        }
+      }
+      usort($gstats, function($a,$b){ $c = $a[3] - $b[3]; $c .= $b[2] - $a[2]; $c .= $b[0] - $a[0]; return $c; });
+      /*
+      [0] => Array
+          (
+              [0] => shots
+              [1] => goals
+              [2] => svs%
+              [3] => lid
+              [4] => league longname
+              [5] => player
+              [6] => teamshort
+          )    
+      */
+      
+      $i=$pos=0;
+      while($i < count($gstats))
+        {
+        $lid = $gstats[$i][3];
+        if($gstats[$i][0]=="") $gstats[$i][0]=0;
+        if($gstats[$i][1]=="") $gstats[$i][1]=0;
+        $svsp = round($gstats[$i][2]*100,2);
+        $svs = $gstats[$i][0]-$gstats[$i][1];
+        
+        if($pos==0) $stat .= '<div class="text-xs text-muted font-weight-bold mb-1">'.$gstats[$i][4].'</div>
+                            </div>
+                           </div>
+                           <div class="row no-gutters align-items-center text-xs border-bottom mb-1">
+                            <div class="col-9">'.LANG_FANTASY_GOALIE.'</div>
+                            <div class="col">S</div>
+                            <div class="col">SVS</div>
+                            <div class="col">SVS%</div>
+                           </div>';
+        $pos=$lid;
+        if($pos!=$ppos && $ppos) $stat .= ' 
+                              <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                  <div class="text-xs text-muted font-weight-bold mb-1 mt-3">'.$gstats[$i][4].'</div>
+                                </div>
+                              </div>
+                              <div class="row no-gutters align-items-center text-xs border-bottom mb-1">
+                                <div class="col-9">'.LANG_PLAYERDB_PLAYER.'</div>
+                                <div class="col">S</div>
+                                <div class="col">SVS</div>
+                                <div class="col">SVS%</div>
+                              </div>';
+        
+        $stat .= '            <div class="row no-gutters align-items-center small">
+                                <div class="col-9"><img class="flag-iihf '.$gstats[$i][6].'-small" src="/img/blank.png" alt="'.$gstats[$i][6].'"> '.$gstats[$i][5].'</div>
+                                <div class="col">'.$gstats[$i][0].'</div>
+                                <div class="col">'.$svs.'</div>
+                                <div class="col font-weight-bold">'.$svsp.'</div>
+                              </div>';
+        $ppos = $pos;
+        $i++;
+        }
+        
     $stats = array();
     $p=0;
     while($f = mysql_fetch_array($q))
@@ -214,7 +312,7 @@ function Get_Latest_Stats() {
         $p++;
         }
       }
-      if($p==0) $stat .= "<p class='bg-gray-100 border p-2 rounded small'>".LANG_GAMECONT_NOSTATS."</p>";
+      if($p==0 && count($gstats)==0) $stat .= "<p class='bg-gray-100 border p-2 rounded small'>".LANG_GAMECONT_NOSTATS."</p>";
       usort($stats, function($a,$b){ $c = $a[3] - $b[3]; $c .= $b[0] - $a[0]; $c .= $b[1] - $a[1]; return $c; });
       /*
       [0] => Array

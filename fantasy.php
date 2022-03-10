@@ -1,18 +1,18 @@
 <?php
 $params = explode("/", htmlspecialchars($_GET[id]));
 
-$nazov = "Fantasy Olympics";
-$menu = "ZOH 2022";
-$skratka = "ZOH";
+$nazov = "Fantasy Championship";
+$menu = "MS 2022";
+$skratka = "MS";
 $manazerov = 10;
 $article_id = 2269;
-$league_id = 138;
+$league_id = 136;
 //$timeout = 480;
 $predraftt = 1; // = draftuje sa do zásobníka. ak 1, upraviť počet manažérov aj v includes/fantasy_functions.php
 $knownrosters = 0; // = su zname zostavy (do ft_choices pridat hracov, ktori sa zucastnia)
 $article_rosters = 2266;
-$draft_start = "2022-01-25 20:10:00";
-$league_start = "2022-02-03 10:00:00";
+$draft_start = "2022-05-06 20:00:00";
+$league_start = "2022-05-13 15:20:00";
 
 /*
 1. nastaviť dátum deadlinu
@@ -42,7 +42,7 @@ $leag = mysql_query("SELECT * FROM 2004leagues WHERE longname LIKE '%$skratka%' 
 $league = mysql_fetch_array($leag);
 $leaguecolor = $league[color];
 $active_league = $league[id];
-//if($uid==2) $uid=2935;
+//if($uid==2) $uid=2784;
 
 // cron job pre vyber random hraca pri necinnosti manazera
 if($_GET[cron]==1)
@@ -518,9 +518,15 @@ if($params[0]=="picks")
     // zmazat
      //$t[points]=0;
      //if($t[uid]==2932) $t[points]=$t[points]-1;
+    if($t[prev_points]<>$t[points]) 
+      {
+      $diffn = $t[points]-$t[prev_points];
+      $diff = '<span class="text-success text-xs"> (+'.$diffn.')</span>';
+      }
+    else $diff='';
     if($t[user_avatar]!="") $avatar = "<img class='rounded-circle mr-1' src='/images/user_avatars/".$t[uid].".".$t[user_avatar]."' alt='".$t[uname]."' style='width:2rem;height:2rem;vertical-align:-11px;'>";
     else $avatar = "<i class='text-gray-300 fas fa-user-circle fa-2x mr-1' style='width:2rem;height:2rem;vertical-align:-7px;'></i>";
-    $content .= "<tr><td class='text-center$add'>$i.</td><td class='$add'><a href='#$t[uname]'>".$avatar."$t[uname]</a></td><td class='$add'><b>$t[points]</b></td></tr>";
+    $content .= "<tr><td class='text-center$add'>$i.</td><td class='$add'><a href='#$t[uname]'>".$avatar."$t[uname]</a></td><td class='$add'><b>$t[points]</b>".$diff."</td></tr>";
     $i++;
     }
   $content .= '</tbody></table>
