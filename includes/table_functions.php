@@ -606,7 +606,7 @@ function Insert_to_table($table_name, $uloha, $league_data, $show_clinch, $playo
     else 
       {
       $ttable["conference"][$table_name][$p]["shortname"] = $data[shortname];
-      $ttable["conference"][$table_name][$p]["longname"] = iconv("cp1250", "utf-8", $data[longname]);
+      $ttable["conference"][$table_name][$p]["longname"] = $data[longname];
       $ttable["conference"][$table_name][$p]["gp"] = $data[zapasov];
       $ttable["conference"][$table_name][$p]["wins"] = $wins;
       $ttable["conference"][$table_name][$p]["losts"] = $losts;
@@ -614,8 +614,8 @@ function Insert_to_table($table_name, $uloha, $league_data, $show_clinch, $playo
       $ttable["conference"][$table_name][$p]["points"] = $points;
       }
     // cannot make playoff's
-    if($show_clinch==1 && $sim!=1 && strstr($league_data[longname], "Tipos") && (($games_total-$data[zapasov])*$wpoints)+$points < $desiaty[body] || $data[shortname]=="S20" && $sim!=1 && $show_clinch==1 && strstr($league_data[longname], "Tipos") || $show_clinch==1 && $sim!=1 && $games_total-$data[zapasov]==0 && $p>$playoff_line && strstr($league_data[longname], "Tipos")) { $bs="<span class='font-italic'>"; $be="</span>"; $clinch = "<sup><span class='text-danger font-weight-bold'>y</span></sup>"; $cannotwas=1; }
-    //if($show_clinch==1 && $sim!=1 && !strstr($league_data[longname], "Tipos") && (($games_total-$data[zapasov])*$wpoints)+$points < $osmy[body] || $data[shortname]=="S20" && $sim!=1 && $show_clinch==1 && !strstr($league_data[longname], "Tipos") || $show_clinch==1 && $sim!=1 && $games_total-$data[zapasov]==0 && $p>$playoff_line && !strstr($league_data[longname], "Tipos")) { $bs="<span class='font-italic'>"; $be="</span>"; $clinch = "<sup><span class='text-danger font-weight-bold'>y</span></sup>"; $cannotwas=1; }
+    //if($show_clinch==1 && $sim!=1 && strstr($league_data[longname], "Tipos") && (($games_total-$data[zapasov])*$wpoints)+$points < $desiaty[body] || $data[shortname]=="S20" && $sim!=1 && $show_clinch==1 && strstr($league_data[longname], "Tipos") || $show_clinch==1 && $sim!=1 && $games_total-$data[zapasov]==0 && $p>$playoff_line && strstr($league_data[longname], "Tipos")) { $bs="<span class='font-italic'>"; $be="</span>"; $clinch = "<sup><span class='text-danger font-weight-bold'>y</span></sup>"; $cannotwas=1; }
+    if($show_clinch==1 && $sim!=1 && !strstr($league_data[longname], "Tipos") && (($games_total-$data[zapasov])*$wpoints)+$points < $osmy[body] || $data[shortname]=="S20" && $sim!=1 && $show_clinch==1 && !strstr($league_data[longname], "Tipos") || $show_clinch==1 && $sim!=1 && $games_total-$data[zapasov]==0 && $p>$playoff_line && !strstr($league_data[longname], "Tipos")) { $bs="<span class='font-italic'>"; $be="</span>"; $clinch = "<sup><span class='text-danger font-weight-bold'>y</span></sup>"; $cannotwas=1; }
     // relegated to DIV.I
     //if(strstr($league_data[longname], "MS") && $show_clinch==1 && (($games_total-$data[zapasov])*$wpoints)+$data[body] < $reord[6][6] || strstr($league_data[longname], "MS") && $show_clinch==1 && ($data[zapasov]==7 && $i==7)) { $bs="<i>"; $be="</i>"; $clinch = "<sup><span class='text-primary font-weight-bold'>z</span></sup>"; $relegwas=1; }
     if(!$json) $ttable .= "'>$bs<span class='d-none d-md-inline'>$data[longname]</span><span class='d-inline d-md-none'>$data[mediumname]</span>$be</a> $clinch</td><td class='text-center'$line>$data[zapasov]</td><td class='text-center'$line>$wins</td><td class='text-center'$line>$losts</td><td class='text-center'$line>$goals</td><td class='text-center'$line><span class='font-weight-bold'>$points</span></td></tr>";

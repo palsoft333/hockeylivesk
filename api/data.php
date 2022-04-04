@@ -8,7 +8,7 @@ THEN
 
 www.hockey-live.sk/api/team/{team}/{league}/{year}?key={API_key} - team statistics
 team = 3-char country ISO, eg. SVK
-league = WCH for World Championship; OG for Olympic Games; NHL for NHL season
+league = WCH for World Championship; OG for Olympic Games; NHL for NHL season; KHL for KHL season; EL for Slovak extraliga season
 year = tournament year or season, eg. 2018 (=2018/2019 for NHL season)
 
 www.hockey-live.sk/api/player/{id}?key={API_key} - player statistics by id
@@ -98,12 +98,18 @@ function StatusParser($status)
   return $newname;
   }
   
-function SEOtitle($team)
-  {
-  
-  return $team;
-  }
-  
+function LeagueFont($name) {
+    if(strstr($name, 'Tipsport') || strstr($name, 'Extraliga')) $font = "tipsport";
+    elseif(strstr($name, 'KHL')) $font = "khl";
+    elseif(strstr($name, 'NHL')) $font = "nhl";
+    elseif(strstr($name, 'MS')) $font = "iihf";
+    elseif(strstr($name, 'ZOH')) $font = "olympics";
+    elseif(strstr($name, 'Kaufland') || strstr($name, 'Slovakia') || strstr($name, 'Loto')) $font = "kauflandcup";
+    elseif(strstr($name, 'Challenge') || strstr($name, 'Škoda')) $font = "arosa";
+    else $font = "dcup";
+    return $font;
+}
+   
 // START
 
 if($_GET[team])
@@ -137,6 +143,24 @@ if($_GET[team])
     $seas = $sea+1;
     $season = $sea."/".$seas;
     $lname = "NHL ".$season;
+    $el = 1;
+    }
+  elseif($t=="KHL") 
+    {
+    if($year<2010 || $year>date("Y")) die("Incorrect season");
+    $sea = substr($year,2,2);
+    $seas = $sea+1;
+    $season = $sea."/".$seas;
+    $lname = "KHL ".$season;
+    $el = 1;
+    }
+  elseif($t=="EL") 
+    {
+    if($year<2005 || $year>date("Y")) die("Incorrect season");
+    $sea = substr($year,2,2);
+    $seas = $sea+1;
+    $season = $sea."/".$seas;
+    $lname = "%liga ".$season;
     $el = 1;
     }
   else die("Incorrect tournament name");
@@ -573,6 +597,24 @@ elseif($_GET[games])
     $lname = "NHL ".$season;
     $el = 1;
     }
+  elseif($t=="KHL") 
+    {
+    if($year<2010 || $year>date("Y")) die("Incorrect season");
+    $sea = substr($year,2,2);
+    $seas = $sea+1;
+    $season = $sea."/".$seas;
+    $lname = "KHL ".$season;
+    $el = 1;
+    }
+  elseif($t=="EL") 
+    {
+    if($year<2005 || $year>date("Y")) die("Incorrect season");
+    $sea = substr($year,2,2);
+    $seas = $sea+1;
+    $season = $sea."/".$seas;
+    $lname = "%liga ".$season;
+    $el = 1;
+    }
   else die("Incorrect tournament name");
   $q = mysql_query("SELECT * FROM 2004leagues WHERE longname LIKE '".$lname."'");
   $f = mysql_fetch_array($q);
@@ -641,6 +683,24 @@ elseif($_GET[table])
     $el = 1;
     $teams_table = "el_teams";
     }
+  elseif($t=="KHL") 
+    {
+    if($year<2010 || $year>date("Y")) die("Incorrect season");
+    $sea = substr($year,2,2);
+    $seas = $sea+1;
+    $season = $sea."/".$seas;
+    $lname = "KHL ".$season;
+    $el = 1;
+    }
+  elseif($t=="EL") 
+    {
+    if($year<2005 || $year>date("Y")) die("Incorrect season");
+    $sea = substr($year,2,2);
+    $seas = $sea+1;
+    $season = $sea."/".$seas;
+    $lname = "%liga ".$season;
+    $el = 1;
+    }
   else die("Incorrect tournament name");
   $q = mysql_query("SELECT * FROM 2004leagues WHERE longname LIKE '".$lname."'");
   $f = mysql_fetch_array($q);
@@ -655,10 +715,20 @@ elseif($_GET[table])
     $playoff_line=1;
     $games_total=3;
     }
-  else
+  elseif(strstr($f[longname], 'NHL'))
     {
     $playoff_line=8;
     $games_total=82;
+    }
+  elseif(strstr($f[longname], 'KHL'))
+    {
+    $playoff_line=8;
+    $games_total=56;
+    }
+  else
+    {
+    $playoff_line=6;
+    $games_total=50;
     }
     
   if($playoff_line>0) $pol = $playoff_line-1;
@@ -732,17 +802,31 @@ elseif($_GET[table])
     $group = json_encode($group, JSON_UNESCAPED_UNICODE);
     echo $group;
     }
-  else
+  elseif(strstr($f[longname], 'NHL') || strstr($f[longname], 'KHL'))
     {
     include("../includes/table_functions.php");
     $json = TRUE;
     $conference = Get_Table($f[id], "", "conference", 0);
     $conference = str_replace('}}}}{"conference":{"', '}},"', $conference);
   if($lang=="en")
-    {
-    $conference = str_replace("LANG_TEAMTABLE_WESTCONF1", "Western conference", $conference);
-    $conference = str_replace("LANG_TEAMTABLE_EASTCONF1", "Eastern conference", $conference);
+      {
+      $conference = str_replace("LANG_TEAMTABLE_WESTCONF1", "Western conference", $conference);
+      $conference = str_replace("LANG_TEAMTABLE_EASTCONF1", "Eastern conference", $conference);
+      }
+    else
+      {
+      $conference = str_replace("LANG_TEAMTABLE_WESTCONF1", "Západná konferencia", $conference);
+      $conference = str_replace("LANG_TEAMTABLE_EASTCONF1", "Východná konferencia", $conference);
+      }
+    echo $conference;
     }
+  else
+    {
+    include("../includes/table_functions.php");
+    $json = TRUE;
+    $conference = Get_Table($f[id], "", "league", 0);
+    if($lang=="en") $conference = str_replace("LANG_NAV_TABLE", "Table", $conference);
+    else $conference = str_replace("LANG_NAV_TABLE", "Tabuľka", $conference);
     echo $conference;
     }
   /*echo "<pre>";

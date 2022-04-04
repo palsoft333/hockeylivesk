@@ -148,22 +148,6 @@ return $games;
 */
 
 function Get_Latest_Stats() {
-    function array_orderby()
-    {
-        $args = func_get_args();
-        $data = array_shift($args);
-        foreach ($args as $n => $field) {
-            if (is_string($field)) {
-                $tmp = array();
-                foreach ($data as $key => $row)
-                    $tmp[$key] = $row[$field];
-                $args[$n] = $tmp;
-                }
-        }
-        $args[] = &$data;
-        call_user_func_array('array_multisort', $args);
-        return array_pop($args);
-    }
   $stat = '<div class="card shadow mb-4">
             <div class="card-header">
                 <div class="font-weight-bold text-primary text-uppercase">'.LANG_GAMECONT_STATS.'</div>
@@ -255,7 +239,7 @@ function Get_Latest_Stats() {
           )    
       */
       
-      $i=$pos=0;
+      $i=$gpos=0;
       while($i < count($gstats))
         {
         $lid = $gstats[$i][3];
@@ -264,7 +248,7 @@ function Get_Latest_Stats() {
         $svsp = round($gstats[$i][2]*100,2);
         $svs = $gstats[$i][0]-$gstats[$i][1];
         
-        if($pos==0) $stat .= '<div class="text-xs text-muted font-weight-bold mb-1">'.$gstats[$i][4].'</div>
+        if($gpos==0) $stat .= '<div class="text-xs text-muted font-weight-bold mb-1">'.$gstats[$i][4].'</div>
                             </div>
                            </div>
                            <div class="row no-gutters align-items-center text-xs border-bottom mb-1">
@@ -273,15 +257,15 @@ function Get_Latest_Stats() {
                             <div class="col">SVS</div>
                             <div class="col">SVS%</div>
                            </div>';
-        $pos=$lid;
-        if($pos!=$ppos && $ppos) $stat .= ' 
+        $gpos=$lid;
+        if($gpos!=$ppos && $ppos) $stat .= ' 
                               <div class="row no-gutters align-items-center">
                                 <div class="col mr-2">
                                   <div class="text-xs text-muted font-weight-bold mb-1 mt-3">'.$gstats[$i][4].'</div>
                                 </div>
                               </div>
                               <div class="row no-gutters align-items-center text-xs border-bottom mb-1">
-                                <div class="col-9">'.LANG_PLAYERDB_PLAYER.'</div>
+                                <div class="col-9">'.LANG_FANTASY_GOALIE.'</div>
                                 <div class="col">S</div>
                                 <div class="col">SVS</div>
                                 <div class="col">SVS%</div>
@@ -293,12 +277,12 @@ function Get_Latest_Stats() {
                                 <div class="col">'.$svs.'</div>
                                 <div class="col font-weight-bold">'.$svsp.'</div>
                               </div>';
-        $ppos = $pos;
+        $ppos = $gpos;
         $i++;
         }
         
     $stats = array();
-    $p=0;
+    $p=$ppos=0;
     while($f = mysql_fetch_array($q))
       {
       if(!strstr($f[longname], "Tipos"))
@@ -334,7 +318,7 @@ function Get_Latest_Stats() {
         if($stats[$i][1]=="") $stats[$i][1]=0;
         if($stats[$i][2]=="") $stats[$i][2]=0;
         
-        if($pos==0) $stat .= '<div class="text-xs text-muted font-weight-bold mb-1">'.$stats[$i][4].'</div>
+        if($gpos==0) $stat .= '<div class="text-xs text-muted font-weight-bold mb-1">'.$stats[$i][4].'</div>
                             </div>
                            </div>
                            <div class="row no-gutters align-items-center text-xs border-bottom mb-1">
@@ -344,7 +328,7 @@ function Get_Latest_Stats() {
                             <div class="col">'.LANG_A.'</div>
                            </div>';
         $pos=$lid;
-        if($pos!=$ppos && $ppos) $stat .= ' 
+        if(($pos!=$ppos && $ppos) || !$ppos && $gpos>0) $stat .= ' 
                               <div class="row no-gutters align-items-center">
                                 <div class="col mr-2">
                                   <div class="text-xs text-muted font-weight-bold mb-1 mt-3">'.$stats[$i][4].'</div>
