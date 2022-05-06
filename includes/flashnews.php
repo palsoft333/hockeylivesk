@@ -10,6 +10,44 @@ else {
     include("lang/lang_sk.php");
 }
 
+function DisplayTags($tags) {
+    Global $link;
+    $out = "";
+    $tags = json_decode($tags, true);
+    foreach($tags as $key => $tag) {
+        if($key=="p") {
+            $el = substr($tag, -1);
+            $id = substr($tag, 0, -1);
+            if($el==0) $q = mysql_query("SELECT * FROM 2004players WHERE id='".$id."'");
+            else $q = mysql_query("SELECT * FROM el_players WHERE id='".$id."'");
+            $f = mysql_fetch_array($q);
+            $out .= '<span class="tag badge badge-primary mr-1">'.$f[name].'</span>';
+        }
+        elseif($key=="g") {
+            $el = substr($tag, -1);
+            $id = substr($tag, 0, -1);
+            if($el==0) $q = mysql_query("SELECT * FROM 2004goalies WHERE id='".$id."'");
+            else $q = mysql_query("SELECT * FROM el_goalies WHERE id='".$id."'");
+            $f = mysql_fetch_array($q);
+            $out .= '<span class="tag badge badge-info mr-1">'.$f[name].'</span>';
+        }
+        elseif($key=="t") {
+            $el = substr($tag, -1);
+            $id = substr($tag, 0, -1);
+            if($el==0) $q = mysql_query("SELECT * FROM 2004teams WHERE id='".$id."'");
+            else $q = mysql_query("SELECT * FROM el_teams WHERE id='".$id."'");
+            $f = mysql_fetch_array($q);
+            $out .= '<span class="tag badge badge-success mr-1">'.$f[longname].'</span>';
+        }
+        elseif($key=="n") {
+            $q = mysql_query("SELECT * FROM e_xoops_topics WHERE topic_id='".$tag."'");
+            $f = mysql_fetch_array($q);
+            $out .= '<span class="tag badge badge-warning mr-1">'.$f[topic_title].'</span>';
+        }
+    }
+return $out;
+}
+
 //appsecret_proof:
 //echo hash_hmac('sha256', FB_ACCESS_TOKEN, 'bfa5a8b399abf1c6e95196d6ceffb083');
 
@@ -28,8 +66,16 @@ $page_posts = json_decode($feedData, true);*/
 }*/
 $page_posts['data'] = [];
 
+// nacitat 10 poslednych Google News a zlucit ich s FB feedom
+$s = mysql_query("SELECT s.* FROM gn_news s WHERE s.tags IS NOT NULL ORDER BY s.published DESC LIMIT 10") or die(mysql_error());
+$i=0;
+while($a = mysql_fetch_array($s))
+  {
+  array_push($page_posts['data'], array('id'=>$a[tags], 'story'=>$a[publisher], 'message'=>$a[title], 'created_time'=>strtotime($a[published]), 'comments'=>$a[link]));
+  $i++;
+  }
+
 // nacitat nasich 5 poslednych rychlych noviniek a zlucit ich s FB feedom
-$s = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
 $s = mysql_query("SELECT s.*, count(c.id) as comment_count FROM e_xoops_stories s LEFT JOIN comments c ON c.what='0' && c.whatid=s.storyid WHERE s.ihome='1' GROUP BY s.storyid ORDER BY s.published DESC LIMIT 5") or die(mysql_error());
 $i=0;
 while($a = mysql_fetch_array($s))
@@ -45,7 +91,7 @@ unset($page_posts['data'][25], $page_posts['data'][26], $page_posts['data'][27],
 
 $i=0;
 foreach($page_posts['data'] as $post){
-    $our=0;
+    $our=$gn=0;
     $picture="";
     $post_id = explode("_", $post['id']);
     $story = ($post['story']) ? $post['story'] : "";
@@ -56,27 +102,62 @@ foreach($page_posts['data'] as $post){
       // z FB feedu
       $comments = count($post['comments']);
       $picture = ($post['picture']) ? $post['picture'] : "";
+      $link = "https://www.facebook.com/hockeylive/posts/".$post_id[1];
       }
+    elseif(!is_numeric($post['comments'])) {
+      // z Google News
+      $comments = 0;
+      $link = $post['comments'];
+      $tags = json_decode($post_id[0], true);
+      foreach($tags as $key => $tag) {
+          if($key=="p" || $key=="g") {
+            $el = substr($tag, -1);
+            $id = substr($tag, 0, -1);
+            if($key=="p") { $nonel_table="2004players"; $el_table="el_players"; }
+            if($key=="g") { $nonel_table="2004goalies"; $el_table="el_goalies"; }
+            if($el==0) $q = mysql_query("SELECT * FROM $nonel_table WHERE id='".$id."'");
+            else $q = mysql_query("SELECT * FROM $el_table WHERE id='".$id."'");
+            $f = mysql_fetch_array($q);
+            $picture = "/includes/player_photo.php?name=".$f[name];
+          }
+          elseif($key=="t" && $picture=="") {
+            $el = substr($tag, -1);
+            $id = substr($tag, 0, -1);
+            if($el==0) $q = mysql_query("SELECT * FROM 2004teams WHERE id='".$id."'");
+            else $q = mysql_query("SELECT * FROM el_teams WHERE id='".$id."'");
+            $f = mysql_fetch_array($q);
+            if($el==0) $picture = "/images/vlajky/".$f[shortname].".gif";
+            else $picture = "/images/vlajky/".$f[shortname]."_big.gif";
+          }
+      }
+      $gn=1;
+    }
     else
       {
       // nasa novinka
       $comments = $post['comments'];
       $message = str_replace("news-image","bg-gray-100 float-left img-thumbnail mr-2 p-1 shadow-sm w-25",$message);
+      $link = "/news/".$post_id[0]."-".SEOtitle($story);
       $our=1;
       }
     if($i % 2 == 0) {$tableclass = "";} 
-    else $tableclass = " class='bg-light'";
-    echo "<table class='w-100 my-0'>
-            <tr$tableclass>
-              <td style='width:60%;' class='py-2'><b><a href='".($our==1 ? "/news/".$post_id[0]."-".SEOtitle($story) : "https://www.facebook.com/hockeylive/posts/".$post_id[1])."' ".($our==1 ? "" : " target='_blank'").">".($story ? $story : LANG_FLASH_FROMFB)."</a></b></td>
-              <td style='width:40%;' class='text-right'>".date("j.n.Y H:i", $post_time)."</td>
+    else $tableclass = " bg-light";
+    echo "<table class='card w-100 my-0 mb-2'>
+            <tr class='card-header$tableclass'>
+              <td style='width:60%;' class='pl-2'>
+                <b><a href='".$link."' ".($our==1 ? "" : " target='_blank'").">".($story ? $story : LANG_FLASH_FROMFB)."</a></b>
+              </td>
+              <td style='width:40%;' class='text-right align-top pr-2'>".date("j.n.Y H:i", $post_time)."</td>
             </tr>
-            <tr$tableclass>
-              <td colspan='2'>".($picture ? "<img src='data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=' data-src='$picture' class='lazy bg-gray-100 float-left img-thumbnail mr-2 p-1 shadow-sm w-25'>" : "")."$message</td>
-            </tr>
-            <tr$tableclass>
+            ".($gn==1 ? "<tr class='$tableclass'><td colspan='2' class='pl-2 pt-1'>".DisplayTags($post_id[0])."</td></tr>":"")."
+            <tr class='$tableclass'>
+              <td colspan='2' class='p-2'>".($picture ? "<img src='data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=' data-src='$picture' class='lazy bg-gray-100 float-left img-thumbnail mr-2 p-1 shadow-sm w-25'>" : "")."$message</td>
+            </tr>";
+    if($gn==0) echo "
+            <tr class='$tableclass'>
               <td colspan='2' class='text-right'><div class='comment-count float-right'>".($our==1 ? "<a href='/news/".$post_id[0]."-".SEOtitle($story)."'><i class='far fa-comment'></i> <span>$comments ".LANG_COMMENTS."</span></a>" : "<a href='https://www.facebook.com/hockeylive/posts/".$post_id[1]."' target='_blank'><i class='far fa-comment'></i> $comments ".LANG_COMMENTS."</span></a>")."</div></td>
-            </tr>
+            </tr>";
+        echo "
           </table>";
     $i++;
 }

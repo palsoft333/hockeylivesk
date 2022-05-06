@@ -252,7 +252,7 @@ function Get_Latest_Stats() {
                             </div>
                            </div>
                            <div class="row no-gutters align-items-center text-xs border-bottom mb-1">
-                            <div class="col-9">'.LANG_FANTASY_GOALIE.'</div>
+                            <div class="col-8">'.LANG_FANTASY_GOALIE.'</div>
                             <div class="col">S</div>
                             <div class="col">SVS</div>
                             <div class="col">SVS%</div>
@@ -265,14 +265,14 @@ function Get_Latest_Stats() {
                                 </div>
                               </div>
                               <div class="row no-gutters align-items-center text-xs border-bottom mb-1">
-                                <div class="col-9">'.LANG_FANTASY_GOALIE.'</div>
+                                <div class="col-8">'.LANG_FANTASY_GOALIE.'</div>
                                 <div class="col">S</div>
                                 <div class="col">SVS</div>
                                 <div class="col">SVS%</div>
                               </div>';
         
         $stat .= '            <div class="row no-gutters align-items-center small">
-                                <div class="col-9"><img class="flag-iihf '.$gstats[$i][6].'-small" src="/img/blank.png" alt="'.$gstats[$i][6].'"> '.$gstats[$i][5].'</div>
+                                <div class="col-8"><img class="flag-iihf '.$gstats[$i][6].'-small" src="/img/blank.png" alt="'.$gstats[$i][6].'"> '.$gstats[$i][5].'</div>
                                 <div class="col">'.$gstats[$i][0].'</div>
                                 <div class="col">'.$svs.'</div>
                                 <div class="col font-weight-bold">'.$svsp.'</div>
@@ -318,7 +318,7 @@ function Get_Latest_Stats() {
         if($stats[$i][1]=="") $stats[$i][1]=0;
         if($stats[$i][2]=="") $stats[$i][2]=0;
         
-        if($gpos==0) $stat .= '<div class="text-xs text-muted font-weight-bold mb-1">'.$stats[$i][4].'</div>
+        if($gpos==0 && !$ppos) $stat .= '<div class="text-xs text-muted font-weight-bold mb-1">'.$stats[$i][4].'</div>
                             </div>
                            </div>
                            <div class="row no-gutters align-items-center text-xs border-bottom mb-1">
@@ -916,7 +916,7 @@ function ComputeGOTD()
         $gotdid = array($cis[0][1], 0);
       }
     }
-  mysql_query("INSERT INTO gotd (datetime, matchid, el) VALUES ('$dnes', '".$gotdid[0]."', '".$gotdid[1]."')");
+  mysql_query("REPLACE INTO gotd (datetime, matchid, el) VALUES ('$dnes', '".$gotdid[0]."', '".$gotdid[1]."')");
   }
   return $gotdid;
 }

@@ -142,14 +142,6 @@ $content .= '<div class="league-select">
                       <p class="card-text"><small class="text-muted">Ochráni pásky pred prachom a nečistotami</small></p>
                     </div>
                   </div>
-
-                  <div class="card">
-                    <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/images/ceny/mikina.jpg" class="lazy card-img-top" alt="Tmavomodrá mikina">
-                    <div class="card-body">
-                      <h5 class="card-title">Tmavomodrá mikina s kapucňou</h5>
-                      <p class="card-text"><small class="text-muted">veľkosť L</small></p>
-                    </div>
-                  </div>
                   
                   <div class="card">
                     <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/images/ceny/bunda.jpg" class="lazy card-img-top" alt="Prechodná tmavomodrá bunda">
@@ -163,14 +155,6 @@ $content .= '<div class="league-select">
                     <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/images/ceny/batoh.jpg" class="lazy card-img-top" alt="Cestovný batoh">
                     <div class="card-body">
                       <h5 class="card-title">Cestovný batoh</h5>
-                    </div>
-                  </div>
-                  
-                  <div class="card bg-warning">
-                    <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="https://howieshockey.sk/store/25-large_default/howies-vosk-na-cepel.jpg" class="lazy card-img-top" alt="Vosk na čepeľ">
-                    <div class="card-body">
-                      <h5 class="card-title">Howies Vosk na čepeľ</h5>
-                      <p class="card-text"><small class="text-muted">Pomáha chrániť pred usádzaním snehu na čepeli</small></p>
                     </div>
                   </div>
                   

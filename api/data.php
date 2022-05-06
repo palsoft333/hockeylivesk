@@ -804,10 +804,10 @@ elseif($_GET[table])
     }
   elseif(strstr($f[longname], 'NHL') || strstr($f[longname], 'KHL'))
     {
-    include("../includes/table_functions.php");
-    $json = TRUE;
-    $conference = Get_Table($f[id], "", "conference", 0);
-    $conference = str_replace('}}}}{"conference":{"', '}},"', $conference);
+    include("../includes/teamtable.class.php");
+    include("../includes/league_specifics.php");
+    $tt = LeagueSpecifics($f[id], $f[longname]);
+    $conference = $tt->render_table("conference", false, true);
   if($lang=="en")
       {
       $conference = str_replace("LANG_TEAMTABLE_WESTCONF1", "Western conference", $conference);
@@ -822,9 +822,10 @@ elseif($_GET[table])
     }
   else
     {
-    include("../includes/table_functions.php");
-    $json = TRUE;
-    $conference = Get_Table($f[id], "", "league", 0);
+    include("../includes/teamtable.class.php");
+    include("../includes/league_specifics.php");
+    $tt = LeagueSpecifics($f[id], $f[longname]);
+    $conference = $tt->render_table("league", false, true);
     if($lang=="en") $conference = str_replace("LANG_NAV_TABLE", "Table", $conference);
     else $conference = str_replace("LANG_NAV_TABLE", "Tabuľka", $conference);
     echo $conference;

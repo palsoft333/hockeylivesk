@@ -5,24 +5,22 @@ $nazov = "Fantasy Championship";
 $menu = "MS 2022";
 $skratka = "MS";
 $manazerov = 10;
-$article_id = 2269;
+$article_id = 2299;
 $league_id = 136;
 //$timeout = 480;
 $predraftt = 1; // = draftuje sa do zásobníka. ak 1, upraviť počet manažérov aj v includes/fantasy_functions.php
 $knownrosters = 0; // = su zname zostavy (do ft_choices pridat hracov, ktori sa zucastnia)
 $article_rosters = 2266;
-$draft_start = "2022-05-06 20:00:00";
+$draft_start = "2022-04-29 14:00:00";
 $league_start = "2022-05-13 15:20:00";
 
 /*
 1. nastaviť dátum deadlinu
 2. odremovať potrebné veci
-3. odremovať v players.php draft button
-4. pridať brankárske tímy do ft_choices
-5. vyprázdniť ft_players, ft_predraft, ft_teams a ft_changes
-6. zmeniť link v menu
-7. v includes/players_functions.php pridať hráčov, ktorí sa nezúčastnia
-8. vypnúť/zapnúť cronjob
+3. vyprázdniť ft_players, ft_predraft, ft_teams a ft_changes
+4. zmeniť link v menu
+5. v includes/players_functions.php pridať hráčov, ktorí sa nezúčastnia
+6. vypnúť/zapnúť cronjob
 */
 
 if($_GET[cron]==1) {
@@ -42,7 +40,7 @@ $leag = mysql_query("SELECT * FROM 2004leagues WHERE longname LIKE '%$skratka%' 
 $league = mysql_fetch_array($leag);
 $leaguecolor = $league[color];
 $active_league = $league[id];
-//if($uid==2) $uid=2784;
+//if($uid==2) $uid=2944;
 
 // cron job pre vyber random hraca pri necinnosti manazera
 if($_GET[cron]==1)
@@ -159,6 +157,15 @@ if($_GET[cron]==1)
         mail(ADMIN_MAIL, "Dalsi na rade v drafte", "Vykonany nahodny vyber. Nasleduje: $h[email]", $headers);
         }
     }
+  if(mysql_num_rows($w)==0) {
+    $n = mysql_query("SELECT * FROM ft_predraft WHERE uid='$narade'");
+    if(mysql_num_rows($n)>0)
+      {
+      include("includes/fantasy_functions.php");
+      PreDraft();
+      $pd=1;
+      }
+  }
   mysql_close($link);
   exit;
   }

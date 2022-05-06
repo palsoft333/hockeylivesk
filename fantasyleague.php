@@ -439,14 +439,6 @@ if($params[0]=="main")
          <p>'.sprintf(LANG_BETS_BUYMEABEERTEXT, "Fantasy KHL", LANG_BETS_BUYMEABEER, "e74a3b").'</p>
          <p>'.LANG_BETS_FORWHATTEXT.'</p>
          <div class="card-columns">
-         
-          <div class="card">
-            <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/images/ceny/mikina.jpg" class="lazy card-img-top" alt="Tmavomodrá mikina">
-            <div class="card-body">
-              <h5 class="card-title">Tmavomodrá mikina s kapucňou</h5>
-              <p class="card-text"><small class="text-muted">veľkosť L</small></p>
-            </div>
-          </div>
           
           <div class="card">
             <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/images/ceny/bunda.jpg" class="lazy card-img-top" alt="Prechodná tmavomodrá bunda">

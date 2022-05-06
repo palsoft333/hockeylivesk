@@ -153,6 +153,7 @@
                 }
               else
                 {
+                $topicid = explode("-", $_GET[topicID]);
                 echo '
                   <div class="card shadow mb-2 articleBanner">
                     <div class="card-body">
@@ -167,7 +168,9 @@
                            (adsbygoogle = window.adsbygoogle || []).push({});
                       </script>
                     </div>
-                  </div>';
+                  </div>
+                  
+                  '.GoogleNews("n", $topicid[0]);
                 }
               ?>
             </div>

@@ -29,7 +29,7 @@ if($id)
     $players_table = "2004players";
     $matches_table = "2004matches";
     $injury_table = "el_injuries";
-    $goalies_table = "2004goalies";
+    $goalies_table = "el_goalies";
     $title1 = LANG_TEAMSTATS_LEAGUE;
     $title2 = LANG_TEAMSTATS_APPEAR;
     }
@@ -55,16 +55,14 @@ if($id)
     $z = mysql_query("SELECT * FROM el_infos WHERE teamshort='$f[shortname]'");
     $u = mysql_fetch_array($z);
     $o = mysql_query("SELECT * FROM $matches_table WHERE (team1short='$f[shortname]' || team2short='$f[shortname]') && league='$f[league]' ORDER BY datetime");
+    $tt = LeagueSpecifics($f[league], $e[longname], 0);
+    $pos = $tt->check_position($f[shortname]);
     if($el==1) 
       {
-      if(strstr($e[longname], 'NHL') || strstr($e[longname], 'KHL')) $a = Get_Table($f[league], 0, "conference", 0, $f[shortname]);
-      else $a = Get_Table($f[league], 0, "league", 0, $f[shortname]);
-      $a = explode("|",$a);
       $hl = LANG_TEAMSTATS_SEASONTITLE;
       $seasson = Get_Seasson($e[longname]);
-      $pos = $a[0];
       $gl = mysql_num_rows($o)-$f[zapasov];
-      $ce = $a[2]*$gl;
+      $ce = $tt->check_canearn($f[shortname])-($f["p_basic"]!=0 ? $f["p_basic"]:$f["body"]);
       $g = mysql_query("SELECT $goalies_table.*, (svs/sog)*100 as svsp, ga/gp as gaa, CONCAT(YEAR(NOW()),DATE_FORMAT(born,'-%m-%d')) as datum, YEAR(NOW())-YEAR(born) as vek, dt.injury FROM $goalies_table LEFT JOIN (SELECT name, injury FROM $injury_table WHERE league='$f[league]')dt ON $goalies_table.name=dt.name WHERE teamshort='$f[shortname]' && league='$f[league]' ORDER BY svsp DESC, gaa ASC");
       $p = mysql_query("SELECT $players_table.*, CONCAT(YEAR(NOW()),DATE_FORMAT(born,'-%m-%d')) as datum, YEAR(NOW())-YEAR(born) as vek, dt.injury FROM $players_table LEFT JOIN (SELECT name, injury FROM $injury_table WHERE league='$f[league]')dt ON $players_table.name=dt.name WHERE teamshort='$f[shortname]' && league='$f[league]' ORDER BY points DESC, gp ASC, goals DESC, asists DESC, gwg DESC, gtg DESC, shg DESC, ppg DESC, penalty ASC");
       $h = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
@@ -78,12 +76,9 @@ if($id)
       }
     else
       {
-      if($e[groups]!="") $a = Get_Table($f[league], 0, "groups", 0, $f[shortname]);
-      else $a = Get_Table($f[league], 0, "league", 0, $f[shortname]);
       $hl = LANG_TEAMSTATS_TURNEYTITLE;
       $seasson = $e[longname];
       $suffix = ' class="shadow-sm"';
-      $pos = $a;
       $g = mysql_query("SELECT $goalies_table.*, (svs/sog)*100 as svsp, ga/gp as gaa, CONCAT(YEAR(NOW()),DATE_FORMAT(born,'-%m-%d')) as datum, YEAR(NOW())-YEAR(born) as vek, dt.injury FROM $goalies_table LEFT JOIN (SELECT name, injury FROM $injury_table WHERE league='$f[league]')dt ON $goalies_table.name=dt.name WHERE teamshort='$f[shortname]' && league='$f[league]' ORDER BY svsp DESC, gaa ASC");
       $p = mysql_query("SELECT $players_table.*, dt.injury FROM $players_table LEFT JOIN (SELECT name, injury FROM $injury_table WHERE league='$f[league]')dt ON $players_table.name=dt.name WHERE $players_table.teamshort='$f[shortname]' && $players_table.league='$f[league]' ORDER BY points DESC, goals DESC, asists DESC, gwg DESC, gtg DESC, shg DESC, ppg DESC, penalty ASC");
       $h = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());

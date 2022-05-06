@@ -90,6 +90,11 @@ function Generate_Menu($active_league = FALSE) {
         $badge = '<span class="badge badge-'.$bg.' float-right mr-2 text-xs">'.$badge_num.'</span>';
         if($live==1) $badge .= '<span class="badge live" style="margin-right:2px;color:#FFEB3B;">LIVE</span>';
         }
+      $sim=0;
+      $tt = LeagueSpecifics($f[id], $f[longname], 1);
+      if(strstr($f[longname], "KHL") || strstr($f[longname], "NHL")) $table_type="conference";
+      if(strstr($f[longname], "liga")) $table_type="conference";
+      if($f[el]==0) $table_type="division";
       if($f[el]!=$elpred) $menu .= '<!-- Divider -->
       <hr class="sidebar-divider">
 
@@ -106,7 +111,7 @@ function Generate_Menu($active_league = FALSE) {
                     <div class="bg-white border-left-'.$bg.' py-2 collapse-inner rounded">
                       <h6 class="collapse-header">'.LANG_NAV_TABLE.':</h6>
                       <div class="text-xs pb-2">
-                        '.($f[endbasic]==1 && $f[el]>0 ? Get_Series($f[id]) : Get_team_table($f[id])).'
+                        '.($f[endbasic]==1 && $f[el]>0 ? Get_Series($f[id]) : ($f[endbasic]==1 && $f[el]==0 ? Get_team_table($f[id]):$tt->render_table($table_type, 1))).'
                       </div>
                       <div class="collapse-divider"></div>
                       <h6 class="collapse-header">Odkazy:</h6>
@@ -119,7 +124,7 @@ function Generate_Menu($active_league = FALSE) {
                       '.(strstr($f[longname], 'KHL') ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/slovaks/'.$f[id].'-'.SEOtitle($f[topic_title]).'"><span itemprop="name">'.LANG_NAV_SLOVAKI.'</span><i class="fas fa-user-shield fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                       '.($f[el]>0 && $f[topic_id]!=60 ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/injured/'.$f[id].'-'.SEOtitle($f[topic_title]).'"><span itemprop="name">'.LANG_NAV_INJURED.'</span><i class="fas fa-user-injured fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                       '.($f[el]>0 ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/transfers/'.$f[id].'-'.SEOtitle($f[topic_title]).'"><span itemprop="name">'.LANG_NAV_TRANSFERS.'</span><i class="fas fa-exchange-alt fa-fw float-right text-gray-500 my-1"></i></a>':'').'
-                      '.($f[id]==138 ? '<a itemprop="url" class="collapse-item font-weight-bold text-info" href="/fantasy/picks"><span itemprop="name">Fantasy ZOH</span><i class="fas fa-magic fa-fw float-right text-gray-500 my-1"></i></a>':'').'
+                      '.($f[id]==136 ? '<a itemprop="url" class="collapse-item font-weight-bold text-success" href="/fantasy/draft"><span itemprop="name">Fantasy MS</span><i class="fas fa-magic fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                       '.($f[id]==134 ? '<a itemprop="url" class="collapse-item font-weight-bold text-danger" href="/fantasy/main"><span itemprop="name">Fantasy KHL</span><i class="fas fa-magic fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                     </div>
                   </div>
@@ -1030,6 +1035,88 @@ function StatusParser($name)
   $slovak_statuses = array("konečný stav","na programe","pripravte sa","v 1.tretine","po 1.tretine","v 2.tretine","po 2.tretine","v 3.tretine","po 3.tretine","v predlzeni","po predlzeni");
   $newname = str_replace($slovak_statuses,$foreign_statuses,$name);
   return $newname;
+  }
+  
+/*
+* Zobrazenie najnovšieho spravodajského servisu z Google News
+* @param $type string - p/g/t/n pre hráčov/brankárov/tímy/kategórie noviniek
+* @param $id int - ID daného záznamu v jednotlivých tabuľkách DB
+* @return $news string
+*/
+
+function GoogleNews($type, $id)
+  {
+  Global $link;
+    if($type=="p") {
+        $w = mysql_query("SELECT SUBSTRING(JSON_UNQUOTE(JSON_EXTRACT(tags, '$.p')),1,LENGTH(JSON_UNQUOTE(JSON_EXTRACT(tags, '$.p')))-1) as pid, SUBSTRING(JSON_UNQUOTE(JSON_EXTRACT(tags, '$.p')),-1) as el FROM gn_news ORDER BY published DESC;");
+        /*$el = substr($tag, -1);
+        $id = substr($tag, 0, -1);
+        if($el==0) $q = mysql_query("SELECT * FROM 2004players WHERE id='".$id."'");
+        else $q = mysql_query("SELECT * FROM el_players WHERE id='".$id."'");
+        $f = mysql_fetch_array($q);
+        $search = $f[name];*/
+    }
+    elseif($type=="g") {
+
+    }
+    elseif($type=="t") {
+
+    }
+    elseif($type=="n") {
+        $w = mysql_query("SELECT * FROM gn_news WHERE JSON_UNQUOTE(JSON_EXTRACT(tags, '$.n'))='".$id."' ORDER BY published DESC LIMIT 5");
+    }
+  if(mysql_num_rows($w)>0) {
+    $news = '
+    <div class="card shadow mb-2">
+        <div class="card-header">
+            <div class="font-weight-bold text-primary text-uppercase">Spravodajský servis</div>
+        </div>
+        <div class="card-body">';
+    $i=0;
+    while($e = mysql_fetch_array($w)) {
+        $picture="";
+        $tags = json_decode($e[tags], true);
+        foreach($tags as $key => $tag) {
+            if($key=="p" || $key=="g") {
+                $el = substr($tag, -1);
+                $id = substr($tag, 0, -1);
+                if($key=="p") { $nonel_table="2004players"; $el_table="el_players"; }
+                if($key=="g") { $nonel_table="2004goalies"; $el_table="el_goalies"; }
+                if($el==0) $q = mysql_query("SELECT * FROM $nonel_table WHERE id='".$id."'");
+                else $q = mysql_query("SELECT * FROM $el_table WHERE id='".$id."'");
+                $f = mysql_fetch_array($q);
+                $picture = "/includes/player_photo.php?name=".$f[name];
+            }
+            elseif($key=="t" && $picture=="") {
+                $el = substr($tag, -1);
+                $id = substr($tag, 0, -1);
+                if($el==0) $q = mysql_query("SELECT * FROM 2004teams WHERE id='".$id."'");
+                else $q = mysql_query("SELECT * FROM el_teams WHERE id='".$id."'");
+                $f = mysql_fetch_array($q);
+                if($el==0) $picture = "/images/vlajky/".$f[shortname].".gif";
+                else $picture = "/images/vlajky/".$f[shortname]."_big.gif";
+            }
+        }
+        if($i % 2 == 0) {$tableclass = "";} 
+        else $tableclass = " bg-light";
+        $news .= "<table class='card w-100 my-0 mb-2 position-relative small'>
+                <tr class='card-header$tableclass'>
+                <td style='width:60%;' class='pl-2'>
+                    <b><a href='".$e[link]."' target='_blank' class='stretched-link'>".$e[publisher]."</a></b>
+                </td>
+                <td style='width:40%;' class='text-right align-top pr-2'>".date("j.n.Y H:i", strtotime($e[published]))."</td>
+                </tr>
+                <tr class='$tableclass'>
+                <td colspan='2' class='p-2'>".($picture!="" ? "<img src='data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=' data-src='$picture' class='lazy bg-gray-100 float-left img-thumbnail mr-2 p-1 shadow-sm w-25'>" : "").$e[title]."</td>
+                </tr>
+            </table>";
+        $i++;
+    }
+    $news .= '
+        </div>
+    </div>';
+  }
+  return $news;
   }
 
 /*

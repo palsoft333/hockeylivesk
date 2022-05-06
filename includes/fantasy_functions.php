@@ -36,14 +36,13 @@ if($_GET[save]==1)
           // change already drafted player
           $e = mysql_query("SELECT * FROM ft_players WHERE pid='".$options[$i][pid]."'");
           if($options[$i][pid]!=$f[pid] && mysql_num_rows($e)==0) {
-            $pla = mysql_fetch_array($e);
-            mysql_query("UPDATE ft_players SET pid='".$options[$i][pid]."', type='0', gk='".$pla[gk]."', g='0', a='0', w='0', so='0' WHERE round='".$options[$i]["round"]."' && uid='".$uid."'");
+            mysql_query("UPDATE ft_players SET pid='".$options[$i][pid]."', type='0', gk='".$options[$i][gk]."', g='0', a='0', w='0', so='0' WHERE round='".$options[$i]["round"]."' && uid='".$uid."'");
             mysql_query("INSERT INTO ft_changes (uid, old_pid, new_pid, tstamp) VALUES ('".$uid."', '".$f[pid]."', '".$options[$i][pid]."', NOW())");
             if($_SESSION["knownrosters"]==0) {
-                if($pla[gk]==1) $sp = mysql_query("SELECT * FROM 2004goalies WHERE id='".$options[$i][pid]."'");
+                if($options[$i][gk]==1) $sp = mysql_query("SELECT * FROM 2004goalies WHERE id='".$options[$i][pid]."'");
                 else $sp = mysql_query("SELECT * FROM 2004players WHERE id='".$options[$i][pid]."'");
                 $selp = mysql_fetch_array($sp);
-                if($pla[gk]==1) $pos = "GK";
+                if($options[$i][gk]==1) $pos = "GK";
                 else $pos = $selp[pos];
                 if($pos=="LD" || $pos=="RD") $pos="D";
                 if($pos=="CE" || $pos=="RW" || $pos=="LW") $pos="F";
@@ -93,6 +92,22 @@ function PreDraft()
       $rnd = $options[$i]["round"];
       if($rnd==$round) 
         {
+        if($pid==0) {
+          $mail = mysql_query("SELECT * FROM ft_teams WHERE pos='".$narade."' && last_mail_round='".$round."'");
+          if(mysql_num_rows($mail)==0) {
+            $subject = LANG_FANTASY_MAILSUBJECT;
+            $message = sprintf(LANG_FANTASY_MAILTEXT2, $nazov, $menu, $nazov);
+            $headers = 'From: '.SITE_MAIL. "\r\n" .
+            'Reply-To: '.SITE_MAIL. "\r\n" .
+            'X-Mailer: PHP/' . phpversion();
+            mail(ADMIN_MAIL, "Predraft čaká", "Kolo: $round, Výber: $pick, Užívateľ na ťahu: $u[uname] ($u[email])", $headers);
+            mail($u[email], $subject, $message, $headers);
+            mysql_query("UPDATE ft_teams SET last_mail_round='".$round."' WHERE pos='".$narade."'");
+            echo "ok";
+            }
+          else echo "ok";
+          break;
+        }
         $w = mysql_query("SELECT * FROM ft_players WHERE pid='$pid'");
         if(mysql_num_rows($w)>0) 
           {

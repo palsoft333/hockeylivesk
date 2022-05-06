@@ -3,6 +3,8 @@ session_start();
 			
 include("includes/db.php");
 include("includes/main_functions.php");
+include("includes/teamtable.class.php");
+include("includes/league_specifics.php");
 
 if(isset($_SESSION['logged']))
   {
