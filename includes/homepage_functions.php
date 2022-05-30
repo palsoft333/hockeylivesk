@@ -932,7 +932,15 @@ function gotd()
   {
   $gotdid = ComputeGOTD();
   
+  $k = mysql_query("select * from comments WHERE what='2' && whatid='".$gotdid[0].$gotdid[1]."'");
+  $comm_count = mysql_num_rows($k);
+  
   $gotd = '<div class="card border-left-primary shadow h-100 py-2">
+      '.($comm_count>0 ? '
+            <div class="position-absolute" style="right: -5px;top: -10px;">
+              <span class="badge badge-pill badge-secondary"><a href="/game/'.$gotdid[0].$gotdid[1].'#comments" class="text-white"><i class="fa fa-comment mr-1"></i>'.$comm_count.'</a></span>
+            </div>
+            ':'').'
             <div class="card-body d-flex flex-column">
               <div class="row no-gutters align-items-center">
                 <div class="col mr-2">
@@ -1008,9 +1016,6 @@ function gotd()
       $tv .= '<p class="m-0"><span class="font-weight-bold">LIVE:</span> '.$tvarr.'</p>';
       }
     $h = mysql_fetch_array($g);
-    if($gotdid[1]==1) $k = mysql_query("select userid, komentar, dt.uname as nick from el_tips JOIN (SELECT uid, uname FROM e_xoops_users)dt ON dt.uid=userid where length(komentar) = (select max(length(komentar)) from el_tips WHERE matchid='$gotdid[0]') && matchid='$gotdid[0]'");
-    else $k = mysql_query("select userid, komentar, dt.uname as nick from 2004tips JOIN (SELECT uid, uname FROM e_xoops_users)dt ON dt.uid=userid where length(komentar) = (select max(length(komentar)) from 2004tips WHERE matchid='$gotdid[0]') && matchid='$gotdid[0]'");
-    $l = mysql_fetch_array($k);
     
     $gotd .= '    <div class="row mb-2 no-gutters">
                     <div class="col-5 text-center">

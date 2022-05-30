@@ -64,7 +64,7 @@ function LeagueSpecifics($lid, $longname, $condensed=FALSE) {
         else {
           // MS po 2012
           $tt->games_total = 7;
-          $tt->playoff_line = 4;
+          $tt->playoff_line = array(4,7);
           $tt->playoff_wins = 1;
           $tt->add_conference("");
           $tt->add_division("Skupina A", 0);

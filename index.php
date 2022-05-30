@@ -10,14 +10,14 @@ if(isset($_SESSION['logged']))
   {
   $la = mysql_query("SELECT lang FROM e_xoops_users WHERE uid='".$_SESSION['logged']."'");
   $lng = mysql_fetch_array($la);
-  $_SESSION[lang] = $lng[lang];
-  include("includes/lang/lang_".strtolower($_SESSION[lang]).".php");
+  $_SESSION["lang"] = $lng["lang"];
+  include("includes/lang/lang_".strtolower($_SESSION["lang"]).".php");
   }
 else
   {
   $langs = array();
 
-  if(!isset($_SESSION[lang]))
+  if(!isset($_SESSION["lang"]))
     {
     if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
         preg_match_all('/([a-z]{1,8}(-[a-z]{1,8})?)\s*(;\s*q\s*=\s*(1|0\.[0-9]+))?/i', $_SERVER['HTTP_ACCEPT_LANGUAGE'], $lang_parse);
@@ -37,37 +37,37 @@ else
     
     foreach ($langs as $lang => $val) {
       if (strpos($lang, 'sk') === 0) {
-        $_SESSION[lang] = "sk";
+        $_SESSION["lang"] = "sk";
         break;
       }
        else if (strpos($lang, 'en') === 0) {
-        $_SESSION[lang] = "en";
+        $_SESSION["lang"] = "en";
         break;
       }
       else {
-        $_SESSION[lang] = "sk";
+        $_SESSION["lang"] = "sk";
         }
       }
     if(count($langs)==0) {
-      $_SESSION[lang] = "sk";
+      $_SESSION["lang"] = "sk";
       }
-    include("includes/lang/lang_".strtolower($_SESSION[lang]).".php");
+    include("includes/lang/lang_".strtolower($_SESSION["lang"]).".php");
     }
   else
     {
-    if($_SESSION[lang]=="en" || $_SESSION[lang]=="sk") include("includes/lang/lang_".strtolower($_SESSION[lang]).".php");
+    if($_SESSION["lang"]=="en" || $_SESSION["lang"]=="sk") include("includes/lang/lang_".strtolower($_SESSION["lang"]).".php");
     else include("includes/lang/lang_sk.php");
     }
   }
   
-if($_GET[changeLang] != '' && ($_GET[changeLang] == 'sk' || $_GET[changeLang] == 'en')) {
-			$_SESSION[lang] = $_GET[changeLang];
-			if(isset($_SESSION['logged'])) mysql_query("UPDATE e_xoops_users SET lang='".$_GET[changeLang]."' WHERE uid='".$_SESSION['logged']."'");
+if($_GET["changeLang"] != '' && ($_GET["changeLang"] == 'sk' || $_GET["changeLang"] == 'en')) {
+			$_SESSION["lang"] = $_GET["changeLang"];
+			if(isset($_SESSION['logged'])) mysql_query("UPDATE e_xoops_users SET lang='".$_GET["changeLang"]."' WHERE uid='".$_SESSION['logged']."'");
 			header("Location: index.php");
 			die();
 			}
 
-switch ($_GET[p]) {
+switch ($_GET["p"]) {
     case "articles":
         include("articles.php");
         break;
@@ -137,10 +137,10 @@ switch ($_GET[p]) {
 }
 header('Content-Type: text/html; charset=utf-8');
 if(!$title) $title="Hlavná stránka";
-if(!$meta_image) $meta_image = "https://www.hockey-live.sk/images/hl_avatar.png";
+if(!isset($meta_image)) $meta_image = "https://www.hockey-live.sk/images/hl_avatar.png";
 
 if(!isset($_SESSION['logged'])) CheckCookieLogin();
-else mysql_query("UPDATE e_xoops_users SET last_login='".mktime()."' WHERE uid='".$_SESSION['logged']."'");
+else mysql_query("UPDATE e_xoops_users SET last_login='".time()."' WHERE uid='".$_SESSION['logged']."'");
 ?>
 <!DOCTYPE html>
 <html lang="en">

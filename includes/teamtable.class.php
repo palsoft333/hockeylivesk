@@ -56,7 +56,7 @@ class TeamTable {
         while($f = mysql_fetch_array($q)) {
             $this->conference[$to_conference]["division"][$to_division]["teams"][$i]["tid"] = $f["id"];
             $this->conference[$to_conference]["division"][$to_division]["teams"][$i]["tshort"] = $f["shortname"];
-            $this->conference[$to_conference]["division"][$to_division]["teams"][$i]["tmedium"] = $f["mediumname"];
+            $this->conference[$to_conference]["division"][$to_division]["teams"][$i]["tmedium"] = ($this->el==1 ? $f["mediumname"]:$f["longname"]);
             $this->conference[$to_conference]["division"][$to_division]["teams"][$i]["tlong"] = $f["longname"];
             $this->conference[$to_conference]["division"][$to_division]["teams"][$i]["games"] = ($this->end_basic==1 ? $f["w_basic"]+$f["l_basic"]:$f["zapasov"]);
             $this->conference[$to_conference]["division"][$to_division]["teams"][$i]["wins"] = ($this->end_basic==1 ? $f["w_basic"]:$f["wins"]);
@@ -65,12 +65,6 @@ class TeamTable {
             $this->conference[$to_conference]["division"][$to_division]["teams"][$i]["ga"] = ($this->end_basic==1 ? $f["ga_basic"]:$f["ga"]);
             $this->conference[$to_conference]["division"][$to_division]["teams"][$i]["gdiff"] = ($this->end_basic==1 ? $f["gf_basic"]-$f["ga_basic"]:$f["goals"]-$f["ga"]);
             $this->conference[$to_conference]["division"][$to_division]["teams"][$i]["points"] = ($this->end_basic==1 ? $f["p_basic"]:$f["body"]);
-/*            $this->conference[$to_conference]["division"][$to_division]["teams"][$i]["w_basic"] = $f["w_basic"];
-            $this->conference[$to_conference]["division"][$to_division]["teams"][$i]["l_basic"] = $f["l_basic"];
-            $this->conference[$to_conference]["division"][$to_division]["teams"][$i]["gf_basic"] = $f["gf_basic"];
-            $this->conference[$to_conference]["division"][$to_division]["teams"][$i]["ga_basic"] = $f["ga_basic"];
-            $this->conference[$to_conference]["division"][$to_division]["teams"][$i]["gdiff_basic"] = $f["gf_basic"]-$f["ga_basic"];
-            $this->conference[$to_conference]["division"][$to_division]["teams"][$i]["p_basic"] = $f["p_basic"];*/
             $this->conference[$to_conference]["division"][$to_division]["teams"][$i]["cws"] = $f["cws"];
             $this->conference[$to_conference]["division"][$to_division]["teams"][$i]["cls"] = $f["cls"];
             $this->conference[$to_conference]["division"][$to_division]["teams"][$i]["ppgf"] = $f["ppgf"];
@@ -204,7 +198,7 @@ class TeamTable {
       $p=1;
       foreach($teams as $key => $team) {
         $bs=$be=$clinchout=$fav="";
-        if($type=="conference" || $type=="division" && $this->el==0) {
+        if($type=="conference" || $type=="division" && $this->el==0 && $this->playoff_line) {
           $clinch = $this->check_clinch($key, $teams);
           if($clinch=="x") { $clinchwas=1; $bs = "<b>"; $be="</b>"; $clinchout = "<sup><span class='text-success font-weight-bold'>x</span></sup>"; }
           if($clinch=="y") { $cannotwas=1; $bs = "<span class='font-italic'>"; $be="</span>"; $clinchout = "<sup><span class='text-danger font-weight-bold'>y</span></sup>"; }
@@ -231,11 +225,11 @@ class TeamTable {
         $p++;
       }
       if(!$json) {
+        $table = str_replace(">Slovensko<", "><span class='font-weight-bold'>Slovensko</span><", $table);
+        $table = str_replace(">Slovensko U20<", "><span class='font-weight-bold'>Slovensko U20</span><", $table);
+        $table = str_replace(">Európa<", "><span class='font-weight-bold'>Európa</span><", $table);
         if($condensed) {
             $table .= "</tbody></table>";
-            $table = str_replace(">Slovensko<", "><span class='font-weight-bold'>Slovensko</span><", $table);
-            $table = str_replace(">Slovensko U20<", "><span class='font-weight-bold'>Slovensko U20</span><", $table);
-            $table = str_replace(">Európa<", "><span class='font-weight-bold'>Európa</span><", $table);
         }
         else $table .= "</tbody></table></div></div>";
       }
@@ -289,12 +283,12 @@ class TeamTable {
         }
         // tie-breaking procedure for 3 or more teams tied on points
         elseif(count($point_value)>2) {
+          $tied_teams=[];
           foreach($point_value as $tied_team) {
             $tied_teams[] = $tied_team["tshort"];
           }
           $tied_teams = implode("','", $tied_teams);
           $vzaj = mysql_query("SELECT m.*, MAX(g.time) as time FROM 2004matches m LEFT JOIN 2004goals g ON g.matchno=m.id WHERE m.team1short IN ('".$tied_teams."') && m.team2short IN ('".$tied_teams."') && m.league='".$this->lid."' && m.kedy='konečný stav' GROUP BY m.id");
-          echo "";
           while($vzajom = mysql_fetch_array($vzaj)) {
             if($vzajom["time"]>60) { $pts = 2; $lpts = 1; }
             else { $pts = 3; $lpts = 0; }

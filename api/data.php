@@ -808,6 +808,7 @@ elseif($_GET[table])
     include("../includes/league_specifics.php");
     $tt = LeagueSpecifics($f[id], $f[longname]);
     $conference = $tt->render_table("conference", false, true);
+    $conference = str_replace('}}}}{"conference":{"', '}},"', $conference);
   if($lang=="en")
       {
       $conference = str_replace("LANG_TEAMTABLE_WESTCONF1", "Western conference", $conference);

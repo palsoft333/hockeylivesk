@@ -28,6 +28,32 @@ function Get_Table($lid, $params, $table_type, $sim, $pos=false) {
                <div".($table_type=="playoff" ? "":" style='max-width: 1000px;'").">";
   
   // prepínače
+  if($vyb[active]==0) {
+      $content .= '
+      <nav aria-label="League navigation">
+        <ul class="pagination pagination-sm">
+            <li class="page-item">
+                <a class="page-link text-'.$leaguecolor.'" href="/category/'.$vyb[topic_id].'-'.SEOtitle($vyb[longname]).'" aria-label="'.LANG_NAV_NEWS.'">
+                    <span aria-hidden="true">'.LANG_NAV_NEWS.'</span>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link text-'.$leaguecolor.'" href="/games/'.$lid.'-'.SEOtitle($vyb[longname]).'" aria-label="'.LANG_TEAMSTATS_MATCHES.'">
+                    <span aria-hidden="true">'.LANG_TEAMSTATS_MATCHES.'</span>
+                </a>
+            </li>
+            <li class="page-item disabled">
+                <a class="page-link" tabindex="-1" href="#" aria-disabled="true">'.LANG_NAV_TABLE.'</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link text-'.$leaguecolor.'" href="/stats/'.$lid.'-'.SEOtitle($vyb[longname]).'" aria-label="'.LANG_NAV_STATS.'">
+                    <span aria-hidden="true">'.LANG_NAV_STATS.'</span>
+                </a>
+            </li>
+        </ul>
+      </nav>';
+  }
+
   if($vyb[el]==1) 
     {
     if($table_type=="playoff")

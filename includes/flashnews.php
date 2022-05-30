@@ -142,7 +142,7 @@ foreach($page_posts['data'] as $post){
       }
     if($i % 2 == 0) {$tableclass = "";} 
     else $tableclass = " bg-light";
-    echo "<table class='card w-100 my-0 mb-2'>
+    echo "<table class='card d-table w-100 my-0 mb-2'>
             <tr class='card-header$tableclass'>
               <td style='width:60%;' class='pl-2'>
                 <b><a href='".$link."' ".($our==1 ? "" : " target='_blank'").">".($story ? $story : LANG_FLASH_FROMFB)."</a></b>

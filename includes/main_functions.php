@@ -124,7 +124,7 @@ function Generate_Menu($active_league = FALSE) {
                       '.(strstr($f[longname], 'KHL') ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/slovaks/'.$f[id].'-'.SEOtitle($f[topic_title]).'"><span itemprop="name">'.LANG_NAV_SLOVAKI.'</span><i class="fas fa-user-shield fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                       '.($f[el]>0 && $f[topic_id]!=60 ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/injured/'.$f[id].'-'.SEOtitle($f[topic_title]).'"><span itemprop="name">'.LANG_NAV_INJURED.'</span><i class="fas fa-user-injured fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                       '.($f[el]>0 ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/transfers/'.$f[id].'-'.SEOtitle($f[topic_title]).'"><span itemprop="name">'.LANG_NAV_TRANSFERS.'</span><i class="fas fa-exchange-alt fa-fw float-right text-gray-500 my-1"></i></a>':'').'
-                      '.($f[id]==136 ? '<a itemprop="url" class="collapse-item font-weight-bold text-success" href="/fantasy/draft"><span itemprop="name">Fantasy MS</span><i class="fas fa-magic fa-fw float-right text-gray-500 my-1"></i></a>':'').'
+                      '.($f[id]==136 ? '<a itemprop="url" class="collapse-item font-weight-bold text-success" href="/fantasy/picks"><span itemprop="name">Fantasy MS</span><i class="fas fa-magic fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                       '.($f[id]==134 ? '<a itemprop="url" class="collapse-item font-weight-bold text-danger" href="/fantasy/main"><span itemprop="name">Fantasy KHL</span><i class="fas fa-magic fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                     </div>
                   </div>
@@ -1046,21 +1046,33 @@ function StatusParser($name)
 
 function GoogleNews($type, $id)
   {
-  Global $link;
+  Global $link, $leaguecolor;
     if($type=="p") {
-        $w = mysql_query("SELECT SUBSTRING(JSON_UNQUOTE(JSON_EXTRACT(tags, '$.p')),1,LENGTH(JSON_UNQUOTE(JSON_EXTRACT(tags, '$.p')))-1) as pid, SUBSTRING(JSON_UNQUOTE(JSON_EXTRACT(tags, '$.p')),-1) as el FROM gn_news ORDER BY published DESC;");
-        /*$el = substr($tag, -1);
-        $id = substr($tag, 0, -1);
+        $el = substr($id, -1);
+        $id = substr($id, 0, -1);
         if($el==0) $q = mysql_query("SELECT * FROM 2004players WHERE id='".$id."'");
         else $q = mysql_query("SELECT * FROM el_players WHERE id='".$id."'");
         $f = mysql_fetch_array($q);
-        $search = $f[name];*/
+        $search = $f[name];
+        $w = mysql_query("SELECT * FROM (SELECT g.*, IF(SUBSTRING(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.p')),-1)=0, p1.name, p2.name) as name FROM gn_news g LEFT JOIN 2004players p1 ON p1.id=SUBSTRING(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.p')),1,LENGTH(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.p')))-1) LEFT JOIN el_players p2 ON p2.id=SUBSTRING(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.p')),1,LENGTH(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.p')))-1))dt WHERE dt.name='".$search."' ORDER BY dt.published DESC LIMIT 5");
     }
     elseif($type=="g") {
-
+        $el = substr($id, -1);
+        $id = substr($id, 0, -1);
+        if($el==0) $q = mysql_query("SELECT * FROM 2004goalies WHERE id='".$id."'");
+        else $q = mysql_query("SELECT * FROM el_goalies WHERE id='".$id."'");
+        $f = mysql_fetch_array($q);
+        $search = $f[name];
+        $w = mysql_query("SELECT * FROM (SELECT g.*, IF(SUBSTRING(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.g')),-1)=0, p1.name, p2.name) as name FROM gn_news g LEFT JOIN 2004goalies p1 ON p1.id=SUBSTRING(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.g')),1,LENGTH(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.g')))-1) LEFT JOIN el_goalies p2 ON p2.id=SUBSTRING(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.g')),1,LENGTH(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.g')))-1))dt WHERE dt.name='".$search."' ORDER BY dt.published DESC LIMIT 5");
     }
     elseif($type=="t") {
-
+        $el = substr($id, -1);
+        $id = substr($id, 0, -1);
+        if($el==0) $q = mysql_query("SELECT * FROM 2004teams WHERE id='".$id."'");
+        else $q = mysql_query("SELECT * FROM el_teams WHERE id='".$id."'");
+        $f = mysql_fetch_array($q);
+        $search = $f[shortname];
+        $w = mysql_query("SELECT * FROM (SELECT g.*, IF(SUBSTRING(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.t')),-1)=0, p1.shortname, p2.shortname) as shortname FROM gn_news g LEFT JOIN 2004teams p1 ON p1.id=SUBSTRING(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.t')),1,LENGTH(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.t')))-1) LEFT JOIN el_teams p2 ON p2.id=SUBSTRING(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.t')),1,LENGTH(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.t')))-1))dt WHERE dt.shortname='".$search."' ORDER BY dt.published DESC LIMIT 5");
     }
     elseif($type=="n") {
         $w = mysql_query("SELECT * FROM gn_news WHERE JSON_UNQUOTE(JSON_EXTRACT(tags, '$.n'))='".$id."' ORDER BY published DESC LIMIT 5");
@@ -1069,37 +1081,39 @@ function GoogleNews($type, $id)
     $news = '
     <div class="card shadow mb-2">
         <div class="card-header">
-            <div class="font-weight-bold text-primary text-uppercase">Spravodajský servis</div>
+            <div class="font-weight-bold text-'.$leaguecolor.''.($type=="n" ? " text-uppercase":"").'">Spravodajský servis</div>
         </div>
         <div class="card-body">';
     $i=0;
     while($e = mysql_fetch_array($w)) {
         $picture="";
         $tags = json_decode($e[tags], true);
-        foreach($tags as $key => $tag) {
-            if($key=="p" || $key=="g") {
-                $el = substr($tag, -1);
-                $id = substr($tag, 0, -1);
-                if($key=="p") { $nonel_table="2004players"; $el_table="el_players"; }
-                if($key=="g") { $nonel_table="2004goalies"; $el_table="el_goalies"; }
-                if($el==0) $q = mysql_query("SELECT * FROM $nonel_table WHERE id='".$id."'");
-                else $q = mysql_query("SELECT * FROM $el_table WHERE id='".$id."'");
-                $f = mysql_fetch_array($q);
-                $picture = "/includes/player_photo.php?name=".$f[name];
-            }
-            elseif($key=="t" && $picture=="") {
-                $el = substr($tag, -1);
-                $id = substr($tag, 0, -1);
-                if($el==0) $q = mysql_query("SELECT * FROM 2004teams WHERE id='".$id."'");
-                else $q = mysql_query("SELECT * FROM el_teams WHERE id='".$id."'");
-                $f = mysql_fetch_array($q);
-                if($el==0) $picture = "/images/vlajky/".$f[shortname].".gif";
-                else $picture = "/images/vlajky/".$f[shortname]."_big.gif";
+        if($type=="n" || $type=="t") {
+            foreach($tags as $key => $tag) {
+                if($key=="p" || $key=="g") {
+                    $el = substr($tag, -1);
+                    $id = substr($tag, 0, -1);
+                    if($key=="p") { $nonel_table="2004players"; $el_table="el_players"; }
+                    if($key=="g") { $nonel_table="2004goalies"; $el_table="el_goalies"; }
+                    if($el==0) $q = mysql_query("SELECT * FROM $nonel_table WHERE id='".$id."'");
+                    else $q = mysql_query("SELECT * FROM $el_table WHERE id='".$id."'");
+                    $f = mysql_fetch_array($q);
+                    $picture = "/includes/player_photo.php?name=".$f[name];
+                }
+                elseif($type!="t" && $key=="t" && $picture=="") {
+                    $el = substr($tag, -1);
+                    $id = substr($tag, 0, -1);
+                    if($el==0) $q = mysql_query("SELECT * FROM 2004teams WHERE id='".$id."'");
+                    else $q = mysql_query("SELECT * FROM el_teams WHERE id='".$id."'");
+                    $f = mysql_fetch_array($q);
+                    if($el==0) $picture = "/images/vlajky/".$f[shortname].".gif";
+                    else $picture = "/images/vlajky/".$f[shortname]."_big.gif";
+                }
             }
         }
         if($i % 2 == 0) {$tableclass = "";} 
         else $tableclass = " bg-light";
-        $news .= "<table class='card w-100 my-0 mb-2 position-relative small'>
+        $news .= "<table class='card d-table w-100 my-0 mb-2 position-relative small'>
                 <tr class='card-header$tableclass'>
                 <td style='width:60%;' class='pl-2'>
                     <b><a href='".$e[link]."' target='_blank' class='stretched-link'>".$e[publisher]."</a></b>

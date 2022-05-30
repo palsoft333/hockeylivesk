@@ -633,6 +633,9 @@ ORDER BY datetime DESC LIMIT 1)dt WHERE dt.id IS NOT NULL");
                       </tbody></table>
                     </div>
                    </div>
+
+                    '.GoogleNews("p",$pid).'
+
                     <div class="card shadow my-4">
                         <div class="card-body">
                         '.GenerateComments(3,$data[name]."p").'
@@ -901,6 +904,9 @@ elseif($gid)
                         </tbody></table>
                       </div>
                     </div>
+
+                    '.GoogleNews("g",$gid).'
+
                     <div class="card shadow my-4">
                         <div class="card-body">
                         '.GenerateComments(3,$data[name]."g").'

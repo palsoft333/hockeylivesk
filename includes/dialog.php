@@ -19,28 +19,32 @@ if($_GET[action]=="change")
   if($_GET[action]=="change" && $_GET[newpid] && $_GET[oldpid])
     {
     $newpid = mysql_real_escape_string($_GET['newpid']);
-    $oldpid = mysql_real_escape_string($_GET['oldpid']);
-    $p = MySQL_Query("SELECT * FROM ft_players WHERE pid='$oldpid' && uid='$uid'");
-    $o = mysql_fetch_array($p);
-    if($o[gk]==1) $q = MySQL_Query("SELECT f.*, p.name, 'GK' as pos, p.league FROM `ft_players` f LEFT JOIN 2004goalies p ON p.id=f.pid WHERE pid='$oldpid' && uid='$uid'");
-    else $q = MySQL_Query("SELECT f.*, p.name, p.pos, p.league FROM `ft_players` f LEFT JOIN 2004players p ON p.id=f.pid WHERE pid='$oldpid' && uid='$uid'");
-    if(mysql_num_rows($q)>0)
+    $newp = MySQL_Query("SELECT * FROM ft_players WHERE pid='$newpid'");
+    if(mysql_num_rows($newp)==0) 
       {
-      $f = mysql_fetch_array($q);
-      if($o[gk]==1) $w = MySQL_Query("SELECT * FROM 2004goalies WHERE id='".$newpid."'");
-      else $w = MySQL_Query("SELECT * FROM 2004players WHERE id='".$newpid."'");
-      $e = mysql_fetch_array($w);
-      if($o[gk]==1) $pos = "GK";
-      else $pos = $e[pos];
-      mysql_query("UPDATE ft_players SET pid='".$newpid."', gk='".$o[gk]."', g='0', a='0', w='0', so='0' WHERE pid='".$oldpid."' && uid='$uid'");
-      mysql_query("REPLACE INTO ft_choices (id, teamshort, teamlong, pos, name) VALUES ('$newpid', '$e[teamshort]', '$e[teamlong]', '$pos', '$e[name]')");
-      mysql_query("INSERT INTO ft_changes (uid, old_pid, new_pid) VALUES ('$uid', '$oldpid', '$newpid')");
-      $headers = 'From: '.SITE_MAIL. "\r\n" .
-            'Reply-To: '.SITE_MAIL. "\r\n" .
-            'X-Mailer: PHP/' . phpversion();
-      $count++;
-      mail(ADMIN_MAIL, "Vymenený hráč", "user ID: ".$uid.". Starý hráč: ".$f[name].", Nový hráč: ".$e[name], $headers);
-      echo "ok";
+      $oldpid = mysql_real_escape_string($_GET['oldpid']);
+      $p = MySQL_Query("SELECT * FROM ft_players WHERE pid='$oldpid' && uid='$uid'");
+      $o = mysql_fetch_array($p);
+      if($o[gk]==1) $q = MySQL_Query("SELECT f.*, p.name, 'GK' as pos, p.league FROM `ft_players` f LEFT JOIN 2004goalies p ON p.id=f.pid WHERE pid='$oldpid' && uid='$uid'");
+      else $q = MySQL_Query("SELECT f.*, p.name, p.pos, p.league FROM `ft_players` f LEFT JOIN 2004players p ON p.id=f.pid WHERE pid='$oldpid' && uid='$uid'");
+      if(mysql_num_rows($q)>0)
+        {
+        $f = mysql_fetch_array($q);
+        if($o[gk]==1) $w = MySQL_Query("SELECT * FROM 2004goalies WHERE id='".$newpid."'");
+        else $w = MySQL_Query("SELECT * FROM 2004players WHERE id='".$newpid."'");
+        $e = mysql_fetch_array($w);
+        if($o[gk]==1) $pos = "GK";
+        else $pos = $e[pos];
+        mysql_query("UPDATE ft_players SET pid='".$newpid."', gk='".$o[gk]."', g='0', a='0', w='0', so='0' WHERE pid='".$oldpid."' && uid='$uid'");
+        mysql_query("REPLACE INTO ft_choices (id, teamshort, teamlong, pos, name) VALUES ('$newpid', '$e[teamshort]', '$e[teamlong]', '$pos', '$e[name]')");
+        mysql_query("INSERT INTO ft_changes (uid, old_pid, new_pid) VALUES ('$uid', '$oldpid', '$newpid')");
+        $headers = 'From: '.SITE_MAIL. "\r\n" .
+              'Reply-To: '.SITE_MAIL. "\r\n" .
+              'X-Mailer: PHP/' . phpversion();
+        $count++;
+        //mail(ADMIN_MAIL, "Vymenený hráč", "user ID: ".$uid.". Starý hráč: ".$f[name].", Nový hráč: ".$e[name], $headers);
+        echo "ok";
+        }
       }
     }
   else

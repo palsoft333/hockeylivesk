@@ -25,9 +25,6 @@ if($_GET[save]==1)
     }
   }
   // check if change of already drafted player isn't happening
-  $w = mysql_query("SELECT * FROM ft_players");
-  // only if draft hasn't finished
-  if(mysql_num_rows($w)<100) {
     $q = mysql_query("SELECT * FROM ft_players WHERE uid='".$uid."' ORDER BY round");
     while($f = mysql_fetch_array($q)) {
       $i=0;
@@ -53,7 +50,6 @@ if($_GET[save]==1)
       $i++;
       }
     }
-  }
   $key = array_search(0, array_column($options, 'pid'));
   if(!$key && $key!==0 && count($options)==10) PreDraft();
   mysql_close($link);
@@ -286,13 +282,16 @@ function Show_Drafted()
               </tr>
             </thead>
             <tbody>';
-  $q = mysql_query("SELECT ft_changes.*, p.teamshort as old_tshort, p.name as old_name, p2.teamshort as new_tshort, p2.name as new_name, u.uname FROM `ft_changes` JOIN 2004players p ON ft_changes.old_pid=p.id JOIN ft_choices p2 ON ft_changes.new_pid=p2.id JOIN e_xoops_users u ON ft_changes.uid=u.uid ORDER BY tstamp DESC LIMIT 10");
+  $q = mysql_query("SELECT ft_changes.*, IF(p.pos='GK',1,0) as gk, u.uname FROM `ft_changes` LEFT JOIN ft_choices p ON ft_changes.old_pid=p.id JOIN e_xoops_users u ON ft_changes.uid=u.uid ORDER BY tstamp DESC LIMIT 10");
   while($f = mysql_fetch_array($q))
     {
+    if($f[gk]==1) $p = mysql_query("SELECT g1.teamshort as old_tshort, g1.name as old_name, g2.teamshort as new_tshort, g2.name as new_name FROM 2004goalies g1 LEFT JOIN 2004goalies g2 ON g2.id='".$f[new_pid]."' WHERE g1.id='".$f[old_pid]."'");
+    else $p = mysql_query("SELECT p1.teamshort as old_tshort, p1.name as old_name, p2.teamshort as new_tshort, p2.name as new_name FROM 2004players p1 LEFT JOIN 2004players p2 ON p2.id='".$f[new_pid]."' WHERE p1.id='".$f[old_pid]."'");
+    $m = mysql_fetch_array($p);
     if(date('Y-m-d',strtotime($f[tstamp]))==date("Y-m-d", mktime())) $hl="dnes o <b>".date('G:i', strtotime($f[tstamp]))."</b>";
     elseif(date('Y-m-d',strtotime($f[tstamp]))==date('Y-m-d', mktime(0, 0, 0, date('m'), date('d')-1, date('Y')))) $hl="včera o ".date('G:i', strtotime($f[tstamp]));
     else $hl=date('j.n.',strtotime($f[tstamp])). " ".LANG_AT." ".date('G:i', strtotime($f[tstamp]));
-    $drafted .= '<tr><td class="text-nowrap">'.$hl.'</td><td><a href="/user/'.$f[uid].'">'.$f[uname].'</a></td><td class="text-nowrap"><img class="flag-iihf '.$f[old_tshort].'-small" src="/images/blank.png" alt="'.$f[old_tshort].'"> <a href="/player/'.$f[old_pid].'0-'.SEOtitle($f[old_name]).'">'.$f[old_name].'</a></td><td class="text-nowrap"><img class="flag-iihf '.$f[new_tshort].'-small" src="/images/blank.png" alt="'.$f[new_tshort].'"> <a href="/player/'.$f[new_pid].'0-'.SEOtitle($f[new_name]).'">'.$f[new_name].'</a></td></tr>';
+    $drafted .= '<tr><td class="text-nowrap">'.$hl.'</td><td><a href="/user/'.$f[uid].'">'.$f[uname].'</a></td><td class="text-nowrap"><img class="flag-iihf '.$m[old_tshort].'-small" src="/images/blank.png" alt="'.$m[old_tshort].'"> <a href="/'.($f[gk]==1 ? 'goalie':'player').'/'.$f[old_pid].'0-'.SEOtitle($m[old_name]).'">'.$m[old_name].'</a></td><td class="text-nowrap"><img class="flag-iihf '.$m[new_tshort].'-small" src="/images/blank.png" alt="'.$m[new_tshort].'"> <a href="/'.($f[gk]==1 ? 'goalie':'player').'/'.$f[new_pid].'0-'.SEOtitle($m[new_name]).'">'.$m[new_name].'</a></td></tr>';
     }
   $drafted .= '</tbody></table></div></div></div></div>';
   }

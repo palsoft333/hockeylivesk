@@ -19,8 +19,7 @@ $league_start = "2022-05-13 15:20:00";
 2. odremovať potrebné veci
 3. vyprázdniť ft_players, ft_predraft, ft_teams a ft_changes
 4. zmeniť link v menu
-5. v includes/players_functions.php pridať hráčov, ktorí sa nezúčastnia
-6. vypnúť/zapnúť cronjob
+5. vypnúť/zapnúť cronjob
 */
 
 if($_GET[cron]==1) {
@@ -40,7 +39,7 @@ $leag = mysql_query("SELECT * FROM 2004leagues WHERE longname LIKE '%$skratka%' 
 $league = mysql_fetch_array($leag);
 $leaguecolor = $league[color];
 $active_league = $league[id];
-//if($uid==2) $uid=2944;
+//if($uid==2) { $uid=1319; $_SESSION[logged]=1319; }
 
 // cron job pre vyber random hraca pri necinnosti manazera
 if($_GET[cron]==1)
@@ -531,7 +530,7 @@ if($params[0]=="picks")
       $diff = '<span class="text-success text-xs"> (+'.$diffn.')</span>';
       }
     else $diff='';
-    if($t[user_avatar]!="") $avatar = "<img class='rounded-circle mr-1' src='/images/user_avatars/".$t[uid].".".$t[user_avatar]."' alt='".$t[uname]."' style='width:2rem;height:2rem;vertical-align:-11px;'>";
+    if($t[user_avatar]!="") $avatar = "<img class='rounded-circle mr-1' src='/images/user_avatars/".$t[uid].".".$t[user_avatar]."?".filemtime('images/user_avatars/'.$t[uid].'.'.$t[user_avatar])."' alt='".$t[uname]."' style='width:2rem;height:2rem;vertical-align:-11px;'>";
     else $avatar = "<i class='text-gray-300 fas fa-user-circle fa-2x mr-1' style='width:2rem;height:2rem;vertical-align:-7px;'></i>";
     $content .= "<tr><td class='text-center$add'>$i.</td><td class='$add'><a href='#$t[uname]'>".$avatar."$t[uname]</a></td><td class='$add'><b>$t[points]</b>".$diff."</td></tr>";
     $i++;
@@ -605,7 +604,7 @@ if($params[0]=="picks")
               </tr>
             </thead>
             <tbody>';
-  $q = mysql_query("SELECT ft_changes.*, p.gk, u.uname FROM `ft_changes` JOIN ft_players p ON ft_changes.old_pid=p.pid JOIN e_xoops_users u ON ft_changes.uid=u.uid ORDER BY tstamp DESC LIMIT 10");
+  $q = mysql_query("SELECT ft_changes.*, IF(p.pos='GK',1,0) as gk, u.uname FROM `ft_changes` LEFT JOIN ft_choices p ON ft_changes.old_pid=p.id JOIN e_xoops_users u ON ft_changes.uid=u.uid ORDER BY tstamp DESC LIMIT 10");
   while($f = mysql_fetch_array($q))
     {
     if($f[gk]==1) $p = mysql_query("SELECT g1.teamshort as old_tshort, g1.name as old_name, g2.teamshort as new_tshort, g2.name as new_name FROM 2004goalies g1 LEFT JOIN 2004goalies g2 ON g2.id='".$f[new_pid]."' WHERE g1.id='".$f[old_pid]."'");
@@ -644,7 +643,7 @@ if($params[0]=="picks")
                   <th class="text-center">'.LANG_MATCHES_SO.'</th>
                 </tr>
               </thead>';
-    $w = mysql_query("SELECT ft_players.*, ft_players.g+ft_players.a as points, t1.*, IF(t1.pos='F',1,IF(t1.pos='D',2,3)) as zor FROM ft_players JOIN ft_choices t1 ON t1.id=ft_players.pid WHERE uid='$f[uid]' ORDER BY zor ASC, points DESC, g DESC, a DESC, w DESC, so DESC");
+    $w = mysql_query("SELECT ft_players.*, ft_players.g+ft_players.a as points, t1.teamshort, t1.teamlong, t1.pos, t1.name, IF(t1.pos='F',1,IF(t1.pos='D',2,3)) as zor FROM ft_players JOIN ft_choices t1 ON t1.id=ft_players.pid WHERE uid='$f[uid]' ORDER BY zor ASC, points DESC, ft_players.g DESC, ft_players.a DESC, ft_players.w DESC, ft_players.so DESC");
     $i = 1;
     $pts=$goals=$asists=$wins=$so=0;
     while($e = mysql_fetch_array($w))
@@ -664,7 +663,7 @@ if($params[0]=="picks")
       }
     $tfoot = '<tfoot class="alert-'.$leaguecolor.' font-weight-bold">
             <tr>
-              <td colspan="3">'.LANG_BETS_OVERALL.': '.$pts.' '.LANG_TEAMSTATS_PTS.'</td>
+              <td colspan="3">'.LANG_BETS_ACTUAL.': '.$pts.' '.LANG_TEAMSTATS_PTS.'</td>
               <td class="text-center" style="width:13%;">'.$goals.'</td>
               <td class="text-center" style="width:14%;">'.$asists.'</td>
               <td class="text-center" style="width:14%;">'.$wins.'</td>

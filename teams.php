@@ -29,7 +29,7 @@ if($id)
     $players_table = "2004players";
     $matches_table = "2004matches";
     $injury_table = "el_injuries";
-    $goalies_table = "el_goalies";
+    $goalies_table = "2004goalies";
     $title1 = LANG_TEAMSTATS_LEAGUE;
     $title2 = LANG_TEAMSTATS_APPEAR;
     }
@@ -377,7 +377,7 @@ if($id)
                   $content .= '
                   </div>
                 </div>';
-if($el==0) $content .= '<div class="card shadow">
+if($el==0) $content .= '<div class="card shadow mb-4">
 <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
 <!-- V detaile non-EL tímu -->
 <ins class="adsbygoogle"
@@ -391,8 +391,12 @@ if($el==0) $content .= '<div class="card shadow">
 </script>
 </div>';
 $content .= '
+
+            '.GoogleNews("t",$id).'
+
               </div>
             </div>
+
             <div class="card shadow mb-4">
                 <div class="card-body">
                 '.GenerateComments(1,$id).'
