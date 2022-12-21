@@ -132,7 +132,7 @@ else
   <script src="/js/jquery.lazy.min.js"></script>
   <script src="/js/main.min.js?v=1.1.7"></script>
   <script src="/includes/lang/lang_<? echo $_SESSION[lang]; ?>.js?v=1.0.0"></script>
-  <script src="/js/register_events.js?v=1.0.4"></script>
+  <script src="/js/register_events.js?v=1.0.5"></script>
 
 </body>
 

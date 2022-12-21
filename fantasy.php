@@ -1,31 +1,34 @@
 <?php
 $params = explode("/", htmlspecialchars($_GET[id]));
 
-$nazov = "Fantasy Championship";
-$menu = "MS 2022";
-$skratka = "MS";
+$nazov = "Fantasy Junior Championship";
+$menu = "MS U20 2023";
+$skratka = "MS U20";
 $manazerov = 10;
-$article_id = 2299;
-$league_id = 136;
+$article_id = 2350;
+$league_id = 146;
 //$timeout = 480;
 $predraftt = 1; // = draftuje sa do zásobníka. ak 1, upraviť počet manažérov aj v includes/fantasy_functions.php
-$knownrosters = 0; // = su zname zostavy (do ft_choices pridat hracov, ktori sa zucastnia)
-$article_rosters = 2266;
-$draft_start = "2022-04-29 14:00:00";
-$league_start = "2022-05-13 15:20:00";
+$knownrosters = 1; // = su zname zostavy (do ft_choices pridat hracov, ktori sa zucastnia)
+$article_rosters = 2354;
+$draft_start = "2022-12-16 08:00:00";
+$league_start = "2022-12-26 17:00:00";
 
 /*
 1. nastaviť dátum deadlinu
 2. odremovať potrebné veci
 3. vyprázdniť ft_players, ft_predraft, ft_teams a ft_changes
 4. zmeniť link v menu
-5. vypnúť/zapnúť cronjob
+5. vypnúť/zapnúť cronjob pre neaktivitu a nulovanie bodov
+6. ak je knownroster=1 do ft_choices pridat hracov a brankarov, ktori sa zucastnia
+7. odoslať pozvánkové maily na základe reakčného času avg_time v e_xoops_users
 */
 
 if($_GET[cron]==1) {
   include("includes/db.php");
   include("includes/lang/lang_sk.php");
 }
+else include("includes/advert_bigscreenside.php");
 
 $date1 = new DateTime(date("Y-m-d"));
 $date2 = new DateTime(date("Y-m-d", strtotime($league_start)));
@@ -39,7 +42,7 @@ $leag = mysql_query("SELECT * FROM 2004leagues WHERE longname LIKE '%$skratka%' 
 $league = mysql_fetch_array($leag);
 $leaguecolor = $league[color];
 $active_league = $league[id];
-//if($uid==2) { $uid=1319; $_SESSION[logged]=1319; }
+/*if($uid==2) { $uid=215; $_SESSION[logged]=215; }*/
 
 // cron job pre vyber random hraca pri necinnosti manazera
 if($_GET[cron]==1)
@@ -369,18 +372,7 @@ if($params[0]=="draft")
     </div>
    </div> <!-- end col -->
    <div class="col-auto flex-grow-1 flex-shrink-1 d-none d-xl-block">
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8860983069832222"
-            crossorigin="anonymous"></script>
-        <!-- HL reklama na podstránkach XL zariadenie -->
-        <ins class="adsbygoogle"
-            style="display:block"
-            data-ad-client="ca-pub-8860983069832222"
-            data-ad-slot="3044717777"
-            data-ad-format="auto"
-            data-full-width-responsive="true"></ins>
-        <script>
-            (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
+    '.$advert.'
    </div> <!-- end col -->
    </div> <!-- end row -->';
   }
@@ -680,18 +672,7 @@ if($params[0]=="picks")
     </div>
    </div> <!-- end col -->
    <div class="col-auto flex-grow-1 flex-shrink-1 d-none d-xl-block">
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8860983069832222"
-            crossorigin="anonymous"></script>
-        <!-- HL reklama na podstránkach XL zariadenie -->
-        <ins class="adsbygoogle"
-            style="display:block"
-            data-ad-client="ca-pub-8860983069832222"
-            data-ad-slot="3044717777"
-            data-ad-format="auto"
-            data-full-width-responsive="true"></ins>
-        <script>
-            (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
+    '.$advert.'
    </div> <!-- end col -->
    </div> <!-- end row -->';
   }

@@ -188,6 +188,7 @@ function Show_Drafted()
     {
     $mid = $k[uid];
     $avgtime[$mid] = $k[avgtime];
+    mysql_query("UPDATE e_xoops_users SET avg_time='".$k[avgtime]."' WHERE uid='".$mid."'");
     }
   $drafted = '
   <div class="row justify-content-center">

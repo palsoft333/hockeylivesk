@@ -97,6 +97,8 @@ define("LANG_USERPROFILE_TOTHEPLAYER",'K hráčovi');
 define("LANG_G","G");
 define("LANG_A","A");
 define("LANG_P","B");
+define("LANG_OT","PP");
+define("LANG_SO","SN");
 
 define("LANG_MATCHES_DETAIL","detail zápasu");
 define("LANG_MATCHES_SLOVAKS","Slováci v akcii");
@@ -327,6 +329,7 @@ define("LANG_NAV_HOME","Domov");
 define("LANG_NAV_MAINPAGE","Hlavná stránka");
 define("LANG_NAV_PLAYERDB","Databáza hráčov");
 define("LANG_NAV_SHOOTERS","Strelci");
+define("LANG_NAV_FORUM","Diskusie");
 define("LANG_NAV_IMPERSSUM","Kontakt");
 define("LANG_NAV_LIVE","LIVE komentár");
 define("LANG_NAV_NEWS","Novinky");
@@ -567,4 +570,11 @@ define('LANG_PRIVACY_TEXT12','Nad svojimi údajmi máte plnú kontrolu a tak, ak
 define('LANG_PRIVACY_TEXT13','Zmeny v podmienkach o ochrane osobných údajov');
 define('LANG_PRIVACY_TEXT14','Všetky zmeny v podmienkach o ochrane osobných údajov budú uverejnené na tejto stránke.<br>Tieto podmienky sú platné od 16.5.2018.');
 define('LANG_PRIVACY_TEXT15','V prípade akýchkoľvek otázok nás môžete <a href="/contact" class="email">kontaktovať</a>.');
+
+define('LANG_FORUM_TITLE','Diskusné fórum');
+define('LANG_FORUM_TOPICS','Témy fóra');
+define('LANG_FORUM_TEAMTOPICS','Diskusie k tímom');
+define('LANG_FORUM_GAMETOPICS','Diskusie k zápasom');
+define('LANG_FORUM_PLAYERTOPICS','Diskusie k hráčom');
+define('LANG_FORUM_NEWSTOPICS','Diskusie k článkom');
 ?>

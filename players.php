@@ -34,6 +34,8 @@ $locale = explode(";",setlocale(LC_ALL, '0'));
 $locale = explode("=",$locale[0]);
 $locale = $locale[1];
 
+include("includes/advert_bigscreenside.php");
+
 $content = "";
 // slovaci v KHL a NHL
 if($sid)
@@ -179,18 +181,7 @@ $content .= '</tbody></table>
            </div>
         </div> <!-- end col -->
         <div class="col-auto flex-grow-1 flex-shrink-1 d-none d-xl-block mt-4">
-                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8860983069832222"
-                    crossorigin="anonymous"></script>
-                <!-- HL reklama na podstránkach XL zariadenie -->
-                <ins class="adsbygoogle"
-                    style="display:block"
-                    data-ad-client="ca-pub-8860983069832222"
-                    data-ad-slot="3044717777"
-                    data-ad-format="auto"
-                    data-full-width-responsive="true"></ins>
-                <script>
-                    (adsbygoogle = window.adsbygoogle || []).push({});
-                </script>
+            '.$advert.'
         </div> <!-- end col -->
         </div> <!-- end row -->';
     }
@@ -318,18 +309,7 @@ $content .= '</tbody></table>
            </div>
         </div> <!-- end col -->
         <div class="col-auto flex-grow-1 flex-shrink-1 d-none d-xl-block mt-4">
-                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8860983069832222"
-                    crossorigin="anonymous"></script>
-                <!-- HL reklama na podstránkach XL zariadenie -->
-                <ins class="adsbygoogle"
-                    style="display:block"
-                    data-ad-client="ca-pub-8860983069832222"
-                    data-ad-slot="3044717777"
-                    data-ad-format="auto"
-                    data-full-width-responsive="true"></ins>
-                <script>
-                    (adsbygoogle = window.adsbygoogle || []).push({});
-                </script>
+            '.$advert.'
         </div> <!-- end col -->
         </div> <!-- end row -->';
   }
@@ -663,18 +643,7 @@ ORDER BY datetime DESC LIMIT 1)dt WHERE dt.id IS NOT NULL");
       }
     $content .= '   </div> <!-- end col -->
    <div class="col-auto flex-grow-1 flex-shrink-1 d-none d-xl-block">
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8860983069832222"
-            crossorigin="anonymous"></script>
-        <!-- HL reklama na podstránkach XL zariadenie -->
-        <ins class="adsbygoogle"
-            style="display:block"
-            data-ad-client="ca-pub-8860983069832222"
-            data-ad-slot="3044717777"
-            data-ad-format="auto"
-            data-full-width-responsive="true"></ins>
-        <script>
-            (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
+    '.$advert.'
    </div> <!-- end col -->
    </div> <!-- end row -->';
     }
@@ -934,18 +903,7 @@ $script_end = '<script type="text/javascript">
     $content .= '   
     </div> <!-- end col -->
    <div class="col-auto flex-grow-1 flex-shrink-1 d-none d-xl-block">
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8860983069832222"
-            crossorigin="anonymous"></script>
-        <!-- HL reklama na podstránkach XL zariadenie -->
-        <ins class="adsbygoogle"
-            style="display:block"
-            data-ad-client="ca-pub-8860983069832222"
-            data-ad-slot="3044717777"
-            data-ad-format="auto"
-            data-full-width-responsive="true"></ins>
-        <script>
-            (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
+    '.$advert.'
    </div> <!-- end col -->
    </div> <!-- end row -->';
     }
@@ -1177,7 +1135,7 @@ elseif($_GET[shooters])
                     </thead>
                     <tbody>";
 
-  $kurzy = utf8_encode(file_get_contents('strelci_kurzy.xml'));
+  $kurzy = iconv("windows-1250", "UTF-8", file_get_contents('strelci_kurzy.xml'));
   
   $i=0;
   while($f = mysql_fetch_array($q))
@@ -1223,11 +1181,10 @@ elseif($_GET[shooters])
     
     // prehladanie kurzov zo suboru
     $odd="";
-    if($pos = stripos($kurzy, "Góly ".$f[goaler]." do rozhodnutia|"))
+    if($sub = strstr($kurzy, "Góly ".mb_convert_case($f[goaler], MB_CASE_TITLE, "UTF-8")." vrátane predĺženia|"))
       {
-      $pos2 = strpos($kurzy, "<br>",$pos);
-      $odd = substr($kurzy, $pos, $pos2-$pos);
-      $odd = explode("|", $odd);
+      $br = explode("<br>", $sub);
+      $odd = explode("|", $br[0]);
       $odd = $odd[1];
       }
 
@@ -1304,11 +1261,10 @@ elseif($_GET[shooters])
     
     // prehladanie kurzov zo suboru
     $odd="";
-    if($pos = stripos($kurzy, "Kanadské body ".$p[name]." do rozhodnutia|"))
+    if($sub = strstr($kurzy, "Kanadské body ".mb_convert_case($p[name], MB_CASE_TITLE, "UTF-8")." v zápase vrátane predĺženia|"))
       {
-      $pos2 = strpos($kurzy, "<br>",$pos);
-      $odd = substr($kurzy, $pos, $pos2-$pos);
-      $odd = explode("|", $odd);
+      $br = explode("<br>", $sub);
+      $odd = explode("|", $br[0]);
       $odd = $odd[1];
       }
 
@@ -1335,18 +1291,7 @@ elseif($_GET[shooters])
     $content .= '  
     </div> <!-- end col -->
     <div class="col-auto flex-grow-1 flex-shrink-1 d-none d-xl-block">
-            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8860983069832222"
-                crossorigin="anonymous"></script>
-            <!-- HL reklama na podstránkach XL zariadenie -->
-            <ins class="adsbygoogle"
-                style="display:block"
-                data-ad-client="ca-pub-8860983069832222"
-                data-ad-slot="3044717777"
-                data-ad-format="auto"
-                data-full-width-responsive="true"></ins>
-            <script>
-                (adsbygoogle = window.adsbygoogle || []).push({});
-            </script>
+        '.$advert.'
     </div> <!-- end col -->
     </div> <!-- end row -->';
   }

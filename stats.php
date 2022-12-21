@@ -213,19 +213,10 @@ $content .= '<div class="card my-4 shadow animated--grow-in">
        
    $content .= '
    </div> <!-- end col -->
-   <div class="col-auto flex-grow-1 flex-shrink-1 d-none d-xl-block mt-4">
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8860983069832222"
-            crossorigin="anonymous"></script>
-        <!-- HL reklama na podstránkach XL zariadenie -->
-        <ins class="adsbygoogle"
-            style="display:block"
-            data-ad-client="ca-pub-8860983069832222"
-            data-ad-slot="3044717777"
-            data-ad-format="auto"
-            data-full-width-responsive="true"></ins>
-        <script>
-            (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
+   <div class="col-auto flex-grow-1 flex-shrink-1 d-none d-xl-block mt-4">';
+            include("includes/advert_bigscreenside.php");
+            $content .= $advert;
+        $content .= '
    </div> <!-- end col -->
    </div> <!-- end row -->';
 

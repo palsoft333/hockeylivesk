@@ -492,6 +492,8 @@ elseif($gid)
             {
               "@context": "http://schema.org",
               "@type": "Event",
+              "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+              "eventStatus": "https://schema.org/EventScheduled",
               "name": "'.$t1[longname].' vs. '.$t2[longname].'",
               "startDate" : "'.date("c", strtotime($b[datetime])).'",
               "endDate" : "'.date("c", strtotime($b[datetime])+9000).'",

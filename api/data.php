@@ -114,10 +114,10 @@ function LeagueFont($name) {
 
 if($_GET[team])
   {
-  $team = $_GET[team];
+  $team = mysql_real_escape_string($_GET[team]);
   if(strlen($team)!=3) die("Incorrect team shortname");
-  $t = $_GET[tournament];
-  $year = $_GET[year];
+  $t = mysql_real_escape_string($_GET[tournament]);
+  $year = mysql_real_escape_string($_GET[year]);
   if($t=="WCH") 
     {
     if($year<2004 || $year>date("Y")) die("Incorrect tournament year");
@@ -166,8 +166,8 @@ if($_GET[team])
   else die("Incorrect tournament name");
   $q = mysql_query("SELECT * FROM 2004leagues WHERE longname LIKE '".$lname."'");
   $f = mysql_fetch_array($q);
-  if($el==1) $p = mysql_query("SELECT el_players.*, dt.injury FROM el_players LEFT JOIN (SELECT name, injury FROM el_injuries WHERE league='".$f[id]."')dt ON el_players.name=dt.name WHERE el_players.teamshort='$team' && el_players.league='".$f[id]."' ORDER BY points DESC, goals DESC, asists DESC, gwg DESC, gtg DESC, shg DESC, ppg DESC, penalty ASC");
-  else $p = mysql_query("SELECT 2004players.*, dt.injury FROM 2004players LEFT JOIN (SELECT name, injury FROM el_injuries WHERE league='".$f[id]."')dt ON 2004players.name=dt.name WHERE 2004players.teamshort='$team' && 2004players.league='".$f[id]."' ORDER BY points DESC, goals DESC, asists DESC, gwg DESC, gtg DESC, shg DESC, ppg DESC, penalty ASC");
+  if($el==1) $p = mysql_query("SELECT el_players.*, dt.injury FROM el_players LEFT JOIN (SELECT name, injury FROM el_injuries WHERE league='".$f[id]."')dt ON el_players.name=dt.name WHERE el_players.teamshort='".$team."' && el_players.league='".$f[id]."' ORDER BY points DESC, goals DESC, asists DESC, gwg DESC, gtg DESC, shg DESC, ppg DESC, penalty ASC");
+  else $p = mysql_query("SELECT 2004players.*, dt.injury FROM 2004players LEFT JOIN (SELECT name, injury FROM el_injuries WHERE league='".$f[id]."')dt ON 2004players.name=dt.name WHERE 2004players.teamshort='".$team."' && 2004players.league='".$f[id]."' ORDER BY points DESC, goals DESC, asists DESC, gwg DESC, gtg DESC, shg DESC, ppg DESC, penalty ASC");
   $i=0;
   while($y = mysql_fetch_array($p))
     {
@@ -198,7 +198,7 @@ if($_GET[team])
     $players["players"][$i]["stats"]["gwg"] = $y[gwg];
     $i++;
     }
-  if($el==1) $o = mysql_query("SELECT * FROM el_matches WHERE (team1short='$team' || team2short='$team') && league='".$f[id]."' ORDER BY datetime");
+  if($el==1) $o = mysql_query("SELECT * FROM el_matches WHERE (team1short='".$team."' || team2short='".$team."') && league='".$f[id]."' ORDER BY datetime");
   else $o = mysql_query("SELECT * FROM 2004matches WHERE (team1short='$team' || team2short='$team') && league='".$f[id]."' ORDER BY datetime");
   $i=0;
   while($y = mysql_fetch_array($o))
@@ -230,7 +230,7 @@ if($_GET[team])
   }
 elseif($_GET[player])
   {
-  $id = $_GET[id];
+  $id = mysql_real_escape_string($_GET[id]);
   if(is_numeric($id))
     {
     $el = substr($id, -1);
@@ -250,8 +250,8 @@ elseif($_GET[player])
     if($t=="WCH" || $t=="OG") $el = 0;
     else $el = 1;
     $name = $_GET[id];
-    if($el==1) $q = mysql_query("SELECT * FROM el_players WHERE name='$name' LIMIT 1");
-    else $q = mysql_query("SELECT * FROM 2004players WHERE name='$name' LIMIT 1");
+    if($el==1) $q = mysql_query("SELECT * FROM el_players WHERE name='$name' ORDER BY id DESC LIMIT 1");
+    else $q = mysql_query("SELECT * FROM 2004players WHERE name='$name' ORDER BY id DESC LIMIT 1");
     if(mysql_num_rows($q)>0)
       {
       $data = mysql_fetch_array($q);
@@ -307,6 +307,7 @@ elseif($_GET[player])
     if($lang=="en") $f[teamlong] = TeamParser($f[teamlong]);
     $player["league"][$i]["name"] = $f[longname];
     $player["league"][$i]["team"] = $f[teamlong];
+    if($el==1) $player["league"][$i]["stats"]["gp"] = $f[gp];
     $player["league"][$i]["stats"]["goals"] = $f[goals];
     $player["league"][$i]["stats"]["asists"] = $f[asists];
     $player["league"][$i]["stats"]["points"] = $f[points];
@@ -316,7 +317,80 @@ elseif($_GET[player])
     $player["league"][$i]["stats"]["gwg"] = $f[gwg];
     $i++;
     }
+  $di = mysql_query("SELECT * FROM 2004playerdiary WHERE name='".$data[name]."' ORDER BY msg_date DESC LIMIT 10");
+  $i=0;
+  while($dia = mysql_fetch_array($di)) {
+      $player["diary"][$i]["date"] = $dia["msg_date"];
+      $player["diary"][$i]["type"] = $dia["msg_type"];
+      $player["diary"][$i]["msg"] = $dia["msg"];
+      $i++;
+  }
   $player = json_encode($player, JSON_UNESCAPED_UNICODE);
+  if($lang=="en")
+    {
+    $player = str_replace("Zranil sa", "Got injured", $player);
+	$player = str_replace("brucho", "Abdomen", $player);
+	$player = str_replace("achilovka", "Achilles", $player);
+	$player = str_replace("členok", "Ankle", $player);
+	$player = str_replace(">plece<", ">Arm<", $player);
+	$player = str_replace("chrbát", "Back", $player);
+	$player = str_replace("hruď", "Chest", $player);
+	$player = str_replace("rozhodnutie trénera", "Coach`s Decision", $player);
+	$player = str_replace("kľúčna kosť", "Collarbone", $player);
+	$player = str_replace("zmluvný spor", "Contract Dispute", $player);
+	$player = str_replace("otras mozgu", "Concussion", $player);
+	$player = str_replace("kľúčna kosť", "Clavicle", $player);
+	$player = str_replace("lakeť", "Elbow", $player);
+	$player = str_replace(">oko<", ">Eye<", $player);
+	$player = str_replace(">tvár<", ">Face<", $player);
+	$player = str_replace(">prst<", ">Finger<", $player);
+	$player = str_replace("chodidlo", "Foot", $player);
+	$player = str_replace("chrípka", "Flu", $player);
+	$player = str_replace("všeobecná bolesť", "General Soreness", $player);
+	$player = str_replace("triesla", "Groin", $player);
+	$player = str_replace(">ruka<", ">Hand<", $player);
+	$player = str_replace("podkolenná šľacha", "Hamstring", $player);
+	$player = str_replace(">hlava<", ">Head<", $player);
+	$player = str_replace(">päta<", ">Heel<", $player);
+	$player = str_replace("prietrž", "Hernia", $player);
+	$player = str_replace(">bedro<", ">Hip<", $player);
+	$player = str_replace("choroba", "Illness", $player);
+	$player = str_replace("čeľusť", "Jaw", $player);
+	$player = str_replace(">koleno<", ">Knee<", $player);
+	$player = str_replace(">noha<", ">Leg<", $player);
+	$player = str_replace("dolná časť tela", "Lower body", $player);
+	$player = str_replace("dolná časť tela", "Lower Body", $player);
+	$player = str_replace(">krk<", ">Neck<", $player);
+	$player = str_replace(">nos<", ">Nose<", $player);
+	$player = str_replace("nejde o zranenie", "Not Injury Related", $player);
+	$player = str_replace(">panva<", ">Pelvis<", $player);
+	$player = str_replace("hrudník", "Pectoral", $player);
+	$player = str_replace("osobné dôvody", "Personal", $player);
+	$player = str_replace("odpočinok", "Rest", $player);
+	$player = str_replace("rebrá", "ribs", $player);
+	$player = str_replace("rebrá", "Ribs", $player);
+	$player = str_replace(">rameno<", ">Shoulder<", $player);
+	$player = str_replace("suspenzácia", "Suspension", $player);
+	$player = str_replace(">palec<", ">Thumb<", $player);
+	$player = str_replace("horná časť tela", "Upper body", $player);
+	$player = str_replace("horná časť tela", "Upper Body", $player);
+	$player = str_replace("bližšie nešpecifikované", "Undisclosed", $player);
+	$player = str_replace("zápästie", "Wrist", $player);
+    $player = str_replace("Prestúpil z tímu", "Transferred from the team", $player);
+    $player = str_replace("do tímu", "to the team", $player);
+    $player = str_replace("Pridal sa k tímu", "He joined the team", $player);
+    $player = str_replace("Bol nominovaný na turnaj", "He was nominated for the tournament", $player);
+    $player = str_replace("Dosiahol hattrick v zápase proti", "He scored a hat trick in the game against", $player);
+    $player = str_replace("Dosiahol jubilejný", "He scored the jubilee", $player);
+    $player = str_replace(".gól v sezóne", "th goal of the season", $player);
+    $player = str_replace("Strelil víťazný gól v zápase proti tímu", "He scored the winning goal in the game against", $player);
+    $player = str_replace("Vychytal čisté konto v zápase proti", "He records a shutout in the game against", $player);
+    $player = str_replace("S tímom ", "He won the title of champion of Slovakia with the team ", $player);
+    $player = str_replace("získal titul majstra Slovenska", "", $player);
+    $player = str_replace("Získal zlatú medailu s tímom", "He won a gold medal with the team", $player);
+    $player = str_replace("Uzdravil sa", "He is no longer injured", $player);
+    $player = str_replace("Stal sa neobmedzeným voľným hráčom", "He became an unrestricted free agent", $player);
+    }
   echo $player;
   /*echo "<pre>";
   echo print_r($player);
@@ -324,11 +398,13 @@ elseif($_GET[player])
   }
 elseif($_GET[game])
   {
-  $id = $_GET[game];
+  $id = mysql_real_escape_string($_GET[game]);
   if($id==1)
     {
     if(!$_GET[team1] || !$_GET[team2] || strlen($_GET[team1])!=3 || strlen($_GET[team2])!=3 || !$_GET[tournament]) die("Missing required parameters");
-    $t = $_GET["tournament"];
+    $t = mysql_real_escape_string($_GET["tournament"]);
+    $_GET[team1] = mysql_real_escape_string($_GET[team1]);
+    $_GET[team2] = mysql_real_escape_string($_GET[team2]);
     if($t=="WCH" || $t=="OG") $el = 0;
     else $el = 1;
     if($el==1) $q = mysql_query("SELECT * FROM `el_matches` WHERE (team1short='".$_GET[team1]."' && team2short='".$_GET[team2]."' && kedy!='na programe') || (team1short='".$_GET[team2]."' && team2short='".$_GET[team1]."' && kedy!='na programe') ORDER BY datetime DESC LIMIT 1");
@@ -359,7 +435,11 @@ elseif($_GET[game])
   $game["team1long"] = $y[team1long];
   $game["team2short"] = $y[team2short];
   $game["team2long"] = $y[team2long];
-  $game["date"] = $y[datetime];
+  if(isset($_GET["tz"])) { 
+      $game["date"] = new DateTime($y[datetime], new DateTimeZone('Europe/Bratislava'));
+      $game["date"]->setTimezone(new DateTimeZone($_GET["tz"]));
+  }
+  else $game["date"] = $y[datetime];
   $game["score"]["goals1"] = $y[goals1];
   $game["score"]["goals2"] = $y[goals2];
   $game["score"]["status"] = $y[kedy];
@@ -450,7 +530,11 @@ elseif($_GET[game])
       $vs1 = TeamParser($vs1);
       $vs2 = TeamParser($vs2);
       }
-    $game["last5games"]["team1"][$x]["date"] = $lastt1[$x][6];
+    if(isset($_GET["tz"])) { 
+        $game["last5games"]["team1"][$x]["date"] = new DateTime($lastt1[$x][6], new DateTimeZone('Europe/Bratislava'));
+        $game["last5games"]["team1"][$x]["date"]->setTimezone(new DateTimeZone($_GET["tz"]));
+    }
+    else $game["last5games"]["team1"][$x]["date"] = $lastt1[$x][6];
     $game["last5games"]["team1"][$x]["versus"] = $vs1;
     $game["last5games"]["team1"][$x]["where"] = $kde1;
     $game["last5games"]["team1"][$x]["score"] = $lastt1[$x][4].":".$lastt1[$x][5];
@@ -486,7 +570,11 @@ elseif($_GET[game])
       $g1=$h2h[$x][5];
       $g2=$h2h[$x][4];
       }
-    $game["last5head2head"][$x]["date"] = $h2h[$x][6];
+    if(isset($_GET["tz"])) { 
+        $game["last5head2head"][$x]["date"] = new DateTime($h2h[$x][6], new DateTimeZone('Europe/Bratislava'));
+        $game["last5head2head"][$x]["date"]->setTimezone(new DateTimeZone($_GET["tz"]));
+    }
+    else $game["last5head2head"][$x]["date"] = $h2h[$x][6];
     $game["last5head2head"][$x]["score"] = $g1.":".$g2;
     $game["last5head2head"][$x]["winner"] = $winner;
     $x++;
@@ -568,8 +656,8 @@ elseif($_GET[game])
   }
 elseif($_GET[games])
   {
-  $t = $_GET[tournament];
-  $year = $_GET[year];
+  $t = mysql_real_escape_string($_GET[tournament]);
+  $year = mysql_real_escape_string($_GET[year]);
   if($t=="WCH") 
     {
     if($year<2004 || $year>date("Y")) die("Incorrect tournament year");
@@ -636,7 +724,11 @@ elseif($_GET[games])
     $games["games"][$i]["team1long"] = $e[team1long];
     $games["games"][$i]["team2short"] = $e[team2short];
     $games["games"][$i]["team2long"] = $e[team2long];
-    $games["games"][$i]["date"] = $e[datetime];
+    if(isset($_GET["tz"])) { 
+        $games["games"][$i]["date"] = new DateTime($e[datetime], new DateTimeZone('Europe/Bratislava'));
+        $games["games"][$i]["date"]->setTimezone(new DateTimeZone($_GET["tz"]));
+    }
+    else $games["games"][$i]["date"] = $e[datetime];
     $games["games"][$i]["score"]["goals1"] = $e[goals1];
     $games["games"][$i]["score"]["goals2"] = $e[goals2];
     $games["games"][$i]["score"]["status"] = $e[kedy];
@@ -650,8 +742,8 @@ elseif($_GET[games])
   }
 elseif($_GET[table])
   {
-  $t = $_GET[tournament];
-  $year = $_GET[year];
+  $t = mysql_real_escape_string($_GET[tournament]);
+  $year = mysql_real_escape_string($_GET[year]);
   if($t=="WCH") 
     {
     if($year<2004 || $year>date("Y")) die("Incorrect tournament year");

@@ -144,14 +144,6 @@ $content .= '<div class="league-select">
                   </div>
                   
                   <div class="card">
-                    <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/images/ceny/bunda.jpg" class="lazy card-img-top" alt="Prechodná tmavomodrá bunda">
-                    <div class="card-body">
-                      <h5 class="card-title">Prechodná tmavomodrá bunda</h5>
-                      <p class="card-text"><small class="text-muted">veľkosť L</small></p>
-                    </div>
-                  </div>
-                  
-                  <div class="card">
                     <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/images/ceny/batoh.jpg" class="lazy card-img-top" alt="Cestovný batoh">
                     <div class="card-body">
                       <h5 class="card-title">Cestovný batoh</h5>
@@ -194,22 +186,6 @@ $content .= '<div class="league-select">
                     </div>
                   </div>
                   
-                  <div class="card bg-warning">
-                    <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="https://howieshockey.sk/store/1430-large_default/howies-tricko.jpg" class="lazy card-img-top bg-white" alt="Tričko">
-                    <div class="card-body">
-                      <h5 class="card-title">Tričko s logom Howies</h5>
-                      <p class="card-text"><small class="text-muted">Tričko Howies je vyrobené zo 100% bavlny</small></p>
-                    </div>
-                  </div>
-                  
-                  <div class="card bg-warning">
-                    <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="https://howieshockey.sk/store/223-large_default/howies-eliminator-zapachu.jpg" class="lazy card-img-top" alt="Tričko">
-                    <div class="card-body">
-                      <h5 class="card-title">Howies Eliminátor zápachu</h5>
-                      <p class="card-text"><small class="text-muted">Howies deodorizátor hokejovej výstroje je špeciálne navrhnutý tak, aby bojoval proti zápachom vašej výstroje všetkých druhov.</small></p>
-                    </div>
-                  </div>
-                  
                   <div class="card">
                     <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/images/ceny/nalepky.jpg" class="lazy card-img-top" alt="Živicové nálepky">
                     <div class="card-body">
@@ -242,20 +218,10 @@ $content .= '<div class="league-select">
               </div>
             </div>
         </div> <!-- end col -->
-        <div class="col-auto flex-grow-1 flex-shrink-1 d-none d-xl-block">
-                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8860983069832222"
-                    crossorigin="anonymous"></script>
-                <!-- HL reklama na podstránkach XL zariadenie -->
-                <ins class="adsbygoogle"
-                    style="display:block"
-                    data-ad-client="ca-pub-8860983069832222"
-                    data-ad-slot="3044717777"
-                    data-ad-format="auto"
-                    data-full-width-responsive="true"></ins>
-                <script>
-                    (adsbygoogle = window.adsbygoogle || []).push({});
-                </script>
-        </div> <!-- end col -->
+        <div class="col-auto flex-grow-1 flex-shrink-1 d-none d-xl-block">';
+            include("includes/advert_bigscreenside.php");
+            $content .= $advert;
+        $content .= '</div> <!-- end col -->
         </div> <!-- end row -->';
     }
   }

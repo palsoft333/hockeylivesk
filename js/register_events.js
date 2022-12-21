@@ -34,6 +34,9 @@ $(document).ready( function() {
             success: function(data){
               if(data=="OK")
                 {
+                gtag('event', 'registracia', {
+                'user': username
+                });
                 location.href = "/";
                 }
               else if(data=="CAPTCHAERROR")

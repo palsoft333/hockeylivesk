@@ -98,6 +98,8 @@ define("LANG_USERPROFILE_TOTHEPLAYER",'To the player');
 define("LANG_G","G");
 define("LANG_A","A");
 define("LANG_P","P");
+define("LANG_OT","OT");
+define("LANG_SO","SO");
 
 define("LANG_MATCHES_DETAIL","game detail");
 define("LANG_MATCHES_SLOVAKS","Slovaks in action");
@@ -328,6 +330,7 @@ define("LANG_NAV_HOME","Home");
 define("LANG_NAV_MAINPAGE","Main page");
 define("LANG_NAV_PLAYERDB","Player database");
 define("LANG_NAV_SHOOTERS","Shooters");
+define("LANG_NAV_FORUM","Forum");
 define("LANG_NAV_IMPERSSUM","Contact");
 define("LANG_NAV_LIVE","LIVE commentary");
 define("LANG_NAV_NEWS","News");
@@ -568,6 +571,13 @@ define("LANG_PRIVACY_TEXT12","You have full control over your data, so if you do
 define('LANG_PRIVACY_TEXT13','Changes in terms of privacy policy');
 define('LANG_PRIVACY_TEXT14','All changes to the terms of privacy will be posted on this page.<br>These Terms apply as of 16.5.2018.');
 define('LANG_PRIVACY_TEXT15','If you have any questions, please <a href="/contact" class="email">contact us</a>.');
+
+define('LANG_FORUM_TITLE','Discussion forum');
+define('LANG_FORUM_TOPICS','Forum topics');
+define('LANG_FORUM_TEAMTOPICS','Team discussions');
+define('LANG_FORUM_GAMETOPICS','Game discussions');
+define('LANG_FORUM_PLAYERTOPICS','Player discussions');
+define('LANG_FORUM_NEWSTOPICS','Article discussions');
 
 $foreign_teams = array("Belarus","Denmark","China","Czechia","Europe","Finland","France","Japan","Canada","Kazakhstan","Latvia","Hungary","Germany","Norway","Austria","Russia","North America","Slovakia","Slovenia","Italy","Ukraine","USA","Switzerland","Sweden");
 $foreign_statuses = array("final result","scheduled","get ready","in the 1st period","after 1st period","in the 2nd period","after 2nd period","in the 3rd period","after 3rd period","overtime","after overtime");

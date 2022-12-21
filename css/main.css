@@ -260,6 +260,7 @@
 
 .scroll-to-top {
   z-index: 2 !important;
+  bottom: 2rem !important;
 }
 
 .bg-gradient-hl {
@@ -444,6 +445,15 @@ a.text-hl:hover, a.text-hl:focus {
     box-shadow: 0 0 0 0.2rem rgb(255 211 99 / 25%) !important;
 }
 
+.qc-cmp2-persistent-link {
+    font-size: 12px;
+}
+
+.qc-cmp2-persistent-link img {
+    width: 14px !important;
+    height: 13px !important;
+    margin-right: 3px !important;
+}
 
 @-webkit-keyframes live-pulse {
   0% {

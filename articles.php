@@ -56,9 +56,9 @@ if(mysql_num_rows($q)>0)
       </div>
       <div class="card shadow mb-2 articleBanner">
         <div class="card-body">
-          <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+          <!--<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>-->
           <!-- HL v článku -->
-          <ins class="adsbygoogle"
+          <!--<ins class="adsbygoogle"
                style="display:block"
                data-ad-client="ca-pub-8860983069832222"
                data-ad-slot="1141079059"
@@ -66,7 +66,11 @@ if(mysql_num_rows($q)>0)
                data-full-width-responsive="true"></ins>
           <script>
                (adsbygoogle = window.adsbygoogle || []).push({});
-          </script>
+          </script>-->
+          <div id="101390-3">
+            <script src="//ads.themoneytizer.com/s/gen.js?type=3"></script>
+            <script src="//ads.themoneytizer.com/s/requestform.js?siteId=101390&formatId=3"></script>
+          </div>
         </div>
       </div>
     </div>

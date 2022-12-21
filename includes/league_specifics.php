@@ -31,7 +31,7 @@ function LeagueSpecifics($lid, $longname, $condensed=FALSE) {
     }
     if(strstr($longname, "KHL")) {
         // KHL
-        $tt->games_total = 56;
+        $tt->games_total = 68;
         $tt->playoff_line = 8;
         $tt->playoff_wins = 4;
         $tt->add_conference(LANG_TEAMTABLE_WESTCONF1);
@@ -40,9 +40,9 @@ function LeagueSpecifics($lid, $longname, $condensed=FALSE) {
         $tt->add_division(LANG_TEAMTABLE_TARASOV, 0);
         $tt->add_division(LANG_TEAMTABLE_KHARLAMOV, 1);
         $tt->add_division(LANG_TEAMTABLE_CHERNYSHEV, 1);
-        $tt->add_teams(array("SPA", "VIT", "SOC", "JOK", "PET", "TNN"), "body desc, wins desc, diff desc, zapasov asc, id asc", 0, 0);
-        $tt->add_teams(array("DYN", "DMN", "LOK", "DIR", "CSK", "SEV"), "body desc, wins desc, diff desc, zapasov asc, id asc", 0, 1);
-        $tt->add_teams(array("AVT", "AKB", "MMG", "NKH", "TRA", "KUN"), "body desc, wins desc, diff desc, zapasov asc, id asc", 1, 0);
+        $tt->add_teams(array("SPA", "VIT", "SOC", "PET", "TNN"), "body desc, wins desc, diff desc, zapasov asc, id asc", 0, 0);
+        $tt->add_teams(array("DYN", "DMN", "KUN", "LOK", "CSK", "SEV"), "body desc, wins desc, diff desc, zapasov asc, id asc", 0, 1);
+        $tt->add_teams(array("AVT", "AKB", "MMG", "NKH", "TRA"), "body desc, wins desc, diff desc, zapasov asc, id asc", 1, 0);
         $tt->add_teams(array("AVA", "SIB", "AMU", "BAR", "SAL", "VLA"), "body desc, wins desc, diff desc, zapasov asc, id asc", 1, 1);
     }
     if(strstr($longname, "MS 20")) {

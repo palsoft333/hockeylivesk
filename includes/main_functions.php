@@ -124,8 +124,8 @@ function Generate_Menu($active_league = FALSE) {
                       '.(strstr($f[longname], 'KHL') ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/slovaks/'.$f[id].'-'.SEOtitle($f[topic_title]).'"><span itemprop="name">'.LANG_NAV_SLOVAKI.'</span><i class="fas fa-user-shield fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                       '.($f[el]>0 && $f[topic_id]!=60 ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/injured/'.$f[id].'-'.SEOtitle($f[topic_title]).'"><span itemprop="name">'.LANG_NAV_INJURED.'</span><i class="fas fa-user-injured fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                       '.($f[el]>0 ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/transfers/'.$f[id].'-'.SEOtitle($f[topic_title]).'"><span itemprop="name">'.LANG_NAV_TRANSFERS.'</span><i class="fas fa-exchange-alt fa-fw float-right text-gray-500 my-1"></i></a>':'').'
-                      '.($f[id]==136 ? '<a itemprop="url" class="collapse-item font-weight-bold text-success" href="/fantasy/picks"><span itemprop="name">Fantasy MS</span><i class="fas fa-magic fa-fw float-right text-gray-500 my-1"></i></a>':'').'
-                      '.($f[id]==134 ? '<a itemprop="url" class="collapse-item font-weight-bold text-danger" href="/fantasy/main"><span itemprop="name">Fantasy KHL</span><i class="fas fa-magic fa-fw float-right text-gray-500 my-1"></i></a>':'').'
+                      '.($f[id]==146 ? '<a itemprop="url" class="collapse-item font-weight-bold text-success" href="/fantasy/draft"><span itemprop="name">Fantasy MS</span><i class="fas fa-magic fa-fw float-right text-gray-500 my-1"></i></a>':'').'
+                      '.($f[id]==144 ? '<a itemprop="url" class="collapse-item font-weight-bold text-danger" href="/fantasy/main"><span itemprop="name">Fantasy KHL</span><i class="fas fa-magic fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                     </div>
                   </div>
                 </li>';
@@ -1088,7 +1088,8 @@ function GoogleNews($type, $id)
     while($e = mysql_fetch_array($w)) {
         $picture="";
         $tags = json_decode($e[tags], true);
-        if($type=="n" || $type=="t") {
+        if($e["image"]!="") $picture = $e["image"];
+        elseif($type=="n" || $type=="t") {
             foreach($tags as $key => $tag) {
                 if($key=="p" || $key=="g") {
                     $el = substr($tag, -1);
@@ -1116,12 +1117,15 @@ function GoogleNews($type, $id)
         $news .= "<table class='card d-table w-100 my-0 mb-2 position-relative small'>
                 <tr class='card-header$tableclass'>
                 <td style='width:60%;' class='pl-2'>
-                    <b><a href='".$e[link]."' target='_blank' class='stretched-link'>".$e[publisher]."</a></b>
+                    <b><a href='".$e[link]."' target='_blank' class='stretched-link'>".$e[title]."</a></b>
                 </td>
-                <td style='width:40%;' class='text-right align-top pr-2'>".date("j.n.Y H:i", strtotime($e[published]))."</td>
+                  <td style='width:40%;' class='text-right align-top pr-2'>".date("j.n.Y H:i", strtotime($e[published]))."</td>
                 </tr>
                 <tr class='$tableclass'>
-                <td colspan='2' class='p-2'>".($picture!="" ? "<img src='data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=' data-src='$picture' class='lazy bg-gray-100 float-left img-thumbnail mr-2 p-1 shadow-sm w-25'>" : "").$e[title]."</td>
+                  <td colspan='2' class='p-2'>".($picture!="" ? "<img src='data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=' data-src='$picture' class='lazy bg-gray-100 float-left img-thumbnail mr-2 p-1 shadow-sm w-25'>" : "").$e[summary]."</td>
+                </tr>
+                <tr class='$tableclass'>
+                  <td colspan='2' class='px-2 text-right'>".$e[publisher]."</td>
                 </tr>
             </table>";
         $i++;
@@ -1132,6 +1136,37 @@ function GoogleNews($type, $id)
   }
   return $news;
   }
+
+function time_elapsed_string($datetime, $full = false) {
+    $now = new DateTime;
+    $ago = new DateTime($datetime);
+    $diff = $now->diff($ago);
+
+    $diff->w = floor($diff->d / 7);
+    $diff->d -= $diff->w * 7;
+
+    $string = array(
+        'y' => LANG_TIME_YEARS,
+        'm' => LANG_TIME_MONTHS,
+        'w' => LANG_TIME_WEEKS,
+        'd' => LANG_TIME_DAYS,
+        'h' => LANG_TIME_HOURS,
+        'i' => LANG_TIME_MINUTES,
+        's' => LANG_TIME_SECONDS,
+    );
+    foreach ($string as $k => &$v) {
+        if ($diff->$k) {
+            $v = $diff->$k . ' ' . $v . ($diff->$k > 1 ? '' : '');
+        } else {
+            unset($string[$k]);
+        }
+    }
+
+    if (!$full) $string = array_slice($string, 0, 1);
+    if(strtolower($_SESSION[lang])=="sk") $hl = LANG_TIME_AGO.' '. implode(', ', $string);
+    else $hl = implode(', ', $string).' '.LANG_TIME_AGO;
+    return $string ? $hl : LANG_TIME_RIGHTNOW;
+}
 
 /*
 * Funkcia na overenie zapamätaného prihlásenia

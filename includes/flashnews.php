@@ -71,7 +71,7 @@ $s = mysql_query("SELECT s.* FROM gn_news s WHERE s.tags IS NOT NULL ORDER BY s.
 $i=0;
 while($a = mysql_fetch_array($s))
   {
-  array_push($page_posts['data'], array('id'=>$a[tags], 'story'=>$a[publisher], 'message'=>$a[title], 'created_time'=>strtotime($a[published]), 'comments'=>$a[link]));
+  array_push($page_posts['data'], array('id'=>$a[tags], 'story'=>$a[title], 'message'=>$a[summary], 'created_time'=>strtotime($a[published]), 'comments'=>$a[link], 'image'=>$a[image], 'publisher'=>$a[publisher]));
   $i++;
   }
 
@@ -80,7 +80,7 @@ $s = mysql_query("SELECT s.*, count(c.id) as comment_count FROM e_xoops_stories 
 $i=0;
 while($a = mysql_fetch_array($s))
   {
-  array_push($page_posts['data'], array('id'=>$a[storyid], 'story'=>$a[title], 'message'=>$a[hometext], 'created_time'=>$a[created], 'comments'=>$a[comment_count]));
+  array_push($page_posts['data'], array('id'=>$a[storyid], 'story'=>$a[title], 'message'=>$a[hometext], 'created_time'=>$a[created], 'comments'=>$a[comment_count], 'image'=>'', 'publisher'=>''));
   $i++;
   }
    
@@ -109,26 +109,29 @@ foreach($page_posts['data'] as $post){
       $comments = 0;
       $link = $post['comments'];
       $tags = json_decode($post_id[0], true);
-      foreach($tags as $key => $tag) {
-          if($key=="p" || $key=="g") {
-            $el = substr($tag, -1);
-            $id = substr($tag, 0, -1);
-            if($key=="p") { $nonel_table="2004players"; $el_table="el_players"; }
-            if($key=="g") { $nonel_table="2004goalies"; $el_table="el_goalies"; }
-            if($el==0) $q = mysql_query("SELECT * FROM $nonel_table WHERE id='".$id."'");
-            else $q = mysql_query("SELECT * FROM $el_table WHERE id='".$id."'");
-            $f = mysql_fetch_array($q);
-            $picture = "/includes/player_photo.php?name=".$f[name];
-          }
-          elseif($key=="t" && $picture=="") {
-            $el = substr($tag, -1);
-            $id = substr($tag, 0, -1);
-            if($el==0) $q = mysql_query("SELECT * FROM 2004teams WHERE id='".$id."'");
-            else $q = mysql_query("SELECT * FROM el_teams WHERE id='".$id."'");
-            $f = mysql_fetch_array($q);
-            if($el==0) $picture = "/images/vlajky/".$f[shortname].".gif";
-            else $picture = "/images/vlajky/".$f[shortname]."_big.gif";
-          }
+      if($post["image"]!="") $picture = $post["image"];
+      else {
+        foreach($tags as $key => $tag) {
+            if($key=="p" || $key=="g") {
+              $el = substr($tag, -1);
+              $id = substr($tag, 0, -1);
+              if($key=="p") { $nonel_table="2004players"; $el_table="el_players"; }
+              if($key=="g") { $nonel_table="2004goalies"; $el_table="el_goalies"; }
+              if($el==0) $q = mysql_query("SELECT * FROM $nonel_table WHERE id='".$id."'");
+              else $q = mysql_query("SELECT * FROM $el_table WHERE id='".$id."'");
+              $f = mysql_fetch_array($q);
+              $picture = "/includes/player_photo.php?name=".$f[name];
+            }
+            elseif($key=="t" && $picture=="") {
+              $el = substr($tag, -1);
+              $id = substr($tag, 0, -1);
+              if($el==0) $q = mysql_query("SELECT * FROM 2004teams WHERE id='".$id."'");
+              else $q = mysql_query("SELECT * FROM el_teams WHERE id='".$id."'");
+              $f = mysql_fetch_array($q);
+              if($el==0) $picture = "/images/vlajky/".$f[shortname].".gif";
+              else $picture = "/images/vlajky/".$f[shortname]."_big.gif";
+            }
+        }
       }
       $gn=1;
     }
@@ -149,7 +152,7 @@ foreach($page_posts['data'] as $post){
               </td>
               <td style='width:40%;' class='text-right align-top pr-2'>".date("j.n.Y H:i", $post_time)."</td>
             </tr>
-            ".($gn==1 ? "<tr class='$tableclass'><td colspan='2' class='pl-2 pt-1'>".DisplayTags($post_id[0])."</td></tr>":"")."
+            ".($gn==1 ? "<tr class='$tableclass'><td colspan='2' class='pl-2 pt-1'>".DisplayTags($post_id[0])."<span class='float-right mr-1'><a href='".$link."' target='_blank'>".$post[publisher]."</a></span></td></tr>":"")."
             <tr class='$tableclass'>
               <td colspan='2' class='p-2'>".($picture ? "<img src='data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=' data-src='$picture' class='lazy bg-gray-100 float-left img-thumbnail mr-2 p-1 shadow-sm w-25'>" : "")."$message</td>
             </tr>";

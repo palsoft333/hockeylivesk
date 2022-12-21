@@ -1,8 +1,9 @@
 <?php
 $params = explode("/", htmlspecialchars($_GET[id]));
+include("includes/advert_bigscreenside.php");
 
 // pred zaciatkom ligy vyprazdnit tabulku fl_prices, fl_prices_g a fl_selects
-$league = 134;
+$league = 144;
 $uid = $_SESSION['logged'];
 $m = mysql_query("SELECT * FROM 2004leagues WHERE id='$league'");
 $n = mysql_fetch_array($m);
@@ -192,37 +193,6 @@ $roster .= '
   return $roster;
   }
   
-function time_elapsed_string($datetime, $full = false) {
-    $now = new DateTime;
-    $ago = new DateTime($datetime);
-    $diff = $now->diff($ago);
-
-    $diff->w = floor($diff->d / 7);
-    $diff->d -= $diff->w * 7;
-
-    $string = array(
-        'y' => LANG_TIME_YEARS,
-        'm' => LANG_TIME_MONTHS,
-        'w' => LANG_TIME_WEEKS,
-        'd' => LANG_TIME_DAYS,
-        'h' => LANG_TIME_HOURS,
-        'i' => LANG_TIME_MINUTES,
-        's' => LANG_TIME_SECONDS,
-    );
-    foreach ($string as $k => &$v) {
-        if ($diff->$k) {
-            $v = $diff->$k . ' ' . $v . ($diff->$k > 1 ? '' : '');
-        } else {
-            unset($string[$k]);
-        }
-    }
-
-    if (!$full) $string = array_slice($string, 0, 1);
-    if(strtolower($_SESSION[lang])=="sk") $hl = LANG_TIME_AGO.' '. implode(', ', $string);
-    else $hl = implode(', ', $string).' '.LANG_TIME_AGO;
-    return $string ? $hl : LANG_TIME_RIGHTNOW;
-}
-
 $content .= '
   <div class="modal fade" id="dialog" tabindex="-1" role="dialog" aria-labelledby="dialogTitle" aria-hidden="true">
   </div>';
@@ -439,15 +409,7 @@ if($params[0]=="main")
          <p>'.sprintf(LANG_BETS_BUYMEABEERTEXT, "Fantasy KHL", LANG_BETS_BUYMEABEER, "e74a3b").'</p>
          <p>'.LANG_BETS_FORWHATTEXT.'</p>
          <div class="card-columns">
-          
-          <div class="card">
-            <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/images/ceny/bunda.jpg" class="lazy card-img-top" alt="Prechodná tmavomodrá bunda">
-            <div class="card-body">
-              <h5 class="card-title">Prechodná tmavomodrá bunda</h5>
-              <p class="card-text"><small class="text-muted">veľkosť L</small></p>
-            </div>
-          </div>
-          
+                  
           <div class="card">
             <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/images/ceny/batoh.jpg" class="lazy card-img-top" alt="Cestovný batoh">
             <div class="card-body">
@@ -591,18 +553,7 @@ if($params[0]=="main")
   $content .= '        
     </div> <!-- end col -->
     <div class="col-auto flex-grow-1 flex-shrink-1 d-none d-xl-block">
-            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8860983069832222"
-                crossorigin="anonymous"></script>
-            <!-- HL reklama na podstránkach XL zariadenie -->
-            <ins class="adsbygoogle"
-                style="display:block"
-                data-ad-client="ca-pub-8860983069832222"
-                data-ad-slot="3044717777"
-                data-ad-format="auto"
-                data-full-width-responsive="true"></ins>
-            <script>
-                (adsbygoogle = window.adsbygoogle || []).push({});
-            </script>
+        '.$advert.'
     </div> <!-- end col -->
     </div> <!-- end row -->';
   }
@@ -653,18 +604,7 @@ if($params[0]=="roster")
   $content .= '   
   </div> <!-- end col -->
    <div class="col-auto flex-grow-1 flex-shrink-1 d-none d-xl-block">
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8860983069832222"
-            crossorigin="anonymous"></script>
-        <!-- HL reklama na podstránkach XL zariadenie -->
-        <ins class="adsbygoogle"
-            style="display:block"
-            data-ad-client="ca-pub-8860983069832222"
-            data-ad-slot="3044717777"
-            data-ad-format="auto"
-            data-full-width-responsive="true"></ins>
-        <script>
-            (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
+    '.$advert.'
    </div> <!-- end col -->
    </div> <!-- end row -->';
   }
@@ -725,18 +665,7 @@ if($params[0]=="select")
   
    </div> <!-- end col -->
    <div class="col-auto flex-grow-1 flex-shrink-1 d-none d-xl-block">
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8860983069832222"
-            crossorigin="anonymous"></script>
-        <!-- HL reklama na podstránkach XL zariadenie -->
-        <ins class="adsbygoogle"
-            style="display:block"
-            data-ad-client="ca-pub-8860983069832222"
-            data-ad-slot="3044717777"
-            data-ad-format="auto"
-            data-full-width-responsive="true"></ins>
-        <script>
-            (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
+    '.$advert.'
    </div> <!-- end col -->
    </div> <!-- end row -->';
                 

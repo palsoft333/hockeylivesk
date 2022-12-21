@@ -16,9 +16,9 @@ else $gpos="false";
 
 if($_SESSION["knownrosters"]==1) $q = mysql_query("(SELECT max(id) as id, name, pos, '1970-01-01' as born, 0 as type FROM `ft_choices` WHERE ".$ppos."name LIKE '%$term%' GROUP BY name ORDER BY id DESC LIMIT 5)
 UNION
-(SELECT max(id) as id, name, 'GK' as pos, 0 as born, 2 as type FROM `ft_choices` WHERE pos='".$gpos."' && name LIKE '%$term%' GROUP BY name ORDER BY id DESC LIMIT 5)");
+(SELECT max(id) as id, name, 'GK' as pos, '1970-01-01' as born, 2 as type FROM `ft_choices` WHERE pos='".$gpos."' && name LIKE '%$term%' GROUP BY name ORDER BY id DESC LIMIT 5)");
 else {
-  if($_GET[g]>0) { 
+  if($_GET[g]>0) {
   $q = mysql_query("(SELECT max(id) as id, name, pos, born, 0 as type FROM `2004players` WHERE ".$ppos."name LIKE '%$term%' GROUP BY name ORDER BY id DESC LIMIT 5)
   UNION
   (SELECT max(id) as id, name, 'GK' as pos, born, 2 as type FROM `2004goalies` WHERE name LIKE '%$term%' GROUP BY name ORDER BY id DESC LIMIT 5)");

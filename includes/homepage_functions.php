@@ -177,7 +177,7 @@ function Get_Latest_Stats() {
   $q = mysql_query("(SELECT ft.*, 2004leagues.longname FROM 2004leagues JOIN (SELECT et.* FROM (SELECT el_goals.goaler, el_goals.asister1, el_goals.asister2, el_goals.teamshort, dt.league FROM el_goals JOIN (SELECT id, league FROM el_matches WHERE kedy = 'konečný stav' && datetime > '$vcera 07:00' && datetime < '$dnes 07:00' ORDER BY datetime)dt ON dt.id=el_goals.matchno)et WHERE goaler IN ($in) OR asister1 IN ($in) OR asister2 IN ($in))ft ON 2004leagues.id=ft.league)
   UNION
   (SELECT gt.*, 2004leagues.longname FROM 2004leagues JOIN (SELECT et.* FROM (SELECT 2004goals.goaler, 2004goals.asister1, 2004goals.asister2, 2004goals.teamshort, dt.league FROM 2004goals JOIN (SELECT id, league FROM 2004matches WHERE kedy = 'konečný stav' && datetime > '$vcera 07:00' && datetime < '$dnes 07:00' ORDER BY datetime)dt ON dt.id=2004goals.matchno)et WHERE teamshort='SVK')gt ON 2004leagues.id=gt.league)");
-  
+ 
   $g = mysql_query("(SELECT m.id, m.league, m.team1short, m.team2short, l.longname, ms.goalie1, ms.goalie2, 
   IF(JSON_UNQUOTE(JSON_EXTRACT(goalie1, '$[0]')) IN ($in_goalies),1,
     IF(JSON_UNQUOTE(JSON_EXTRACT(goalie1, '$[1]')) IN ($in_goalies),2,
@@ -388,9 +388,9 @@ function Transfers() {
             <div class="row p-fluid"'.($i%2==1 ? '':' style="background-color: rgba(0,0,0,.05);"').'>
                 <div class="col-7">'.($l["pid"]!=NULL ? '<a href="'.$url.'">'.$player["name"].'</a>':$player["name"]).'</div>
                 <div class="col-5 small pt-1 text-right">'.$datum.'</div>
-                <div class="col-5 small bg-white border rounded text-center p-2">'.($l["from_image"]!="" ? '<img src="'.$l["from_image"].'" style="height:24px;"><br>':'').''.$l["from_name"].'</div>
+                <div class="col-5 small bg-white border rounded text-center p-2">'.($l["from_image"]!="" ? '<img src="'.$l["from_image"].'" style="height:24px;" alt="'.$l["from_name"].'"><br>':'').''.$l["from_name"].'</div>
                 <div class="col-2 align-self-center text-center"><i class="fas fa-angle-double-right text-success"></i></div>
-                <div class="col-5 small bg-white border rounded text-center p-2">'.($l["to_image"]!="" ? '<img src="'.$l["to_image"].'" style="height:24px;"><br>':'').''.$l["to_name"].'</div>
+                <div class="col-5 small bg-white border rounded text-center p-2">'.($l["to_image"]!="" ? '<img src="'.$l["to_image"].'" style="height:24px;" alt="'.$l["to_name"].'"><br>':'').''.$l["to_name"].'</div>
             </div>';
             $i++;
             }
@@ -756,10 +756,19 @@ function ComputeGOTD()
     $a = mysql_query("SELECT dt.*, et.zor FROM ((SELECT team1long, team2long, datetime, league FROM 2004matches WHERE datetime > '$dnes 07:00:00' && datetime < '$zajtra 07:00:00') UNION (SELECT team1long, team2long, datetime, league FROM el_matches WHERE datetime > '$dnes 07:00:00' && datetime < '$zajtra 07:00:00') ORDER BY datetime ASC)dt JOIN (SELECT id, IF(el=0,1,IF(topic_id=60,2,IF(topic_id=68,3,IF(topic_id=71,4,0)))) as zor FROM 2004leagues)et ON et.id=dt.league ORDER BY et.zor LIMIT 1;");
     if(mysql_num_rows($a)==0) {
       // nehra sa, najdi najblizsi hraci den
-      $ne = mysql_query("SELECT datetime FROM el_matches WHERE datetime > '$dnes 07:00:00' UNION SELECT datetime FROM 2004matches WHERE datetime > '$dnes 07:00:00' LIMIT 1");
+      $ne = mysql_query("SELECT datetime FROM 2004matches WHERE datetime > '$dnes 07:00:00' UNION SELECT datetime FROM el_matches WHERE datetime > '$dnes 07:00:00' LIMIT 1");
       $nea = mysql_fetch_array($ne);
-      $dnes = date("Y-m-d", strtotime($nea[datetime]));
-      $zajtra = date('Y-m-d', strtotime($nea[datetime])+86400);
+      if(mysql_num_rows($ne)==0) {
+        $dnes = date("Y-m-d", mktime());
+      }
+      else {
+        $dnes = date("Y-m-d", strtotime($nea[datetime]));
+        $zajtra = date('Y-m-d', strtotime($nea[datetime])+86400);
+        if(date("G", strtotime($nea[datetime]))<=7) {
+            $dnes = date("Y-m-d", strtotime($nea[datetime])-86400);
+            $zajtra = date('Y-m-d', strtotime($nea[datetime]));
+        }
+      }
       $a = mysql_query("SELECT dt.*, et.zor FROM ((SELECT team1long, team2long, datetime, league FROM 2004matches WHERE datetime > '$dnes 07:00:00' && datetime < '$zajtra 07:00:00') UNION (SELECT team1long, team2long, datetime, league FROM el_matches WHERE datetime > '$dnes 07:00:00' && datetime < '$zajtra 07:00:00') ORDER BY datetime ASC)dt JOIN (SELECT id, IF(el=0,1,IF(topic_id=60,2,IF(topic_id=68,3,IF(topic_id=71,4,0)))) as zor FROM 2004leagues)et ON et.id=dt.league ORDER BY et.zor LIMIT 1;");
     }
     $f = mysql_fetch_array($a);
@@ -916,6 +925,7 @@ function ComputeGOTD()
         $gotdid = array($cis[0][1], 0);
       }
     }
+  $dnes = date("Y-m-d", mktime());
   mysql_query("REPLACE INTO gotd (datetime, matchid, el) VALUES ('$dnes', '".$gotdid[0]."', '".$gotdid[1]."')");
   }
   return $gotdid;
@@ -1082,7 +1092,7 @@ $i=0;
 while ($f = mysql_fetch_array($q)) {
 $s="";
 $e="";
-if($i==2) $newsList .= '<div class="card shadow mb-4">
+if($i==2) /*$newsList .= '<div class="card shadow mb-4">
   <div class="col">
     <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
     <ins class="adsbygoogle"
@@ -1095,6 +1105,15 @@ if($i==2) $newsList .= '<div class="card shadow mb-4">
          (adsbygoogle = window.adsbygoogle || []).push({});
     </script>
   </div>
+</div>';*/
+$newsList .= '
+<div class="card shadow mb-4">
+    <div class="col">
+        <div id="101390-1">
+            <script src="//ads.themoneytizer.com/s/gen.js?type=1"></script>
+            <script src="//ads.themoneytizer.com/s/requestform.js?siteId=101390&formatId=1"></script>
+        </div>
+    </div>
 </div>';
 if($f[bodytext] != '') { $s = '<a href="/news/'.$f[storyid].'-'.SEOtitle($f[title]).'">'; $e = '</a>'; }
     preg_match('/<img.+src=[\'"](?P<src>.+?)[\'"].*>/i', $f[hometext], $image);

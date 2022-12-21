@@ -115,6 +115,10 @@ switch ($_GET["p"]) {
     case "users":
         include("user.php");
         break;
+    case "forum":
+        include("includes/forum_functions.php");
+        include("forum.php");
+        break;
     case "fantasy":
         if(strstr($_GET[id], "select")) include("fantasyleague.php");
         elseif(strstr($_GET[id], "main")) include("fantasyleague.php");
@@ -191,6 +195,169 @@ else mysql_query("UPDATE e_xoops_users SET last_login='".time()."' WHERE uid='".
   if($_GET[p]=="articles") echo '<link rel="stylesheet" href="/css/jquery.fancybox.min.css?v=3.5.7" />';
   if($_GET[p]=="games" || $_GET[p]=="teams" || $_GET[p]=="report" || $_GET[p]=="articles" || $_GET[p]=="players" || $_GET[p]=="fantasy") echo '<link rel="stylesheet" href="/css/jquery.emojiarea.css?v=1.0.0" />';
   ?>
+
+    <!-- Quantcast Choice. Consent Manager Tag v2.0 (for TCF 2.0) -->
+    <script type="text/javascript" async=true>
+    (function() {
+    var host = 'www.themoneytizer.com';
+    var element = document.createElement('script');
+    var firstScript = document.getElementsByTagName('script')[0];
+    var url = 'https://cmp.quantcast.com'
+        .concat('/choice/', '6Fv0cGNfc_bw8', '/', host, '/choice.js');
+    var uspTries = 0;
+    var uspTriesLimit = 3;
+    element.async = true;
+    element.type = 'text/javascript';
+    element.src = url;
+
+    firstScript.parentNode.insertBefore(element, firstScript);
+
+    function makeStub() {
+        var TCF_LOCATOR_NAME = '__tcfapiLocator';
+        var queue = [];
+        var win = window;
+        var cmpFrame;
+
+        function addFrame() {
+        var doc = win.document;
+        var otherCMP = !!(win.frames[TCF_LOCATOR_NAME]);
+
+        if (!otherCMP) {
+            if (doc.body) {
+            var iframe = doc.createElement('iframe');
+
+            iframe.style.cssText = 'display:none';
+            iframe.name = TCF_LOCATOR_NAME;
+            doc.body.appendChild(iframe);
+            } else {
+            setTimeout(addFrame, 5);
+            }
+        }
+        return !otherCMP;
+        }
+
+        function tcfAPIHandler() {
+        var gdprApplies;
+        var args = arguments;
+
+        if (!args.length) {
+            return queue;
+        } else if (args[0] === 'setGdprApplies') {
+            if (
+            args.length > 3 &&
+            args[2] === 2 &&
+            typeof args[3] === 'boolean'
+            ) {
+            gdprApplies = args[3];
+            if (typeof args[2] === 'function') {
+                args[2]('set', true);
+            }
+            }
+        } else if (args[0] === 'ping') {
+            var retr = {
+            gdprApplies: gdprApplies,
+            cmpLoaded: false,
+            cmpStatus: 'stub'
+            };
+
+            if (typeof args[2] === 'function') {
+            args[2](retr);
+            }
+        } else {
+            if(args[0] === 'init' && typeof args[3] === 'object') {
+            args[3] = { ...args[3], tag_version: 'V2' };
+            }
+            queue.push(args);
+        }
+        }
+
+        function postMessageEventHandler(event) {
+        var msgIsString = typeof event.data === 'string';
+        var json = {};
+
+        try {
+            if (msgIsString) {
+            json = JSON.parse(event.data);
+            } else {
+            json = event.data;
+            }
+        } catch (ignore) {}
+
+        var payload = json.__tcfapiCall;
+
+        if (payload) {
+            window.__tcfapi(
+            payload.command,
+            payload.version,
+            function(retValue, success) {
+                var returnMsg = {
+                __tcfapiReturn: {
+                    returnValue: retValue,
+                    success: success,
+                    callId: payload.callId
+                }
+                };
+                if (msgIsString) {
+                returnMsg = JSON.stringify(returnMsg);
+                }
+                if (event && event.source && event.source.postMessage) {
+                event.source.postMessage(returnMsg, '*');
+                }
+            },
+            payload.parameter
+            );
+        }
+        }
+
+        while (win) {
+        try {
+            if (win.frames[TCF_LOCATOR_NAME]) {
+            cmpFrame = win;
+            break;
+            }
+        } catch (ignore) {}
+
+        if (win === window.top) {
+            break;
+        }
+        win = win.parent;
+        }
+        if (!cmpFrame) {
+        addFrame();
+        win.__tcfapi = tcfAPIHandler;
+        win.addEventListener('message', postMessageEventHandler, false);
+        }
+    };
+
+    makeStub();
+
+    var uspStubFunction = function() {
+        var arg = arguments;
+        if (typeof window.__uspapi !== uspStubFunction) {
+        setTimeout(function() {
+            if (typeof window.__uspapi !== 'undefined') {
+            window.__uspapi.apply(window.__uspapi, arg);
+            }
+        }, 500);
+        }
+    };
+
+    var checkIfUspIsReady = function() {
+        uspTries++;
+        if (window.__uspapi === uspStubFunction && uspTries < uspTriesLimit) {
+        console.warn('USP is not accessible');
+        } else {
+        clearInterval(uspInterval);
+        }
+    };
+
+    if (typeof window.__uspapi === 'undefined') {
+        window.__uspapi = uspStubFunction;
+        var uspInterval = setInterval(checkIfUspIsReady, 6000);
+    }
+    })();
+    </script>
+    <!-- End Quantcast Choice. Consent Manager Tag v2.0 (for TCF 2.0) -->
 </head>
 
 <body id="page-top">
@@ -235,6 +402,11 @@ else mysql_query("UPDATE e_xoops_users SET last_login='".time()."' WHERE uid='".
       <li class="nav-item<? if($_GET[p]=="players" && $_GET[shooters]) echo " active"; ?>">
         <a class="nav-link" href="/shooters">
           <span><? echo LANG_NAV_SHOOTERS; ?></span></a>
+      </li>
+      
+      <li class="nav-item<? if($_GET[p]=="forum") echo " active"; ?>">
+        <a class="nav-link" href="/forum">
+          <span><? echo LANG_NAV_FORUM; ?></span></a>
       </li>
 
       <!-- Divider -->
@@ -355,6 +527,11 @@ else mysql_query("UPDATE e_xoops_users SET last_login='".time()."' WHERE uid='".
             </ul>
             <div class="d-flex d-none justify-content-center"><hr class="m-2 w-50"></div>
             <div class="text-center">
+              <div class="badge badge-light badge-pill text-xs text-wrap mb-1 mb-xl-0">Nejlepší <a href="https://www.casinoonline24cz.com/nove-online-casino/">nové online casino s českou licencí</a> 2022 s bonusem bez vkladu casinoonline24cz.com</div>
+              <div class="badge badge-light badge-pill text-xs text-wrap">Casino <a href="https://www.slotvegascz.com/no-deposit-bonus/">bonus za registraci bez vkladu 2023</a> slotvegascz.com</div>
+            </div>
+            <div class="d-flex d-none justify-content-center"><hr class="m-2 w-50"></div>
+            <div class="text-center">
               <a href="https://www.instagram.com/hockeylive.sk" target="_blank" rel="noopener" class="text-danger"><i class="fa-2x fa-instagram-square fab"></i></a>
               <a href="https://www.facebook.com/hockeylive" target="_blank" rel="noopener" class="ml-2"><i class="fa-2x fa-facebook-square fab"></i></a>
               <a href="https://www.github.com/palsoft333/hockeylivesk" target="_blank" rel="noopener" class="ml-2 text-secondary"><i class="fa-2x fa-github-square fab"></i></a>
@@ -465,12 +642,12 @@ if($_GET[p]=="stats" || $_GET[p]=="players" || $_GET[p]=="teams" || $_GET[p]=="b
   
 echo $script_end;
 ?>
-  <link href="/vendor/fontawesome-free/css/all.min.css?v=5.13.0" rel="stylesheet" type="text/css">
+  <link href="/vendor/fontawesome-free/css/all.min.css?v=6.2.0" rel="stylesheet" type="text/css">
   <link href="/css/league-logos.css?v=1.0.7" rel="stylesheet" type="text/css">
   <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
 
   <link href="/css/template.min.css?v=1.0.2" rel="stylesheet">
-  <link href="/css/main.css?v=1.2.6" rel="stylesheet">
+  <link href="/css/main.css?v=1.2.8" rel="stylesheet">
 </body>
 
 </html>

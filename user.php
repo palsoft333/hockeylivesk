@@ -6,6 +6,8 @@ if($_GET[id])
   $id=$id[0];
   }
 
+include("includes/advert_bigscreenside.php");
+
 $content = ""; 
 // moj profil
 
@@ -173,18 +175,7 @@ if($_GET[profile])
 $content .= '
    </div> <!-- end col -->
    <div class="col-auto flex-grow-1 flex-shrink-1 d-none d-xl-block">
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8860983069832222"
-            crossorigin="anonymous"></script>
-        <!-- HL reklama na podstránkach XL zariadenie -->
-        <ins class="adsbygoogle"
-            style="display:block"
-            data-ad-client="ca-pub-8860983069832222"
-            data-ad-slot="3044717777"
-            data-ad-format="auto"
-            data-full-width-responsive="true"></ins>
-        <script>
-            (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
+    '.$advert.'
    </div> <!-- end col -->
    </div> <!-- end row -->
     
@@ -299,18 +290,7 @@ if($_GET[notif])
     $content .= '</div>
    </div> <!-- end col -->
    <div class="col-auto flex-grow-1 flex-shrink-1 d-none d-xl-block">
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8860983069832222"
-            crossorigin="anonymous"></script>
-        <!-- HL reklama na podstránkach XL zariadenie -->
-        <ins class="adsbygoogle"
-            style="display:block"
-            data-ad-client="ca-pub-8860983069832222"
-            data-ad-slot="3044717777"
-            data-ad-format="auto"
-            data-full-width-responsive="true"></ins>
-        <script>
-            (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
+    '.$advert.'
    </div> <!-- end col -->
    </div> <!-- end row -->';
     $script_end = '
@@ -371,6 +351,11 @@ elseif($id)
       $i = mysql_query("SELECT * FROM (SELECT @rank:=@rank+1 AS rank, uid, tip_points FROM e_xoops_users ORDER BY tip_points DESC)dt WHERE dt.uid='".$id."'");
       $o = mysql_fetch_array($i);
       }
+    if($f[avg_time]!=NULL) {
+        $avg = $f[avg_time]/60;
+        if($avg>60) $avg = round($avg/60,0)." ".LANG_FANTASY_HRS;
+        else $avg = round($avg,0)." ".LANG_FANTASY_MINS;
+    }
     if($f[user_avatar]!="") $avatar = '/images/user_avatars/'.$id.'.'.$f[user_avatar]."?".filemtime('images/user_avatars/'.$id.'.'.$f[user_avatar]);
     else $avatar = '/img/players/no_photo.jpg';
     $title = LANG_USERPROFILE_TITLE." ".$f[uname];
@@ -421,6 +406,11 @@ elseif($id)
 
             <dt class="col-sm-8">Počet komentárov</dt>
             <dd class="col-sm-4 text-hl">'.$f[posts].'</dd>
+
+            '.($f[avg_time]!=NULL ? '
+            <dt class="col-sm-8">Priemerný čas výberu vo Fantasy Championship</dt>
+            <dd class="col-sm-4 text-hl">'.$avg.' <i class="fas fa-question-circle text-secondary" data-toggle="tooltip" data-html="true" data-placement="left" title="<li>Čo od tohto času závisí?</li>Manažérov s najnižším časom pozývame do Fantasy súťaží medzi prvými<li>Ako ho viem znížiť?</li>Sledujte maily, že ste na ťahu v draftovom výbere a čo možno najskôr draftujte hráča"></i></dd>
+            ':'').'
             
           </dl>
         </div>
@@ -454,18 +444,7 @@ elseif($id)
 $content .= '
    </div> <!-- end col -->
    <div class="col-auto flex-grow-1 flex-shrink-1 d-none d-xl-block mt-2">
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8860983069832222"
-            crossorigin="anonymous"></script>
-        <!-- HL reklama na podstránkach XL zariadenie -->
-        <ins class="adsbygoogle"
-            style="display:block"
-            data-ad-client="ca-pub-8860983069832222"
-            data-ad-slot="3044717777"
-            data-ad-format="auto"
-            data-full-width-responsive="true"></ins>
-        <script>
-            (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
+    '.$advert.'
    </div> <!-- end col -->
    </div> <!-- end row -->';
     }
