@@ -1,4 +1,6 @@
 <?
+require __DIR__ . '/../vendor/Webpush/vendor/autoload.php';
+use Minishlink\WebPush\WebPush;
 
 /*
 * Funkcia pre konverziu akéhokoľvek reťazca na URL v SEO forme
@@ -28,16 +30,37 @@ function SEOtitle($title) {
 
 function LeagueColor($name) {
     $name = SEOtitle($name);
-    if(strstr($name, 'nemecky')) $bg = "danger";
-    elseif(strstr($name, 'tipsport') || strstr($name, 'extraliga')) $bg = "primary";
-    elseif(strstr($name, 'khl')) $bg = "danger";
-    elseif(strstr($name, 'nhl')) $bg = "warning";
-    elseif(strstr($name, 'ms')) $bg = "success";
-    elseif(strstr($name, 'zoh')) $bg = "info";
-    elseif(strstr($name, 'kaufland') || strstr($name, 'slovakia') || strstr($name, 'loto')) $bg = "primary";
-    elseif(strstr($name, 'challenge') || strstr($name, 'skoda')) $bg = "warning";
-    elseif(strstr($name, 'svetovy')) $bg = "info";
-    else $bg = "hl";
+    if (preg_match('/nemecky|tipsport|extraliga|khl|nhl|ms|zoh|kaufland|slovakia|loto|challenge|skoda|svetovy/', $name, $matches)) {
+        switch ($matches[0]) {
+            case 'nemecky':
+            case 'khl':
+                $bg = 'danger';
+                break;
+            case 'tipsport':
+            case 'extraliga':
+            case 'kaufland':
+            case 'slovakia':
+            case 'loto':
+                $bg = 'primary';
+                break;
+            case 'nhl':
+            case 'challenge':
+            case 'skoda':
+                $bg = 'warning';
+                break;
+            case 'ms':
+                $bg = 'success';
+                break;
+            case 'zoh':
+            case 'svetovy':
+                $bg = 'info';
+                break;
+            default:
+                $bg = 'hl';
+        }
+    } else {
+        $bg = 'hl';
+    }
     return $bg;
 }
 
@@ -124,7 +147,7 @@ function Generate_Menu($active_league = FALSE) {
                       '.(strstr($f[longname], 'KHL') ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/slovaks/'.$f[id].'-'.SEOtitle($f[topic_title]).'"><span itemprop="name">'.LANG_NAV_SLOVAKI.'</span><i class="fas fa-user-shield fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                       '.($f[el]>0 && $f[topic_id]!=60 ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/injured/'.$f[id].'-'.SEOtitle($f[topic_title]).'"><span itemprop="name">'.LANG_NAV_INJURED.'</span><i class="fas fa-user-injured fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                       '.($f[el]>0 ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/transfers/'.$f[id].'-'.SEOtitle($f[topic_title]).'"><span itemprop="name">'.LANG_NAV_TRANSFERS.'</span><i class="fas fa-exchange-alt fa-fw float-right text-gray-500 my-1"></i></a>':'').'
-                      '.($f[id]==146 ? '<a itemprop="url" class="collapse-item font-weight-bold text-success" href="/fantasy/draft"><span itemprop="name">Fantasy MS</span><i class="fas fa-magic fa-fw float-right text-gray-500 my-1"></i></a>':'').'
+                      '.($f[id]==147 ? '<a itemprop="url" class="collapse-item font-weight-bold text-success" href="/fantasy/draft"><span itemprop="name">Fantasy MS</span><i class="fas fa-magic fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                       '.($f[id]==144 ? '<a itemprop="url" class="collapse-item font-weight-bold text-danger" href="/fantasy/main"><span itemprop="name">Fantasy KHL</span><i class="fas fa-magic fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                     </div>
                   </div>
@@ -1122,7 +1145,7 @@ function GoogleNews($type, $id)
                   <td style='width:40%;' class='text-right align-top pr-2'>".date("j.n.Y H:i", strtotime($e[published]))."</td>
                 </tr>
                 <tr class='$tableclass'>
-                  <td colspan='2' class='p-2'>".($picture!="" ? "<img src='data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=' data-src='$picture' class='lazy bg-gray-100 float-left img-thumbnail mr-2 p-1 shadow-sm w-25'>" : "").$e[summary]."</td>
+                  <td colspan='2' class='p-2'>".($picture!="" ? "<img src='data:image/svg+xml,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1 0.525\"%3E%3C/svg%3E' data-src='$picture' class='lazy bg-gray-100 float-left img-thumbnail mr-2 p-1 shadow-sm w-25'>" : "").$e[summary]."</td>
                 </tr>
                 <tr class='$tableclass'>
                   <td colspan='2' class='px-2 text-right'>".$e[publisher]."</td>
@@ -1187,14 +1210,50 @@ function CheckCookieLogin() {
         }
 }
 
-function SendMail($to, $subject, $message)
-  {
-  Global $link;
-  if($_SESSION[user]!=1) {
-    $headers = 'From: '.SITE_MAIL. "\r\n" .
-      'Reply-To: '.SITE_MAIL. "\r\n" .
-      'X-Mailer: PHP/' . phpversion();
-    mail($to, $subject, $message, $headers);
+function SendMail($to, $subject, $message) {
+    $q = mysql_query("SELECT * FROM e_xoops_users WHERE email='".$to."'");
+    if(mysql_num_rows($q)>0) {
+        $f = mysql_fetch_array($q);
+        if($f["mail_notify"]==1) {
+            // send e-mail
+            if($_SESSION[user]!=1) {
+                $headers = 'From: '.SITE_MAIL. "\r\n" .
+                'Reply-To: '.SITE_MAIL. "\r\n" .
+                'X-Mailer: PHP/' . phpversion();
+                mail($to, $subject, $message, $headers);
+            }
+        }
+        if($f["push_id"]!=NULL) {
+            // send push notification
+            SendPush($to, $subject, $message);
+        }
     }
   }
+
+function SendPush($to, $subject, $message) {
+    $q = mysql_query("SELECT * FROM e_xoops_users WHERE email='".$to."'");
+    if(mysql_num_rows($q)>0) {
+        $f = mysql_fetch_array($q);
+
+        $auth = array(
+            'VAPID' => array(
+                'subject' => 'https://www.hockey-live.sk/vendor/Webpush',
+                'publicKey' => 'BIntrrrigzs9rUaiccEhsTjz4D-bLL5r25T7wp36awV9vNzaeDDlVxT3OcreF9VR0xG6dlzBb2XyPvCSEFenwjY',
+                'privateKey' => WEBPUSH_PRIVATE_KEY,
+            ),
+        );
+
+        $webPush = new WebPush($auth);
+
+        $subscription = json_decode($f["push_id"], true);
+
+        $res = $webPush->sendNotification(
+            $subscription['endpoint'],
+            $subject." - ".$message,
+            $subscription['key'],
+            $subscription['token'],
+            true
+        );
+    }
+}
 ?>

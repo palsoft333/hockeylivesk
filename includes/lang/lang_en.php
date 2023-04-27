@@ -94,6 +94,8 @@ define("LANG_USERPROFILE_TOTHESTORY",'To the article');
 define("LANG_USERPROFILE_TOTHETEAM",'To the team');
 define("LANG_USERPROFILE_TOTHEGAME",'To the game');
 define("LANG_USERPROFILE_TOTHEPLAYER",'To the player');
+define("LANG_USERPROFILE_EMAIL",'email');
+define("LANG_USERPROFILE_PUSH",'push notifications');
 
 define("LANG_G","G");
 define("LANG_A","A");
@@ -113,6 +115,7 @@ define("LANG_MATCHES_GAMEDAY","game day");
 define("LANG_MATCHES_GAMEDAY1","Game days");
 define("LANG_MATCHES_STATUS","Status");
 define("LANG_MATCHES_BETS","Number of betters");
+define("LANG_MATCHES_SERIES","Series");
 define("LANG_MATCHES_RESULT","Result");
 define("LANG_MATCHES_LAST5","Last 5 games");
 define("LANG_MATCHES_LAST5H2H","Last 5 head to head games");
@@ -548,6 +551,7 @@ define("LANG_FANTASY_ONLYFROMROSTERS",'Team lineups for %s are known. Draft allo
 define("LANG_FANTASY_ONLYFROMDB1",'Team lineups for %s will be known later. Draft players you think could participate.');
 define("LANG_FANTASY_PICKPLACEHOLDER",'Start typing the player\'s name...');
 define("LANG_FANTASY_ALREADYTOOLTIP",'We have detected that this player could be drafted by another manager before you. We recommend replacing him.');
+define("LANG_FANTASY_TURNONPUSH",'We recommend that you turn on push notifications in your <a href="/profile" class="alert-link">profile</a> to be informed about your next draft pick.');
 
 define("LANG_PARTNERS_TITLE",'Partners');
 define("LANG_PARTNERS_TEXT",'Partners of our portal are ranked according to how many visitors they helped point to our site. We cannot thank them enough for this and hope that our users will also find their way to their sites using these links.');

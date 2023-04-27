@@ -11,7 +11,7 @@ function LeagueSpecifics($lid, $longname, $condensed=FALSE) {
         $tt->playoff_wins = 4;
         $tt->add_conference("");
         $tt->add_division("", 0);
-        $tt->add_teams(array("SBA", "ZVO", "NIT", "MII", "KOS", "POP", "SNV", "BBS", "TRE", "PHC", "NZO", "LMI"), "body desc, diff desc, zapasov asc, goals desc, wins desc, losts asc", 0, 0);
+        $tt->add_teams(array("SBA", "ZVO", "NIT", "MII", "KOS", "POP", "SNV", "BBS", "TRE", "PHC", "NZO", "LMI"), "body desc, wins desc, diff desc, zapasov asc, goals desc, losts asc", 0, 0);
     }
     if(strstr($longname, "NHL")) {
         // NHL

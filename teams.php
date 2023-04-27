@@ -206,9 +206,9 @@ if($id)
                     <table class="table-hover table-light table-striped table-responsive-sm w-100 p-fluid"'.(mysql_num_rows($p)==0 ? '' : ' id="'.$prefix.'players"').'">
                       <thead><tr>
                         <th class="text-center" data-toggle="tooltip" data-placement="top" title="'.LANG_PLAYERSTATS_POS.'">POS</th>
-                        <th>'.LANG_TEAMSTATS_NAME.'</th>';
-                        if($el==1) $content .= '<th class="text-center data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_GAMES.'">GP</th>';
-                        $content .= '<th class="text-center" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_GOALS.'">G</th>
+                        <th>'.LANG_TEAMSTATS_NAME.'</th>
+                        <th class="text-center" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_GAMES.'">GP</th>
+                        <th class="text-center" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_GOALS.'">G</th>
                         <th class="text-center" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_ASISTS.'">A</th>
                         <th class="text-center" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_POINTS.'">P</th>
                         <th class="text-center" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_PIM.'">PIM</th>
@@ -231,9 +231,9 @@ if($id)
                       if(array_key_exists($y[name], $slovaks)) $slovak = ' <img class="flag-iihf SVK-small" src="/img/blank.png" alt="Slovák">';
                       $content .= '<tr'.($el==1 && $y[gp]==0 ? ' class="text-gray-500"':'').'>
                       <td class="text-center">'.$y[pos].'</td>
-                      <td class="text-nowrap"><a href="/player/'.$y[id].$el.'-'.SEOtitle($y[name]).'">'.$y[name].'</a>'.$slovak.''.$injury.''.$bday.'</td>';
-                      if($el==1) $content .= '<td class="text-center">'.$y[gp].'</td>';
-                      $content .= '<td class="text-center">'.$y[goals].'</td>
+                      <td class="text-nowrap"><a href="/player/'.$y[id].$el.'-'.SEOtitle($y[name]).'">'.$y[name].'</a>'.$slovak.''.$injury.''.$bday.'</td>
+                      <td class="text-center">'.$y[gp].'</td>
+                      <td class="text-center">'.$y[goals].'</td>
                       <td class="text-center">'.$y[asists].'</td>
                       <td class="text-center font-weight-bold">'.$y[points].'</td>
                       <td class="text-center">'.$y[penalty].'</td>
@@ -333,7 +333,7 @@ if($id)
                 }
                 $content .= '
               </div>
-              <div class="col-12 col-xl-5'.($el==0 ? ' order-first order-xl-last':'').'">
+              <div class="col-12 col-xl-5'.($el==0 ? ' order-xl-last':'').'">
                 <div class="card my-4 shadow animated--grow-in">
                   <div class="card-header">
                     <h6 class="m-0 font-weight-bold text-'.$leaguecolor.'">

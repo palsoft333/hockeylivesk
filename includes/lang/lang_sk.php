@@ -93,6 +93,8 @@ define("LANG_USERPROFILE_TOTHESTORY",'K článku');
 define("LANG_USERPROFILE_TOTHETEAM",'K tímu');
 define("LANG_USERPROFILE_TOTHEGAME",'K zápasu');
 define("LANG_USERPROFILE_TOTHEPLAYER",'K hráčovi');
+define("LANG_USERPROFILE_EMAIL",'e-mail');
+define("LANG_USERPROFILE_PUSH",'push notifikácie');
 
 define("LANG_G","G");
 define("LANG_A","A");
@@ -112,6 +114,7 @@ define("LANG_MATCHES_GAMEDAY","hrací deň");
 define("LANG_MATCHES_GAMEDAY1","Hracie dni");
 define("LANG_MATCHES_STATUS","Stav");
 define("LANG_MATCHES_BETS","Počet tipujúcich");
+define("LANG_MATCHES_SERIES","Stav série");
 define("LANG_MATCHES_RESULT","Výsledok");
 define("LANG_MATCHES_LAST5","Posledných 5 zápasov");
 define("LANG_MATCHES_LAST5H2H","Posledných 5 vzájomných zápasov");
@@ -456,8 +459,8 @@ define("LANG_FANTASY_FILL","Doplniť");
 define("LANG_FANTASY_NOTLOGGED",'Pre prihlásenie sa do <b>Fantasy %s</b> je nutné sa najprv <a href="/login" class="alert-link">prihlásiť</a> na stránke!');
 define("LANG_FANTASY_NOTLOGGED1",'Pre prihlásenie sa do <b>%s</b> je nutné sa najprv <a href="/login" class="alert-link">prihlásiť</a> na stránke!');
 define("LANG_FANTASY_MAILSUBJECT",'Ste na rade v draftovom výbere!');
-define("LANG_FANTASY_MAILTEXT",'Draft %s na stránke hockey-LIVE.sk pokračuje Vašim výberom. Prihláste sa prosím čo najskôr na stránkach http://www.hockey-live.sk/, v ľavom menu %s kliknite na %s a vyberte si jedného hráča, alebo tím brankárov. Ďakujeme.');
-define("LANG_FANTASY_MAILTEXT1",'Draft %s na stránke hockey-LIVE.sk pokračuje Vašim výberom, pretože Vami vybraný hráč (%s) už bol draftovaný iným manažérom pred Vami. Prihláste sa prosím čo najskôr na stránkach http://www.hockey-live.sk/, v ľavom menu %s kliknite na %s a vyberte si iného hráča, alebo tím brankárov. Ďakujeme.');
+define("LANG_FANTASY_MAILTEXT",'Draft %s na stránke hockey-LIVE.sk pokračuje Vašim výberom. Prihláste sa prosím čo najskôr na stránkach http://www.hockey-live.sk/, v ľavom menu %s kliknite na %s a vyberte si jedného hráča, alebo brankára. Ďakujeme.');
+define("LANG_FANTASY_MAILTEXT1",'Draft %s na stránke hockey-LIVE.sk pokračuje Vašim výberom, pretože Vami vybraný hráč (%s) už bol draftovaný iným manažérom pred Vami. Prihláste sa prosím čo najskôr na stránkach http://www.hockey-live.sk/, v ľavom menu %s kliknite na %s a vyberte si iného hráča, alebo brankára. Ďakujeme.');
 define("LANG_FANTASY_MAILTEXT2",'Draft %s na stránke hockey-LIVE.sk pokračuje Vašim výberom. Prihláste sa prosím čo najskôr na stránkach http://www.hockey-live.sk/, v ľavom menu %s kliknite na %s a vyberte si svojich 10 hráčov, ktorých by ste radi videli vo svojom tíme. Ďakujeme.');
 define("LANG_FANTASY_PICKSTITLE",'poradie a zostavy');
 define("LANG_FANTASY_PICKSTITLE1",'Poradie a zostavy manažérov');
@@ -547,6 +550,7 @@ define("LANG_FANTASY_ONLYFROMROSTERS",'Zostavy tímov na %s sú známe. Draft po
 define("LANG_FANTASY_ONLYFROMDB1",'Zostavy tímov pre %s budú známe neskôr. Draftujte hráčov, o ktorých si myslíte, že by sa mohli zúčastniť.');
 define("LANG_FANTASY_PICKPLACEHOLDER",'Začnite písať meno hráča...');
 define("LANG_FANTASY_ALREADYTOOLTIP",'Zistili sme, že tento hráč by mohol byť draftovaný iným manažérom pred Vami. Odporúčame vymeniť si ho.');
+define("LANG_FANTASY_TURNONPUSH",'Odporúčame vám zapnúť si v <a href="/profile" class="alert-link">profile</a> push notifikácie, aby ste boli informovaný o vašej najbližšej možnosti výberu v drafte.');
 
 define("LANG_PARTNERS_TITLE",'Partneri');
 define("LANG_PARTNERS_TEXT",'Partneri nášho portálu sú zoradení podľa toho, koľko návštevníkom pomohli poukázať na našu stránku. Za to im úprimne ďakujeme a dúfame, že naši užívatelia si takisto nájdu cestu k nim pomocou týchto odkazov.');

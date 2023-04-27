@@ -419,7 +419,7 @@ ORDER BY datetime DESC LIMIT 1)dt WHERE dt.id IS NOT NULL");
     $w = mysql_query("SELECT 2004players.*, l.longname, t.id as tid, m.datetime as firstgame FROM 2004players JOIN 2004leagues l ON l.id=2004players.league JOIN 2004teams t ON t.shortname=2004players.teamshort && t.league=2004players.league LEFT JOIN 2004matches m ON m.league=2004players.league WHERE name='$data[name]'$coll GROUP BY 2004players.league ORDER BY firstgame ASC");
     if(mysql_num_rows($w)>0)
         {
-        $name = mysql_query("SELECT sum(goals), sum(asists), sum(points), sum(penalty), sum(ppg), sum(shg), sum(gwg), sum(gtg) FROM 2004players WHERE name='$data[name]'$coll");
+        $name = mysql_query("SELECT sum(gp), sum(goals), sum(asists), sum(points), sum(penalty), sum(ppg), sum(shg), sum(gwg), sum(gtg) FROM 2004players WHERE name='$data[name]'$coll");
         $sumar = mysql_fetch_array($name);
         $content .= '<div class="card my-4 shadow animated--grow-in">
               <div class="card-header">
@@ -433,13 +433,14 @@ ORDER BY datetime DESC LIMIT 1)dt WHERE dt.id IS NOT NULL");
                   <thead><tr>
                     <th style="width:22%;">'.LANG_TEAMSTATS_LEAGUE.'</th>
                     <th style="width:22%;">'.LANG_PLAYERSTATS_TEAM.'</th>
-                    <th class="text-center" style="width:8%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_GOALS.'">G</th>
-                    <th class="text-center" style="width:8%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_ASISTS.'">A</th>
-                    <th class="text-center" style="width:8%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_POINTS.'">P</th>
-                    <th class="text-center" style="width:8%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_PIM.'">PIM</th>
-                    <th class="text-center" style="width:8%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_PPG.'">PPG</th>
-                    <th class="text-center" style="width:8%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_SHG.'">SHG</th>
-                    <th class="text-center" style="width:8%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_GWG.'">GWG</th>
+                    <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_GAMES.'">GP</th>
+                    <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_GOALS.'">G</th>
+                    <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_ASISTS.'">A</th>
+                    <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_POINTS.'">P</th>
+                    <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_PIM.'">PIM</th>
+                    <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_PPG.'">PPG</th>
+                    <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_SHG.'">SHG</th>
+                    <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_GWG.'">GWG</th>
                 </tr>
               </thead>
               <tbody>';
@@ -448,26 +449,28 @@ ORDER BY datetime DESC LIMIT 1)dt WHERE dt.id IS NOT NULL");
           $content .= '<tr>
               <td style="width:22%;"><a href="/games/'.$f[league].'-'.SEOTitle($f[longname]).'">'.$f[longname].'</a></td>
               <td style="width:22%;"><a href="/team/'.$f[tid].'0-'.SEOTitle($f[teamlong]).'">'.$f[teamlong].'</a></td>
-              <td class="text-center" style="width:8%;">'.$f[goals].'</td>
-              <td class="text-center" style="width:8%;">'.$f[asists].'</td>
-              <td class="text-center font-weight-bold" style="width:8%;">'.$f[points].'</td>
-              <td class="text-center" style="width:8%;">'.$f[penalty].'</td>
-              <td class="text-center" style="width:8%;">'.$f[ppg].'</td>
-              <td class="text-center" style="width:8%;">'.$f[shg].'</td>
-              <td class="text-center" style="width:8%;">'.$f[gwg].'</td>
+              <td class="text-center" style="width:7%;">'.$f[gp].'</td>
+              <td class="text-center" style="width:7%;">'.$f[goals].'</td>
+              <td class="text-center" style="width:7%;">'.$f[asists].'</td>
+              <td class="text-center font-weight-bold" style="width:7%;">'.$f[points].'</td>
+              <td class="text-center" style="width:7%;">'.$f[penalty].'</td>
+              <td class="text-center" style="width:7%;">'.$f[ppg].'</td>
+              <td class="text-center" style="width:7%;">'.$f[shg].'</td>
+              <td class="text-center" style="width:7%;">'.$f[gwg].'</td>
             </tr>';
           }
         $content .= '</tbody>
               <tfoot class="font-weight-bold">
                 <tr>
                   <td colspan="2">'.LANG_BETS_OVERALL.'</td>
-                  <td class="text-center" style="width:8%;">'.$sumar[0].'</td>
-                  <td class="text-center" style="width:8%;">'.$sumar[1].'</td>
-                  <td class="text-center" style="width:8%;">'.$sumar[2].'</td>
-                  <td class="text-center" style="width:8%;">'.$sumar[3].'</td>
-                  <td class="text-center" style="width:8%;">'.$sumar[4].'</td>
-                  <td class="text-center" style="width:8%;">'.$sumar[5].'</td>
-                  <td class="text-center" style="width:8%;">'.$sumar[6].'</td>
+                  <td class="text-center" style="width:7%;">'.$sumar[0].'</td>
+                  <td class="text-center" style="width:7%;">'.$sumar[1].'</td>
+                  <td class="text-center" style="width:7%;">'.$sumar[2].'</td>
+                  <td class="text-center" style="width:7%;">'.$sumar[3].'</td>
+                  <td class="text-center" style="width:7%;">'.$sumar[4].'</td>
+                  <td class="text-center" style="width:7%;">'.$sumar[5].'</td>
+                  <td class="text-center" style="width:7%;">'.$sumar[6].'</td>
+                  <td class="text-center" style="width:7%;">'.$sumar[7].'</td>
                 </tr>
               </tfoot>
           </table>
@@ -1135,7 +1138,7 @@ elseif($_GET[shooters])
                     </thead>
                     <tbody>";
 
-  $kurzy = iconv("windows-1250", "UTF-8", file_get_contents('strelci_kurzy.xml'));
+  $kurzy = json_decode(file_get_contents('strelci_kurzy.json'),true);
   
   $i=0;
   while($f = mysql_fetch_array($q))
@@ -1181,11 +1184,10 @@ elseif($_GET[shooters])
     
     // prehladanie kurzov zo suboru
     $odd="";
-    if($sub = strstr($kurzy, "Góly ".mb_convert_case($f[goaler], MB_CASE_TITLE, "UTF-8")." vrátane predĺženia|"))
+    $pname = "g ".mb_convert_case($f[goaler], MB_CASE_LOWER, "UTF-8");
+    if(array_key_exists($pname,$kurzy))
       {
-      $br = explode("<br>", $sub);
-      $odd = explode("|", $br[0]);
-      $odd = $odd[1];
+      $odd = number_format($kurzy[$pname], 2, '.', '');
       }
 
     $content .= "<tr>
@@ -1261,11 +1263,10 @@ elseif($_GET[shooters])
     
     // prehladanie kurzov zo suboru
     $odd="";
-    if($sub = strstr($kurzy, "Kanadské body ".mb_convert_case($p[name], MB_CASE_TITLE, "UTF-8")." v zápase vrátane predĺženia|"))
+    $pname = "p ".mb_convert_case($p[name], MB_CASE_LOWER, "UTF-8");
+    if(array_key_exists($pname,$kurzy))
       {
-      $br = explode("<br>", $sub);
-      $odd = explode("|", $br[0]);
-      $odd = $odd[1];
+      $odd = number_format($kurzy[$pname], 2, '.', '');
       }
 
     $content .= "<tr>

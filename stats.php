@@ -39,10 +39,9 @@ if($lid)
     $goalies_table = "2004goalies";
     $title = LANG_STATS_TITLE2.' '.$vyb[longname];
     $hl = LANG_STATS_TITLE2;
-    $hid = ', {"bVisible": false, "aTargets": [ 4 ] }'; 
-    $incr = 4;
-    $sortby = 7;
-    $players = '"aoColumns": [{ "sWidth": "5%", className: "text-center" }, { "sWidth": "31%", className: "text-nowrap" }, { "sWidth": "8%", className: "text-center" }, { "sWidth": "8%", className: "text-center" }, { "sWidth": "8%", className: "text-center" }, { "sWidth": "8%", className: "text-center" }, { "sWidth": "8%", className: "text-center" }, { "sWidth": "8%", className: "text-center" }, { "sWidth": "8%", className: "text-center" }, { "sWidth": "8%", className: "text-center" }, { "sWidth": "8%", className: "text-center" }, { "sWidth": "8%", className: "text-center" }],';
+    $incr = 6;
+    $sortby = 8;
+    $players = '"aoColumns": [{ "sWidth": "5%", className: "text-center" }, { "sWidth": "30%", className: "text-nowrap" }, { "sWidth": "7%", className: "text-center" }, { "sWidth": "7%", className: "text-center" }, { "sWidth": "7%", className: "text-center" }, { "sWidth": "7%", className: "text-center" }, { "sWidth": "7%", className: "text-center" }, { "sWidth": "7%", className: "text-center" }, { "sWidth": "7%", className: "text-center" }, { "sWidth": "7%", className: "text-center" }, { "sWidth": "7%", className: "text-center" }, { "sWidth": "7%", className: "text-center" }, { "sWidth": "7%", className: "text-center" }],';
     }
   else
     {
@@ -68,7 +67,7 @@ if($lid)
 		},
 		"bProcessing": true,
 		"bServerSide": true,
-    "aoColumnDefs": [ { "bVisible": false, "aTargets": [ 2 ] }, {"bVisible": false, "aTargets": [ 3 ] }'.$hid.', { "bSortable": false, "aTargets": [ 0 ] }],
+    "aoColumnDefs": [ { "bVisible": false, "aTargets": [ 2 ] }, {"bVisible": false, "aTargets": [ 3 ] }, { "bSortable": false, "aTargets": [ 0 ] }],
     "oLanguage": { "sUrl": "/includes/lang/datatables_'.$locale.'.txt" },
     "aaSorting": [['.$sortby.', "desc"]],
     "bAutoWidth": false,
@@ -133,7 +132,7 @@ $content .= '<div class="card my-4 shadow animated--grow-in">
                       <th>'.LANG_PLAYERDB_PLAYER.'</th>
                       <th>'.LANG_PLAYERSTATS_TEAM.'</th>
                       <th>ID</th>
-                      '.($vyb[el]==1 ? '<th class="text-center" data-toggle="tooltip" data-placement="top" title="'.LANG_PLAYERSTATS_POS.'">POS</th>' : '').'
+                      <th class="text-center" data-toggle="tooltip" data-placement="top" title="'.LANG_PLAYERSTATS_POS.'">POS</th>
                       <th class="text-center" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_GAMES.'">GP</th>
                       <th class="text-center" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_GOALS.'">G</th>
                       <th class="text-center" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_ASISTS.'">A</th>

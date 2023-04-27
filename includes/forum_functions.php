@@ -38,11 +38,11 @@ function GetTopics() {
     }
     $out .= '
                     <h6 class="border-bottom font-weight-bold pt-4">'.LANG_FORUM_PLAYERTOPICS.'</h6>';
-    $q = mysql_query("SELECT c.*, count(c.id) as poc, MAX(datum) as maxdatum, IF(RIGHT(c.whatid,1)='0',t1.name,t2.name) as name FROM `comments` c LEFT JOIN 2004players as t1 ON t1.id=LEFT(c.whatid,char_length(c.whatid)-1) LEFT JOIN el_players as t2 ON t2.id=LEFT(c.whatid,char_length(c.whatid)-1) WHERE c.what=3 GROUP BY IF(RIGHT(c.whatid,1)='0',t1.name,t2.name) ORDER BY maxdatum DESC LIMIT 10");
+    $q = mysql_query("SELECT c.*, count(DISTINCT c.id) as poc, MAX(datum) as maxdatum, IF(t1.name IS NOT NULL,CONCAT(t1.id,'0'),CONCAT(t1.id,'1')) as pid, LEFT(c.whatid,char_length(c.whatid)-1) as pname FROM `comments` c LEFT JOIN 2004players as t1 ON t1.name=LEFT(c.whatid,char_length(c.whatid)-1) LEFT JOIN el_players as t2 ON t2.name=LEFT(c.whatid,char_length(c.whatid)-1) WHERE c.what=3 GROUP BY LEFT(c.whatid,char_length(c.whatid)-1) ORDER BY maxdatum DESC LIMIT 10");
     while($f = mysql_fetch_array($q)) {
         $out .= '<div class="row p-fluid">
                     <div class="col-9 col-sm-6 col-xl-9">
-                        <a href="/players/'.$f["whatid"].'-'.SEOtitle($f["name"]).'#tocomments">'.$f["name"].'</a>
+                        <a href="/player/'.$f["pid"].'-'.SEOtitle($f["pname"]).'#tocomments">'.$f["pname"].'</a>
                     </div>
                     <div class="col-3 col-sm-2 col-xl-1 text-right">
                         '.$f["poc"].'<i class="fas fa-message fa-sm ml-1"></i>

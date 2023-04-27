@@ -147,7 +147,7 @@ ORDER BY dt.id ASC) AS timyel FROM ((SELECT id, name, teamshort, teamlong, 1 as 
 			if ( $aColumns[$i] == "name" )
 			{
 				/* Special output formatting for 'name' */
-				if($aRow[el]==2) { $aRow[el]=""; $pag="goalie"; }
+				if($aRow[el]==2) { $aRow[el]=""; $pag="goalie"; $aRow[el]=1; }
 				else $pag="player";
 				$sOutput .= '"<a href=\'/'.$pag.'/'.$aRow[id].$aRow[el].'-'.SEOtitle($aRow[name]).'\'>'.str_replace('"', '\"', $aRow[ $aColumns[$i] ]).'</a>",';
 			}

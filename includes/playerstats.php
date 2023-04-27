@@ -10,8 +10,7 @@
 	 */
 	$lid = $_GET[lid];
 	$el = $_GET[el];
-	if($el==1 || $el==3) $aColumns = array( ' ', 'name', 'teamshort', 'id', 'pos', 'gp', 'goals', 'asists', 'points', 'penalty', 'ppg', 'shg', 'gwg' );
-	else $aColumns = array( ' ', 'name', 'teamshort', 'id', ' ', 'goals', 'asists', 'points', 'penalty', 'ppg', 'shg', 'gwg' );
+	$aColumns = array( ' ', 'name', 'teamshort', 'id', 'pos', 'gp', 'goals', 'asists', 'points', 'penalty', 'ppg', 'shg', 'gwg' );
 	
 	/* Indexed column (used for fast and accurate table cardinality) */
 	$sIndexColumn = "id";
@@ -105,10 +104,9 @@
 		$sOrder
 		$sLimit
 	";*/
-	if($el==1 || $el==3) $gp=", sum(gp) as gp, pos";
 	$sQuery = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
 	$sQuery = "
-		SELECT SQL_CALC_FOUND_ROWS id, teamshort, name$gp, sum(goals) as goals, sum(asists) as asists, sum(points) as points, sum(penalty) as penalty, sum(ppg) as ppg, sum(shg) as shg, sum(gwg) as gwg
+		SELECT SQL_CALC_FOUND_ROWS id, teamshort, name, sum(gp) as gp, pos, sum(goals) as goals, sum(asists) as asists, sum(points) as points, sum(penalty) as penalty, sum(ppg) as ppg, sum(shg) as shg, sum(gwg) as gwg
 		FROM   $sTable
 		$sWhere
 		GROUP BY name, league

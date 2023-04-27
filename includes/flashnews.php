@@ -154,7 +154,7 @@ foreach($page_posts['data'] as $post){
             </tr>
             ".($gn==1 ? "<tr class='$tableclass'><td colspan='2' class='pl-2 pt-1'>".DisplayTags($post_id[0])."<span class='float-right mr-1'><a href='".$link."' target='_blank'>".$post[publisher]."</a></span></td></tr>":"")."
             <tr class='$tableclass'>
-              <td colspan='2' class='p-2'>".($picture ? "<img src='data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=' data-src='$picture' class='lazy bg-gray-100 float-left img-thumbnail mr-2 p-1 shadow-sm w-25'>" : "")."$message</td>
+              <td colspan='2' class='p-2'>".($picture ? "<img src='data:image/svg+xml,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1 0.525\"%3E%3C/svg%3E' data-src='$picture' class='lazy bg-gray-100 float-left img-thumbnail mr-2 p-1 shadow-sm w-25'>" : "")."$message</td>
             </tr>";
     if($gn==0) echo "
             <tr class='$tableclass'>

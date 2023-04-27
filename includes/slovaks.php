@@ -8,14 +8,16 @@ $slovaks = array(
 //"HRIVÍK Marek" => "CGY",
 //"JAROŠ Christián" => "NJD",
 //"JURČO Tomáš" => "VGK",
+"KELEMEN Miloš" => "ARI",
 //"KOPECKÝ Tomáš" => "FLA",
+"KŇAŽKO Samuel" => "CBJ",
 //"MARINČIN Martin" => "TOR",
 //"MEŠÁR Filip" => "MTL",
 //"NEMEC Šimon" => "NJD",
 "RUŽIČKA Adam" => "CGY",
 "REGENDA Pavol" => "ANA",
 "SLAFKOVSKÝ Juraj" => "MTL",
-//"STUDENIČ Marián" => "DAL",
+"STUDENIČ Marián" => "DAL",
 //"PÁNIK Richard" => "NYI",
 "TATAR Tomáš" => "NJD"
 );

@@ -111,7 +111,7 @@ function Get_Matches($lid, $params, $sel, $potype)
 		$da = explode("-", $_GET[sel]);
 		if($_SESSION[lang] != 'sk') { $hl = LANG_MATCHES_GAMEDAY.' - '.$da[1].'/'.$da[2]; }
 		else { $hl = LANG_MATCHES_GAMEDAY.' - '.$b[datumik]; }
-		if(!$uid) $e = mysql_query("SELECT m.id, m.team1short, m.team1long, m.team2short, m.team2long, m.goals1, m.goals2, m.kedy, m.datetime, NULL as kolo, m.next_refresh, m.league, m.active, NULL as tip1, NULL as tip2, NULL as komentar, MAX(g.time) as cas FROM 2004matches m LEFT JOIN 2004goals g ON g.matchno=m.id WHERE m.league='$lid' && m.datetime LIKE '$_GET[sel]%' GROUP BY m.id ORDER BY m.datetime ASC, m.id ASC");
+		if(!$uid) $e = mysql_query("SELECT m.id, m.team1short, m.team1long, m.team2short, m.team2long, m.goals1, m.goals2, m.kedy, m.datetime, NULL as kolo, m.next_refresh, m.fs_tv, m.league, m.active, NULL as tip1, NULL as tip2, NULL as komentar, MAX(g.time) as cas FROM 2004matches m LEFT JOIN 2004goals g ON g.matchno=m.id WHERE m.league='$lid' && m.datetime LIKE '$_GET[sel]%' GROUP BY m.id ORDER BY m.datetime ASC, m.id ASC");
 		else $e = mysql_query("SELECT 2004matches.*, NULL as kolo, dt.tip1, dt.tip2, dt.komentar, et.col, et.rate, et.amount, ft.k1, ft.kx, ft.k2, MAX(g.time) as cas FROM 2004matches LEFT JOIN (SELECT matchid, userid, tip1, tip2, komentar FROM 2004tips WHERE userid='$uid')dt ON (dt.matchid=2004matches.id) LEFT JOIN (SELECT matchid, col, rate, amount FROM 2004bets WHERE userid='$uid' && el='0')et ON (et.matchid=2004matches.id) LEFT JOIN (SELECT matchid, k1, kx, k2 FROM 2004rates WHERE el='0')ft ON (ft.matchid=2004matches.id) LEFT JOIN 2004goals g ON g.matchno=2004matches.id WHERE league='$lid' && datetime LIKE '$_GET[sel]%' GROUP BY 2004matches.id ORDER BY datetime ASC, id ASC");
 		$el=0;
 		}
@@ -212,9 +212,9 @@ function Get_Matches($lid, $params, $sel, $potype)
 		{
     $matches .= LANG_MATCHES_GAMEDAY1.': 
     <ul class="pagination pagination-sm">';
-    $g = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
-    $g = mysql_query("SELECT DATE_FORMAT(datetime, '%e.%c.') as date, DATE_FORMAT(datetime, '%c/%e') as dateus, DATE_FORMAT(datetime, '%Y-%m-%d') as datum FROM 2004matches WHERE league='$lid' GROUP BY date ORDER BY datetime ASC");
-    while(list($datem,$dateus,$datum) = mysql_fetch_array($g)) 
+    $gd = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
+    $gd = mysql_query("SELECT DATE_FORMAT(datetime, '%e.%c.') as date, DATE_FORMAT(datetime, '%c/%e') as dateus, DATE_FORMAT(datetime, '%Y-%m-%d') as datum FROM 2004matches WHERE league='$lid' GROUP BY date ORDER BY datetime ASC");
+    while(list($datem,$dateus,$datum) = mysql_fetch_array($gd)) 
       {
       if($_SESSION[lang] != 'sk') $datem = $dateus;
       if($_GET[sel]==$datum) $matches .= '<li class="page-item disabled">

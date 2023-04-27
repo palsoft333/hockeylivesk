@@ -104,7 +104,7 @@ elseif($gid)
                 <div class="row no-gutters my-4">
                   <div class="col-6 col-md-4 order-2 order-md-1 mt-3 p-fluid">';
                     if($lowerdiv) $i = mysql_query("(SELECT m.*, 1 as roz, l.longname FROM $matches_table m LEFT JOIN 2004leagues l ON l.id=m.league WHERE (m.team1short='$b[team1short]' || m.team2short='$b[team1short]') && m.kedy='konečný stav' && l.longname LIKE '%".$lowerdiv."%' ORDER BY m.datetime DESC LIMIT 5) UNION (SELECT m.*, 2 as roz, l.longname FROM $matches_table m LEFT JOIN 2004leagues l ON l.id=m.league WHERE (m.team1short='$b[team2short]' || m.team2short='$b[team2short]') && m.kedy='konečný stav' && l.longname LIKE '%".$lowerdiv."%' ORDER BY m.datetime DESC LIMIT 5)");
-                    else $i = mysql_query("(SELECT *, 1 as roz FROM $matches_table WHERE (team1short='$b[team1short]' || team2short='$b[team1short]') && kedy='konečný stav' ORDER BY datetime DESC LIMIT 5) UNION (SELECT *, 2 as roz FROM $matches_table WHERE (team1short='$b[team2short]' || team2short='$b[team2short]') && kedy='konečný stav' ORDER BY datetime DESC LIMIT 5)");
+                    else $i = mysql_query("(SELECT m.*, 1 as roz, l.longname FROM $matches_table m LEFT JOIN 2004leagues l ON l.id=m.league WHERE (m.team1short='$b[team1short]' || m.team2short='$b[team1short]') && m.kedy='konečný stav' && l.longname NOT LIKE '%U20%' ORDER BY m.datetime DESC LIMIT 5) UNION (SELECT m.*, 2 as roz, l.longname FROM $matches_table m LEFT JOIN 2004leagues l ON l.id=m.league WHERE (m.team1short='$b[team2short]' || m.team2short='$b[team2short]') && m.kedy='konečný stav' && l.longname NOT LIKE '%U20%' ORDER BY m.datetime DESC LIMIT 5)");
                     $z1=$z2=0;
                     while($j = mysql_fetch_array($i))
                       {
@@ -176,7 +176,7 @@ elseif($gid)
                 <div class="row no-gutters my-4">
                   <div class="col-6 col-md-4 order-2 order-md-1 mt-3 p-fluid">';
                     if($lowerdiv) $i = mysql_query("SELECT m.*, l.longname FROM $matches_table m LEFT JOIN 2004leagues l ON l.id=m.league WHERE (m.team1short='$b[team1short]' && m.team2short='$b[team2short]' && m.kedy='konečný stav' && l.longname LIKE '%".$lowerdiv."%') || (m.team1short='$b[team2short]' && m.team2short='$b[team1short]' && m.kedy='konečný stav' && l.longname LIKE '%".$lowerdiv."%') ORDER BY m.datetime DESC LIMIT 5");
-                    else $i = mysql_query("SELECT * FROM $matches_table WHERE (team1short='$b[team1short]' && team2short='$b[team2short]' && kedy='konečný stav') || (team1short='$b[team2short]' && team2short='$b[team1short]' && kedy='konečný stav') ORDER BY datetime DESC LIMIT 5");
+                    else $i = mysql_query("SELECT m.*, l.longname FROM $matches_table m LEFT JOIN 2004leagues l ON l.id=m.league WHERE (m.team1short='$b[team1short]' && m.team2short='$b[team2short]' && m.kedy='konečný stav' && l.longname NOT LIKE '%U20%') || (m.team1short='$b[team2short]' && m.team2short='$b[team1short]' && m.kedy='konečný stav' && l.longname NOT LIKE '%U20%') ORDER BY m.datetime DESC LIMIT 5");
                     while($j = mysql_fetch_array($i))
                       {
                       if($_SESSION[lang]!='sk') { $j[team1long] = TeamParser($j[team1long]); $j[team2long] = TeamParser($j[team2long]); }

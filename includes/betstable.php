@@ -41,13 +41,19 @@
 	if($_GET[lid])
     {
     $lid = $_GET[lid];
-    $sel = mysql_query("SELECT el FROM 2004leagues WHERE id='$lid'");
-    $vyb = mysql_fetch_array($sel);
-    if($vyb[el]==1) $tips_table="el_tips";
-    else $tips_table="2004tips";
-	$sQuery = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
-	$sQuery = "SELECT SQL_CALC_FOUND_ROWS dt.*, e_xoops_users.uname as uname, e_xoops_users.uid as uid, e_xoops_users.user_avatar as user_avatar FROM e_xoops_users INNER JOIN (SELECT userid,sum(points) as points, count(id) as poc FROM $tips_table WHERE league='$lid' GROUP BY userid ORDER BY points DESC)dt ON (e_xoops_users.uid=dt.userid)
-		$sLimit";
+    if($lid=="contest") {
+      // sutaz o karticky
+      $sQuery = "SELECT SQL_CALC_FOUND_ROWS t.userid,t.matchid,m.datetime,sum(t.points) as points, count(t.id) as poc, u.uname, u.uid, u.user_avatar FROM el_tips t LEFT JOIN el_matches m ON m.id=t.matchid LEFT JOIN e_xoops_users u ON u.uid=t.userid WHERE t.league='145' && m.datetime>'2023-02-01 00:00:00' GROUP BY t.userid ORDER BY points DESC $sLimit";
+    }
+    else {
+      $sel = mysql_query("SELECT el FROM 2004leagues WHERE id='$lid'");
+      $vyb = mysql_fetch_array($sel);
+      if($vyb[el]==1) $tips_table="el_tips";
+      else $tips_table="2004tips";
+    $sQuery = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
+    $sQuery = "SELECT SQL_CALC_FOUND_ROWS dt.*, e_xoops_users.uname as uname, e_xoops_users.uid as uid, e_xoops_users.user_avatar as user_avatar FROM e_xoops_users INNER JOIN (SELECT userid,sum(points) as points, count(id) as poc FROM $tips_table WHERE league='$lid' GROUP BY userid ORDER BY points DESC)dt ON (e_xoops_users.uid=dt.userid)
+      $sLimit";
+      }
 		}
 	else 
     {

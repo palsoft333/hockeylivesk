@@ -970,6 +970,12 @@ function gotd()
     $gotf = mysql_fetch_array($q);
     if($gotdid[1]==1) {
       $g = mysql_query("SELECT count(id) as poc, ROUND(sum(tip1)/count(id),2) as vys1, ROUND(sum(tip2)/count(id),2) as vys2 FROM el_tips WHERE matchid='".$gotdid[0]."'");
+      // stav serie
+      if($gotf["kolo"]==0) {
+          $p = mysql_query("SELECT * FROM `el_playoff` WHERE league='143' && ((team1='".$gotf["team1short"]."' && team2='".$gotf["team2short"]."') || (team2='".$gotf["team1short"]."' && team1='".$gotf["team2short"]."'))");
+          $po = mysql_fetch_array($p);
+          $pohl = '<p class="m-0"><span class="font-weight-bold">Stav série:</span> '.$po["status1"].':'.$po["status2"].'</p>';
+      }
       // slovaci v akcii
       include('slovaks.php');
       $nhl_players=$slovaks;
@@ -1041,6 +1047,7 @@ function gotd()
                     </div>
                   </div>
                   <div class="text-xs text-center mb-2">
+                    '.$pohl.'
                     <p class="m-0"><span class="font-weight-bold">'.LIVE_GAME_START.':</span> '.$gotf[datum].'</p>
                     <p class="m-0"><span class="font-weight-bold">'.LANG_MATCHES_AVGBET.':</span> '.$h[vys1].' : '.$h[vys2].'</p>
                     <p class="m-0"><span class="font-weight-bold">'.LANG_MATCHES_BETS.':</span> '.$h[poc].'</p>

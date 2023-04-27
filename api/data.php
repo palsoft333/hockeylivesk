@@ -43,7 +43,9 @@ else
     $f = mysql_fetch_array($q);
     $lang = $f[lang];
     if($f[active]==0) die("API is not active. Contact API provider.");
+    $headers = json_encode(getallheaders());
     mysql_query("UPDATE api_keys SET last_use='".date("Y-m-d H:i:s")."', hits=hits+1 WHERE checksum='".$crc."'");
+    mysql_query("UPDATE api_keys SET headers='".$headers."' WHERE checksum='".$crc."'");
     }
   }
 
@@ -187,8 +189,8 @@ if($_GET[team])
       $players["players"][$i]["bio"]["hold"] = $y[hold];
       $players["players"][$i]["bio"]["kg"] = $y[kg];
       $players["players"][$i]["bio"]["cm"] = $y[cm];
-      $players["players"][$i]["stats"]["gp"] = $y[gp];
       }
+    $players["players"][$i]["stats"]["gp"] = $y[gp];
     $players["players"][$i]["stats"]["goals"] = $y[goals];
     $players["players"][$i]["stats"]["asists"] = $y[asists];
     $players["players"][$i]["stats"]["points"] = $y[points];
@@ -290,10 +292,10 @@ elseif($_GET[player])
   else 
     {
     $w = mysql_query("SELECT 2004players.*, l.longname, t.id as tid, m.datetime as firstgame FROM 2004players JOIN 2004leagues l ON l.id=2004players.league JOIN 2004teams t ON t.shortname=2004players.teamshort && t.league=2004players.league LEFT JOIN 2004matches m ON m.league=2004players.league WHERE name='$data[name]'$coll GROUP BY 2004players.league ORDER BY firstgame ASC");
-    $celk = mysql_query("SELECT sum(goals), sum(asists), sum(points), sum(penalty), sum(ppg), sum(shg), sum(gwg) FROM 2004players WHERE name='$data[name]'$coll");
+    $celk = mysql_query("SELECT sum(goals), sum(asists), sum(points), sum(penalty), sum(ppg), sum(shg), sum(gwg), sum(gp) FROM 2004players WHERE name='$data[name]'$coll");
     }
   $sumar = mysql_fetch_array($celk);
-  if($el==1) $player["overall"]["gp"] = $sumar[7];
+  $player["overall"]["gp"] = $sumar[7];
   $player["overall"]["goals"] = $sumar[0];
   $player["overall"]["asists"] = $sumar[1];
   $player["overall"]["points"] = $sumar[2];
@@ -307,7 +309,7 @@ elseif($_GET[player])
     if($lang=="en") $f[teamlong] = TeamParser($f[teamlong]);
     $player["league"][$i]["name"] = $f[longname];
     $player["league"][$i]["team"] = $f[teamlong];
-    if($el==1) $player["league"][$i]["stats"]["gp"] = $f[gp];
+    $player["league"][$i]["stats"]["gp"] = $f[gp];
     $player["league"][$i]["stats"]["goals"] = $f[goals];
     $player["league"][$i]["stats"]["asists"] = $f[asists];
     $player["league"][$i]["stats"]["points"] = $f[points];

@@ -1,18 +1,18 @@
 <?php
 $params = explode("/", htmlspecialchars($_GET[id]));
 
-$nazov = "Fantasy Junior Championship";
-$menu = "MS U20 2023";
-$skratka = "MS U20";
+$nazov = "Fantasy Championship";
+$menu = "MS 2023";
+$skratka = "MS";
 $manazerov = 10;
-$article_id = 2350;
-$league_id = 146;
+$article_id = 2393;
+$league_id = 147;
 //$timeout = 480;
 $predraftt = 1; // = draftuje sa do zásobníka. ak 1, upraviť počet manažérov aj v includes/fantasy_functions.php
-$knownrosters = 1; // = su zname zostavy (do ft_choices pridat hracov, ktori sa zucastnia)
+$knownrosters = 0; // = su zname zostavy (do ft_choices pridat hracov, ktori sa zucastnia)
 $article_rosters = 2354;
-$draft_start = "2022-12-16 08:00:00";
-$league_start = "2022-12-26 17:00:00";
+$draft_start = "2023-04-25 08:00:00";
+$league_start = "2023-05-12 15:20:00";
 
 /*
 1. nastaviť dátum deadlinu
@@ -21,7 +21,7 @@ $league_start = "2022-12-26 17:00:00";
 4. zmeniť link v menu
 5. vypnúť/zapnúť cronjob pre neaktivitu a nulovanie bodov
 6. ak je knownroster=1 do ft_choices pridat hracov a brankarov, ktori sa zucastnia
-7. odoslať pozvánkové maily na základe reakčného času avg_time v e_xoops_users
+7. odoslať pozvánkové maily na základe reakčného času avg_time (menej ako 10k) v e_xoops_users
 */
 
 if($_GET[cron]==1) {
@@ -42,7 +42,7 @@ $leag = mysql_query("SELECT * FROM 2004leagues WHERE longname LIKE '%$skratka%' 
 $league = mysql_fetch_array($leag);
 $leaguecolor = $league[color];
 $active_league = $league[id];
-/*if($uid==2) { $uid=215; $_SESSION[logged]=215; }*/
+//if($uid==2) { $uid=1319; /*$_SESSION[logged]=215;*/ } 
 
 // cron job pre vyber random hraca pri necinnosti manazera
 if($_GET[cron]==1)
@@ -177,7 +177,7 @@ if($params[0]=="draft")
   // odosle info o dostupnych zostavach do draft_autocomplete.php
   if($knownrosters==1) $_SESSION["knownrosters"]=1;
   else $_SESSION["knownrosters"]=0;
-  $hra = mysql_query("SELECT * FROM ft_teams WHERE uid='$uid'");
+  $hra = mysql_query("SELECT t.*, u.push_id FROM ft_teams t LEFT JOIN e_xoops_users u ON u.uid=t.uid WHERE t.uid='$uid';");
   if($uid)
   {
   if(mysql_num_rows($hra)>0) // ak je prihlasenym manazerom
@@ -186,6 +186,7 @@ if($params[0]=="draft")
     $f = mysql_fetch_array($q);
     $po = mysql_query("SELECT * FROM ft_players WHERE round='$f[round]'");
     $poc = mysql_num_rows($po);
+    $push = mysql_fetch_array($hra);
     $title = $nazov." - ".LANG_FANTASY_PLAYERSDRAFT;
     
     $content .= "<div id='toasts' class='fixed-top' style='top: 80px; right: 23px; left: initial; z-index:3;'></div>
@@ -259,6 +260,7 @@ if($params[0]=="draft")
       </div>
       <div class="card-body">
         '.($knownrosters==1 ? '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle mr-1"></i>'.sprintf(LANG_FANTASY_ONLYFROMROSTERS, $menu, $article_rosters).'</div>':'<div class="alert alert-info"><i class="fas fa-info-circle mr-1"></i>'.sprintf(LANG_FANTASY_ONLYFROMDB1, $menu).'</div>').'
+        '.($push["push_id"]==NULL ? '<div class="alert alert-warning"><i class="fas fa-mobile-screen-button mr-1"></i>'.LANG_FANTASY_TURNONPUSH.'</div>':'').'
         <p class="h6-fluid m-0">'.LANG_FANTASY_REMAINING1.':</p>
         <div class="row text-center mb-3 p-fluid">
             <div class="col-4 border rounded bg-gray-100 p-1"><span id="numf" class="font-weight-bold h5 text-primary">'.$numf.'</span><br>'.LANG_FANTASY_FORWARDS1.'</div>
@@ -388,7 +390,7 @@ if($params[0]=="picks")
                     <div class='col-12' style='max-width: 1000px;'>";
 
   $r = mysql_query("SELECT t.uid, t.points, t.prev_points, u.uname, u.user_avatar FROM ft_teams t LEFT JOIN e_xoops_users u ON u.uid=t.uid WHERE t.active='1' ORDER BY t.points DESC, t.pos ASC");
-  //$content .= '<div class="alert alert-info">Keďže nastala na prvej priečke rovnosť bodov medzi dvoma manažérmi, museli sme zaviesť rozhodovacie pravidlo, ktorým je viac bodov jednotlivých draftovaných hráčov (bez brankárov). Tento rozstrel vyhral v pomere 66:58 manažér <b>lukias24</b>, ktorému gratulujeme! Aby sa ale <b>dodys</b> nehneval, takisto si môže vybrať z našich vecných cien :)</div>';
+  //$content .= '<div class="alert alert-info">Keďže nastala na prvej priečke rovnosť bodov medzi dvoma manažérmi, museli sme zaviesť rozhodovacie pravidlo, ktorým je menší počet výmen hráčov v zostave. Tento rozstrel vyhral v pomere 31:121 manažér <b>Athletix</b>, ktorému gratulujeme! Aby sa ale <b>pegina</b> nehnevala, odmeňujeme takisto aj druhé miesto v drafte :)</div>';
    
   if($uid)
     {
@@ -700,11 +702,8 @@ elseif($params[0]=="signin")
       else 
         {
         mysql_query("INSERT INTO ft_teams (uid, active) VALUES ('$uid', '$_POST[active]')");
-        $headers = 'From: '.SITE_MAIL. "\r\n" .
-            'Reply-To: '.SITE_MAIL. "\r\n" .
-            'X-Mailer: PHP/' . phpversion();
         $count++;
-        mail(ADMIN_MAIL, "Novy manazer v drafte", "user ID: ".$uid.". Pocet: ".$count."/".$manazerov, $headers);
+        SendMail(ADMIN_MAIL, "Novy manazer v drafte", "user ID: ".$uid.". Pocet: ".$count."/".$manazerov);
         $content .= '<div class="alert alert-success" role="alert">
                       <p><i class="fas fa-hourglass-half"></i> '.LANG_FANTASY_SUCCESSSIGN.'</p>
                       <p>'.LANG_FANTASY_WAITFOROTHERS.'</p>

@@ -228,7 +228,7 @@ function Show_Drafted()
   if(mysql_num_rows($q)==0) $round=1;
   if($round % 2 == 0) { $narade = $manazerov-$pick+1; $otoc=1; }
   else { $narade = $pick; $otoc=0; }
-  $t = mysql_query("SELECT ft_teams.*, et.uname, et.last_login, et.user_avatar FROM ft_teams JOIN e_xoops_users et ON ft_teams.uid=et.uid WHERE ft_teams.active='1' ORDER BY pos ASC");
+  $t = mysql_query("SELECT ft_teams.*, et.uname, et.last_login, et.user_avatar, et.avg_time FROM ft_teams JOIN e_xoops_users et ON ft_teams.uid=et.uid WHERE ft_teams.active='1' ORDER BY pos ASC");
   while($y = mysql_fetch_array($t))
     {
     if($otoc==0) $odhad = (($y[pos]-$narade-1)*$timeout)+$min;
@@ -249,8 +249,13 @@ function Show_Drafted()
     else $hl=date('j.n.',$odhad). " o ".date('G:i', $odhad);
     if($narade==$y[pos]) $hl="<b>".LANG_FANTASY_JUSTPICKING."</b> <i class='fas fa-hourglass-half'></i>";
     if($round==10 && $y[pos]>$narade) $hl="-";
-    $mid = $y[uid];
-    $avg = $avgtime[$mid]/60;
+    if($round==1 && $y[pos]>=$narade) {
+        $avg = $y["avg_time"]/60;
+    }
+    else {
+        $mid = $y[uid];
+        $avg = $avgtime[$mid]/60;
+    }
     if($avg>60) $avg = round($avg/60,0)." ".LANG_FANTASY_HRS;
     else $avg = round($avg,0)." ".LANG_FANTASY_MINS;
     if($y[user_avatar]!="") $avatar = "<img class='rounded-circle mr-1' src='/images/user_avatars/".$y[uid].".".$y[user_avatar]."?".filemtime('images/user_avatars/'.$y[uid].'.'.$y[user_avatar])."' alt='".$y[uname]."' style='width:2rem;height:2rem;vertical-align:-11px;'>";
