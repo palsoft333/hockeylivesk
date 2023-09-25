@@ -71,7 +71,7 @@ $content .= '<div class="league-select">
             <!--<div class="animated--grow-in card mt-4 shadow">
               <div class="card-header"><h6 class="font-weight-bold m-0 text-secondary">Súťaž o hokejové kartičky</h6></div>
               <div class="bg-gradient-secondary card-body text-center"><img src="/images/kartickyEL.jpg" class="col-12 col-lg-5 col-sm-8"></div>
-            </div>-->
+            </div>
             <div class="row justify-content-center mt-4">
               <div class="col-12 col-lg-5 col-sm-8">
                 <div class="card">
@@ -82,7 +82,7 @@ $content .= '<div class="league-select">
                   </div>
                 </div>
               </div>
-            </div>
+            </div>-->
 
             <div class="card my-4 shadow animated--grow-in">
               <div class="card-header">
@@ -137,54 +137,14 @@ $content .= '<div class="league-select">
               <div class="card-body">
                  <p>'.LANG_BETS_FORWHATTEXT.'</p>
                  <div class="card-columns">
-
-                  <div class="card bg-gradient-light">
-                    <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="https://sportzoo.s15.cdn-upgates.com/_cache/7/f/7f7a9dc7529e67e4a95a4cda98892687.png" class="lazy card-img-top" alt="Premium balíček">
-                    <div class="card-body">
-                      <h5 class="card-title">Hokejové kartičky</h5>
-                      <p class="card-text"><small class="text-muted">Balíček Premium</small></p>
-                    </div>
-                  </div>
-
-                  <div class="card bg-gradient-light">
-                    <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="https://sportzoo.s15.cdn-upgates.com/_cache/2/b/2bc5b4bad1bc313c1a66aab03ffc9e65.png" class="lazy card-img-top" alt="Retail balíček">
-                    <div class="card-body">
-                      <h5 class="card-title">Hokejové kartičky</h5>
-                      <p class="card-text"><small class="text-muted">Balíček Retail</small></p>
-                    </div>
-                  </div>
-                 
-                  <div class="card bg-warning">
-                    <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="https://howieshockey.sk/store/82-large_default/howies-biele-voskovane-textilne-snurky.jpg" class="lazy card-img-top" alt="Textilné šnúrky">
-                    <div class="card-body">
-                      <h5 class="card-title">Howies biele voskované textilné šnúrky</h5>
-                      <p class="card-text"><small class="text-muted">Perfektne navoskované, zalisované končeky</small></p>
-                    </div>
-                  </div>
-                  
-                  <div class="card bg-warning">
-                    <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="https://howieshockey.sk/store/152-large_default/howies-plechovka-na-pasky.jpg" class="lazy card-img-top" alt="Plechovka na pásky">
-                    <div class="card-body">
-                      <h5 class="card-title">Howies Plechovka na pásky</h5>
-                      <p class="card-text"><small class="text-muted">Ochráni pásky pred prachom a nečistotami</small></p>
-                    </div>
-                  </div>
-                  
+                                                
                   <div class="card">
                     <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/images/ceny/batoh.jpg" class="lazy card-img-top" alt="Cestovný batoh">
                     <div class="card-body">
                       <h5 class="card-title">Cestovný batoh</h5>
                     </div>
                   </div>
-                  
-                  <div class="card bg-warning">
-                    <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="https://howieshockey.sk/store/23-large_default/howies-biela-textilna-hokejova-paska.jpg" class="lazy card-img-top" alt="Hokejová páska">
-                    <div class="card-body">
-                      <h5 class="card-title">Howies Biela textilná hokejová páska</h5>
-                      <p class="card-text"><small class="text-muted">Najkvalitnejšia hokejová páska na svete!</small></p>
-                    </div>
-                  </div>
-                  
+                                   
                   <div class="card">
                     <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/images/ceny/ciapka.jpg" class="lazy card-img-top" alt="zimná čiapka">
                     <div class="card-body">

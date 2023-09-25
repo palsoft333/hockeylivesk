@@ -68,7 +68,7 @@ $(document).ready( function() {
   });
   
   // Show swipe icon when the responsive tables are scrollable
-  $( window ).resize(function() {
+  $(window).on("resize", function() {
     SwipeButtonCheck();
   });
 

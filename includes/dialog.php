@@ -11,6 +11,7 @@ else {
 }
 
 $uid = $_SESSION['logged'];
+//if($uid==2) { $uid=1319; /*$_SESSION[logged]=215;*/ } 
 
 // vymena hraca vo Fantasy Championship
 if($_GET[action]=="change")
@@ -38,11 +39,6 @@ if($_GET[action]=="change")
         mysql_query("UPDATE ft_players SET pid='".$newpid."', gk='".$o[gk]."', g='0', a='0', w='0', so='0' WHERE pid='".$oldpid."' && uid='$uid'");
         mysql_query("REPLACE INTO ft_choices (id, teamshort, teamlong, pos, name) VALUES ('$newpid', '$e[teamshort]', '$e[teamlong]', '$pos', '$e[name]')");
         mysql_query("INSERT INTO ft_changes (uid, old_pid, new_pid) VALUES ('$uid', '$oldpid', '$newpid')");
-        $headers = 'From: '.SITE_MAIL. "\r\n" .
-              'Reply-To: '.SITE_MAIL. "\r\n" .
-              'X-Mailer: PHP/' . phpversion();
-        $count++;
-        //mail(ADMIN_MAIL, "Vymenený hráč", "user ID: ".$uid.". Starý hráč: ".$f[name].", Nový hráč: ".$e[name], $headers);
         echo "ok";
         }
       }

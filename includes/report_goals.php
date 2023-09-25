@@ -27,7 +27,7 @@ $id = substr($_GET[id], 0, $dl-1);
 if($el==1) $goals_table = "el_goals";
 else $goals_table = "2004goals";
 
-$q = mysql_query("SELECT * FROM $goals_table WHERE matchno='$id' ORDER BY time AsC, id ASC");
+$q = mysql_query("SELECT *, CAST(time as DECIMAL(5,2)) as cas FROM $goals_table WHERE matchno='$id' ORDER BY cas ASC, id ASC");
 
 $out .= '<div class="card my-4 shadow animated--grow-in">
                   <div class="card-header">

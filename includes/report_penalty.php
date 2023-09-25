@@ -50,7 +50,7 @@ else
   $tlong = $f[team2long];
   $prid = "pen2high";
   }
-$q = mysql_query("SELECT * FROM $penalty_table WHERE matchno='$id' && teamshort='$tshort' ORDER BY time ASC");
+$q = mysql_query("SELECT *, CAST(time as DECIMAL(5,2)) as cas FROM $penalty_table WHERE matchno='$id' && teamshort='$tshort' ORDER BY cas ASC");
 
 $out .= '<div class="card my-4 shadow animated--grow-in">
                   <div class="card-header">

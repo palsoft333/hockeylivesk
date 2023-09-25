@@ -332,32 +332,11 @@ elseif($pid)
       $coll = " COLLATE utf8_bin";
       }
     else $coll="";
-    $elinf = mysql_query("SELECT name, max(pos) as pos, max(born) as born, max(hold) as hold, max(kg) as kg, max(cm) as cm FROM el_players WHERE name='$data[name]'$coll ORDER BY id DESC LIMIT 1");
-    $elinfo = mysql_fetch_array($elinf);
-    if($elinfo[name]==NULL)
-      {
-      $elinf = mysql_query("SELECT name, max(pos) as pos, max(born) as born, max(hold) as hold, max(kg) as kg, max(cm) as cm FROM 2004players WHERE name='$data[name]'$coll ORDER BY id DESC LIMIT 1");
-      $elinfo = mysql_fetch_array($elinf);
-      }
+
     $title = "Štatistika hráča ".$data[name];
     $leaguecolor = $data[color];
-    $active_league = $data[league];
-    if($elinfo[pos]=="F") $hl=LANG_PLAYERSTATS_F;
-    elseif($elinfo[pos]=="LW") $hl=LANG_PLAYERSTATS_LW;
-    elseif($elinfo[pos]=="RW") $hl=LANG_PLAYERSTATS_RW;
-    elseif($elinfo[pos]=="C" || $elinfo[pos]=="CE") $hl=LANG_PLAYERSTATS_C;
-    elseif($elinfo[pos]=="D") $hl=LANG_PLAYERSTATS_D;
-    elseif($elinfo[pos]=="LD") $hl=LANG_PLAYERSTATS_LD;
-    elseif($elinfo[pos]=="RD") $hl=LANG_PLAYERSTATS_RD;
-    elseif($elinfo[pos]=="GK" || $elinfo[pos]=="G") $hl=LANG_PLAYERSTATS_GK;
-    if($elinfo[hold]=="L") $hl1=LANG_PLAYERSTATS_LHOLD;
-    else $hl1=LANG_PLAYERSTATS_RHOLD;
-    $pinfo = array();
-    if($elinfo[pos] && $elinfo[pos]!="") $pinfo[] = $hl;
-    if($elinfo[born] && $elinfo[born]!="1970-01-01") $pinfo[] = date_diff(date_create($elinfo[born]), date_create('today'))->y.' '.LANG_AGE_YEARS;
-    if($elinfo[cm] && $elinfo[cm]!=0) $pinfo[] = $elinfo[cm].' cm';
-    if($elinfo[kg] && $elinfo[kg]!=0) $pinfo[] = $elinfo[kg].' kg';
-    if($elinfo[hold] && $elinfo[hold]!="") $pinfo[] = $hl1;
+    $active_league = $data[league];   
+    $pinfo = GetBio($data[name], 0);
      
     $content .= "<i class='float-left h1 h1-fluid ll-".LeagueFont($data[longname])." text-gray-600 mr-1'></i>
                <h1 class='h3 h3-fluid mb-1'>".LANG_PLAYERSTATS_TITLE."</h1>
@@ -669,19 +648,11 @@ elseif($gid)
     {
     $comm_id = $gid;
     $data = mysql_fetch_array($q);
-    $elinf = mysql_query("SELECT max(born) as born, max(hold) as hold, max(kg) as kg, max(cm) as cm FROM $goalies_table WHERE name='$data[name]' ORDER BY id DESC LIMIT 1");
-    $elinfo = mysql_fetch_array($elinf);
+
     $title = "Štatistika brankára ".$data[name];
     $leaguecolor = $data[color];
     $active_league = $data[league];
-    if($elinfo[hold]=="L") $hl1=LANG_PLAYERSTATS_LHOLD;
-    else $hl1=LANG_PLAYERSTATS_RHOLD;
-    $pinfo = array();
-    $pinfo[] = LANG_PLAYERSTATS_GK;
-    if($elinfo[born] && $elinfo[born]!="1970-01-01") $pinfo[] = date_diff(date_create($elinfo[born]), date_create('today'))->y.' '.LANG_AGE_YEARS;
-    if($elinfo[cm] && $elinfo[cm]!=0) $pinfo[] = $elinfo[cm].' cm';
-    if($elinfo[kg] && $elinfo[kg]!=0) $pinfo[] = $elinfo[kg].' kg';
-    if($elinfo[hold] && $elinfo[hold]!="") $pinfo[] = $hl1;
+    $pinfo = GetBio($data[name], 1);
     
     $content .= "<i class='float-left h1 h1-fluid ll-".LeagueFont($data[longname])." text-gray-600 mr-1'></i>
                <h1 class='h3 h3-fluid mb-1'>".LANG_PLAYERSTATS_TITLEGOALIE."</h1>

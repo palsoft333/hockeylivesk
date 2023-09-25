@@ -18,7 +18,7 @@ $(document).ready(function() {
         "paging":   false,
         "info":     false,
         "searching":     false,
-        "order": [[ 4, 'desc' ], [ 2, 'desc' ], [ 3, 'desc' ], [ 8, 'desc' ], [ 7, 'desc' ], [ 6, 'desc' ], [ 5, 'asc' ]]
+        "order": [[ 5, 'desc' ], [ 2, 'asc' ], [ 3, 'desc' ], [ 4, 'desc' ], [ 9, 'desc' ], [ 8, 'desc' ], [ 6, 'asc' ]]
     } );
     
   $("#league").on('change', function() {

@@ -35,7 +35,7 @@ if(mysql_num_rows($q)>0)
   if($_SESSION[lang]!='sk') { $f[team1long] = TeamParser($f[team1long]); $f[team2long] = TeamParser($f[team2long]); }
   $title = LANG_MATCH1." $f[team1long] - $f[team2long]";
   
-  if($e[goalhorn]==1) $content .= '<script src="https://code.responsivevoice.org/responsivevoice.js"></script>';
+  if($e[goalhorn]==1) $content .= '<script src="https://code.responsivevoice.org/responsivevoice.js" defer></script>';
   else $content .= '<audio preload="auto" id="goalhorn">
     <source src="/includes/sounds/goal.mp3"></source>
     <source src="/includes/sounds/goal.ogg"></source>

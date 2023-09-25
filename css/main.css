@@ -302,6 +302,11 @@ a.text-hl:hover, a.text-hl:focus {
   flex-flow: wrap;
 }
 
+.pagination .page-link {
+    font-size: 90%;
+    padding: 0.3rem 0.5rem;
+}
+
 .fc-calendar-event .calendar-default {
   display: none;
 }

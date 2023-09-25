@@ -1,5 +1,5 @@
 <!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-KGVEHD3VW1"></script>
+<script async defer src="https://www.googletagmanager.com/gtag/js?id=G-KGVEHD3VW1"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}

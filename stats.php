@@ -61,7 +61,7 @@ if($lid)
 	$(document).ready(function() {
 	$("#players").dataTable( {
 			"fnRowCallback": function( nRow, aData, iDisplayIndex ) {
-				$("td:eq('.$incr.')", nRow).html( "<b>"+aData['.$sortby.']+"</b>" );
+				$("td:eq('.$incr.')", nRow).html( "<b>"+aData[8]+"</b>" );
                 '.($_SESSION[logged] ? 'if(aData[2]=="'.$f[user_favteam].'") $(nRow).addClass("bg-gray-400");':'').'
 			return nRow;
 		},
@@ -69,7 +69,7 @@ if($lid)
 		"bServerSide": true,
     "aoColumnDefs": [ { "bVisible": false, "aTargets": [ 2 ] }, {"bVisible": false, "aTargets": [ 3 ] }, { "bSortable": false, "aTargets": [ 0 ] }],
     "oLanguage": { "sUrl": "/includes/lang/datatables_'.$locale.'.txt" },
-    "aaSorting": [['.$sortby.', "desc"]],
+    "aaSorting": [[8, "desc"], [5, "desc"], [6, "desc"], [7, "desc"]],
     "bAutoWidth": false,
     '.$players.'
 		"sPaginationType": "full_numbers",
@@ -88,7 +88,7 @@ if($lid)
 		"bServerSide": true,
     "aoColumnDefs": [ { "bVisible": false, "aTargets": [ 2 ] }, {"bVisible": false, "aTargets": [ 3 ] }, { "bSortable": false, "aTargets": [ 0 ] }],
     "oLanguage": { "sUrl": "/includes/lang/datatables_'.$locale.'.txt" },
-    "aaSorting": [[7, "desc"]],
+    "aaSorting": [[7, "desc"], [6, "desc"]],
     "bAutoWidth": false,
     "aoColumns": [{ "sWidth": "5%", className: "text-center" }, { "sWidth": "31%", className: "text-nowrap" }, { "sWidth": "8%", className: "text-center" }, { "sWidth": "8%", className: "text-center" }, { "sWidth": "8%", className: "text-center" }, { "sWidth": "8%", className: "text-center" }, { "sWidth": "8%", className: "text-center" }, { "sWidth": "8%", className: "text-center" }, { "sWidth": "8%", className: "text-center" }, { "sWidth": "8%", className: "text-center" }, { "sWidth": "8%", className: "text-center" }, { "sWidth": "8%", className: "text-center" }],
 		"sPaginationType": "full_numbers",

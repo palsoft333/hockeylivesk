@@ -15,7 +15,7 @@
 
 $advert = '
 <div id="101390-3">
-    <script src="//ads.themoneytizer.com/s/gen.js?type=3"></script>
-    <script src="//ads.themoneytizer.com/s/requestform.js?siteId=101390&formatId=3"></script>
+    <script src="//ads.themoneytizer.com/s/gen.js?type=3" defer></script>
+    <script src="//ads.themoneytizer.com/s/requestform.js?siteId=101390&formatId=3" defer></script>
 </div>';
 ?>

@@ -42,7 +42,7 @@ $leag = mysql_query("SELECT * FROM 2004leagues WHERE longname LIKE '%$skratka%' 
 $league = mysql_fetch_array($leag);
 $leaguecolor = $league[color];
 $active_league = $league[id];
-//if($uid==2) { $uid=1319; /*$_SESSION[logged]=215;*/ } 
+if($uid==2) { $uid=1319; /*$_SESSION[logged]=215;*/ } 
 
 // cron job pre vyber random hraca pri necinnosti manazera
 if($_GET[cron]==1)
@@ -607,7 +607,7 @@ if($params[0]=="picks")
     if(date('Y-m-d',strtotime($f[tstamp]))==date("Y-m-d", mktime())) $hl="dnes o <b>".date('G:i', strtotime($f[tstamp]))."</b>";
     elseif(date('Y-m-d',strtotime($f[tstamp]))==date('Y-m-d', mktime(0, 0, 0, date('m'), date('d')-1, date('Y')))) $hl="včera o ".date('G:i', strtotime($f[tstamp]));
     else $hl=date('j.n.',strtotime($f[tstamp])). " ".LANG_AT." ".date('G:i', strtotime($f[tstamp]));
-    $content .= '<tr><td class="text-nowrap">'.$hl.'</td><td><a href="/user/'.$f[uid].'">'.$f[uname].'</a></td><td class="text-nowrap"><img class="flag-iihf '.$o[old_tshort].'-small" src="/images/blank.png" alt="'.$o[old_tshort].'"> <a href="/'.($f[gk]==1 ? 'goalie':'player').'/'.$f[old_pid].'0-'.SEOtitle($o[old_name]).'">'.$o[old_name].'</a></td><td class="text-nowrap"><img class="flag-iihf '.$o[new_tshort].'-small" src="/images/blank.png" alt="'.$o[new_tshort].'"> <a href="/'.($f[gk]==1 ? 'goalie':'player').'/'.$f[new_pid].'0-'.SEOtitle($o[new_name]).'">'.$o[new_name].'</a></td></tr>';
+    $content .= '<tr><td class="text-nowrap">'.$hl.'</td><td><a href="/user/'.$f[uid].'">'.$f[uname].'</a></td><td class="text-nowrap"><img class="flag-iihf '.$o[old_tshort].'-small" src="/images/blank.png" alt="'.$o[old_tshort].'"> <a href="/'.($f[gk]==1 ? 'goalie':'player').'/'.$f[old_pid].'0-'.SEOtitle($o[old_name]).'" data-toggle="popover" data-player="'.$o[old_name].'|'.$f[gk].'">'.$o[old_name].'</a></td><td class="text-nowrap"><img class="flag-iihf '.$o[new_tshort].'-small" src="/images/blank.png" alt="'.$o[new_tshort].'"> <a href="/'.($f[gk]==1 ? 'goalie':'player').'/'.$f[new_pid].'0-'.SEOtitle($o[new_name]).'" data-toggle="popover" data-player="'.$o[new_name].'|'.$f[gk].'">'.$o[new_name].'</a></td></tr>';
     }
   $content .= '</tbody></table></div></div></div></div>';
   

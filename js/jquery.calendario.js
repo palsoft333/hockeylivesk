@@ -1,5 +1,6 @@
 /**
  * [jquery.calendario.js] (v4.1.0) #Copyright 2015, Boží Ďábel#
+ * Updated by Palsoft on line 363
  */
 
 +function ($) {
@@ -359,7 +360,7 @@
       var options = typeof option == 'object' && option
 
       if (!data) $this.data('bz.calendario', (data = new Calendario(this, options)))
-      if (typeof option == 'string' && $.isFunction(data[option])) return val = data[option](value1, value2, value3)
+      if (typeof option == 'string' && typeof data[option]==="function") return val = data[option](value1, value2, value3)
       else if (typeof option == 'string') return val = data['option'](value1, value2)
     })
     if(val) return val

@@ -11,7 +11,7 @@ function LeagueSpecifics($lid, $longname, $condensed=FALSE) {
         $tt->playoff_wins = 4;
         $tt->add_conference("");
         $tt->add_division("", 0);
-        $tt->add_teams(array("SBA", "ZVO", "NIT", "MII", "KOS", "POP", "SNV", "BBS", "TRE", "PHC", "NZO", "LMI"), "body desc, wins desc, diff desc, zapasov asc, goals desc, losts asc", 0, 0);
+        $tt->add_teams(array("SBA", "ZVO", "NIT", "MII", "KOS", "POP", "SNV", "BBS", "TRE", "HCH", "NZO", "LMI"), "body desc, wins desc, diff desc, zapasov asc, goals desc, losts asc", 0, 0);
     }
     if(strstr($longname, "NHL")) {
         // NHL
@@ -42,7 +42,7 @@ function LeagueSpecifics($lid, $longname, $condensed=FALSE) {
         $tt->add_division(LANG_TEAMTABLE_CHERNYSHEV, 1);
         $tt->add_teams(array("SPA", "VIT", "SOC", "PET", "TNN"), "body desc, wins desc, diff desc, zapasov asc, id asc", 0, 0);
         $tt->add_teams(array("DYN", "DMN", "KUN", "LOK", "CSK", "SEV"), "body desc, wins desc, diff desc, zapasov asc, id asc", 0, 1);
-        $tt->add_teams(array("AVT", "AKB", "MMG", "NKH", "TRA"), "body desc, wins desc, diff desc, zapasov asc, id asc", 1, 0);
+        $tt->add_teams(array("AVT", "AKB", "MMG", "NKH", "TRA", "LAD"), "body desc, wins desc, diff desc, zapasov asc, id asc", 1, 0);
         $tt->add_teams(array("AVA", "SIB", "AMU", "BAR", "SAL", "VLA"), "body desc, wins desc, diff desc, zapasov asc, id asc", 1, 1);
     }
     if(strstr($longname, "MS 20")) {
@@ -69,8 +69,8 @@ function LeagueSpecifics($lid, $longname, $condensed=FALSE) {
           $tt->add_conference("");
           $tt->add_division("Skupina A", 0);
           $tt->add_division("Skupina B", 0);
-          $tt->add_teams("", "body desc, diff desc, goals desc, wins desc, losts asc", 0, 0);
-          $tt->add_teams("", "body desc, diff desc, goals desc, wins desc, losts asc", 0, 1);
+          $tt->add_teams("", "body desc, zapasov asc, diff desc, goals desc, wins desc, losts asc", 0, 0);
+          $tt->add_teams("", "body desc, zapasov asc, diff desc, goals desc, wins desc, losts asc", 0, 1);
 
         }
     }

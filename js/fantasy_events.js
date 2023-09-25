@@ -170,3 +170,38 @@
       }   
     });
   });
+
+$(document).ready(function () {
+
+    $('[data-toggle="popover"]').popover({
+        placement: 'top',
+        trigger: 'hover',
+        delay: {
+            "show": 500,
+            "hide": 100
+        },
+        html: true,
+        content: function(){
+            var div_id =  "tmp-id-" + $.now();
+            return details_in_popup($(this).data('player'), div_id, $(this));
+        }
+    });
+
+});
+
+function details_in_popup(player, div_id, parent){
+    $.ajax({
+        url: "/includes/player_popover.php?p="+player,
+        success: function(response){
+            $('#'+div_id).html(response);
+            parent.popover('update')
+            $(".lazy").lazy(
+                { effect: 'fadeIn',     
+                afterLoad: function(e) {
+                    e.removeClass("lazy");
+                }}
+            );
+        }
+    });
+    return '<div id="'+ div_id +'">'+LANG_USERPROFILE_LOADING+'</div>';
+}

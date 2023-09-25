@@ -68,13 +68,30 @@ if(mysql_num_rows($q)>0)
                (adsbygoogle = window.adsbygoogle || []).push({});
           </script>-->
           <div id="101390-3">
-            <script src="//ads.themoneytizer.com/s/gen.js?type=3"></script>
-            <script src="//ads.themoneytizer.com/s/requestform.js?siteId=101390&formatId=3"></script>
+            <script src="//ads.themoneytizer.com/s/gen.js?type=3" defer></script>
+            <script src="//ads.themoneytizer.com/s/requestform.js?siteId=101390&formatId=3" defer></script>
           </div>
         </div>
       </div>
     </div>
-  </div>';
+  </div>
+  
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org/",
+  "@type": "NewsArticle",
+  "headline": "'.$f[title].'",
+  "image": [
+    "'.$meta_image.'"
+    ],
+  "datePublished": "'.date("c",$f[published]).'",
+  "author": [{
+        "@type": "Person",
+        "name": "'.$f[name].'",
+        "url": "https://www.hockey-live.sk/user/'.$f[uid].'"
+    }]
+}
+  </script>';
 
   if(!in_array($id[0], $_SESSION["visited_articles"])) {
     mysql_query("UPDATE e_xoops_stories SET counter=counter+1 WHERE storyid='".$id[0]."'");

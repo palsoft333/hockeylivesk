@@ -372,11 +372,44 @@ if($id)
                       <div class="col-9 col-sm-5 align-self-center text-left text-sm-center text-nowrap"><img class="flag-'.($el==0 ? 'iihf':'el').' '.$l[team1short].'-small" src="/img/blank.png" alt="'.$l[team1long].'"> <strong>'.$l[team1short].'</strong> vs. <strong>'.$l[team2short].'</strong> <img class="flag-'.($el==0 ? 'iihf':'el').' '.$l[team2short].'-small" src="/img/blank.png" alt="'.$l[team2long].'"></div>
                       <div class="col-3 col-sm-2 text-center">'.$score.'</div>
                     </div>';
+                      $struct_data[] = array($l[team1long], $l[team2long], 'https://www.hockey-live.sk/images/vlajky/'.$l[team1short].'_big.gif','https://www.hockey-live.sk/images/vlajky/'.$l[team2short].'_big.gif', 'https://www.hockey-live.sk/game/'.$l[id].$el.'-'.SEOtitle($l[team1long]." vs ".$l[team2long]), $l[datetime], 'https://www.hockey-live.sk/includes/gotd.php?id='.$l[id].$el);
                       $i++;
                       }
                   $content .= '
                   </div>
                 </div>';
+
+    // strukturovane data pre Google
+    $content .= '<script type="application/ld+json">[';
+    foreach($struct_data as $event) {
+        $content .= '
+  {
+    "@context": "https://schema.org",
+    "@type": "SportsEvent",
+    "name": "'.$event[0].' vs. '.$event[1].'",
+    "url": "'.$event[4].'",
+    "image": "'.$event[6].'",
+    "startDate": "'.date("c",strtotime($event[5])).'",
+    "endDate": "'.date("c",strtotime($event[5])+9000).'",
+    "eventAttendanceMode": "https://schema.org/MixedEventAttendanceMode",
+    "eventStatus": "https://schema.org/EventScheduled",
+    "homeTeam": {
+      "@type": "SportsTeam",
+      "name": "'.$event[0].'",
+      "image": "'.$event[2].'"
+    },
+    "awayTeam": {
+      "@type": "SportsTeam",
+      "name": "'.$event[1].'",
+      "image": "'.$event[3].'"
+    },
+    "location": "'.$e[longname].'"
+  },';
+    }
+    $content = substr($content, 0, -1);
+    $content .= ']
+    </script>';
+
 if($el==0) $content .= '<div class="card shadow mb-4">
 <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
 <!-- V detaile non-EL tímu -->

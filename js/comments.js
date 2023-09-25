@@ -5,7 +5,7 @@ function onRecaptchaLoadCallback() {
         'size': 'invisible'
     });
     
-    $("#addcomment").click(function( event ) {
+    $("#addcomment").on('click', function (event) {
     
     event.preventDefault();
     grecaptcha.ready(function() {
@@ -63,7 +63,7 @@ $(document).ready(function(){
     modal.find('#cid').val(cid);
   });
   
-  $(".deleteComment").click(function( event ) {
+  $(".deleteComment").on('click', function (event) {
     event.preventDefault();
     var cid=$("#cid").val();
     $.post("/includes/comments.php",{ del:cid } ,function(data) {

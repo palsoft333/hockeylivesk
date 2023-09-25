@@ -974,7 +974,7 @@ function gotd()
       if($gotf["kolo"]==0) {
           $p = mysql_query("SELECT * FROM `el_playoff` WHERE league='143' && ((team1='".$gotf["team1short"]."' && team2='".$gotf["team2short"]."') || (team2='".$gotf["team1short"]."' && team1='".$gotf["team2short"]."'))");
           $po = mysql_fetch_array($p);
-          $pohl = '<p class="m-0"><span class="font-weight-bold">Stav série:</span> '.$po["status1"].':'.$po["status2"].'</p>';
+          $pohl = '<p class="m-0"><span class="font-weight-bold">'.LANG_MATCHES_SERIES.':</span> '.$po["status1"].':'.$po["status2"].'</p>';
       }
       // slovaci v akcii
       include('slovaks.php');
@@ -1099,9 +1099,9 @@ $i=0;
 while ($f = mysql_fetch_array($q)) {
 $s="";
 $e="";
-if($i==2) /*$newsList .= '<div class="card shadow mb-4">
+if($i==2) $newsList .= '<div class="card shadow mb-4">
   <div class="col">
-    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <script async defer src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
     <ins class="adsbygoogle"
          style="display:block"
          data-ad-format="fluid"
@@ -1112,16 +1112,16 @@ if($i==2) /*$newsList .= '<div class="card shadow mb-4">
          (adsbygoogle = window.adsbygoogle || []).push({});
     </script>
   </div>
-</div>';*/
-$newsList .= '
+</div>';
+/*$newsList .= '
 <div class="card shadow mb-4">
     <div class="col">
         <div id="101390-1">
-            <script src="//ads.themoneytizer.com/s/gen.js?type=1"></script>
-            <script src="//ads.themoneytizer.com/s/requestform.js?siteId=101390&formatId=1"></script>
+            <script src="//ads.themoneytizer.com/s/gen.js?type=1" defer></script>
+            <script src="//ads.themoneytizer.com/s/requestform.js?siteId=101390&formatId=1" defer></script>
         </div>
     </div>
-</div>';
+</div>';*/
 if($f[bodytext] != '') { $s = '<a href="/news/'.$f[storyid].'-'.SEOtitle($f[title]).'">'; $e = '</a>'; }
     preg_match('/<img.+src=[\'"](?P<src>.+?)[\'"].*>/i', $f[hometext], $image);
     preg_match('/<img.+class=[\'"](?P<class>.+?)[\'"].*>/i', $f[hometext], $imageclass);
@@ -1173,7 +1173,7 @@ if($f[bodytext] != '') { $s = '<a href="/news/'.$f[storyid].'-'.SEOtitle($f[titl
   $newsList .= '<nav aria-label="Page navigation">
         <ul class="pagination justify-content-between">
           <li class="page-item">'.($pageprev>=1 ? '<a class="page-link" href="/category/'.$tema.'/'.$pageprev.'"><i class="fas fa-angle-double-left" aria-hidden="true"></i> '.LANG_BACK.'</a>':'').'</li>
-          <li class="page-item">'.(($page*4)<=$num ? '<a class="page-link" href="/category/'.$tema.'/'.$pagenext.'">'.LANG_NEXT.' <i class="fas fa-angle-double-right" aria-hidden="true"></i></a>':'').'</li>
+          <li class="page-item">'.(($page*$limit)<=$num ? '<a class="page-link" href="/category/'.$tema.'/'.$pagenext.'">'.LANG_NEXT.' <i class="fas fa-angle-double-right" aria-hidden="true"></i></a>':'').'</li>
         </ul>
       </nav>';
       

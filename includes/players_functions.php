@@ -61,4 +61,53 @@ function Show_Draft_Button($playername,$pid)
     }
   return $draft;
   }
+  
+function GetBio($name, $gk) {
+  if($gk==0) {
+    $pos=$born=$hold=$kg=$cm="";
+    $bio=array();
+    $q = mysql_query("SELECT id, pos, born, hold, kg, cm, league FROM 2004players WHERE name='".$name."' UNION SELECT id, pos, born, hold, kg, cm, league FROM el_players WHERE name='".$name."' ORDER BY league DESC, id DESC;");
+    while($f = mysql_fetch_array($q)) {
+      if($pos=="" && $f["pos"]!="") $pos=$f["pos"];
+      if($born=="" && $f["born"]!="1970-01-01") $born=$f["born"];
+      if($hold=="" && $f["hold"]!="") $hold=$f["hold"];
+      if($kg=="" && $f["kg"]!=0) $kg=$f["kg"];
+      if($cm=="" && $f["cm"]!=0) $cm=$f["cm"];
+    }
+    if($pos=="F") $hl=LANG_PLAYERSTATS_F;
+    elseif($pos=="LW") $hl=LANG_PLAYERSTATS_LW;
+    elseif($pos=="RW") $hl=LANG_PLAYERSTATS_RW;
+    elseif($pos=="C" || $pos=="CE") $hl=LANG_PLAYERSTATS_C;
+    elseif($pos=="D") $hl=LANG_PLAYERSTATS_D;
+    elseif($pos=="LD") $hl=LANG_PLAYERSTATS_LD;
+    elseif($pos=="RD") $hl=LANG_PLAYERSTATS_RD;
+    elseif($pos=="GK" || $pos=="G") $hl=LANG_PLAYERSTATS_GK;
+    if($hold=="L") $hl1=LANG_PLAYERSTATS_LHOLD;
+    else $hl1=LANG_PLAYERSTATS_RHOLD;
+    if($pos!="") $bio[] = $hl;
+    if($born!="") $bio[] = date_diff(date_create($born), date_create('today'))->y.' '.LANG_AGE_YEARS;
+    if($hold!="") $bio[] = $hl1;
+    if($kg!="") $bio[] = $kg.' kg';
+    if($cm!="") $bio[] = $cm.' cm';
+  }
+  else {
+    $born=$hold=$kg=$cm="";
+    $bio=array();
+    $q = mysql_query("SELECT id, born, hold, kg, cm, league FROM 2004goalies WHERE name='".$name."' UNION SELECT id, born, hold, kg, cm, league FROM el_goalies WHERE name='".$name."' ORDER BY league DESC, id DESC;");
+    while($f = mysql_fetch_array($q)) {
+      if($born=="" && $f["born"]!="1970-01-01") $born=$f["born"];
+      if($hold=="" && $f["hold"]!="") $hold=$f["hold"];
+      if($kg=="" && $f["kg"]!=0) $kg=$f["kg"];
+      if($cm=="" && $f["cm"]!=0) $cm=$f["cm"];
+    }
+    if($hold=="L") $hl1=LANG_PLAYERSTATS_LHOLD;
+    else $hl1=LANG_PLAYERSTATS_RHOLD;
+    $bio[] = LANG_PLAYERSTATS_GK;
+    if($born!="") $bio[] = date_diff(date_create($born), date_create('today'))->y.' '.LANG_AGE_YEARS;
+    if($hold!="") $bio[] = $hl1;
+    if($kg!="") $bio[] = $kg.' kg';
+    if($cm!="") $bio[] = $cm.' cm';
+  }
+  return $bio;
+}
 ?>

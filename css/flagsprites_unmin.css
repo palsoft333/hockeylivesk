@@ -96,6 +96,10 @@
     background: url('../img/vlajky/szlh_sprites.png') -36px -72px;
 }
 
+.HCH-small {
+    background: url('../img/vlajky/szlh_sprites.png') -54px -12px;
+}
+
 /*  KHL SPRITES */
 
 .CSK-small {
@@ -460,4 +464,8 @@
 
 .CHN-small {
     background: url('../img/vlajky/iihf_sprites.png') -16px -44px;
+}
+
+.POL-small {
+    background: url('../img/vlajky/iihf_sprites.png') -32px -44px;
 }

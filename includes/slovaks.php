@@ -19,7 +19,7 @@ $slovaks = array(
 "SLAFKOVSKÝ Juraj" => "MTL",
 "STUDENIČ Marián" => "DAL",
 //"PÁNIK Richard" => "NYI",
-"TATAR Tomáš" => "NJD"
+"TATAR Tomáš" => "COL"
 );
 
 // SVK brankari

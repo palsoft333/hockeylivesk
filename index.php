@@ -136,6 +136,7 @@ switch ($_GET["p"]) {
           $f = mysql_fetch_array($q);
           $leaguecolor = LeagueColor($f[longname]);
           $active_league = $f[id];
+          $title = Get_SEO_title($_GET[topicID]);
           }
         else $leaguecolor = "hl";
 }
@@ -154,7 +155,7 @@ else mysql_query("UPDATE e_xoops_users SET last_login='".time()."' WHERE uid='".
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="Portál pokrývajúci slovenský a zahraničný ľadový hokej. Štatistiky, tipovanie, databáza hráčov, výsledkový servis z domácich líg, zahraničných turnajov, KHL a NHL.">
+  <meta name="description" content="Portál pokrývajúci slovenský a zahraničný ľadový hokej. Štatistiky, tipovanie, databáza hráčov, výsledkový servis z domácich líg, zahraničných turnajov, KHL a NHL. <? echo $title; ?>.">
 
   <meta name="author" content="<? echo $author; ?>" />
   <meta name="title" content="<? echo $title; ?>" />
@@ -190,7 +191,7 @@ else mysql_query("UPDATE e_xoops_users SET last_login='".time()."' WHERE uid='".
   </style>
   <?
   echo '<link href="/css/flagsprites.css?v=1.0.1" rel="stylesheet">';
-  if($_GET[p]=="stats") echo '<link href="/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">';
+  if($_GET[p]=="stats") echo '<link href="/vendor/datatables/dataTables.bootstrap4.min.css?v=1.13.4" rel="stylesheet">';
   if($_GET[p]=="users") echo '<link href="/css/croppie.min.css?v=2.6.4" rel="stylesheet">';
   if($_GET[p]=="articles") echo '<link rel="stylesheet" href="/css/jquery.fancybox.min.css?v=3.5.7" />';
   if($_GET[p]=="games" || $_GET[p]=="teams" || $_GET[p]=="report" || $_GET[p]=="articles" || $_GET[p]=="players" || $_GET[p]=="fantasy") echo '<link rel="stylesheet" href="/css/jquery.emojiarea.css?v=1.0.0" />';
@@ -207,6 +208,7 @@ else mysql_query("UPDATE e_xoops_users SET last_login='".time()."' WHERE uid='".
     var uspTries = 0;
     var uspTriesLimit = 3;
     element.async = true;
+    element.defer = true;
     element.type = 'text/javascript';
     element.src = url;
 
@@ -525,11 +527,13 @@ else mysql_query("UPDATE e_xoops_users SET last_login='".time()."' WHERE uid='".
                 <a class="nav-link" href="/contact"><? echo LANG_NAV_IMPERSSUM; ?></a>
               </li>
             </ul>
+            <? if(!$_SESSION["logged"]) echo '
             <div class="d-flex d-none justify-content-center"><hr class="m-2 w-50"></div>
             <div class="text-center">
               <div class="badge badge-light badge-pill text-xs text-wrap mb-1 mb-xl-0">Nejlepší <a href="https://www.casinoonline24cz.com/nove-online-casino/">nové online casino s českou licencí</a> 2022 s bonusem bez vkladu casinoonline24cz.com</div>
               <div class="badge badge-light badge-pill text-xs text-wrap">Casino <a href="https://www.slotvegascz.com/no-deposit-bonus/">bonus za registraci bez vkladu 2023</a> slotvegascz.com</div>
-            </div>
+            </div>'; 
+            ?>
             <div class="d-flex d-none justify-content-center"><hr class="m-2 w-50"></div>
             <div class="text-center">
               <a href="https://www.instagram.com/hockeylive.sk" target="_blank" rel="noopener" class="text-danger"><i class="fa-2x fa-instagram-square fab"></i></a>
@@ -573,28 +577,28 @@ else mysql_query("UPDATE e_xoops_users SET last_login='".time()."' WHERE uid='".
   </div>
 
   <!-- Bootstrap core JavaScript-->
-  <script src="/vendor/jquery/jquery.min.js?v=3.5.1"></script>
+  <script src="/vendor/jquery/jquery.min.js?v=3.7.0"></script>
   <script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
   <!-- Core plugin JavaScript-->
   <script src="/vendor/jquery-easing/jquery.easing.min.js"></script>
 
   <!-- Custom scripts for all pages-->
-  <script src="/js/jquery-ui.min.js?v=1.13.1"></script>
+  <script src="/js/jquery-ui.min.js?v=1.13.2"></script>
   <script src="/js/jquery.lazy.min.js"></script>
-  <script src="/js/main.min.js?v=1.2.3"></script>
+  <script src="/js/main.min.js?v=1.2.4"></script>
 <? 
-if(!$_GET[p] && !$_GET[topicID]) echo '  <script type="text/javascript" src="/js/jquery.calendario.js?v=1.0.5"></script>
+if(!$_GET[p] && !$_GET[topicID]) echo '  <script type="text/javascript" src="/js/jquery.calendario.js?v=1.0.6"></script>
   <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION[lang].'.js?v=1.0.0"></script>
-  <script type="text/javascript" src="/js/homepage_events.js?v=1.1.2"></script>';
+  <script type="text/javascript" src="/js/homepage_events.js?v=1.1.3"></script>';
 elseif($_GET[p]=="games")
   {
   echo '  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION[lang].'.js?v=1.0.0"></script>
   <script type="text/javascript" src="/js/games_events.js?v=1.0.4"></script>';
   if($_GET[gid]) echo '  <script src="/js/jquery.emojiarea.min.js?v=1.0.0"></script>
   <script src="/images/smilies/emojis.js?v=1.0.0"></script>
-  <script src="/js/comments.js?v=1.0.1"></script>
-  <script src="https://www.google.com/recaptcha/api.js?render=explicit&onload=onRecaptchaLoadCallback"></script>';
+  <script src="/js/comments.js?v=1.0.2"></script>
+  <script src="https://www.google.com/recaptcha/api.js?render=explicit&onload=onRecaptchaLoadCallback" defer></script>';
   }
 elseif($_GET[p]=="table") 
   {
@@ -602,52 +606,52 @@ elseif($_GET[p]=="table")
   echo '  <script type="text/javascript" src="/js/table_events.js?v=1.0.1"></script>';
   }
 elseif($_GET[p]=="teams") echo '  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION[lang].'.js?v=1.0.0"></script>
-  <script type="text/javascript" src="/js/teams_events.js?v=1.0.0"></script>
+  <script type="text/javascript" src="/js/teams_events.js?v=1.0.1"></script>
   <script src="/js/jquery.emojiarea.min.js?v=1.0.0"></script>
   <script src="/images/smilies/emojis.js?v=1.0.0"></script>
-  <script src="/js/comments.js?v=1.0.1"></script>
-  <script src="https://www.google.com/recaptcha/api.js?render=explicit&onload=onRecaptchaLoadCallback"></script>';
+  <script src="/js/comments.js?v=1.0.2"></script>
+  <script src="https://www.google.com/recaptcha/api.js?render=explicit&onload=onRecaptchaLoadCallback" defer></script>';
 elseif($_GET[p]=="fantasy") echo '  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION[lang].'.js?v=1.0.0"></script>
-  <script type="text/javascript" src="/js/fantasy_events.js?v=1.0.2"></script>
+  <script type="text/javascript" src="/js/fantasy_events.js?v=1.0.3"></script>
   <script src="/js/jquery.emojiarea.min.js?v=1.0.0"></script>
   <script src="/images/smilies/emojis.js?v=1.0.0"></script>
-  <script src="/js/comments.js?v=1.0.1"></script>
-  <script src="https://www.google.com/recaptcha/api.js?render=explicit&onload=onRecaptchaLoadCallback"></script>';
+  <script src="/js/comments.js?v=1.0.2"></script>
+  <script src="https://www.google.com/recaptcha/api.js?render=explicit&onload=onRecaptchaLoadCallback" defer></script>';
 elseif($_GET[p]=="users" && !$_GET[notif] && !$id) echo '  <script src="/js/croppie.min.js?v=2.6.4"></script>
-  <script src="https://code.responsivevoice.org/responsivevoice.js?key=ZN9dlYeg"></script>
-  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION[lang].'.js?v=1.0.0"></script>
-  <script type="text/javascript" src="/js/user_events.js?v=1.0.6"></script>';
+  <script src="https://code.responsivevoice.org/responsivevoice.js?key=ZN9dlYeg" defer></script>
+  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION[lang].'.js?v=1.0.1"></script>
+  <script type="text/javascript" src="/js/user_events.js?v=1.0.7"></script>';
 elseif($_GET[p]=="report") echo '  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION[lang].'.js?v=1.0.0"></script>
   <script type="text/javascript" src="/js/jquery.cookie.js"></script>
-  <script src="https://code.responsivevoice.org/responsivevoice.js?key=ZN9dlYeg"></script>
+  <script src="https://code.responsivevoice.org/responsivevoice.js?key=ZN9dlYeg" defer></script>
   <script type="text/javascript" src="/js/report_events.php?id='.$id.$el.'"></script>
   <script src="/js/jquery.emojiarea.min.js?v=1.0.0"></script>
   <script src="/images/smilies/emojis.js?v=1.0.0"></script>
-  <script src="/js/comments.js?v=1.0.1"></script>
-  <script src="https://www.google.com/recaptcha/api.js?render=explicit&onload=onRecaptchaLoadCallback"></script>';
+  <script src="/js/comments.js?v=1.0.2"></script>
+  <script src="https://www.google.com/recaptcha/api.js?render=explicit&onload=onRecaptchaLoadCallback" defer></script>';
 elseif($_GET[p]=="articles") echo '  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION[lang].'.js?v=1.0.0"></script>
   <script src="/js/jquery.fancybox.min.js?v=3.5.7"></script>
   <script src="/js/jquery.emojiarea.min.js?v=1.0.0"></script>
   <script src="/images/smilies/emojis.js?v=1.0.0"></script>
-  <script src="/js/comments.js?v=1.0.1"></script>
-  <script src="https://www.google.com/recaptcha/api.js?render=explicit&onload=onRecaptchaLoadCallback"></script>';
+  <script src="/js/comments.js?v=1.0.2"></script>
+  <script src="https://www.google.com/recaptcha/api.js?render=explicit&onload=onRecaptchaLoadCallback" defer></script>';
 elseif($_GET[p]=="players") echo '  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION[lang].'.js?v=1.0.0"></script>
   <script src="/js/jquery.emojiarea.min.js?v=1.0.0"></script>
   <script src="/images/smilies/emojis.js?v=1.0.0"></script>
-  <script src="/js/comments.js?v=1.0.1"></script>
-  <script src="https://www.google.com/recaptcha/api.js?render=explicit&onload=onRecaptchaLoadCallback"></script>';
+  <script src="/js/comments.js?v=1.0.2"></script>
+  <script src="https://www.google.com/recaptcha/api.js?render=explicit&onload=onRecaptchaLoadCallback" defer></script>';
 
-if($_GET[p]=="stats" || $_GET[p]=="players" || $_GET[p]=="teams" || $_GET[p]=="bets" || $_GET[p]=="fantasy") echo '  <script type="text/javascript" src="/vendor/datatables/jquery.dataTables.min.js?v=1.10.19"></script>
-  <script src="/vendor/datatables/dataTables.bootstrap4.min.js?v=1.0.0"></script>';
+if($_GET[p]=="stats" || $_GET[p]=="players" || $_GET[p]=="teams" || $_GET[p]=="bets" || $_GET[p]=="fantasy") echo '  <script type="text/javascript" src="/vendor/datatables/jquery.dataTables.min.js?v=1.13.4"></script>
+  <script src="/vendor/datatables/dataTables.bootstrap4.min.js?v=1.13.4"></script>';
   
 echo $script_end;
 ?>
-  <link href="/vendor/fontawesome-free/css/all.min.css?v=6.2.0" rel="stylesheet" type="text/css">
+  <link href="/vendor/fontawesome-free/css/all.min.css?v=6.4.0" rel="stylesheet" type="text/css">
   <link href="/css/league-logos.css?v=1.0.7" rel="stylesheet" type="text/css">
   <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
 
   <link href="/css/template.min.css?v=1.0.2" rel="stylesheet">
-  <link href="/css/main.css?v=1.2.8" rel="stylesheet">
+  <link href="/css/main.css?v=1.2.9" rel="stylesheet">
 </body>
 
 </html>

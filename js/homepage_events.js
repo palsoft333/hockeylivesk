@@ -87,15 +87,12 @@ $(document).ready( function() {
 					$( '#custom-year' ).html( $( '#calendar' ).calendario('getYear'));
 					$( '#custom-next' ).on( 'click', function() {
 						$( '#calendar' ).calendario('gotoNextMonth', updateMonthYear);
-						ga('send', 'event', 'Page', 'calendarTurn', $('#calendar').calendario('getYear')+'-'+$('#calendar').calendario('getMonth'));
 					} );
 					$( '#custom-prev' ).on( 'click', function() {
 						$( '#calendar' ).calendario('gotoPreviousMonth', updateMonthYear);
-						ga('send', 'event', 'Page', 'calendarTurn', $('#calendar').calendario('getYear')+'-'+$('#calendar').calendario('getMonth'));
 					} );
 					$( '#custom-current' ).on( 'click', function() {
 						$( '#calendar' ).calendario('gotoNow', updateMonthYear);
-						ga('send', 'event', 'Page', 'calendarTurn', $('#calendar').calendario('getYear')+'-'+$('#calendar').calendario('getMonth'));
 					} );
                 });
 				

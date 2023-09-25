@@ -21,6 +21,19 @@ function SEOtitle($title) {
     return $seotitle;
 }
 
+function Get_SEO_title($topicID, $provided=false) {
+    if($provided) $f["topic_title"]=$topicID;
+    else {
+        $q = mysql_query("SELECT * FROM e_xoops_topics WHERE topic_id='".$topicID."'");
+        $f = mysql_fetch_array($q);
+    }
+    if(strstr($f["topic_title"], "U20")) $title = "Majstrovstvá sveta do 20 rokov";
+    elseif(strstr($f["topic_title"], "MS ")) $title = str_replace("MS ", "Majstrovstvá sveta ", $f["topic_title"]);
+    elseif(strstr($f["topic_title"], "ZOH ")) $title = str_replace("ZOH ", "Zimné olympijské hry ", $f["topic_title"]);
+    else $title = $f["topic_title"];
+    return $title;
+}
+
 /*
 * Funkcia pre vrátenie farby na základe názvu ligy
 * version: 1.0.0 (6.2.2020 - vytvorenie novej funkcie)
@@ -138,17 +151,17 @@ function Generate_Menu($active_league = FALSE) {
                       </div>
                       <div class="collapse-divider"></div>
                       <h6 class="collapse-header">Odkazy:</h6>
-                      <a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/category/'.$f[topic_id].'-'.SEOtitle($f[topic_title]).'"><span itemprop="name">'.LANG_NAV_NEWS.'</span><i class="fas fa-newspaper fa-fw float-right text-gray-500 my-1"></i></a>
-                      '.($f[el]>0 && $f[endbasic]==1 ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/table/'.$f[id].'-'.SEOtitle($f[topic_title]).'/playoff"><span itemprop="name">'.LANG_TEAMTABLE_PLAYOFF.'</span><i class="fas fa-trophy fa-fw float-right text-gray-500 my-1"></i></a>':'').'
-                      <a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="'.($f[endbasic]==1 && $f[el]==0 ? "/table/".$f[id]."-".SEOtitle($f[topic_title])."/playoff" : "/games/".$f[id]."-".SEOtitle($f[topic_title])).'"><span itemprop="name">'.LANG_NAV_UPCOMMING.'</span><i class="fas fa-hockey-puck fa-fw float-right text-gray-500 my-1"></i>'.$badge.'</a>
-                      <a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/table/'.$f[id].'-'.SEOtitle($f[topic_title]).''.($f[groups]!="" ? "/groups" : "").'"><span itemprop="name">'.LANG_NAV_TABLE.'</span><i class="fas fa-list-ol fa-fw float-right text-gray-500 my-1"></i></a>
-                      <a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/stats/'.$f[id].'-'.SEOtitle($f[topic_title]).'"><span itemprop="name">'.LANG_NAV_STATS.'</span><i class="fas fa-chart-bar fa-fw float-right text-gray-500 my-1"></i></a>
-                      '.(strstr($f[longname], 'NHL') ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/slovaks/'.$f[id].'-'.SEOtitle($f[topic_title]).'"><span itemprop="name">'.LANG_NAV_SLOVAKS.'</span><i class="fas fa-user-shield fa-fw float-right text-gray-500 my-1"></i></a>':'').'
-                      '.(strstr($f[longname], 'KHL') ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/slovaks/'.$f[id].'-'.SEOtitle($f[topic_title]).'"><span itemprop="name">'.LANG_NAV_SLOVAKI.'</span><i class="fas fa-user-shield fa-fw float-right text-gray-500 my-1"></i></a>':'').'
-                      '.($f[el]>0 && $f[topic_id]!=60 ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/injured/'.$f[id].'-'.SEOtitle($f[topic_title]).'"><span itemprop="name">'.LANG_NAV_INJURED.'</span><i class="fas fa-user-injured fa-fw float-right text-gray-500 my-1"></i></a>':'').'
-                      '.($f[el]>0 ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/transfers/'.$f[id].'-'.SEOtitle($f[topic_title]).'"><span itemprop="name">'.LANG_NAV_TRANSFERS.'</span><i class="fas fa-exchange-alt fa-fw float-right text-gray-500 my-1"></i></a>':'').'
-                      '.($f[id]==147 ? '<a itemprop="url" class="collapse-item font-weight-bold text-success" href="/fantasy/draft"><span itemprop="name">Fantasy MS</span><i class="fas fa-magic fa-fw float-right text-gray-500 my-1"></i></a>':'').'
-                      '.($f[id]==144 ? '<a itemprop="url" class="collapse-item font-weight-bold text-danger" href="/fantasy/main"><span itemprop="name">Fantasy KHL</span><i class="fas fa-magic fa-fw float-right text-gray-500 my-1"></i></a>':'').'
+                      <a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/category/'.$f[topic_id].'-'.SEOtitle(Get_SEO_title($f[topic_title],1)).'"><span itemprop="name">'.LANG_NAV_NEWS.'</span><i class="fas fa-newspaper fa-fw float-right text-gray-500 my-1"></i></a>
+                      '.($f[el]>0 && $f[endbasic]==1 ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/table/'.$f[id].'-'.SEOtitle(Get_SEO_title($f[topic_title],1)).'/playoff"><span itemprop="name">'.LANG_TEAMTABLE_PLAYOFF.'</span><i class="fas fa-trophy fa-fw float-right text-gray-500 my-1"></i></a>':'').'
+                      <a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="'.($f[endbasic]==1 && $f[el]==0 ? "/table/".$f[id]."-".SEOtitle(Get_SEO_title($f[topic_title],1))."/playoff" : "/games/".$f[id]."-".SEOtitle(Get_SEO_title($f[topic_title],1))).'"><span itemprop="name">'.LANG_NAV_UPCOMMING.'</span><i class="fas fa-hockey-puck fa-fw float-right text-gray-500 my-1"></i>'.$badge.'</a>
+                      <a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/table/'.$f[id].'-'.SEOtitle(Get_SEO_title($f[topic_title],1)).''.($f[groups]!="" ? "/groups" : "").'"><span itemprop="name">'.LANG_NAV_TABLE.'</span><i class="fas fa-table-list fa-fw float-right text-gray-500 my-1"></i></a>
+                      <a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/stats/'.$f[id].'-'.SEOtitle(Get_SEO_title($f[topic_title],1)).'"><span itemprop="name">'.LANG_NAV_STATS.'</span><i class="fas fa-chart-bar fa-fw float-right text-gray-500 my-1"></i></a>
+                      '.(strstr($f[longname], 'NHL') ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/slovaks/'.$f[id].'-'.SEOtitle(Get_SEO_title($f[topic_title],1)).'"><span itemprop="name">'.LANG_NAV_SLOVAKS.'</span><i class="fas fa-user-shield fa-fw float-right text-gray-500 my-1"></i></a>':'').'
+                      '.(strstr($f[longname], 'KHL') ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/slovaks/'.$f[id].'-'.SEOtitle(Get_SEO_title($f[topic_title],1)).'"><span itemprop="name">'.LANG_NAV_SLOVAKI.'</span><i class="fas fa-user-shield fa-fw float-right text-gray-500 my-1"></i></a>':'').'
+                      '.($f[el]>0 && $f[topic_id]!=60 ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/injured/'.$f[id].'-'.SEOtitle(Get_SEO_title($f[topic_title],1)).'"><span itemprop="name">'.LANG_NAV_INJURED.'</span><i class="fas fa-user-injured fa-fw float-right text-gray-500 my-1"></i></a>':'').'
+                      '.($f[el]>0 ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/transfers/'.$f[id].'-'.SEOtitle(Get_SEO_title($f[topic_title],1)).'"><span itemprop="name">'.LANG_NAV_TRANSFERS.'</span><i class="fas fa-exchange-alt fa-fw float-right text-gray-500 my-1"></i></a>':'').'
+                      '.($f[id]==147 ? '<a itemprop="url" class="collapse-item font-weight-bold text-success" href="/fantasy/picks"><span itemprop="name">Fantasy MS</span><i class="fas fa-wand-magic-sparkles fa-fw float-right text-gray-500 my-1"></i></a>':'').'
+                      '.($f[id]==144 ? '<a itemprop="url" class="collapse-item font-weight-bold text-danger" href="/fantasy/main"><span itemprop="name">Fantasy KHL</span><i class="fas fa-wand-magic-sparkles fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                     </div>
                   </div>
                 </li>';

@@ -67,9 +67,9 @@ function Get_Matches($lid, $params, $sel, $potype)
 			if($po==1) 
         {
         $e = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
-        $e = mysql_query("SELECT dt.*, NULL as tip1, NULL as tip2, NULL as komentar, MAX(g.time) as cas FROM el_playoff JOIN (SELECT * FROM $matches_table WHERE kolo='0' && league='$lid')dt ON (dt.team1short=el_playoff.team1 && dt.team2short=el_playoff.team2 || dt.team2short=el_playoff.team1 && dt.team1short=el_playoff.team2) LEFT JOIN el_goals g ON g.matchno=dt.id WHERE el_playoff.potype='$potype' && el_playoff.league='$lid' GROUP BY id ORDER BY datetime");
+        $e = mysql_query("SELECT dt.*, NULL as tip1, NULL as tip2, NULL as komentar, MAX(CAST(g.time as DECIMAL(5,2))) as cas FROM el_playoff JOIN (SELECT * FROM $matches_table WHERE kolo='0' && league='$lid')dt ON (dt.team1short=el_playoff.team1 && dt.team2short=el_playoff.team2 || dt.team2short=el_playoff.team1 && dt.team1short=el_playoff.team2) LEFT JOIN el_goals g ON g.matchno=dt.id WHERE el_playoff.potype='$potype' && el_playoff.league='$lid' GROUP BY id ORDER BY datetime");
         }
-			else $e = mysql_query("SELECT m.id, m.team1short, m.team1long, m.team2short, m.team2long, m.goals1, m.goals2, m.pp1, m.pp2, m.kedy, m.t1_pres, m.t2_pres, m.goal, m.datetime, m.kolo, m.next_refresh, m.fs_tv, m.league, m.active, NULL as tip1, NULL as tip2, NULL as komentar, MAX(g.time) as cas FROM $matches_table m LEFT JOIN el_goals g ON g.matchno=m.id WHERE kolo='$act_round' && league='$lid' GROUP BY m.id ORDER BY datetime ASC");
+			else $e = mysql_query("SELECT m.id, m.team1short, m.team1long, m.team2short, m.team2long, m.goals1, m.goals2, m.pp1, m.pp2, m.kedy, m.t1_pres, m.t2_pres, m.goal, m.datetime, m.kolo, m.next_refresh, m.fs_tv, m.league, m.active, NULL as tip1, NULL as tip2, NULL as komentar, MAX(CAST(g.time as DECIMAL(5,2))) as cas FROM $matches_table m LEFT JOIN el_goals g ON g.matchno=m.id WHERE kolo='$act_round' && league='$lid' GROUP BY m.id ORDER BY datetime ASC");
 			}
 		else
 			{
@@ -77,9 +77,9 @@ function Get_Matches($lid, $params, $sel, $potype)
 			if($po==1) 
         {
         $e = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
-        $e = mysql_query("SELECT dt.*, MAX(g.time) as cas FROM el_playoff JOIN (SELECT $matches_table.*, et.tip1, et.tip2, et.komentar, ft.col, ft.rate, ft.amount, gt.k1, gt.kx, gt.k2 FROM $matches_table LEFT JOIN (SELECT matchid, userid, tip1, tip2, komentar FROM $tips_table WHERE userid='$uid')et ON (et.matchid=$matches_table.id) LEFT JOIN (SELECT matchid, col, rate, amount FROM 2004bets WHERE userid='$uid' && el='1')ft ON (ft.matchid=$matches_table.id) LEFT JOIN (SELECT matchid, k1, kx, k2 FROM 2004rates WHERE el='1')gt ON (ft.matchid=$matches_table.id) WHERE kolo='0' && league='$lid')dt ON (dt.team1short=el_playoff.team1 && dt.team2short=el_playoff.team2 || dt.team2short=el_playoff.team1 && dt.team1short=el_playoff.team2) LEFT JOIN el_goals g ON g.matchno=dt.id WHERE el_playoff.potype='$potype' && el_playoff.league='$lid' GROUP BY id ORDER BY datetime ASC, id ASC");
+        $e = mysql_query("SELECT dt.*, MAX(CAST(g.time as DECIMAL(5,2))) as cas FROM el_playoff JOIN (SELECT $matches_table.*, et.tip1, et.tip2, et.komentar, ft.col, ft.rate, ft.amount, gt.k1, gt.kx, gt.k2 FROM $matches_table LEFT JOIN (SELECT matchid, userid, tip1, tip2, komentar FROM $tips_table WHERE userid='$uid')et ON (et.matchid=$matches_table.id) LEFT JOIN (SELECT matchid, col, rate, amount FROM 2004bets WHERE userid='$uid' && el='1')ft ON (ft.matchid=$matches_table.id) LEFT JOIN (SELECT matchid, k1, kx, k2 FROM 2004rates WHERE el='1')gt ON (ft.matchid=$matches_table.id) WHERE kolo='0' && league='$lid')dt ON (dt.team1short=el_playoff.team1 && dt.team2short=el_playoff.team2 || dt.team2short=el_playoff.team1 && dt.team1short=el_playoff.team2) LEFT JOIN el_goals g ON g.matchno=dt.id WHERE el_playoff.potype='$potype' && el_playoff.league='$lid' GROUP BY id ORDER BY datetime ASC, id ASC");
         }
-			else $e = mysql_query("SELECT $matches_table.*, dt.tip1, dt.tip2, dt.komentar, et.col, et.rate, et.amount, ft.k1, ft.kx, ft.k2, MAX(g.time) as cas FROM $matches_table LEFT JOIN (SELECT matchid, userid, tip1, tip2, komentar FROM $tips_table WHERE userid='$uid')dt ON (dt.matchid=$matches_table.id) LEFT JOIN (SELECT matchid, col, rate, amount FROM 2004bets WHERE userid='$uid' && el='1')et ON (et.matchid=$matches_table.id) LEFT JOIN (SELECT matchid, k1, kx, k2 FROM 2004rates WHERE el='1')ft ON (ft.matchid=$matches_table.id) LEFT JOIN el_goals g ON g.matchno=el_matches.id WHERE kolo='$act_round' && league='$lid' GROUP BY el_matches.id ORDER BY datetime ASC, id ASC");
+			else $e = mysql_query("SELECT $matches_table.*, dt.tip1, dt.tip2, dt.komentar, et.col, et.rate, et.amount, ft.k1, ft.kx, ft.k2, MAX(CAST(g.time as DECIMAL(5,2))) as cas FROM $matches_table LEFT JOIN (SELECT matchid, userid, tip1, tip2, komentar FROM $tips_table WHERE userid='$uid')dt ON (dt.matchid=$matches_table.id) LEFT JOIN (SELECT matchid, col, rate, amount FROM 2004bets WHERE userid='$uid' && el='1')et ON (et.matchid=$matches_table.id) LEFT JOIN (SELECT matchid, k1, kx, k2 FROM 2004rates WHERE el='1')ft ON (ft.matchid=$matches_table.id) LEFT JOIN el_goals g ON g.matchno=el_matches.id WHERE kolo='$act_round' && league='$lid' GROUP BY el_matches.id ORDER BY datetime ASC, id ASC");
 			}
 		}
 	// NEJEDNA SA O EL
@@ -111,8 +111,8 @@ function Get_Matches($lid, $params, $sel, $potype)
 		$da = explode("-", $_GET[sel]);
 		if($_SESSION[lang] != 'sk') { $hl = LANG_MATCHES_GAMEDAY.' - '.$da[1].'/'.$da[2]; }
 		else { $hl = LANG_MATCHES_GAMEDAY.' - '.$b[datumik]; }
-		if(!$uid) $e = mysql_query("SELECT m.id, m.team1short, m.team1long, m.team2short, m.team2long, m.goals1, m.goals2, m.kedy, m.datetime, NULL as kolo, m.next_refresh, m.fs_tv, m.league, m.active, NULL as tip1, NULL as tip2, NULL as komentar, MAX(g.time) as cas FROM 2004matches m LEFT JOIN 2004goals g ON g.matchno=m.id WHERE m.league='$lid' && m.datetime LIKE '$_GET[sel]%' GROUP BY m.id ORDER BY m.datetime ASC, m.id ASC");
-		else $e = mysql_query("SELECT 2004matches.*, NULL as kolo, dt.tip1, dt.tip2, dt.komentar, et.col, et.rate, et.amount, ft.k1, ft.kx, ft.k2, MAX(g.time) as cas FROM 2004matches LEFT JOIN (SELECT matchid, userid, tip1, tip2, komentar FROM 2004tips WHERE userid='$uid')dt ON (dt.matchid=2004matches.id) LEFT JOIN (SELECT matchid, col, rate, amount FROM 2004bets WHERE userid='$uid' && el='0')et ON (et.matchid=2004matches.id) LEFT JOIN (SELECT matchid, k1, kx, k2 FROM 2004rates WHERE el='0')ft ON (ft.matchid=2004matches.id) LEFT JOIN 2004goals g ON g.matchno=2004matches.id WHERE league='$lid' && datetime LIKE '$_GET[sel]%' GROUP BY 2004matches.id ORDER BY datetime ASC, id ASC");
+		if(!$uid) $e = mysql_query("SELECT m.id, m.team1short, m.team1long, m.team2short, m.team2long, m.goals1, m.goals2, m.kedy, m.datetime, NULL as kolo, m.next_refresh, m.fs_tv, m.league, m.active, NULL as tip1, NULL as tip2, NULL as komentar, MAX(CAST(g.time as DECIMAL(5,2))) as cas FROM 2004matches m LEFT JOIN 2004goals g ON g.matchno=m.id WHERE m.league='$lid' && m.datetime LIKE '$_GET[sel]%' GROUP BY m.id ORDER BY m.datetime ASC, m.id ASC");
+		else $e = mysql_query("SELECT 2004matches.*, NULL as kolo, dt.tip1, dt.tip2, dt.komentar, et.col, et.rate, et.amount, ft.k1, ft.kx, ft.k2, MAX(CAST(g.time as DECIMAL(5,2))) as cas FROM 2004matches LEFT JOIN (SELECT matchid, userid, tip1, tip2, komentar FROM 2004tips WHERE userid='$uid')dt ON (dt.matchid=2004matches.id) LEFT JOIN (SELECT matchid, col, rate, amount FROM 2004bets WHERE userid='$uid' && el='0')et ON (et.matchid=2004matches.id) LEFT JOIN (SELECT matchid, k1, kx, k2 FROM 2004rates WHERE el='0')ft ON (ft.matchid=2004matches.id) LEFT JOIN 2004goals g ON g.matchno=2004matches.id WHERE league='$lid' && datetime LIKE '$_GET[sel]%' GROUP BY 2004matches.id ORDER BY datetime ASC, id ASC");
 		$el=0;
 		}
   // VYPIS ZAPASOV
@@ -243,6 +243,7 @@ function Get_Matches($lid, $params, $sel, $potype)
       $zra[] = $zr[name];
       }
     }
+  $struct_data=array();
   while($g = mysql_fetch_array($e))
     {
     $opt=$los1=$los2=$goals=$slov=$bets=$suffix=$scroll=$bckg=$kedy=$tv=$ot="";
@@ -335,8 +336,8 @@ function Get_Matches($lid, $params, $sel, $potype)
       {
       if($g[kedy]=="konečný stav" && $g[goals1]>$g[goals2]) $los2=" loser";
       elseif($g[kedy]=="konečný stav" && $g[goals1]<$g[goals2]) $los1=" loser";
-      if($g[kedy]=="konečný stav" && ($g[cas]=="65.00" || $g[cas]=="70.00")) $ot = LANG_SO;
-      elseif($g[kedy]=="konečný stav" && ($g[cas]>"60.00" || $g[cas]=="70.00")) $ot = LANG_OT;
+      if($g[kedy]=="konečný stav" && ($g[cas]=="65.00" || $g[cas]=="70.00" || $g[cas]=="80.00")) $ot = LANG_SO;
+      elseif($g[kedy]=="konečný stav" && ($g[cas]>"60.00")) $ot = LANG_OT;
       $goals = '<div class="row mb-2 align-items-center">
                     <div class="col-6 text-center h1 h1-fluid">'.$g[goals1].'</div>
                     '.($ot!="" ? '<div class="position-absolute text-center" style="left:0;right:0;"><span class="badge badge-secondary">'.$ot.'</span></div>':'').'
@@ -408,9 +409,44 @@ function Get_Matches($lid, $params, $sel, $potype)
                     </div>
                   </div>
                  </div>';
+    $struct_data[] = array($g[team1long], $g[team2long], 'https://www.hockey-live.sk/images/vlajky/'.$g[team1short].'_big.gif','https://www.hockey-live.sk/images/vlajky/'.$g[team2short].'_big.gif', 'https://www.hockey-live.sk/game/'.$g[id].$f[el].'-'.SEOtitle($g[team1long]." vs ".$g[team2long]), $g[datetime], 'https://www.hockey-live.sk/includes/gotd.php?id='.$g[id].$f[el]);
     $pred=$g[kedy];
     $poc++;
     }
+
+    // strukturovane data pre Google
+    if(count($struct_data)>0) {
+    $matches .= '<script type="application/ld+json">[';
+    foreach($struct_data as $event) {
+        $matches .= '
+  {
+    "@context": "https://schema.org",
+    "@type": "SportsEvent",
+    "name": "'.$event[0].' vs. '.$event[1].'",
+    "url": "'.$event[4].'",
+    "image": "'.$event[6].'",
+    "startDate": "'.date("c",strtotime($event[5])).'",
+    "endDate": "'.date("c",strtotime($event[5])+9000).'",
+    "eventAttendanceMode": "https://schema.org/MixedEventAttendanceMode",
+    "eventStatus": "https://schema.org/EventScheduled",
+    "homeTeam": {
+      "@type": "SportsTeam",
+      "name": "'.$event[0].'",
+      "image": "'.$event[2].'"
+    },
+    "awayTeam": {
+      "@type": "SportsTeam",
+      "name": "'.$event[1].'",
+      "image": "'.$event[3].'"
+    },
+    "location": "'.$f[longname].'"
+  },';
+    }
+    $matches = substr($matches, 0, -1);
+    $matches .= ']
+    </script>';
+    }
+
   $matches .= '</div>';
   
 

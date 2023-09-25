@@ -297,7 +297,7 @@ function Show_Drafted()
     if(date('Y-m-d',strtotime($f[tstamp]))==date("Y-m-d", mktime())) $hl="dnes o <b>".date('G:i', strtotime($f[tstamp]))."</b>";
     elseif(date('Y-m-d',strtotime($f[tstamp]))==date('Y-m-d', mktime(0, 0, 0, date('m'), date('d')-1, date('Y')))) $hl="včera o ".date('G:i', strtotime($f[tstamp]));
     else $hl=date('j.n.',strtotime($f[tstamp])). " ".LANG_AT." ".date('G:i', strtotime($f[tstamp]));
-    $drafted .= '<tr><td class="text-nowrap">'.$hl.'</td><td><a href="/user/'.$f[uid].'">'.$f[uname].'</a></td><td class="text-nowrap"><img class="flag-iihf '.$m[old_tshort].'-small" src="/images/blank.png" alt="'.$m[old_tshort].'"> <a href="/'.($f[gk]==1 ? 'goalie':'player').'/'.$f[old_pid].'0-'.SEOtitle($m[old_name]).'">'.$m[old_name].'</a></td><td class="text-nowrap"><img class="flag-iihf '.$m[new_tshort].'-small" src="/images/blank.png" alt="'.$m[new_tshort].'"> <a href="/'.($f[gk]==1 ? 'goalie':'player').'/'.$f[new_pid].'0-'.SEOtitle($m[new_name]).'">'.$m[new_name].'</a></td></tr>';
+    $drafted .= '<tr><td class="text-nowrap">'.$hl.'</td><td><a href="/user/'.$f[uid].'">'.$f[uname].'</a></td><td class="text-nowrap"><img class="flag-iihf '.$m[old_tshort].'-small" src="/images/blank.png" alt="'.$m[old_tshort].'"> <a href="/'.($f[gk]==1 ? 'goalie':'player').'/'.$f[old_pid].'0-'.SEOtitle($m[old_name]).'" data-toggle="popover" data-player="'.$m[old_name].'|'.$f[gk].'">'.$m[old_name].'</a></td><td class="text-nowrap"><img class="flag-iihf '.$m[new_tshort].'-small" src="/images/blank.png" alt="'.$m[new_tshort].'"> <a href="/'.($f[gk]==1 ? 'goalie':'player').'/'.$f[new_pid].'0-'.SEOtitle($m[new_name]).'" data-toggle="popover" data-player="'.$m[new_name].'|'.$f[gk].'">'.$m[new_name].'</a></td></tr>';
     }
   $drafted .= '</tbody></table></div></div></div></div>';
   }
@@ -332,8 +332,8 @@ function Show_Drafted()
     $line=$link1=$link2=$add=$add1="";
     if($pi==$manazerov) $line=" border-bottom:1px dashed black !important;";
     if($e[type]==2) $add1=' class="bg-gray-500"';
-    if($e[pos]=="GK") { $link1='<a href="/goalie/'.$e[pid].'0-'.SEOtitle($e[hrac]).'">'; $link2="</a>"; }
-    else { $link1='<a href="/player/'.$e[pid].'0-'.SEOtitle($e[hrac]).'">'; $link2="</a>"; }
+    if($e[pos]=="GK") { $link1='<a href="/goalie/'.$e[pid].'0-'.SEOtitle($e[hrac]).'" data-toggle="popover" data-player="'.$e[hrac].'|1">'; $link2="</a>"; }
+    else { $link1='<a href="/player/'.$e[pid].'0-'.SEOtitle($e[hrac]).'" data-toggle="popover" data-player="'.$e[hrac].'|0">'; $link2="</a>"; }
     if($e[type]!=0)
       {
       if($e[type]==1) { $icon = "robot"; $hl = LANG_FANTASY_AUTOPICK; }

@@ -85,13 +85,17 @@
           
           <!-- Page Heading -->
           <div class="d-flex align-items-center justify-content-between mb-4">
-            <h1 class="d-none d-lg-block h3 mb-0 text-gray-800"><? echo LANG_NAV_NEWS; ?></h1>
+            <h1 class="d-none d-lg-block h3 mb-0 text-gray-800"><? if($_GET[topicID] && $_GET[topicID]!="all") echo Get_SEO_title($_GET[topicID]); else echo LANG_NAV_NEWS; ?></h1>
             <!--<div class="banner468x60">-->
             <div class="banner468x60 col-12 col-xl-6">
           <?
-              if(!$_GET[topicID]) echo '
-                <a href="https://www.najlepsieonlinekasina.com/"><img src="/images/najonlinecasino.jpg" style="width:100%; max-width: 728px;" border="0" alt="najlepsieonlinekasina.com" title="najlepsieonlinekasina.com"></a>';
-              else echo '
+              if(!$_GET[topicID] && !$_SESSION["logged"]) echo '
+                <div id="101390-1">
+                    <script src="//ads.themoneytizer.com/s/gen.js?type=1" defer></script>
+                    <script src="//ads.themoneytizer.com/s/requestform.js?siteId=101390&formatId=1" defer></script>
+                </div>';
+              else {
+               /*   echo '
                 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8860983069832222"
                     crossorigin="anonymous"></script>
                 <!-- HL hlavná stránka top -->
@@ -101,7 +105,13 @@
                     data-ad-slot="8007937220"></ins>
                 <script>
                     (adsbygoogle = window.adsbygoogle || []).push({});
-                </script>';
+                </script>';*/
+                echo '
+                <div id="101390-1">
+                    <script src="//ads.themoneytizer.com/s/gen.js?type=1" defer></script>
+                    <script src="//ads.themoneytizer.com/s/requestform.js?siteId=101390&formatId=1" defer></script>
+                </div>';
+              }
           ?>
             </div>
             <!--<div class="d-none d-lg-block col-3"></div>-->
@@ -115,7 +125,7 @@
             
               <!-- Page Heading mobile only -->
               <div class="d-lg-none mb-4">
-              <h1 class="h3 mb-0 text-gray-800"><? echo LANG_NAV_NEWS; ?></h1>
+              <h1 class="h3 mb-0 text-gray-800"><? if($_GET[topicID]) echo Get_SEO_title($_GET[topicID]); else echo LANG_NAV_NEWS; ?></h1>
               </div>
               <? echo Get_news(10, $_GET[page], $_GET[topicID]); ?>
                          
@@ -126,24 +136,25 @@
               if(!$_GET[topicID])
                 {
                 echo Get_upcomming();
-                echo '
+                if(!$_SESSION["logged"]) echo '
               <div class="advert-container card shadow mb-4 text-center">
                 <p class="m-auto p-2 small">Kompletný zoznam stávkových kancelárií: <a href="https://stavkova-kancelaria.com/ ">stavkova-kancelaria.com</a></p>
               </div>';
                 echo Get_Latest_Stats();
-                echo '
-              <div class="advert-container card shadow mb-4">
-                <p class="m-auto p-2 small"><a href="https://skhra.com/">online casino slovensko</a></p>
-              </div>';
+                if(!$_SESSION["logged"]) echo '
+              <!--div class="advert-container card shadow mb-4">
+                <p class="m-auto p-2 small"></p>
+              </div-->';
                 echo Transfers();
                 echo Favourite_Team();
                 echo Users_Online();
                 echo Sending_Prize();
-                echo '
+                if(!$_SESSION["logged"]) echo '
               <div class="advert-container card shadow">
                 <p class="m-auto p-2 small">Najlepšie <a href="http://casino-hry.sk/">Slovenské Online Casino</a> recenzie a hry zadarmo</p>
-              </div>
+              </div>';
           
+                echo '
               <div class="card shadow my-4 articleBanner d-none d-xl-block">
                 <div class="card-body">
                   <!--<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
@@ -157,15 +168,16 @@
                        (adsbygoogle = window.adsbygoogle || []).push({});
                   </script>-->
                   <div id="101390-19">
-                    <script src="//ads.themoneytizer.com/s/gen.js?type=19"></script>
-                    <script src="//ads.themoneytizer.com/s/requestform.js?siteId=101390&formatId=19"></script>
+                    <script src="//ads.themoneytizer.com/s/gen.js?type=19" defer></script>
+                    <script src="//ads.themoneytizer.com/s/requestform.js?siteId=101390&formatId=19" defer></script>
                   </div>
                 </div>
-              </div>
-              
-              <div class="advert-container card shadow mt-4">
-                <p class="m-auto p-2 small">Hrať <a href="https://ceskacasina.cz/">nejlepší online casino</a> na ceskacasina.cz</p>
               </div>';
+              
+              if(!$_SESSION["logged"]) echo '
+              <!--<div class="advert-container card shadow mt-4">
+                <p class="m-auto p-2 small"></p>
+              </div>-->';
                 }
               else
                 {
@@ -192,3 +204,23 @@
             </div>
             
           </div>
+
+          <script type="application/ld+json">
+            {
+                "@context":"http://schema.org",
+                "@type":"Organization",
+                "name":"hockey-LIVE.sk",
+                "url":"https://www.hockey-live.sk/",
+                "sameAs":["https://www.facebook.com/hockeylive"],
+                "logo":"https://www.hockey-live.sk/img/favicon/android-icon-192x192.png"
+            }
+          </script>
+
+          <script type="application/ld+json">
+            {
+                "@context":"http://schema.org",
+                "@type":"WebSite",
+                "name":"hockey-LIVE.sk",
+                "url":"https://www.hockey-live.sk/"
+            }
+          </script>

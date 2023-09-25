@@ -116,7 +116,7 @@ class TeamTable {
                 foreach($div["teams"] as $team) {
                   $div_teams[$i]["teams"][] = $team;
                   }
-                usort($div_teams[$i]["teams"], function($a,$b){ $c = $b["points"] - $a["points"]; $c .= $b["gdiff"] - $a["gdiff"]; $c .= $a["games"] - $b["games"]; $c .= $b["gf"] - $a["gf"]; $c .= $b["wins"] - $a["wins"]; $c .= $a["losts"] - $b["losts"]; return $c; });
+                usort($div_teams[$i]["teams"], function($a,$b){ $c = $b["points"] - $a["points"]; $c .= $a["games"] - $b["games"]; $c .= $b["gdiff"] - $a["gdiff"]; $c .= $b["gf"] - $a["gf"]; $c .= $b["wins"] - $a["wins"]; $c .= $a["losts"] - $b["losts"]; return $c; });
                 if($this->el==0) {
                   $same_points = array();
                   foreach($div_teams[$i]["teams"] as $team) {
@@ -248,7 +248,8 @@ class TeamTable {
         if($teams[$tpos_under_line][can_earn]>$can_earn) $can_earn = $teams[$tpos_under_line][can_earn];
         $tpos_under_line++;
       }
-      if($teams[$team_pos][points]>$can_earn || $teams[$team_pos][games]==$this->games_total && $team_pos < $playoff_line) $clinch = "x";
+      //if($teams[$team_pos][points]>$can_earn || $teams[$team_pos][games]==$this->games_total && $team_pos < $playoff_line) $clinch = "x";
+      if($teams[$team_pos][points]>$can_earn) $clinch = "x";
       // cannot make playoffs
       if(is_array($this->playoff_line)) $tpos_over_line = $this->playoff_line[0]-1;
       else $tpos_over_line = $this->playoff_line-1;
@@ -280,6 +281,7 @@ class TeamTable {
               $teams[$key]["teams"][$t1_key] = $val2;
             }
           }
+        else return $teams;
         }
         // tie-breaking procedure for 3 or more teams tied on points
         elseif(count($point_value)>2) {
@@ -345,7 +347,7 @@ class TeamTable {
           foreach($div["teams"] as $team) {
             $div_teams[$i]["teams"][] = $team;
             }
-          usort($div_teams[$i]["teams"], function($a,$b){ $c = $b["points"] - $a["points"]; $c .= $b["gdiff"] - $a["gdiff"]; $c .= $a["games"] - $b["games"]; $c .= $b["gf"] - $a["gf"]; $c .= $b["wins"] - $a["wins"]; $c .= $a["losts"] - $b["losts"]; return $c; });
+          usort($div_teams[$i]["teams"], function($a,$b){ $c = $b["points"] - $a["points"]; $c .= $a["games"] - $b["games"]; $c .= $b["gdiff"] - $a["gdiff"]; $c .= $b["gf"] - $a["gf"]; $c .= $b["wins"] - $a["wins"]; $c .= $a["losts"] - $b["losts"]; return $c; });
           if($this->el==0) {
             $same_points = array();
             foreach($div_teams[$i]["teams"] as $team) {
