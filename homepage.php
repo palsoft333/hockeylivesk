@@ -137,9 +137,9 @@
                 {
                 echo Get_upcomming();
                 if(!$_SESSION["logged"]) echo '
-              <div class="advert-container card shadow mb-4 text-center">
-                <p class="m-auto p-2 small">Kompletný zoznam stávkových kancelárií: <a href="https://stavkova-kancelaria.com/ ">stavkova-kancelaria.com</a></p>
-              </div>';
+              <!--div class="advert-container card shadow mb-4 text-center">
+                <p class="m-auto p-2 small"></p>
+              </div-->';
                 echo Get_Latest_Stats();
                 if(!$_SESSION["logged"]) echo '
               <!--div class="advert-container card shadow mb-4">

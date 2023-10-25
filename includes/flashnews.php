@@ -21,7 +21,7 @@ function DisplayTags($tags) {
             if($el==0) $q = mysql_query("SELECT * FROM 2004players WHERE id='".$id."'");
             else $q = mysql_query("SELECT * FROM el_players WHERE id='".$id."'");
             $f = mysql_fetch_array($q);
-            $out .= '<span class="tag badge badge-primary mr-1">'.$f[name].'</span>';
+            $out .= '<a href="/player/'.$id.$el.'-'.SEOtitle($f[name]).'" class="tag badge badge-primary mr-1">'.$f[name].'</a>';
         }
         elseif($key=="g") {
             $el = substr($tag, -1);
@@ -29,7 +29,7 @@ function DisplayTags($tags) {
             if($el==0) $q = mysql_query("SELECT * FROM 2004goalies WHERE id='".$id."'");
             else $q = mysql_query("SELECT * FROM el_goalies WHERE id='".$id."'");
             $f = mysql_fetch_array($q);
-            $out .= '<span class="tag badge badge-info mr-1">'.$f[name].'</span>';
+            $out .= '<a href="/goalie/'.$tag.'-'.SEOtitle($f[name]).'" class="tag badge badge-info mr-1">'.$f[name].'</a>';
         }
         elseif($key=="t") {
             $el = substr($tag, -1);
@@ -37,12 +37,12 @@ function DisplayTags($tags) {
             if($el==0) $q = mysql_query("SELECT * FROM 2004teams WHERE id='".$id."'");
             else $q = mysql_query("SELECT * FROM el_teams WHERE id='".$id."'");
             $f = mysql_fetch_array($q);
-            $out .= '<span class="tag badge badge-success mr-1">'.$f[longname].'</span>';
+            $out .= '<a href="/team/'.$id.$el.'-'.SEOtitle($f[longname]).'" class="tag badge badge-success mr-1">'.$f[longname].'</a>';
         }
         elseif($key=="n") {
             $q = mysql_query("SELECT * FROM e_xoops_topics WHERE topic_id='".$tag."'");
             $f = mysql_fetch_array($q);
-            $out .= '<span class="tag badge badge-warning mr-1">'.$f[topic_title].'</span>';
+            $out .= '<a href="/category/'.$tag.'-'.SEOtitle($f[topic_title]).'" class="tag badge badge-warning mr-1">'.$f[topic_title].'</a>';
         }
     }
 return $out;
@@ -71,6 +71,10 @@ $s = mysql_query("SELECT s.* FROM gn_news s WHERE s.tags IS NOT NULL ORDER BY s.
 $i=0;
 while($a = mysql_fetch_array($s))
   {
+    if(strlen($a["summary"]) > 500) {
+        $stringCut = substr($a["summary"], 0, 500);
+        $a["summary"] = substr($stringCut, 0, strrpos($stringCut, ' ')).' ...';
+    }
   array_push($page_posts['data'], array('id'=>$a[tags], 'story'=>$a[title], 'message'=>$a[summary], 'created_time'=>strtotime($a[published]), 'comments'=>$a[link], 'image'=>$a[image], 'publisher'=>$a[publisher]));
   $i++;
   }

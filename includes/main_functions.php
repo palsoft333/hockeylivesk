@@ -1150,6 +1150,10 @@ function GoogleNews($type, $id)
         }
         if($i % 2 == 0) {$tableclass = "";} 
         else $tableclass = " bg-light";
+        if(strlen($e["summary"]) > 1000) {
+            $stringCut = substr($e["summary"], 0, 1000);
+            $e["summary"] = substr($stringCut, 0, strrpos($stringCut, ' ')).' ...';
+        }
         $news .= "<table class='card d-table w-100 my-0 mb-2 position-relative small'>
                 <tr class='card-header$tableclass'>
                 <td style='width:60%;' class='pl-2'>
@@ -1158,7 +1162,7 @@ function GoogleNews($type, $id)
                   <td style='width:40%;' class='text-right align-top pr-2'>".date("j.n.Y H:i", strtotime($e[published]))."</td>
                 </tr>
                 <tr class='$tableclass'>
-                  <td colspan='2' class='p-2'>".($picture!="" ? "<img src='data:image/svg+xml,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1 0.525\"%3E%3C/svg%3E' data-src='$picture' class='lazy bg-gray-100 float-left img-thumbnail mr-2 p-1 shadow-sm w-25'>" : "").$e[summary]."</td>
+                  <td colspan='2' class='p-2'>".($picture!="" ? "<img src='data:image/svg+xml,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1 0.525\"%3E%3C/svg%3E' data-src='$picture' class='lazy bg-gray-100 float-left img-thumbnail mr-2 p-1 shadow-sm col-8 col-sm-5 col-md-4 col-lg-3'>" : "").$e["summary"]."</td>
                 </tr>
                 <tr class='$tableclass'>
                   <td colspan='2' class='px-2 text-right'>".$e[publisher]."</td>

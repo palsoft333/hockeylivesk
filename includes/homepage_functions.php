@@ -7,6 +7,7 @@
 */
 
 function Get_upcomming() {
+  $today_teams = $injured = array();
   include('slovaks.php');
   $nhl_players=$slovaks;
   $nhl_goalies=$brankari;
@@ -40,6 +41,7 @@ UNION
     
     while($f = mysql_fetch_array($q))
       {
+      $lid = $f["league"];
       if($pos==0) $games .= '
                   <div class="text-xs text-muted font-weight-bold mb-1">'.$f[longname].'</div>
                 </div>
@@ -57,6 +59,7 @@ UNION
         while($zr = mysql_fetch_array($z))
           {
           $zra[] = $zr[name];
+          $injured[$lid] = $zra;
           }
         }
       $slov=$favor="";
@@ -133,10 +136,78 @@ UNION
                   '.($f[el]==1 ? '<div class="col-2 text-center">'.$slov.'</div>':'').'
                  </div>';
       $ppos = $pos;
+      if($f["kedy"]!="konečný stav") {
+        $today_teams[$lid]["teams"][] = $f["team1short"];
+        $today_teams[$lid]["teams"][] = $f["team2short"];
+        $today_teams[$lid]["longname"] = $f["longname"];
+        $today_teams[$lid]["el"] = $f["el"];
+        }
       }
     $games .= "</div></div>";
+    $games .= Get_PlayersToWatch($today_teams, $injured);
     }
 return $games;
+}
+
+/*
+* Funkcia pre výpis dnešných hráčov na sledovanie
+* @param $today_teams array shortname tímov, ktoré dnes hrajú
+* @param $injured array všetci zranení hráči v danej lige
+* @return $p string
+*/
+
+function Get_PlayersToWatch($today_teams, $injured) {
+    $ptw = array();
+    foreach($today_teams as $league=>$teams) {
+        $ptw[$league]["longname"] = $teams["longname"];
+        $el = $teams["el"];
+        $ptw[$league]["el"] = $el;
+        $teams = implode($teams["teams"],"','");
+        if($el==1) $q = mysql_query("SELECT * FROM `el_players` WHERE league='".$league."' && (RIGHT(goals,1)=9 || RIGHT(points,1)=9) && teamshort IN ('".$teams."')");
+        else $q = mysql_query("SELECT * FROM `2004players` WHERE league='".$league."' && (RIGHT(goals,1)=9 || RIGHT(points,1)=9) && teamshort IN ('".$teams."')");
+        if(mysql_num_rows($q)>0) {
+            while($f = mysql_fetch_array($q)) {
+                if(!in_array($f["name"],$injured[$league])) $ptw[$league]["players"][] = array($f["teamshort"], $f["name"], $f["goals"], $f["asists"], $f["points"]);
+            }
+            usort($ptw[$league]["players"], function($a,$b){ $c = $b[2] - $a[2]; $c .= $b[4] - $a[4]; return $c; });
+            $ptw[$league]["players"] = array_slice($ptw[$league]["players"], 0, 10, true);
+        }
+    }
+
+    if(count($ptw)>0) {
+        foreach($ptw as $league=>$players) {
+            if(count($players["players"])>0) {
+                if(!isset($bol)) $p = '<div class="card shadow mb-4">
+                        <div class="card-header">
+                            <div class="font-weight-bold text-primary text-uppercase">'.LANG_GAMECONT_PTW.'</div>
+                        </div>
+                        <div class="card-body">';
+                $p .= '<div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs text-muted font-weight-bold mb-1'.(isset($bol) ? ' mt-3':'').'">'.$players["longname"].'</div>
+                        </div>
+                    </div>
+                        <div class="row no-gutters align-items-center text-xs border-bottom mb-1">
+                            <div class="col-9">'.LANG_PLAYERDB_PLAYER.'</div>
+                            <div class="col">'.LANG_P.'</div>
+                            <div class="col">'.LANG_G.'</div>
+                            <div class="col">'.LANG_A.'</div>
+                        </div>';
+                foreach($players["players"] as $player) {
+                    $p .= '<div class="row no-gutters align-items-center small">
+                                <div class="col-9"><img class="flag-'.($players["el"]==1 ? 'el':'iihf').' '.$player[0].'-small" src="/img/blank.png" alt="'.$player[0].'"> '.$player[1].'</div>
+                                <div class="col">'.(substr($player[4],-1)==9 ? '<abbr title="'.(sprintf(LANG_GAMECONT_WILLHEPOINTS, $player[4]+1)).'" class="initialism font-weight-bold'.($player[4]>30 ? ' text-danger':'').'" data-toggle="tooltip">'.$player[4].'</abbr>':$player[4]).'</div>
+                                <div class="col">'.(substr($player[2],-1)==9 ? '<abbr title="'.(sprintf(LANG_GAMECONT_WILLHESCORE, $player[2]+1)).'" class="initialism font-weight-bold'.($player[2]>10 ? ' text-danger':'').'" data-toggle="tooltip">'.$player[2].'</abbr>':$player[2]).'</div>
+                                <div class="col">'.$player[3].'</div>
+                            </div>';
+                }
+            $bol=1;
+            }
+        }
+        $p .= '</div>
+        </div>';
+    }
+    return $p;
 }
 
 /*

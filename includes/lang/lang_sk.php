@@ -353,6 +353,9 @@ define("LANG_FLASH_FROMFB","Príspevok z nášho Facebooku");
 
 define("LANG_GAMECONT_TODAYS","Dnešné zápasy");
 define("LANG_GAMECONT_NOGAMES","Dnes nie sú na programe žiadne stretnutia");
+define("LANG_GAMECONT_PTW","Dnešní hráči na sledovanie");
+define("LANG_GAMECONT_WILLHEPOINTS","Pridá dnes %d.bod?");
+define("LANG_GAMECONT_WILLHESCORE","Pridá dnes %d.gól?");
 define("LANG_GAMECONT_STATS","Posledné výkony hráčov");
 define("LANG_GAMECONT_NOSTATS","V posledných zápasoch sa nepresadil nikto zo slovenských hráčov. Držíme palce našim v ďalších zápasoch.");
 define("LANG_GAMECONT_POTW","Hráč týždňa");

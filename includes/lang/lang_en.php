@@ -354,6 +354,9 @@ define("LANG_FLASH_FROMFB","Post from our Facebook");
 
 define("LANG_GAMECONT_TODAYS","Today's games");
 define("LANG_GAMECONT_NOGAMES","There are no games planned for today");
+define("LANG_GAMECONT_PTW","Players to watch today");
+define("LANG_GAMECONT_WILLHEPOINTS","Will he add the %dth point today?");
+define("LANG_GAMECONT_WILLHESCORE","Will he score the %dth goal today?");
 define("LANG_GAMECONT_STATS","Last player performances");
 define("LANG_GAMECONT_NOSTATS","No point was achieved by Slovak player in the latest games. We keep our fingers crossed for the next games.");
 define("LANG_GAMECONT_POTW","Player of the week");

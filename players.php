@@ -178,13 +178,13 @@ while ($t = mysql_fetch_array($r))
       }
 $content .= '</tbody></table>
             </div>
-           </div>
-        </div> <!-- end col -->
+           </div>';
+    }
+$content .= '</div> <!-- end col -->
         <div class="col-auto flex-grow-1 flex-shrink-1 d-none d-xl-block mt-4">
             '.$advert.'
         </div> <!-- end col -->
         </div> <!-- end row -->';
-    }
   }
 // zraneni hraci
 elseif($iid)
@@ -347,13 +347,13 @@ elseif($pid)
     //$draft = Show_Draft_Button($data[name],$pid);
     
     $content .= '
-    <div class="player-info">
-                  <div class="row">
-                    <div class="col-auto mx-auto mx-md-0 mb-2 order-1 animated--fade-in">
-                      <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/includes/player_photo.php?name='.$data[name].'" class="lazy rounded-circle img-thumbnail shadow-sm mb-2 p-1" style="width:100px; height:100px; object-fit: cover; object-position: top;">
-                    </div>
-                    <div class="col-auto justify-content-center mx-auto mx-md-0 mb-2 card pl-0 pr-2 order-3 order-md-2 animated--fade-in border-left-'.$leaguecolor.'">
-                      <ul class="m-1 small">
+                    <div class="player-info">
+                      <div class="row">
+                        <div class="col-auto mx-auto mx-md-0 mb-2 order-1 animated--fade-in">
+                          <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/includes/player_photo.php?name='.$data[name].'" class="lazy rounded-circle img-thumbnail shadow-sm mb-2 p-1" style="width:100px; height:100px; object-fit: cover; object-position: top;">
+                        </div>
+                        <div class="col-auto justify-content-center mx-auto mx-md-0 mb-2 card pl-0 pr-2 order-3 order-md-2 animated--fade-in border-left-'.$leaguecolor.'">
+                          <ul class="m-1 small">
                       ';
                       $i=0;
                       while($i < count($pinfo))
@@ -362,7 +362,7 @@ elseif($pid)
                         $i++;
                         }
         $content .= '</ul>
-                    </div>';
+                        </div>';
         $pot = mysql_query("SELECT * FROM (SELECT p.id, p.teamshort, p.teamlong, p.name, potw.datetime, potw.g, potw.a, potw.el FROM el_players p LEFT JOIN potw ON potw.pid=p.id && potw.el=1 WHERE p.name='".$data[name]."' && potw.datetime IS NOT NULL 
 UNION
 SELECT p.id, p.teamshort, p.teamlong, p.name, potw.datetime, potw.g, potw.a, potw.el FROM 2004players p LEFT JOIN potw ON potw.pid=p.id && potw.el=0 WHERE p.name='".$data[name]."' && potw.datetime IS NOT NULL
@@ -378,21 +378,21 @@ ORDER BY datetime DESC LIMIT 1)dt WHERE dt.id IS NOT NULL");
             else $hl = LANG_TEAMSTATS_PTS;
             $week = (int)date('W',strtotime($potw[datetime]));
             $content .= '
-                    <div class="col-auto justify-content-center mx-auto mx-md-3 mb-2 card pl-0 pr-2 order-3 order-md-2 animated--fade-in border-left-'.$leaguecolor.'">
-                        <div class="row no-gutters align-items-center">
+                        <div class="col-auto justify-content-center mx-auto mx-md-3 mb-2 card pl-0 pr-2 order-3 order-md-2 animated--fade-in border-left-'.$leaguecolor.'">
+                          <div class="row no-gutters align-items-center">
                             <div class="col m-2">
                                 <div class="font-weight-bold text-'.$leaguecolor.' text-uppercase text-xs">'.LANG_PLAYERS_LASTPOTW.'</div>
                             </div>
                             <div class="col-auto">
                                 <i class="fas fa-user-shield text-gray-300"></i>
                             </div>
-                        </div>
-                        <p class="mb-1 ml-2 small text-center">'.sprintf(LANG_PLAYERS_LASTPOTWTEXT, '<b>'.$week.date('. \týž\d\eň Y',strtotime($potw[datetime])).'</b>', '<br><img class="'.$potw[teamshort].'-small flag-'.($potw[el]==0 ? 'iihf':'el').'" src="/img/blank.png" alt="'.$potw[teamlong].'"><b>'.$potw[teamlong].'</b>').'</p>
-                        <p class="h5 text-center"><span class="badge badge-pill badge-'.$leaguecolor.'">'.$p.' '.$hl.' ('.$potw[g].'G + '.$potw[a].'A)</span></p>
-                    </div>';
+                          </div>
+                          <p class="mb-1 ml-2 small text-center">'.sprintf(LANG_PLAYERS_LASTPOTWTEXT, '<b>'.$week.date('. \týž\d\eň Y',strtotime($potw[datetime])).'</b>', '<br><img class="'.$potw[teamshort].'-small flag-'.($potw[el]==0 ? 'iihf':'el').'" src="/img/blank.png" alt="'.$potw[teamlong].'"><b>'.$potw[teamlong].'</b>').'</p>
+                          <p class="h5 text-center"><span class="badge badge-pill badge-'.$leaguecolor.'">'.$p.' '.$hl.' ('.$potw[g].'G + '.$potw[a].'A)</span></p>
+                        </div>';
             }
         if($draft!="") $content .='<div class="col-auto mx-auto mx-md-0 mb-2 order-2 order-md-3">'.$draft.'</div>';
-      $content .= '</div>';
+      $content .= '   </div>';
 
     $w = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
     $w = mysql_query("SELECT 2004players.*, l.longname, t.id as tid, m.datetime as firstgame FROM 2004players JOIN 2004leagues l ON l.id=2004players.league JOIN 2004teams t ON t.shortname=2004players.teamshort && t.league=2004players.league LEFT JOIN 2004matches m ON m.league=2004players.league WHERE name='$data[name]'$coll GROUP BY 2004players.league ORDER BY firstgame ASC");
@@ -400,29 +400,30 @@ ORDER BY datetime DESC LIMIT 1)dt WHERE dt.id IS NOT NULL");
         {
         $name = mysql_query("SELECT sum(gp), sum(goals), sum(asists), sum(points), sum(penalty), sum(ppg), sum(shg), sum(gwg), sum(gtg) FROM 2004players WHERE name='$data[name]'$coll");
         $sumar = mysql_fetch_array($name);
-        $content .= '<div class="card my-4 shadow animated--grow-in">
-              <div class="card-header">
-                <h6 class="m-0 font-weight-bold text-'.$leaguecolor.'">
-                  '.LANG_PLAYERSTATS_NATIONAL.'
-                  <span class="swipe d-none float-right text-gray-800"><i class="fas fa-hand-point-up"></i> <i class="fas fa-exchange-alt align-text-top text-xs"></i></span>
-                </h6>
-              </div>
-              <div class="card-body">
-                  <table class="table-hover table-light table-striped table-responsive-sm w-100 p-fluid" id="repre">
-                  <thead><tr>
-                    <th style="width:22%;">'.LANG_TEAMSTATS_LEAGUE.'</th>
-                    <th style="width:22%;">'.LANG_PLAYERSTATS_TEAM.'</th>
-                    <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_GAMES.'">GP</th>
-                    <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_GOALS.'">G</th>
-                    <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_ASISTS.'">A</th>
-                    <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_POINTS.'">P</th>
-                    <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_PIM.'">PIM</th>
-                    <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_PPG.'">PPG</th>
-                    <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_SHG.'">SHG</th>
-                    <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_GWG.'">GWG</th>
-                </tr>
-              </thead>
-              <tbody>';
+        $content .= '
+                      <div class="card my-4 shadow animated--grow-in">
+                        <div class="card-header">
+                          <h6 class="m-0 font-weight-bold text-'.$leaguecolor.'">
+                            '.LANG_PLAYERSTATS_NATIONAL.'
+                            <span class="swipe d-none float-right text-gray-800"><i class="fas fa-hand-point-up"></i> <i class="fas fa-exchange-alt align-text-top text-xs"></i></span>
+                          </h6>
+                        </div>
+                        <div class="card-body">
+                            <table class="table-hover table-light table-striped table-responsive-sm w-100 p-fluid" id="repre">
+                            <thead><tr>
+                              <th style="width:22%;">'.LANG_TEAMSTATS_LEAGUE.'</th>
+                              <th style="width:22%;">'.LANG_PLAYERSTATS_TEAM.'</th>
+                              <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_GAMES.'">GP</th>
+                              <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_GOALS.'">G</th>
+                              <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_ASISTS.'">A</th>
+                              <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_POINTS.'">P</th>
+                              <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_PIM.'">PIM</th>
+                              <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_PPG.'">PPG</th>
+                              <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_SHG.'">SHG</th>
+                              <th class="text-center" style="width:7%;" data-toggle="tooltip" data-placement="top" title="'.LANG_TEAMSTATS_GWG.'">GWG</th>
+                          </tr>
+                        </thead>
+                        <tbody>';
         while($f = mysql_fetch_array($w))
           {
           $content .= '<tr>
@@ -453,8 +454,8 @@ ORDER BY datetime DESC LIMIT 1)dt WHERE dt.id IS NOT NULL");
                 </tr>
               </tfoot>
           </table>
-         </div>
-        </div>';
+                        </div>
+                      </div>';
         }
                 
     $w = mysql_query("SELECT el_players.*, l.longname, t.id as tid FROM el_players JOIN 2004leagues l ON l.id=el_players.league JOIN el_teams t ON t.shortname=el_players.teamshort && t.league=el_players.league WHERE name='$data[name]'$coll ORDER BY league ASC, el_players.id ASC");
@@ -594,17 +595,8 @@ ORDER BY datetime DESC LIMIT 1)dt WHERE dt.id IS NOT NULL");
                         </tr>
                       </tbody></table>
                     </div>
-                   </div>
-
-                    '.GoogleNews("p",$pid).'
-
-                    <div class="card shadow my-4">
-                        <div class="card-body">
-                        '.GenerateComments(3,$data[name]."p").'
-                        </div>
-                    </div>
-                  </div>';
-                       
+                   </div>';
+                   
   $script_end = '<script type="text/javascript">
     
     $(document).ready(function() {
@@ -623,6 +615,18 @@ ORDER BY datetime DESC LIMIT 1)dt WHERE dt.id IS NOT NULL");
   } );
           </script>';
       }
+                   
+
+                    $content .= GoogleNews("p",$pid);
+
+                    $content .= '
+                  <div class="card shadow my-4">
+                      <div class="card-body">
+                      '.GenerateComments(3,$data[name]."p").'
+                      </div>
+                  </div>
+                </div>';
+      
     $content .= '   </div> <!-- end col -->
    <div class="col-auto flex-grow-1 flex-shrink-1 d-none d-xl-block">
     '.$advert.'

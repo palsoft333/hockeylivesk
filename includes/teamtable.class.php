@@ -209,7 +209,7 @@ class TeamTable {
         }
         if($this->favteam!="0" && $this->favteam==$team[tshort]) $fav=" class='bg-gray-400'";
         if(!$json) {
-            if($condensed) $table .= "<tr><td class='text-center'$line>$p.</td><td$line><a href='/team/".$team[tid].$this->el."-".SEOtitle($team[tlong])."'><img class='flag-iihf ".$team[tshort]."-small mr-1' src='/images/blank.png' alt='".$team[tlong]."'>".($this->el==0 ? $team[tlong]:$team[tmedium])."</a> $clinchout</td><td class='text-center'$line><b>".$team[points]."</b></td></tr>";
+            if($condensed) $table .= "<tr><td class='text-center'$line>$p.</td><td$line><a href='/team/".$team[tid].$this->el."-".SEOtitle($team[tlong])."'><img class='flag-".($this->el==0 ? 'iihf':'el')." ".$team[tshort]."-small mr-1' src='/images/blank.png' alt='".$team[tlong]."'>".($this->el==0 ? $team[tlong]:$team[tmedium])."</a> $clinchout</td><td class='text-center'$line><b>".$team[points]."</b></td></tr>";
             else $table .= "<tr$fav><td class='text-center'$line>$p.</td><td class='text-nowrap'$line><img class='flag-".($this->el==0 ? 'iihf':'el')." ".$team[tshort]."-small' src='/img/blank.png' alt='".$team[tlong]."'> $leader<a href='/team/".$team[tid].$this->el."-".SEOtitle($team[tlong])."'>$bs<span class='d-none d-md-inline'>$team[tlong]</span><span class='d-inline d-md-none'>$team[tmedium]</span>$be</a> $clinchout</td><td class='text-center'$line>$team[games]</td><td class='text-center'$line>$team[wins]</td><td class='text-center'$line>$team[losts]</td><td class='text-center'$line>$team[gf]:$team[ga]</td><td class='text-center'$line><span class='font-weight-bold'>$team[points]</span></td></tr>";
         }
         else {
