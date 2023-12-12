@@ -335,7 +335,7 @@ define("LANG_NAV_PLAYERDB","Player database");
 define("LANG_NAV_SHOOTERS","Shooters");
 define("LANG_NAV_FORUM","Forum");
 define("LANG_NAV_IMPERSSUM","Contact");
-define("LANG_NAV_LIVE","LIVE commentary");
+define("LANG_NAV_LIVE","LIVE status");
 define("LANG_NAV_NEWS","News");
 define("LANG_NAV_UPCOMMING","Games");
 define("LANG_NAV_GROUPS","Groups");

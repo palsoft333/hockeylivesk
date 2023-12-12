@@ -118,6 +118,9 @@ UNION
         $fav = mysql_fetch_array($fa);
         if($fav[user_favteam]!="0" && ($fav[user_favteam]==$f[team1short] || $fav[user_favteam]==$f[team2short])) $favor=' bg-gray-200 rounded';
         }
+      else {
+          $fav["user_favteam"]="0";
+      }
       // preklad timov
       if($_SESSION[lang]!='sk') {
           $f[team1long] = TeamParser($f[team1long]);
@@ -126,7 +129,7 @@ UNION
       // vypis
       $cas = date("G:i", strtotime($f[datetime]));
       if(strtotime($f[datetime]) > mktime()) $score = '<a href="/game/'.$f[id].$f[el].'-'.SEOtitle($f[team1long]." vs ".$f[team2long]).'" class="btn btn-light btn-circle btn-sm"><i class="fas fa-search"></i></a>';
-      elseif($f[kedy]!="na programe") $score = '<a href="/report/'.$f[id].$f[el].'-'.SEOtitle($f[team1long].' vs '.$f[team2long]).'" class="font-weight-bold">'.$f[goals1].':'.$f[goals2].'</a>';
+      elseif($f[kedy]!="na programe") $score = '<a href="/report/'.$f[id].$f[el].'-'.SEOtitle($f[team1long].' vs '.$f[team2long]).'" class="font-weight-bold'.($f["kedy"]!="konečný stav" ? ' live rounded-pill text-danger':'').'">'.$f[goals1].':'.$f[goals2].'</a>';
       else $score = "$f[goals1]:$f[goals2]";
       $games .= '<div class="row no-gutters align-items-center small'.$favor.'">
                   <div class="col-2 text-nowrap">'.$cas.'</div>
@@ -144,7 +147,7 @@ UNION
         }
       }
     $games .= "</div></div>";
-    $games .= Get_PlayersToWatch($today_teams, $injured);
+    $games .= Get_PlayersToWatch($today_teams, $injured, $fav["user_favteam"]);
     }
 return $games;
 }
@@ -153,10 +156,11 @@ return $games;
 * Funkcia pre výpis dnešných hráčov na sledovanie
 * @param $today_teams array shortname tímov, ktoré dnes hrajú
 * @param $injured array všetci zranení hráči v danej lige
+* @param $favteam string obľúbený tím prihláseného užívateľa
 * @return $p string
 */
 
-function Get_PlayersToWatch($today_teams, $injured) {
+function Get_PlayersToWatch($today_teams, $injured, $favteam) {
     $ptw = array();
     foreach($today_teams as $league=>$teams) {
         $ptw[$league]["longname"] = $teams["longname"];
@@ -194,7 +198,7 @@ function Get_PlayersToWatch($today_teams, $injured) {
                             <div class="col">'.LANG_A.'</div>
                         </div>';
                 foreach($players["players"] as $player) {
-                    $p .= '<div class="row no-gutters align-items-center small">
+                    $p .= '<div class="row no-gutters align-items-center small'.($favteam==$player[0] ? ' bg-gray-200 rounded':'').'">
                                 <div class="col-9"><img class="flag-'.($players["el"]==1 ? 'el':'iihf').' '.$player[0].'-small" src="/img/blank.png" alt="'.$player[0].'"> '.$player[1].'</div>
                                 <div class="col">'.(substr($player[4],-1)==9 ? '<abbr title="'.(sprintf(LANG_GAMECONT_WILLHEPOINTS, $player[4]+1)).'" class="initialism font-weight-bold'.($player[4]>30 ? ' text-danger':'').'" data-toggle="tooltip">'.$player[4].'</abbr>':$player[4]).'</div>
                                 <div class="col">'.(substr($player[2],-1)==9 ? '<abbr title="'.(sprintf(LANG_GAMECONT_WILLHESCORE, $player[2]+1)).'" class="initialism font-weight-bold'.($player[2]>10 ? ' text-danger':'').'" data-toggle="tooltip">'.$player[2].'</abbr>':$player[2]).'</div>

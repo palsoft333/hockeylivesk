@@ -334,7 +334,7 @@ define("LANG_NAV_PLAYERDB","Databáza hráčov");
 define("LANG_NAV_SHOOTERS","Strelci");
 define("LANG_NAV_FORUM","Diskusie");
 define("LANG_NAV_IMPERSSUM","Kontakt");
-define("LANG_NAV_LIVE","LIVE komentár");
+define("LANG_NAV_LIVE","LIVE priebeh");
 define("LANG_NAV_NEWS","Novinky");
 define("LANG_NAV_UPCOMMING","Zápasy");
 define("LANG_NAV_GROUPS","Skupiny");

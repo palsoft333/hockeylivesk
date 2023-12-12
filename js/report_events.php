@@ -30,7 +30,7 @@ else if(data['tstamp']!=cook) CheckUpdates(data['id']);
         while(i<othm.length)
           {
           var oth = othm[i].split("|");
-          matche = matche + '<a href="/report/'+oth[5]+'-'+oth[0]+'-'+oth[1]+'" class="blacklink"><img style="vertical-align:top;" class="'+oth[0]+'_small" src="/images/blank.png" alt="'+oth[0]+'"> <b>'+oth[0]+'</b> vs. <b>'+oth[1]+'</b> <img style="vertical-align:top;" class="'+oth[1]+'_small" src="/images/blank.png" alt="'+oth[1]+'"> - <b>'+oth[2]+':'+oth[3]+'</b> ('+oth[4]+')</a><br>';
+          matche = matche + '<a href="/report/'+oth[5]+'-'+oth[0]+'-'+oth[1]+'" class="text-gray-800"><img class="flag-el '+oth[0]+'-small mr-1" src="/images/blank.png" alt="'+oth[0]+'"><b>'+oth[0]+'</b> vs. <b>'+oth[1]+'</b><img class="flag-el '+oth[1]+'-small ml-1" src="/images/blank.png" alt="'+oth[1]+'"> - <b>'+oth[2]+':'+oth[3]+'</b> ('+oth[4]+')</a><br>';
           i++;
           }
         Itemvalue = matche;
@@ -38,7 +38,7 @@ else if(data['tstamp']!=cook) CheckUpdates(data['id']);
       else
         {
         var oth = Itemvalue.split("|");
-        Itemvalue = '<a href="/report/'+oth[5]+'-'+oth[0]+'-'+oth[1]+'" class="blacklink"><img style="vertical-align:top;" class="'+oth[0]+'_small" src="/images/blank.png" alt="'+oth[0]+'"> <b>'+oth[0]+'</b> vs. <b>'+oth[1]+'</b> <img style="vertical-align:top;" class="'+oth[1]+'_small" src="/images/blank.png" alt="'+oth[1]+'"> - <b>'+oth[2]+':'+oth[3]+'</b> ('+oth[4]+')</a>';
+        Itemvalue = '<a href="/report/'+oth[5]+'-'+oth[0]+'-'+oth[1]+'" class="text-gray-800"><img class="flag-el '+oth[0]+'-small mr-1" src="/images/blank.png" alt="'+oth[0]+'"><b>'+oth[0]+'</b> vs. <b>'+oth[1]+'</b><img class="flag-el '+oth[1]+'-small mr-1" src="/images/blank.png" alt="'+oth[1]+'"> - <b>'+oth[2]+':'+oth[3]+'</b> ('+oth[4]+')</a>';
         }
       }
     if(Item.html()!=Itemvalue)

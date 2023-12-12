@@ -352,27 +352,27 @@ function Get_Matches($lid, $params, $sel, $potype)
       else 
         {
         // prebieha, ale nie je live
-        $opt = '<a href="/report/'.$g[id].$f[el].'-'.SEOtitle($g[team1long]." vs ".$g[team2long]).'" class="btn btn-sm btn-light btn-icon-split">
+        $opt = '<a href="/report/'.$g[id].$f[el].'-'.SEOtitle($g[team1long]." vs ".$g[team2long]).'" class="btn btn-sm btn-light btn-icon-split live">
                   <span class="icon text-gray-600">
                     <i class="fas fa-comments"></i>
                   </span>
                   <span class="text text-gray-800">'.LANG_NAV_LIVE.'</span>
                 </a>';
-        $bckg = " bg-warning";
-        $kedy = '<div class="row mb-2 no-gutters align-items-center"><div class="col-12 text-center">'.$g[kedy].'</div></div>';
+        $bckg = " bg-gradient-light";
+        $kedy = '<div class="row mb-2 no-gutters align-items-center"><div class="col-12 text-center font-weight-bold text-gray-900">'.$g[kedy].'</div></div>';
         }
       }
     if($g[active]==1) 
       {
       // je live
-      $opt = '<a href="/report/'.$g[id].$f[el].'-'.SEOtitle($g[team1long]." vs ".$g[team2long]).'" class="btn btn-sm btn-light btn-icon-split">
+      $opt = '<a href="/report/'.$g[id].$f[el].'-'.SEOtitle($g[team1long]." vs ".$g[team2long]).'" class="btn btn-sm btn-light btn-icon-split live">
                 <span class="icon text-gray-600">
                   <i class="fas fa-comments"></i>
                 </span>
                 <span class="text text-gray-800">'.LANG_NAV_LIVE.'</span>
               </a>';
-      $bckg = " bg-warning";
-      $kedy = '<div class="row mb-2 no-gutters align-items-center"><div class="col-12 text-center">'.$g[kedy].'</div></div>';
+      $bckg = " bg-gradient-light";
+      $kedy = '<div class="row mb-2 no-gutters align-items-center"><div class="col-12 text-center font-weight-bold text-gray-900">'.$g[kedy].'</div></div>';
       }
     if($f[el]==0) $suffix = " shadow-sm";
     if(strtotime($g[datetime])>mktime(7,0,0) && strtotime($g[datetime])<mktime(7,0,0,date("n"),date("j")+1,date("Y")) && $g[active]==0) $bckg .= " border-".$leaguecolor;

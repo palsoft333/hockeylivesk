@@ -528,17 +528,17 @@ else mysql_query("UPDATE e_xoops_users SET last_login='".time()."' WHERE uid='".
               </li>
             </ul>
             <? if(!$_SESSION["logged"]) echo '
-            <div class="d-flex d-none justify-content-center"><hr class="m-2 w-50"></div>
+            <!--div class="d-flex d-none justify-content-center"><hr class="m-2 w-50"></div>
             <div class="text-center">
-              <div class="badge badge-light badge-pill text-xs text-wrap mb-1 mb-xl-0">Nejlepší <a href="https://www.casinoonline24cz.com/nove-online-casino/">nové online casino s českou licencí</a> 2022 s bonusem bez vkladu casinoonline24cz.com</div>
-              <div class="badge badge-light badge-pill text-xs text-wrap">Casino <a href="https://www.slotvegascz.com/no-deposit-bonus/">bonus za registraci bez vkladu 2023</a> slotvegascz.com</div>
-            </div>'; 
+              <div class="badge badge-light badge-pill text-xs text-wrap mb-1 mb-xl-0"></div>
+              <div class="badge badge-light badge-pill text-xs text-wrap"></div>
+            </div-->'; 
             ?>
             <div class="d-flex d-none justify-content-center"><hr class="m-2 w-50"></div>
             <div class="text-center">
               <a href="https://www.instagram.com/hockeylive.sk" target="_blank" rel="noopener" class="text-danger"><i class="fa-2x fa-instagram-square fab"></i></a>
               <a href="https://www.facebook.com/hockeylive" target="_blank" rel="noopener" class="ml-2"><i class="fa-2x fa-facebook-square fab"></i></a>
-              <a href="https://www.github.com/palsoft333/hockeylivesk" target="_blank" rel="noopener" class="ml-2 text-secondary"><i class="fa-2x fa-github-square fab"></i></a>
+              <a href="https://whatsapp.com/channel/0029Va8uZlAFsn0oxFqVNI3E" target="_blank" rel="noopener" class="ml-2 text-success"><i class="fa-2x fa-whatsapp-square fab"></i></a>
               <a href="https://www.buymeacoffee.com/palsoft"><img src="https://img.buymeacoffee.com/button-api/?text=<? echo LANG_BETS_BUYMEABEER; ?>&emoji=🍺&slug=palsoft&button_colour=0091e6&font_colour=ffffff&font_family=Poppins&outline_colour=ffffff&coffee_colour=FFDD00" style="height: 25px; vertical-align: -3px;" class="ml-2"></a>
             </div>
           </div>

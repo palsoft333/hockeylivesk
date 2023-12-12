@@ -49,16 +49,16 @@ if(mysql_num_rows($q)>0)
                  <h3 class='small text-center'><b>".LIVE_GAME_START.":</b> ".$f[datum]."</h3>";
     
     $content .= '
-      <div id="othermatches" style="display:none;">
-        <table class="mdl-data-table mdl-js-data-table">
+      <div id="othermatches" class="card" style="display:none;">
+        <table>
             <thead>
               <tr>
-                <th class="mdl-data-table__cell--non-numeric">'.LANG_OTHER_GAMES_LIVE.'</th>
+                <th class="card-header">'.LANG_OTHER_GAMES_LIVE.'</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td class="mdl-data-table__cell--numeric"><span id="other"></span></td>
+                <td><span id="other"></span></td>
               </tr>
             </tbody>
          </table>

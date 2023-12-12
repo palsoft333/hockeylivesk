@@ -1,18 +1,18 @@
 <?php
 $params = explode("/", htmlspecialchars($_GET[id]));
 
-$nazov = "Fantasy Championship";
-$menu = "MS 2023";
-$skratka = "MS";
+$nazov = "Fantasy Junior Championship";
+$menu = "MS U20 2024";
+$skratka = "MS U20";
 $manazerov = 10;
-$article_id = 2393;
-$league_id = 147;
+$article_id = 2436;
+$league_id = 150;
 //$timeout = 480;
 $predraftt = 1; // = draftuje sa do zásobníka. ak 1, upraviť počet manažérov aj v includes/fantasy_functions.php
-$knownrosters = 0; // = su zname zostavy (do ft_choices pridat hracov, ktori sa zucastnia)
-$article_rosters = 2354;
-$draft_start = "2023-04-25 08:00:00";
-$league_start = "2023-05-12 15:20:00";
+$knownrosters = 1; // = su zname zostavy (do ft_choices pridat hracov, ktori sa zucastnia)
+$article_rosters = 2435;
+$draft_start = "2023-12-18 08:00:00";
+$league_start = "2023-12-26 12:00:00";
 
 /*
 1. nastaviť dátum deadlinu
@@ -42,7 +42,7 @@ $leag = mysql_query("SELECT * FROM 2004leagues WHERE longname LIKE '%$skratka%' 
 $league = mysql_fetch_array($leag);
 $leaguecolor = $league[color];
 $active_league = $league[id];
-if($uid==2) { $uid=1319; /*$_SESSION[logged]=215;*/ } 
+//if($uid==2) { $uid=215; /*$_SESSION[logged]=215;*/ } 
 
 // cron job pre vyber random hraca pri necinnosti manazera
 if($_GET[cron]==1)
@@ -178,193 +178,216 @@ if($params[0]=="draft")
   if($knownrosters==1) $_SESSION["knownrosters"]=1;
   else $_SESSION["knownrosters"]=0;
   $hra = mysql_query("SELECT t.*, u.push_id FROM ft_teams t LEFT JOIN e_xoops_users u ON u.uid=t.uid WHERE t.uid='$uid';");
-  if($uid)
-  {
-  if(mysql_num_rows($hra)>0) // ak je prihlasenym manazerom
-    {
-    $q = mysql_query("SELECT * FROM ft_players ORDER BY round DESC, id DESC");
-    $f = mysql_fetch_array($q);
-    $po = mysql_query("SELECT * FROM ft_players WHERE round='$f[round]'");
-    $poc = mysql_num_rows($po);
-    $push = mysql_fetch_array($hra);
-    $title = $nazov." - ".LANG_FANTASY_PLAYERSDRAFT;
-    
+  if(strtotime($draft_start)>time()) {
+    // draft ešte nezačal
     $content .= "<div id='toasts' class='fixed-top' style='top: 80px; right: 23px; left: initial; z-index:3;'></div>
                  <i class='float-left h1 h1-fluid ll-".LeagueFont($league[longname])." text-gray-600 mr-1'></i>
                  <h1 class='h3 h3-fluid mb-1'>".$nazov."</h1>
                  <h2 class='h6 h6-fluid text-".$leaguecolor." text-uppercase font-weight-bold mb-3'>".LANG_FANTASY_PLAYERSDRAFT."</h2>
                  <div class='row'>
                     <div class='col-12' style='max-width: 1000px;'>";
-    
-    // zistit aktualne kolo a poradie manazera na rade
-    if($poc<$manazerov)
-      {
-      $pick = $poc+1;
-      $round = $f[round];
-      if(mysql_num_rows($q)==0) $round=1;
-      }
-    else
-      {
-      $pick = 1;
-      $round = $f[round]+1;
-      }
-    if($round % 2 == 0) $narade = $manazerov-$pick+1;
-    else $narade = $pick;
-
-    // nacitat skor ulozene vybery do array
-    $m = mysql_query("SELECT predraft FROM ft_predraft WHERE uid='".$uid."'");
-    if(mysql_num_rows($m)>0) {
-        $n = mysql_fetch_array($m);
-        $picks = json_decode($n[predraft], true);
-    }
-    else $picks = array(0=>array('pid'=>0,'round'=>1,'gk'=>0), 1=>array('pid'=>0,'round'=>2,'gk'=>0),2=>array('pid'=>0,'round'=>3,'gk'=>0),3=>array('pid'=>0,'round'=>4,'gk'=>0),4=>array('pid'=>0,'round'=>5,'gk'=>0),5=>array('pid'=>0,'round'=>6,'gk'=>0),6=>array('pid'=>0,'round'=>7,'gk'=>0),7=>array('pid'=>0,'round'=>8,'gk'=>0),8=>array('pid'=>0,'round'=>9,'gk'=>0),9=>array('pid'=>0,'round'=>10,'gk'=>0));
-
-    // zistit obsadene pozicie
-    $k=0;
-    $numgk = 1;
-    $numd = 3;
-    $numf = 6;
-    while($k < count($picks)) {
-        // zistit, ci manazer uz dane kolo nedraftoval
-        $x = mysql_query("SELECT * FROM ft_players WHERE uid='".$uid."' && round='".$picks[$k][round]."'");
-        if(mysql_num_rows($x)>0) {
-            // naplnit kolo hracom z draftu namiesto hraca z ulozeneho vyberu
-            $z = mysql_fetch_array($x);
-            $picks[$k][pid] = $z[pid];
-        }
-        // overit, ci uz hrac nebol draftovany manazerom pred nim *alebo* samotnym manazerom v skorsom kole *alebo* sa hrac nezucastni
-        $c = mysql_query("SELECT * FROM ft_players WHERE pid='".$picks[$k][pid]."' && (uid!='".$uid."' || uid='".$uid."' && round<'".$picks[$k][round]."' || type='2')");
-        if(mysql_num_rows($c)==0) {
-            $q = mysql_query("SELECT * FROM ft_choices WHERE id='".$picks[$k][pid]."'");
-            $f = mysql_fetch_array($q);
-            if($f[pos]=="GK") $numgk--;
-            if($f[pos]=="D" || $f[pos]=="LD" || $f[pos]=="RD") $numd--;
-            if($f[pos]=="F" || $f[pos]=="CE" || $f[pos]=="RW" || $f[pos]=="LW") $numf--;
-        }
-        $k++;
-    }
-    if($numgk<0) $numgk=0;
-    if($numd<0) $numd=0;
-    if($numf<0) $numf=0;
-    if($numgk==0 && $numd==0 && $numf==0) { $status = LANG_FANTASY_PICKSACTIVE; $color = "success"; }
-    else { $status = LANG_FANTASY_PICKSINACTIVE; $color = "danger"; }
-        
-    $content .= '
-   <div class="row justify-content-center">
-    <div class="col-sm-8 col-md-7">
-     <div class="card shadow animated--grow-in mb-4">
-      <div class="card-header">
-        <h6 class="m-0 font-weight-bold text-'.$leaguecolor.'">
-          '.LANG_FANTASY_PICKSTITLE3.'
-        </h6>
-      </div>
-      <div class="card-body">
-        '.($knownrosters==1 ? '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle mr-1"></i>'.sprintf(LANG_FANTASY_ONLYFROMROSTERS, $menu, $article_rosters).'</div>':'<div class="alert alert-info"><i class="fas fa-info-circle mr-1"></i>'.sprintf(LANG_FANTASY_ONLYFROMDB1, $menu).'</div>').'
-        '.($push["push_id"]==NULL ? '<div class="alert alert-warning"><i class="fas fa-mobile-screen-button mr-1"></i>'.LANG_FANTASY_TURNONPUSH.'</div>':'').'
-        <p class="h6-fluid m-0">'.LANG_FANTASY_REMAINING1.':</p>
-        <div class="row text-center mb-3 p-fluid">
-            <div class="col-4 border rounded bg-gray-100 p-1"><span id="numf" class="font-weight-bold h5 text-primary">'.$numf.'</span><br>'.LANG_FANTASY_FORWARDS1.'</div>
-            <div class="col-4 border rounded bg-gray-100 p-1"><span id="numd" class="font-weight-bold h5 text-success">'.$numd.'</span><br>'.LANG_FANTASY_DEFENSE1.'</div>
-            <div class="col-4 border rounded bg-gray-100 p-1"><span id="numgk" class="font-weight-bold h5 text-danger">'.$numgk.'</span><br>'.LANG_PLAYERSTATS_GK.'</div>
-        </div>
-        <form id="picks-form">';
-        $i=1;
-        while($i<11) {
-            $player=$isvalid=$readonly=$icon=$hidden=$tooltip='';
-            $j=0;
-            // naplnit kola uz vybratymi hracmi
-            while($j < count($picks)) {
-                $already=0;
-                if($picks[$j][round]==$i) {
-                    // zistit, ci manazer uz dane kolo nedraftoval
-                    $x = mysql_query("SELECT * FROM ft_players WHERE uid='".$uid."' && round='".$i."'");
-                    if(mysql_num_rows($x)>0) {
-                        // naplnit kolo hracom z draftu namiesto hraca z ulozeneho vyberu
-                        $z = mysql_fetch_array($x);
-                        $picks[$j][pid] = $z[pid];
-                    }
-                    if($picks[$j][gk]==1) { $b = mysql_query("SELECT * FROM 2004goalies WHERE id='".$picks[$j][pid]."'"); $pos = "GK"; }
-                    else $b = mysql_query("SELECT * FROM 2004players WHERE id='".$picks[$j][pid]."'");
-                    $v = mysql_fetch_array($b);
-                    if($v[pos]=="D" || $v[pos]=="LD" || $v[pos]=="RD") $pos = "D";
-                    if($v[pos]=="F" || $v[pos]=="CE" || $v[pos]=="RW" || $v[pos]=="LW") $pos = "F";
-                    if(mysql_num_rows($b)>0) $player = '('.$pos.') '.$v[name];
-                    else $player = '';
-                    $hidden = $pos."-0-".$picks[$j][pid];
-                    // overit, ci uz hrac nebol draftovany manazerom pred nim *alebo* samotnym manazerom v skorsom kole *alebo* sa hrac nezucastni
-                    $c = mysql_query("SELECT * FROM ft_players WHERE pid='".$picks[$j][pid]."' && (uid!='".$uid."' || uid='".$uid."' && round<'".$i."' || type='2')");
-                    if(mysql_num_rows($c)>0 || mysql_num_rows($b)==0) {
-                        // uz bol draftovany alebo hrac uplne chyba
-                        $isvalid = " is-invalid";
-                        $readonly = "";
-                        $icon = '';
-                    }
-                    else {
-                        // zobrazit upozornenie, ak tohto hraca uz ma naplanovaneho draftovat niekto pred nim
-                        $user_po = mysql_query("SELECT pos FROM ft_teams WHERE uid='".$uid."'");
-                        $user_pos = mysql_fetch_array($user_po);
-                        $k=0;
-                        while($k < $i) {
-                          $zp = mysql_query("SELECT p.uid, t.pos, JSON_UNQUOTE(JSON_EXTRACT(JSON_EXTRACT(CAST(predraft as CHAR), '$[".$k."]'),'$.pid')) as pid, JSON_UNQUOTE(JSON_EXTRACT(JSON_EXTRACT(CAST(predraft as CHAR), '$[".$k."]'),'$.round')) as round FROM ft_predraft p LEFT JOIN ft_teams t ON t.uid=p.uid WHERE p.uid!='".$uid."' ORDER BY pos");
-                          while($zph = mysql_fetch_array($zp)) {
-                            if(($k+1) % 2 == 0 && ($k+1)==$zph[round] && $zph[pos]<$user_pos[pos] && $zph[pid]==$picks[$j][pid]) {
-                              $already=1;
-                              break;
-                            }
-                            if(($k+1) % 2 != 0 && ($k+1)==$zph[round] && $zph[pos]>$user_pos[pos] && $zph[pid]==$picks[$j][pid]) {
-                              $already=1;
-                              break;
-                            }
-                          }
-                        if($already==1) break;
-                        $k++;
-                        }
-                        $isvalid = " is-valid";
-                        if($already==1) {
-                          $isvalid .= " is-doubt";
-                          $tooltip = 'data-toggle="tooltip" data-placement="top" title="'.LANG_FANTASY_ALREADYTOOLTIP.'" ';
-                        }
-                        $readonly = " readonly";
-                        $icon = '<a href="#" class="btn btn-danger btn-sm remove-pick" data-pick="'.$i.'"><i class="fas fa-times-circle"></i></a>';
-                    }
-                }
-                $j++;
-            }
-            $content .= '
-        <div class="row">
-            <div class="col-12 col-lg-2 align-self-center">'.$i.'.'.LANG_ROUND.'</div>
-            <div class="col-10 col-lg-9">
-                <input class="form-control pick-player'.$isvalid.'" '.$tooltip.'type="text" data-pick="'.$i.'" placeholder="'.LANG_FANTASY_PICKPLACEHOLDER.'" value="'.$player.'"'.$readonly.'>
-                <input type="hidden" id="pick-'.$i.'" value="'.$hidden.'">
-            </div>
-            <div class="col-2 col-lg-1 align-self-center"><span class="pick-icon">'.$icon.'</span></div>
-        </div>';
-            $i++;
-        }
-      $content .= '
-        <input type="hidden" id="picks">
-        </form>
-      </div>
-      <div class="card-footer p-fluid text-center text-white bg-'.$color.'" id="draft-status">'.$status.'</div>
-     </div>
-    </div>
-   </div>';
-  
+    $content .= '  
+                      <div class="row justify-content-center">
+                        <div class="col-sm-8 col-md-7">
+                         <div class="card shadow animated--grow-in mb-4">
+                          <div class="card-header">
+                            <h6 class="m-0 font-weight-bold text-success">
+                              Draft sa ešte nezačal
+                            </h6>
+                          </div>
+                          <div class="card-body alert-info">
+                            <p class="text-center m-0"><i class="fas fa-info-circle mr-1"></i>Predpokladaný začiatok draftu je <strong>'.date("j.n. \o G:i", strtotime($draft_start)).'</strong></p>
+                          </div>
+                         </div>
+                        </div>
+                       </div>';
+                       
     $content .= Show_Drafted();
+  }
+  else {
+    if($uid) {
+      if(mysql_num_rows($hra)>0) { // ak je prihlasenym manazerom
+        $q = mysql_query("SELECT * FROM ft_players ORDER BY round DESC, id DESC");
+        $f = mysql_fetch_array($q);
+        $po = mysql_query("SELECT * FROM ft_players WHERE round='$f[round]'");
+        $poc = mysql_num_rows($po);
+        $push = mysql_fetch_array($hra);
+        $title = $nazov." - ".LANG_FANTASY_PLAYERSDRAFT;
+        
+        $content .= "<div id='toasts' class='fixed-top' style='top: 80px; right: 23px; left: initial; z-index:3;'></div>
+                     <i class='float-left h1 h1-fluid ll-".LeagueFont($league[longname])." text-gray-600 mr-1'></i>
+                     <h1 class='h3 h3-fluid mb-1'>".$nazov."</h1>
+                     <h2 class='h6 h6-fluid text-".$leaguecolor." text-uppercase font-weight-bold mb-3'>".LANG_FANTASY_PLAYERSDRAFT."</h2>
+                     <div class='row'>
+                        <div class='col-12' style='max-width: 1000px;'>";
+        
+        // zistit aktualne kolo a poradie manazera na rade
+        if($poc<$manazerov) {
+          $pick = $poc+1;
+          $round = $f[round];
+          if(mysql_num_rows($q)==0) $round=1;
+        }
+        else {
+          $pick = 1;
+          $round = $f[round]+1;
+        }
+        if($round % 2 == 0) $narade = $manazerov-$pick+1;
+        else $narade = $pick;
+
+        // nacitat skor ulozene vybery do array
+        $m = mysql_query("SELECT predraft FROM ft_predraft WHERE uid='".$uid."'");
+        if(mysql_num_rows($m)>0) {
+            $n = mysql_fetch_array($m);
+            $picks = json_decode($n[predraft], true);
+        }
+        else $picks = array(0=>array('pid'=>0,'round'=>1,'gk'=>0), 1=>array('pid'=>0,'round'=>2,'gk'=>0),2=>array('pid'=>0,'round'=>3,'gk'=>0),3=>array('pid'=>0,'round'=>4,'gk'=>0),4=>array('pid'=>0,'round'=>5,'gk'=>0),5=>array('pid'=>0,'round'=>6,'gk'=>0),6=>array('pid'=>0,'round'=>7,'gk'=>0),7=>array('pid'=>0,'round'=>8,'gk'=>0),8=>array('pid'=>0,'round'=>9,'gk'=>0),9=>array('pid'=>0,'round'=>10,'gk'=>0));
+
+        // zistit obsadene pozicie
+        $k=0;
+        $numgk = 1;
+        $numd = 3;
+        $numf = 6;
+        while($k < count($picks)) {
+            // zistit, ci manazer uz dane kolo nedraftoval
+            $x = mysql_query("SELECT * FROM ft_players WHERE uid='".$uid."' && round='".$picks[$k][round]."'");
+            if(mysql_num_rows($x)>0) {
+                // naplnit kolo hracom z draftu namiesto hraca z ulozeneho vyberu
+                $z = mysql_fetch_array($x);
+                $picks[$k][pid] = $z[pid];
+            }
+            // overit, ci uz hrac nebol draftovany manazerom pred nim *alebo* samotnym manazerom v skorsom kole *alebo* sa hrac nezucastni
+            $c = mysql_query("SELECT * FROM ft_players WHERE pid='".$picks[$k][pid]."' && (uid!='".$uid."' || uid='".$uid."' && round<'".$picks[$k][round]."' || type='2')");
+            if(mysql_num_rows($c)==0) {
+                $q = mysql_query("SELECT * FROM ft_choices WHERE id='".$picks[$k][pid]."'");
+                $f = mysql_fetch_array($q);
+                if($f[pos]=="GK") $numgk--;
+                if($f[pos]=="D" || $f[pos]=="LD" || $f[pos]=="RD") $numd--;
+                if($f[pos]=="F" || $f[pos]=="CE" || $f[pos]=="RW" || $f[pos]=="LW") $numf--;
+            }
+            $k++;
+        }
+        if($numgk<0) $numgk=0;
+        if($numd<0) $numd=0;
+        if($numf<0) $numf=0;
+        if($numgk==0 && $numd==0 && $numf==0) { $status = LANG_FANTASY_PICKSACTIVE; $color = "success"; }
+        else { $status = LANG_FANTASY_PICKSINACTIVE; $color = "danger"; }
+            
+        $content .= '
+       <div class="row justify-content-center">
+        <div class="col-sm-8 col-md-7">
+         <div class="card shadow animated--grow-in mb-4">
+          <div class="card-header">
+            <h6 class="m-0 font-weight-bold text-'.$leaguecolor.'">
+              '.LANG_FANTASY_PICKSTITLE3.'
+            </h6>
+          </div>
+          <div class="card-body">
+            '.($knownrosters==1 ? '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle mr-1"></i>'.sprintf(LANG_FANTASY_ONLYFROMROSTERS, $menu, $article_rosters).'</div>':'<div class="alert alert-info"><i class="fas fa-info-circle mr-1"></i>'.sprintf(LANG_FANTASY_ONLYFROMDB1, $menu).'</div>').'
+            '.($push["push_id"]==NULL ? '<div class="alert alert-warning"><i class="fas fa-mobile-screen-button mr-1"></i>'.LANG_FANTASY_TURNONPUSH.'</div>':'').'
+            <p class="h6-fluid m-0">'.LANG_FANTASY_REMAINING1.':</p>
+            <div class="row text-center mb-3 p-fluid">
+                <div class="col-4 border rounded bg-gray-100 p-1"><span id="numf" class="font-weight-bold h5 text-primary">'.$numf.'</span><br>'.LANG_FANTASY_FORWARDS1.'</div>
+                <div class="col-4 border rounded bg-gray-100 p-1"><span id="numd" class="font-weight-bold h5 text-success">'.$numd.'</span><br>'.LANG_FANTASY_DEFENSE1.'</div>
+                <div class="col-4 border rounded bg-gray-100 p-1"><span id="numgk" class="font-weight-bold h5 text-danger">'.$numgk.'</span><br>'.LANG_PLAYERSTATS_GK.'</div>
+            </div>
+            <form id="picks-form">';
+            $i=1;
+            while($i<11) {
+                $player=$isvalid=$readonly=$icon=$hidden=$tooltip='';
+                $j=0;
+                // naplnit kola uz vybratymi hracmi
+                while($j < count($picks)) {
+                    $already=0;
+                    if($picks[$j][round]==$i) {
+                        // zistit, ci manazer uz dane kolo nedraftoval
+                        $x = mysql_query("SELECT * FROM ft_players WHERE uid='".$uid."' && round='".$i."'");
+                        if(mysql_num_rows($x)>0) {
+                            // naplnit kolo hracom z draftu namiesto hraca z ulozeneho vyberu
+                            $z = mysql_fetch_array($x);
+                            $picks[$j][pid] = $z[pid];
+                        }
+                        if($picks[$j][gk]==1) { $b = mysql_query("SELECT * FROM 2004goalies WHERE id='".$picks[$j][pid]."'"); $pos = "GK"; }
+                        else $b = mysql_query("SELECT * FROM 2004players WHERE id='".$picks[$j][pid]."'");
+                        $v = mysql_fetch_array($b);
+                        if($v[pos]=="D" || $v[pos]=="LD" || $v[pos]=="RD") $pos = "D";
+                        if($v[pos]=="F" || $v[pos]=="CE" || $v[pos]=="RW" || $v[pos]=="LW") $pos = "F";
+                        if(mysql_num_rows($b)>0) $player = '('.$pos.') '.$v[name];
+                        else $player = '';
+                        $hidden = $pos."-0-".$picks[$j][pid];
+                        // overit, ci uz hrac nebol draftovany manazerom pred nim *alebo* samotnym manazerom v skorsom kole *alebo* sa hrac nezucastni
+                        $c = mysql_query("SELECT * FROM ft_players WHERE pid='".$picks[$j][pid]."' && (uid!='".$uid."' || uid='".$uid."' && round<'".$i."' || type='2')");
+                        if(mysql_num_rows($c)>0 || mysql_num_rows($b)==0) {
+                            // uz bol draftovany alebo hrac uplne chyba
+                            $isvalid = " is-invalid";
+                            $readonly = "";
+                            $icon = '';
+                        }
+                        else {
+                            // zobrazit upozornenie, ak tohto hraca uz ma naplanovaneho draftovat niekto pred nim
+                            $user_po = mysql_query("SELECT pos FROM ft_teams WHERE uid='".$uid."'");
+                            $user_pos = mysql_fetch_array($user_po);
+                            $k=0;
+                            while($k < $i) {
+                              $zp = mysql_query("SELECT p.uid, t.pos, JSON_UNQUOTE(JSON_EXTRACT(JSON_EXTRACT(CAST(predraft as CHAR), '$[".$k."]'),'$.pid')) as pid, JSON_UNQUOTE(JSON_EXTRACT(JSON_EXTRACT(CAST(predraft as CHAR), '$[".$k."]'),'$.round')) as round FROM ft_predraft p LEFT JOIN ft_teams t ON t.uid=p.uid WHERE p.uid!='".$uid."' ORDER BY pos");
+                              while($zph = mysql_fetch_array($zp)) {
+                                if(($k+1) % 2 == 0 && ($k+1)==$zph[round] && $zph[pos]<$user_pos[pos] && $zph[pid]==$picks[$j][pid]) {
+                                  $already=1;
+                                  break;
+                                }
+                                if(($k+1) % 2 != 0 && ($k+1)==$zph[round] && $zph[pos]>$user_pos[pos] && $zph[pid]==$picks[$j][pid]) {
+                                  $already=1;
+                                  break;
+                                }
+                              }
+                            if($already==1) break;
+                            $k++;
+                            }
+                            $isvalid = " is-valid";
+                            if($already==1) {
+                              $isvalid .= " is-doubt";
+                              $tooltip = 'data-toggle="tooltip" data-placement="top" title="'.LANG_FANTASY_ALREADYTOOLTIP.'" ';
+                            }
+                            $readonly = " readonly";
+                            $icon = '<a href="#" class="btn btn-danger btn-sm remove-pick" data-pick="'.$i.'"><i class="fas fa-times-circle"></i></a>';
+                        }
+                    }
+                    $j++;
+                }
+                $content .= '
+            <div class="row">
+                <div class="col-12 col-lg-2 align-self-center">'.$i.'.'.LANG_ROUND.'</div>
+                <div class="col-10 col-lg-9">
+                    <input class="form-control pick-player'.$isvalid.'" '.$tooltip.'type="text" data-pick="'.$i.'" placeholder="'.LANG_FANTASY_PICKPLACEHOLDER.'" value="'.$player.'"'.$readonly.'>
+                    <input type="hidden" id="pick-'.$i.'" value="'.$hidden.'">
+                </div>
+                <div class="col-2 col-lg-1 align-self-center"><span class="pick-icon">'.$icon.'</span></div>
+            </div>';
+                $i++;
+            }
+          $content .= '
+            <input type="hidden" id="picks">
+            </form>
+          </div>
+          <div class="card-footer p-fluid text-center text-white bg-'.$color.'" id="draft-status">'.$status.'</div>
+         </div>
+        </div>
+       </div>';
+      
+        $content .= Show_Drafted();
+      }
+    }
+    
+    if(!$uid || mysql_num_rows($hra)==0) {
+      $title = $nazov." - ".LANG_FANTASY_PLAYERSDRAFT;
+      $content .= "<i class='float-left h1 h1-fluid ll-".LeagueFont($league[longname])." text-gray-600 mr-1'></i>
+                   <h1 class='h3 h3-fluid mb-1'>".$nazov."</h1>
+                   <h2 class='h6 h6-fluid text-".$leaguecolor." text-uppercase font-weight-bold mb-3'>".LANG_FANTASY_PLAYERSDRAFT."</h2>
+                   <div class='row'>
+                      <div class='col-12' style='max-width: 1000px;'>";
+      $content .= '<div class="alert alert-info" role="alert">'.sprintf(LANG_FANTASY_DRAFTTEXT, $nazov, $manazerov).'</div>';
+      $content .= Show_Drafted();
     }
   }
- 
-  if(!$uid || mysql_num_rows($hra)==0)
-    {
-    $title = $nazov." - ".LANG_FANTASY_PLAYERSDRAFT;
-    $content .= "<i class='float-left h1 h1-fluid ll-".LeagueFont($league[longname])." text-gray-600 mr-1'></i>
-                 <h1 class='h3 h3-fluid mb-1'>".$nazov."</h1>
-                 <h2 class='h6 h6-fluid text-".$leaguecolor." text-uppercase font-weight-bold mb-3'>".LANG_FANTASY_PLAYERSDRAFT."</h2>
-                 <div class='row'>
-                    <div class='col-12' style='max-width: 1000px;'>";
-    $content .= '<div class="alert alert-info" role="alert">'.sprintf(LANG_FANTASY_DRAFTTEXT, $nazov, $manazerov).'</div>';
-    $content .= Show_Drafted();
-    }
     
   $content .= '
     <div class="card shadow my-4">

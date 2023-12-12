@@ -80,14 +80,14 @@ if(mysql_num_rows($q)>0)
 {
   "@context": "https://schema.org/",
   "@type": "NewsArticle",
-  "headline": "'.$f[title].'",
+  "headline": "'.htmlentities($f[title], ENT_QUOTES).'",
   "image": [
     "'.$meta_image.'"
     ],
   "datePublished": "'.date("c",$f[published]).'",
   "author": [{
         "@type": "Person",
-        "name": "'.$f[name].'",
+        "name": "'.htmlentities($f[name], ENT_QUOTES).'",
         "url": "https://www.hockey-live.sk/user/'.$f[uid].'"
     }]
 }
