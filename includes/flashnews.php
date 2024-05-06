@@ -151,10 +151,10 @@ foreach($page_posts['data'] as $post){
     else $tableclass = " bg-light";
     echo "<table class='card d-table w-100 my-0 mb-2'>
             <tr class='card-header$tableclass'>
-              <td style='width:60%;' class='pl-2'>
-                <b><a href='".$link."' ".($our==1 ? "" : " target='_blank'").">".($story ? $story : LANG_FLASH_FROMFB)."</a></b>
+              <td style='width:69%;' class='pl-2'>
+                <b><a href='".$link."' ".($our==1 ? "" : " target='_blank'")." class='text-dark'>".($story ? $story : LANG_FLASH_FROMFB)."</a></b>
               </td>
-              <td style='width:40%;' class='text-right align-top pr-2'>".date("j.n.Y H:i", $post_time)."</td>
+              <td style='width:31%;' class='text-right align-top pr-2 pt-1 text-xs'>".date("j.n.Y G:i", $post_time)."</td>
             </tr>
             ".($gn==1 ? "<tr class='$tableclass'><td colspan='2' class='pl-2 pt-1'>".DisplayTags($post_id[0])."<span class='float-right mr-1'><a href='".$link."' target='_blank'>".$post[publisher]."</a></span></td></tr>":"")."
             <tr class='$tableclass'>

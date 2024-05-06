@@ -69,6 +69,7 @@ if($_GET["changeLang"] != '' && ($_GET["changeLang"] == 'sk' || $_GET["changeLan
 
 switch ($_GET["p"]) {
     case "articles":
+        include("includes/articles_functions.php");
         include("articles.php");
         break;
     case "games":
@@ -138,10 +139,13 @@ switch ($_GET["p"]) {
           $active_league = $f[id];
           $title = Get_SEO_title($_GET[topicID]);
           }
-        else $leaguecolor = "hl";
+        else {
+          $leaguecolor = "hl";
+          if($_GET[topicID]) $title = LANG_NAV_NEWS;
+        }
 }
 header('Content-Type: text/html; charset=utf-8');
-if(!$title) $title="Hlavná stránka";
+if(!$title) $title="hockey-LIVE.sk | Každodenná dávka hokejovej eufórie";
 if(!isset($meta_image)) $meta_image = "https://www.hockey-live.sk/images/hl_avatar.png";
 
 if(!isset($_SESSION['logged'])) CheckCookieLogin();
@@ -155,9 +159,9 @@ else mysql_query("UPDATE e_xoops_users SET last_login='".time()."' WHERE uid='".
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="Portál pokrývajúci slovenský a zahraničný ľadový hokej. Štatistiky, tipovanie, databáza hráčov, výsledkový servis z domácich líg, zahraničných turnajov, KHL a NHL. <? echo $title; ?>.">
+  <meta name="description" content="<? if(!$_GET[p] && !$_GET[topicID]) echo "Portál pokrývajúci slovenský a zahraničný ľadový hokej. Štatistiky, tipovanie, databáza hráčov, výsledkový servis z domácich líg, zahraničných turnajov, KHL a NHL."; else echo $title; ?>">
 
-  <meta name="author" content="<? echo $author; ?>" />
+  <meta name="author" content="<? if(isset($author)) echo $author; else echo "hockey-LIVE.sk"; ?>" />
   <meta name="title" content="<? echo $title; ?>" />
   <meta property="og:image" content="<? echo $meta_image; ?>" />
   <meta name="twitter:image" content="<? echo $meta_image; ?>" />
@@ -183,7 +187,7 @@ else mysql_query("UPDATE e_xoops_users SET last_login='".time()."' WHERE uid='".
   <link rel="preconnect" href="https://adservice.google.sk/">
   <meta name="msapplication-TileColor" content="#ffffff">
   <meta name="msapplication-TileImage" content="/img/favicon/ms-icon-144x144.png">
-  <title>hockey-LIVE.sk - <? echo $title; ?></title>
+  <title><? echo $title; ?></title>
   <style>
     html {
       display: none;
@@ -197,169 +201,168 @@ else mysql_query("UPDATE e_xoops_users SET last_login='".time()."' WHERE uid='".
   if($_GET[p]=="games" || $_GET[p]=="teams" || $_GET[p]=="report" || $_GET[p]=="articles" || $_GET[p]=="players" || $_GET[p]=="fantasy") echo '<link rel="stylesheet" href="/css/jquery.emojiarea.css?v=1.0.0" />';
   ?>
 
-    <!-- Quantcast Choice. Consent Manager Tag v2.0 (for TCF 2.0) -->
-    <script type="text/javascript" async=true>
-    (function() {
-    var host = 'www.themoneytizer.com';
-    var element = document.createElement('script');
-    var firstScript = document.getElementsByTagName('script')[0];
-    var url = 'https://cmp.quantcast.com'
-        .concat('/choice/', '6Fv0cGNfc_bw8', '/', host, '/choice.js');
-    var uspTries = 0;
-    var uspTriesLimit = 3;
-    element.async = true;
-    element.defer = true;
-    element.type = 'text/javascript';
-    element.src = url;
+<!-- Quantcast Choice. Consent Manager Tag v2.0 (for TCF 2.0) -->
+<script type="text/javascript" async=true>
+(function() {
+  var host = 'www.themoneytizer.com';
+  var element = document.createElement('script');
+  var firstScript = document.getElementsByTagName('script')[0];
+  var url = 'https://cmp.quantcast.com'
+    .concat('/choice/', '6Fv0cGNfc_bw8', '/', host, '/choice.js');
+  var uspTries = 0;
+  var uspTriesLimit = 3;
+  element.async = true;
+  element.type = 'text/javascript';
+  element.src = url;
 
-    firstScript.parentNode.insertBefore(element, firstScript);
+  firstScript.parentNode.insertBefore(element, firstScript);
 
-    function makeStub() {
-        var TCF_LOCATOR_NAME = '__tcfapiLocator';
-        var queue = [];
-        var win = window;
-        var cmpFrame;
+  function makeStub() {
+    var TCF_LOCATOR_NAME = '__tcfapiLocator';
+    var queue = [];
+    var win = window;
+    var cmpFrame;
 
-        function addFrame() {
-        var doc = win.document;
-        var otherCMP = !!(win.frames[TCF_LOCATOR_NAME]);
+    function addFrame() {
+      var doc = win.document;
+      var otherCMP = !!(win.frames[TCF_LOCATOR_NAME]);
 
-        if (!otherCMP) {
-            if (doc.body) {
-            var iframe = doc.createElement('iframe');
+      if (!otherCMP) {
+        if (doc.body) {
+          var iframe = doc.createElement('iframe');
 
-            iframe.style.cssText = 'display:none';
-            iframe.name = TCF_LOCATOR_NAME;
-            doc.body.appendChild(iframe);
-            } else {
-            setTimeout(addFrame, 5);
-            }
-        }
-        return !otherCMP;
-        }
-
-        function tcfAPIHandler() {
-        var gdprApplies;
-        var args = arguments;
-
-        if (!args.length) {
-            return queue;
-        } else if (args[0] === 'setGdprApplies') {
-            if (
-            args.length > 3 &&
-            args[2] === 2 &&
-            typeof args[3] === 'boolean'
-            ) {
-            gdprApplies = args[3];
-            if (typeof args[2] === 'function') {
-                args[2]('set', true);
-            }
-            }
-        } else if (args[0] === 'ping') {
-            var retr = {
-            gdprApplies: gdprApplies,
-            cmpLoaded: false,
-            cmpStatus: 'stub'
-            };
-
-            if (typeof args[2] === 'function') {
-            args[2](retr);
-            }
+          iframe.style.cssText = 'display:none';
+          iframe.name = TCF_LOCATOR_NAME;
+          doc.body.appendChild(iframe);
         } else {
-            if(args[0] === 'init' && typeof args[3] === 'object') {
-            args[3] = { ...args[3], tag_version: 'V2' };
-            }
-            queue.push(args);
+          setTimeout(addFrame, 5);
         }
-        }
-
-        function postMessageEventHandler(event) {
-        var msgIsString = typeof event.data === 'string';
-        var json = {};
-
-        try {
-            if (msgIsString) {
-            json = JSON.parse(event.data);
-            } else {
-            json = event.data;
-            }
-        } catch (ignore) {}
-
-        var payload = json.__tcfapiCall;
-
-        if (payload) {
-            window.__tcfapi(
-            payload.command,
-            payload.version,
-            function(retValue, success) {
-                var returnMsg = {
-                __tcfapiReturn: {
-                    returnValue: retValue,
-                    success: success,
-                    callId: payload.callId
-                }
-                };
-                if (msgIsString) {
-                returnMsg = JSON.stringify(returnMsg);
-                }
-                if (event && event.source && event.source.postMessage) {
-                event.source.postMessage(returnMsg, '*');
-                }
-            },
-            payload.parameter
-            );
-        }
-        }
-
-        while (win) {
-        try {
-            if (win.frames[TCF_LOCATOR_NAME]) {
-            cmpFrame = win;
-            break;
-            }
-        } catch (ignore) {}
-
-        if (win === window.top) {
-            break;
-        }
-        win = win.parent;
-        }
-        if (!cmpFrame) {
-        addFrame();
-        win.__tcfapi = tcfAPIHandler;
-        win.addEventListener('message', postMessageEventHandler, false);
-        }
-    };
-
-    makeStub();
-
-    var uspStubFunction = function() {
-        var arg = arguments;
-        if (typeof window.__uspapi !== uspStubFunction) {
-        setTimeout(function() {
-            if (typeof window.__uspapi !== 'undefined') {
-            window.__uspapi.apply(window.__uspapi, arg);
-            }
-        }, 500);
-        }
-    };
-
-    var checkIfUspIsReady = function() {
-        uspTries++;
-        if (window.__uspapi === uspStubFunction && uspTries < uspTriesLimit) {
-        console.warn('USP is not accessible');
-        } else {
-        clearInterval(uspInterval);
-        }
-    };
-
-    if (typeof window.__uspapi === 'undefined') {
-        window.__uspapi = uspStubFunction;
-        var uspInterval = setInterval(checkIfUspIsReady, 6000);
+      }
+      return !otherCMP;
     }
-    })();
-    </script>
-    <!-- End Quantcast Choice. Consent Manager Tag v2.0 (for TCF 2.0) -->
+
+    function tcfAPIHandler() {
+      var gdprApplies;
+      var args = arguments;
+
+      if (!args.length) {
+        return queue;
+      } else if (args[0] === 'setGdprApplies') {
+        if (
+          args.length > 3 &&
+          args[2] === 2 &&
+          typeof args[3] === 'boolean'
+        ) {
+          gdprApplies = args[3];
+          if (typeof args[2] === 'function') {
+            args[2]('set', true);
+          }
+        }
+      } else if (args[0] === 'ping') {
+        var retr = {
+          gdprApplies: gdprApplies,
+          cmpLoaded: false,
+          cmpStatus: 'stub'
+        };
+
+        if (typeof args[2] === 'function') {
+          args[2](retr);
+        }
+      } else {
+        if(args[0] === 'init' && typeof args[3] === 'object') {
+          args[3] = { ...args[3], tag_version: 'V2' };
+        }
+        queue.push(args);
+      }
+    }
+
+    function postMessageEventHandler(event) {
+      var msgIsString = typeof event.data === 'string';
+      var json = {};
+
+      try {
+        if (msgIsString) {
+          json = JSON.parse(event.data);
+        } else {
+          json = event.data;
+        }
+      } catch (ignore) {}
+
+      var payload = json.__tcfapiCall;
+
+      if (payload) {
+        window.__tcfapi(
+          payload.command,
+          payload.version,
+          function(retValue, success) {
+            var returnMsg = {
+              __tcfapiReturn: {
+                returnValue: retValue,
+                success: success,
+                callId: payload.callId
+              }
+            };
+            if (msgIsString) {
+              returnMsg = JSON.stringify(returnMsg);
+            }
+            if (event && event.source && event.source.postMessage) {
+              event.source.postMessage(returnMsg, '*');
+            }
+          },
+          payload.parameter
+        );
+      }
+    }
+
+    while (win) {
+      try {
+        if (win.frames[TCF_LOCATOR_NAME]) {
+          cmpFrame = win;
+          break;
+        }
+      } catch (ignore) {}
+
+      if (win === window.top) {
+        break;
+      }
+      win = win.parent;
+    }
+    if (!cmpFrame) {
+      addFrame();
+      win.__tcfapi = tcfAPIHandler;
+      win.addEventListener('message', postMessageEventHandler, false);
+    }
+  };
+
+  makeStub();
+
+  var uspStubFunction = function() {
+    var arg = arguments;
+    if (typeof window.__uspapi !== uspStubFunction) {
+      setTimeout(function() {
+        if (typeof window.__uspapi !== 'undefined') {
+          window.__uspapi.apply(window.__uspapi, arg);
+        }
+      }, 500);
+    }
+  };
+
+  var checkIfUspIsReady = function() {
+    uspTries++;
+    if (window.__uspapi === uspStubFunction && uspTries < uspTriesLimit) {
+      console.warn('USP is not accessible');
+    } else {
+      clearInterval(uspInterval);
+    }
+  };
+
+  if (typeof window.__uspapi === 'undefined') {
+    window.__uspapi = uspStubFunction;
+    var uspInterval = setInterval(checkIfUspIsReady, 6000);
+  }
+})();
+</script>
+<!-- End Quantcast Choice. Consent Manager Tag v2.0 (for TCF 2.0) -->
 </head>
 
 <body id="page-top">
@@ -539,7 +542,7 @@ else mysql_query("UPDATE e_xoops_users SET last_login='".time()."' WHERE uid='".
               <a href="https://www.instagram.com/hockeylive.sk" target="_blank" rel="noopener" class="text-danger"><i class="fa-2x fa-instagram-square fab"></i></a>
               <a href="https://www.facebook.com/hockeylive" target="_blank" rel="noopener" class="ml-2"><i class="fa-2x fa-facebook-square fab"></i></a>
               <a href="https://whatsapp.com/channel/0029Va8uZlAFsn0oxFqVNI3E" target="_blank" rel="noopener" class="ml-2 text-success"><i class="fa-2x fa-whatsapp-square fab"></i></a>
-              <a href="https://www.buymeacoffee.com/palsoft"><img src="https://img.buymeacoffee.com/button-api/?text=<? echo LANG_BETS_BUYMEABEER; ?>&emoji=🍺&slug=palsoft&button_colour=0091e6&font_colour=ffffff&font_family=Poppins&outline_colour=ffffff&coffee_colour=FFDD00" style="height: 25px; vertical-align: -3px;" class="ml-2"></a>
+              <a href="https://www.buymeacoffee.com/palsoft"><img src="https://img.buymeacoffee.com/button-api/?text=<? echo LANG_BETS_BUYMEABEER; ?>&emoji=🍺&slug=palsoft&button_colour=0091e6&font_colour=ffffff&font_family=Poppins&outline_colour=ffffff&coffee_colour=FFDD00" style="height: 25px; vertical-align: -3px;" class="ml-2" alt="<? echo LANG_BETS_BUYMEABEER; ?>"></a>
             </div>
           </div>
         </div>
@@ -588,57 +591,57 @@ else mysql_query("UPDATE e_xoops_users SET last_login='".time()."' WHERE uid='".
   <script src="/js/jquery.lazy.min.js"></script>
   <script src="/js/main.min.js?v=1.2.4"></script>
 <? 
-if(!$_GET[p] && !$_GET[topicID]) echo '  <script type="text/javascript" src="/js/jquery.calendario.js?v=1.0.6"></script>
+if(!$_GET[p] && !$_GET[topicID]) echo '  <script type="text/javascript" src="/js/jquery.calendario.min.js?v=1.0.6"></script>
   <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION[lang].'.js?v=1.0.0"></script>
-  <script type="text/javascript" src="/js/homepage_events.js?v=1.1.3"></script>';
+  <script type="text/javascript" src="/js/homepage_events.min.js?v=1.1.3"></script>';
 elseif($_GET[p]=="games")
   {
   echo '  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION[lang].'.js?v=1.0.0"></script>
-  <script type="text/javascript" src="/js/games_events.js?v=1.0.4"></script>';
+  <script type="text/javascript" src="/js/games_events.min.js?v=1.0.4"></script>';
   if($_GET[gid]) echo '  <script src="/js/jquery.emojiarea.min.js?v=1.0.0"></script>
   <script src="/images/smilies/emojis.js?v=1.0.0"></script>
-  <script src="/js/comments.js?v=1.0.2"></script>
+  <script src="/js/comments.min.js?v=1.0.2"></script>
   <script src="https://www.google.com/recaptcha/api.js?render=explicit&onload=onRecaptchaLoadCallback" defer></script>';
   }
 elseif($_GET[p]=="table") 
   {
-  if(strstr($_GET[lid], "playoff")) echo '  <script type="text/javascript" src="/js/games_events.js?v=1.0.4"></script>';
-  echo '  <script type="text/javascript" src="/js/table_events.js?v=1.0.1"></script>';
+  if(strstr($_GET[lid], "playoff")) echo '  <script type="text/javascript" src="/js/games_events.min.js?v=1.0.4"></script>';
+  echo '  <script type="text/javascript" src="/js/table_events.min.js?v=1.0.1"></script>';
   }
 elseif($_GET[p]=="teams") echo '  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION[lang].'.js?v=1.0.0"></script>
   <script type="text/javascript" src="/js/teams_events.js?v=1.0.1"></script>
   <script src="/js/jquery.emojiarea.min.js?v=1.0.0"></script>
   <script src="/images/smilies/emojis.js?v=1.0.0"></script>
-  <script src="/js/comments.js?v=1.0.2"></script>
+  <script src="/js/comments.min.js?v=1.0.2"></script>
   <script src="https://www.google.com/recaptcha/api.js?render=explicit&onload=onRecaptchaLoadCallback" defer></script>';
 elseif($_GET[p]=="fantasy") echo '  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION[lang].'.js?v=1.0.0"></script>
-  <script type="text/javascript" src="/js/fantasy_events.js?v=1.0.3"></script>
+  <script type="text/javascript" src="/js/fantasy_events.min.js?v=1.0.3"></script>
   <script src="/js/jquery.emojiarea.min.js?v=1.0.0"></script>
   <script src="/images/smilies/emojis.js?v=1.0.0"></script>
-  <script src="/js/comments.js?v=1.0.2"></script>
+  <script src="/js/comments.min.js?v=1.0.2"></script>
   <script src="https://www.google.com/recaptcha/api.js?render=explicit&onload=onRecaptchaLoadCallback" defer></script>';
 elseif($_GET[p]=="users" && !$_GET[notif] && !$id) echo '  <script src="/js/croppie.min.js?v=2.6.4"></script>
   <script src="https://code.responsivevoice.org/responsivevoice.js?key=ZN9dlYeg" defer></script>
   <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION[lang].'.js?v=1.0.1"></script>
-  <script type="text/javascript" src="/js/user_events.js?v=1.0.7"></script>';
+  <script type="text/javascript" src="/js/user_events.min.js?v=1.0.7"></script>';
 elseif($_GET[p]=="report") echo '  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION[lang].'.js?v=1.0.0"></script>
   <script type="text/javascript" src="/js/jquery.cookie.js"></script>
   <script src="https://code.responsivevoice.org/responsivevoice.js?key=ZN9dlYeg" defer></script>
   <script type="text/javascript" src="/js/report_events.php?id='.$id.$el.'"></script>
   <script src="/js/jquery.emojiarea.min.js?v=1.0.0"></script>
   <script src="/images/smilies/emojis.js?v=1.0.0"></script>
-  <script src="/js/comments.js?v=1.0.2"></script>
+  <script src="/js/comments.min.js?v=1.0.2"></script>
   <script src="https://www.google.com/recaptcha/api.js?render=explicit&onload=onRecaptchaLoadCallback" defer></script>';
 elseif($_GET[p]=="articles") echo '  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION[lang].'.js?v=1.0.0"></script>
   <script src="/js/jquery.fancybox.min.js?v=3.5.7"></script>
   <script src="/js/jquery.emojiarea.min.js?v=1.0.0"></script>
   <script src="/images/smilies/emojis.js?v=1.0.0"></script>
-  <script src="/js/comments.js?v=1.0.2"></script>
+  <script src="/js/comments.min.js?v=1.0.2"></script>
   <script src="https://www.google.com/recaptcha/api.js?render=explicit&onload=onRecaptchaLoadCallback" defer></script>';
 elseif($_GET[p]=="players") echo '  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION[lang].'.js?v=1.0.0"></script>
   <script src="/js/jquery.emojiarea.min.js?v=1.0.0"></script>
   <script src="/images/smilies/emojis.js?v=1.0.0"></script>
-  <script src="/js/comments.js?v=1.0.2"></script>
+  <script src="/js/comments.min.js?v=1.0.2"></script>
   <script src="https://www.google.com/recaptcha/api.js?render=explicit&onload=onRecaptchaLoadCallback" defer></script>';
 
 if($_GET[p]=="stats" || $_GET[p]=="players" || $_GET[p]=="teams" || $_GET[p]=="bets" || $_GET[p]=="fantasy") echo '  <script type="text/javascript" src="/vendor/datatables/jquery.dataTables.min.js?v=1.13.4"></script>
@@ -647,11 +650,38 @@ if($_GET[p]=="stats" || $_GET[p]=="players" || $_GET[p]=="teams" || $_GET[p]=="b
 echo $script_end;
 ?>
   <link href="/vendor/fontawesome-free/css/all.min.css?v=6.4.0" rel="stylesheet" type="text/css">
-  <link href="/css/league-logos.css?v=1.0.7" rel="stylesheet" type="text/css">
-  <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+  <link href="/css/league-logos.min.css?v=1.0.8" rel="stylesheet" type="text/css">
+  <link rel="preload" href="https://fonts.googleapis.com/css?family=Nunito:300,300i,400,400i,700,700i,800,800i,900,900i&display=swap" as="style" onload="this.rel='stylesheet'">
+    <noscript class="async-css"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:300,300i,400,400i,700,700i,800,800i,900,900i&display=swap"></noscript>
+
+    <script>
+    function supportsToken(token) {
+    return function(relList) {
+        if (relList.supports && token) {
+        return relList.supports(token)
+        }
+        return false
+    }
+    }
+        
+    ;(function () {
+    var supportsPreload = supportsToken("preload")
+    var rl = document.createElement("link").relList
+    if (!supportsPreload(rl)) {
+        var styles = document.getElementsByTagName('noscript')
+        for (var i = 0 ; i < styles.length ; i++) {
+        if (styles[i].getAttribute('class') === 'async-css') {
+            var div = document.createElement('div')
+            div.innerHTML = styles[i].innerHTML
+            document.body.appendChild(div)
+        }
+        }
+    }
+    })()
+    </script>
 
   <link href="/css/template.min.css?v=1.0.2" rel="stylesheet">
-  <link href="/css/main.css?v=1.2.9" rel="stylesheet">
+  <link href="/css/main.min.css?v=1.4.0" rel="stylesheet">
 </body>
 
 </html>

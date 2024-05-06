@@ -43,7 +43,7 @@
     $lid = $_GET[lid];
     if($lid=="contest") {
       // sutaz o karticky
-      $sQuery = "SELECT SQL_CALC_FOUND_ROWS t.userid,t.matchid,m.datetime,sum(t.points) as points, count(t.id) as poc, u.uname, u.uid, u.user_avatar FROM el_tips t LEFT JOIN el_matches m ON m.id=t.matchid LEFT JOIN e_xoops_users u ON u.uid=t.userid WHERE t.league='145' && m.datetime>'2023-02-01 00:00:00' GROUP BY t.userid ORDER BY points DESC $sLimit";
+      $sQuery = "SELECT SQL_CALC_FOUND_ROWS t.userid,t.matchid,m.datetime,sum(t.points) as points, count(t.id) as poc, u.uname, u.uid, u.user_avatar FROM el_tips t LEFT JOIN el_matches m ON m.id=t.matchid LEFT JOIN e_xoops_users u ON u.uid=t.userid WHERE t.league='154' && m.datetime>'2024-02-14 00:00:00' GROUP BY t.userid ORDER BY points DESC $sLimit";
     }
     else {
       $sel = mysql_query("SELECT el FROM 2004leagues WHERE id='$lid'");

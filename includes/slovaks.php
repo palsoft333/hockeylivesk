@@ -9,18 +9,19 @@ $slovaks = array(
 //"JAROŠ Christián" => "NJD",
 //"JURČO Tomáš" => "VGK",
 "KELEMEN Miloš" => "ARI",
+"KOCH Patrik" => "ARI",
 //"KOPECKÝ Tomáš" => "FLA",
 //"KŇAŽKO Samuel" => "CBJ",
 //"MARINČIN Martin" => "TOR",
 //"MEŠÁR Filip" => "MTL",
 "NEMEC Šimon" => "NJD",
 "POSPÍŠIL Martin" => "CGY",
-"RUŽIČKA Adam" => "CGY",
-//"REGENDA Pavol" => "ANA",
+"RUŽIČKA Adam" => "ARI",
+"REGENDA Pavol" => "ANA",
 "SLAFKOVSKÝ Juraj" => "MTL",
 "STUDENIČ Marián" => "SEA",
 //"PÁNIK Richard" => "NYI",
-"TATAR Tomáš" => "COL"
+"TATAR Tomáš" => "SEA"
 );
 
 // SVK brankari

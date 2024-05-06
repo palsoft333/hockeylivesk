@@ -19,22 +19,35 @@ if(mysql_num_rows($q)>0)
   $article_meta_tags = '<meta property="og:title" content="'.$f[title].'" />
       <meta property="og:type" content="article" />
       <meta property="og:url" content="https://'.$_SERVER[HTTP_HOST].$_SERVER[REQUEST_URI].'" />
-      <meta property="og:description" content="'.$desc.'" />     
+      <meta property="og:description" content="'.trim($desc).'" />     
       <meta name="twitter:card" content="summary" />
       <meta name="twitter:title" content="'.$f[title].'" />
       <meta name="twitter:description" content="'.$desc.'" />
   ';
 
   $f[hometext] = str_replace("news-image","col-12 col-sm-5 col-xl-2 float-left img-thumbnail mr-3 mb-2 p-1",$f[hometext]);
+  $f["bodytext"] = preg_replace_callback('/\[\[games-table\]\]/', function ($matches) { Global $f; return generateGamesTable($f["lid"]); }, $f["bodytext"]);
+  $f["bodytext"] = preg_replace_callback('/\[\[team-roster\]\]/', function ($matches) { Global $f; return generateRoster("SVK",$f["lid"]); }, $f["bodytext"]);
 
   $content .= '
   <div class="row">
     <div class="col-lg-9 mb-3">
       <div class="card shadow mb-3">
-        <div class="card-body">
-          <p class="h6 h6-fluid font-weight-bold text-'.$leaguecolor.' text-uppercase">'.$f[topic_title].'</h2>
-          <h2 class="h2 h2-fluid">'.$f[title].'</h2>
+        <div class="card-body">';
+            if($f["lid"]!=null) {
+$content .= '
+          <h1 class="h2 h2-fluid font-weight-bold text-'.$leaguecolor.'">'.$f[title].'</h1>
           <div class="text-justify p-fluid">'.$f[hometext].$f[bodytext].'</div>
+';
+            }
+            else {
+$content .= '
+          <h2 class="h6 h6-fluid font-weight-bold text-'.$leaguecolor.' text-uppercase">'.$f[topic_title].'</h2>
+          <h1 class="h2 h2-fluid">'.$f[title].'</h1>
+          <div class="text-justify p-fluid">'.$f[hometext].$f[bodytext].'</div>
+';
+            }
+$content .= '
         </div>
       </div>
       <div class="card shadow">
@@ -43,7 +56,9 @@ if(mysql_num_rows($q)>0)
           </div>
       </div>
     </div>
-    <div class="col-lg-3">
+    <div class="col-lg-3">';
+    if($f["lid"]==null) {
+$content .= '
       <div class="card shadow mb-3">
         <div class="card-body text-center">
           <div class="m-auto w-25" style="max-width: 100px; min-width: 60px;">
@@ -54,6 +69,9 @@ if(mysql_num_rows($q)>0)
           <p class="small"><strong>'.LANG_PUBLISHED.':</strong> '.date("j.n.Y H:i",$f[published]).'</p>
         </div>
       </div>
+';
+    }
+$content .= '
       <div class="card shadow mb-2 articleBanner">
         <div class="card-body">
           <!--<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>-->

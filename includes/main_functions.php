@@ -27,8 +27,8 @@ function Get_SEO_title($topicID, $provided=false) {
         $q = mysql_query("SELECT * FROM e_xoops_topics WHERE topic_id='".$topicID."'");
         $f = mysql_fetch_array($q);
     }
-    if(strstr($f["topic_title"], "U20")) $title = "Majstrovstvá sveta do 20 rokov";
-    elseif(strstr($f["topic_title"], "MS ")) $title = str_replace("MS ", "Majstrovstvá sveta ", $f["topic_title"]);
+    if(strstr($f["topic_title"], "U20")) $title = "Majstrovstvá sveta v hokeji do 20 rokov";
+    elseif(strstr($f["topic_title"], "MS ")) $title = str_replace("MS ", "Majstrovstvá sveta v hokeji ", $f["topic_title"]);
     elseif(strstr($f["topic_title"], "ZOH ")) $title = str_replace("ZOH ", "Zimné olympijské hry ", $f["topic_title"]);
     else $title = $f["topic_title"];
     return $title;
@@ -40,7 +40,6 @@ function Get_SEO_title($topicID, $provided=false) {
 * @param $name string - názov ligy
 * @return $color string - farba podľa Boostrap konvencie
 */
-
 function LeagueColor($name) {
     $name = SEOtitle($name);
     if (preg_match('/nemecky|tipsport|extraliga|khl|nhl|ms|zoh|kaufland|slovakia|loto|challenge|skoda|svetovy/', $name, $matches)) {
@@ -85,15 +84,25 @@ function LeagueColor($name) {
 */
 
 function LeagueFont($name) {
-    if(strstr($name, 'Tipsport') || strstr($name, 'Extraliga')) $font = "tipsport";
-    elseif(strstr($name, 'KHL')) $font = "khl";
-    elseif(strstr($name, 'NHL')) $font = "nhl";
-    elseif(strstr($name, 'MS')) $font = "iihf";
-    elseif(strstr($name, 'ZOH')) $font = "olympics";
-    elseif(strstr($name, 'Kaufland') || strstr($name, 'Slovakia') || strstr($name, 'Loto')) $font = "kauflandcup";
-    elseif(strstr($name, 'Challenge') || strstr($name, 'Škoda')) $font = "arosa";
-    else $font = "dcup";
-    return $font;
+    $name = mb_strtolower($name, 'UTF-8');
+
+    $leagueFontMapping = [
+        'tipsport' => ['tipsport', 'extraliga'],
+        'khl' => ['khl'],
+        'nhl' => ['nhl'],
+        'iihf' => ['ms'],
+        'olympics' => ['zoh'],
+        'kauflandcup' => ['kaufland', 'slovakia', 'loto'],
+        'arosa' => ['challenge', 'škoda'],
+    ];
+
+    foreach ($leagueFontMapping as $font => $leagueNames) {
+        if (array_intersect($leagueNames, explode(' ', $name))) {
+            return $font;
+        }
+    }
+
+    return 'dcup';
 }
 
 /*
@@ -151,6 +160,7 @@ function Generate_Menu($active_league = FALSE) {
                       </div>
                       <div class="collapse-divider"></div>
                       <h6 class="collapse-header">Odkazy:</h6>
+                      '.($f["info_id"]!=null ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/info/'.$f["info_id"].'-'.SEOtitle(Get_SEO_title($f[topic_title],1)).'"><span itemprop="name">Informácie</span><i class="fas fa-circle-info fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                       <a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/category/'.$f[topic_id].'-'.SEOtitle(Get_SEO_title($f[topic_title],1)).'"><span itemprop="name">'.LANG_NAV_NEWS.'</span><i class="fas fa-newspaper fa-fw float-right text-gray-500 my-1"></i></a>
                       '.($f[el]>0 && $f[endbasic]==1 ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/table/'.$f[id].'-'.SEOtitle(Get_SEO_title($f[topic_title],1)).'/playoff"><span itemprop="name">'.LANG_TEAMTABLE_PLAYOFF.'</span><i class="fas fa-trophy fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                       <a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="'.($f[endbasic]==1 && $f[el]==0 ? "/table/".$f[id]."-".SEOtitle(Get_SEO_title($f[topic_title],1))."/playoff" : "/games/".$f[id]."-".SEOtitle(Get_SEO_title($f[topic_title],1))).'"><span itemprop="name">'.LANG_NAV_UPCOMMING.'</span><i class="fas fa-hockey-puck fa-fw float-right text-gray-500 my-1"></i>'.$badge.'</a>
@@ -160,7 +170,7 @@ function Generate_Menu($active_league = FALSE) {
                       '.(strstr($f[longname], 'KHL') ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/slovaks/'.$f[id].'-'.SEOtitle(Get_SEO_title($f[topic_title],1)).'"><span itemprop="name">'.LANG_NAV_SLOVAKI.'</span><i class="fas fa-user-shield fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                       '.($f[el]>0 && $f[topic_id]!=60 ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/injured/'.$f[id].'-'.SEOtitle(Get_SEO_title($f[topic_title],1)).'"><span itemprop="name">'.LANG_NAV_INJURED.'</span><i class="fas fa-user-injured fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                       '.($f[el]>0 ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/transfers/'.$f[id].'-'.SEOtitle(Get_SEO_title($f[topic_title],1)).'"><span itemprop="name">'.LANG_NAV_TRANSFERS.'</span><i class="fas fa-exchange-alt fa-fw float-right text-gray-500 my-1"></i></a>':'').'
-                      '.($f[id]==150 ? '<a itemprop="url" class="collapse-item font-weight-bold text-success" href="/fantasy/draft"><span itemprop="name">Fantasy MS</span><i class="fas fa-wand-magic-sparkles fa-fw float-right text-gray-500 my-1"></i></a>':'').'
+                      '.($f[id]==153 ? '<a itemprop="url" class="collapse-item font-weight-bold text-success" href="/fantasy/draft"><span itemprop="name">Fantasy MS</span><i class="fas fa-wand-magic-sparkles fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                       '.($f[id]==144 ? '<a itemprop="url" class="collapse-item font-weight-bold text-danger" href="/fantasy/main"><span itemprop="name">Fantasy KHL</span><i class="fas fa-wand-magic-sparkles fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                     </div>
                   </div>
@@ -640,56 +650,56 @@ function ShowComment($item, $from_latest=false)
   if($item['main'][3]==0 && $item['main'][4]!=NULL) $item['main'][1] = $item['main'][4];
   if($item['main'][3]==0 && $item['main'][4]==NULL) $item['main'][1] = "neregistrovaný";
   $comm = $item['main'][6];
-  $comm = str_replace(':hladkamsa:','<img src="/images/smilies/boast.gif" class="align-text-bottom">',$comm);
-  $comm = str_replace(':agresivny:','<img src="/images/smilies/aggressive.gif" class="align-text-bottom">',$comm);
-  $comm = str_replace(':tlieskam:','<img src="/images/smilies/clapping.gif" class="align-text-bottom">',$comm);
-  $comm = str_replace(':auu:','<img src="/images/smilies/vava.gif" class="align-text-bottom">',$comm);
-  $comm = str_replace(':beee:','<img src="/images/smilies/beee.gif" class="align-text-bottom">',$comm);
-  $comm = str_replace(':nono:','<img src="/images/smilies/nea.gif" class="align-text-bottom">',$comm);
-  $comm = str_replace(':ee:','<img src="/images/smilies/nea.gif" class="align-text-bottom">',$comm);
-  $comm = str_replace(':stop:','<img src="/images/smilies/stop.gif" class="align-text-bottom">',$comm);
-  $comm = str_replace(':pocuvam:','<img src="/images/smilies/music2.gif" class="align-text-bottom">',$comm);
-  $comm = str_replace(':bomba:','<img src="/images/smilies/bomb.gif" class="align-text-bottom">',$comm);
-  $comm = str_replace(':pifko:','<img src="/images/smilies/drinks.gif" class="align-text-bottom">',$comm);
-  $comm = str_replace(':king:','<img src="/images/smilies/king.gif" class="align-text-bottom">',$comm);
-  $comm = str_replace(':ok:','<img src="/images/smilies/ok.gif" class="align-text-bottom">',$comm);
-  $comm = str_replace(':plazujem:','<img src="/images/smilies/beach.gif" class="align-text-bottom">',$comm);
-  $comm = str_replace(':placem:','<img src="/images/smilies/cray.gif" class="align-text-bottom">',$comm);
-  $comm = str_replace(':tancujem:','<img src="/images/smilies/dance4.gif" class="align-text-bottom">',$comm);
-  $comm = str_replace(':rofl:','<img src="/images/smilies/ROFL.gif" class="align-text-bottom">',$comm);
-  $comm = str_replace(':cmuk:','<img src="/images/smilies/kiss3.gif" class="align-text-bottom">',$comm);
-  $comm = str_replace(':lenivy:','<img src="/images/smilies/lazy.gif" class="align-text-bottom">',$comm);
-  $comm = str_replace(':sok:','<img src="/images/smilies/shok.gif" class="align-text-bottom">',$comm);
-  $comm = str_replace(':anjel:','<img src="/images/smilies/angel.gif" class="align-text-bottom">',$comm);
-  $comm = str_replace(':ciga:','<img src="/images/smilies/smoke.gif" class="align-text-bottom">',$comm);
-  $comm = str_replace(':hladam:','<img src="/images/smilies/search.gif" class="align-text-bottom">',$comm);
-  $comm = str_replace(':jo:','<img src="/images/smilies/yes3.gif" class="align-text-bottom">',$comm);
-  $comm = str_replace(':mojesrdce:','<img src="/images/smilies/give_heart2.gif" class="align-text-bottom">',$comm);
-  $comm = str_replace(':dik:','<img src="/images/smilies/thank_you2.gif" class="align-text-bottom">',$comm);
-  $comm = str_replace(':sisi:','<img src="/images/smilies/wacko.gif" class="align-text-bottom">',$comm);
-  $comm = str_replace(':lol:','<img src="/images/smilies/lol.gif" class="align-text-bottom">',$comm);
-  $comm = str_replace(':sorry:','<img src="/images/smilies/sorry.gif" class="align-text-bottom">',$comm);
-  $comm = str_replace(':toto:','<img src="/images/smilies/this.gif" class="align-text-bottom">',$comm);
-  $comm = str_replace(':bodycheck:','<img src="/images/smilies/bodycheck.gif" class="align-text-bottom">',$comm);
-  $comm = str_replace(':modry:','<img src="/images/smilies/modry.gif" class="align-text-bottom">',$comm);
-  $comm = str_replace(':cerveny:','<img src="/images/smilies/cerveny.gif" class="align-text-bottom">',$comm);
-  $comm = str_replace(':)','<img src="/images/smilies/smiley.png">',$comm);
-  $comm = str_replace(':-)','<img src="/images/smilies/smiley.png">',$comm);
-  $comm = str_replace(':D','<img src="/images/smilies/smiley-lol.png">',$comm);
-  $comm = str_replace(':-D','<img src="/images/smilies/smiley-lol.png">',$comm);
-  $comm = str_replace(';)','<img src="/images/smilies/smiley-wink.png">',$comm);
-  $comm = str_replace(';-)','<img src="/images/smilies/smiley-wink.png">',$comm);
+  $comm = str_replace(':hladkamsa:','<img src="/images/smilies/boast.gif" class="align-text-bottom" alt=":hladkamsa:">',$comm);
+  $comm = str_replace(':agresivny:','<img src="/images/smilies/aggressive.gif" class="align-text-bottom" alt=":agresivny:">',$comm);
+  $comm = str_replace(':tlieskam:','<img src="/images/smilies/clapping.gif" class="align-text-bottom" alt=":tlieskam:">',$comm);
+  $comm = str_replace(':auu:','<img src="/images/smilies/vava.gif" class="align-text-bottom" alt=":auu:">',$comm);
+  $comm = str_replace(':beee:','<img src="/images/smilies/beee.gif" class="align-text-bottom" alt=":beee:">',$comm);
+  $comm = str_replace(':nono:','<img src="/images/smilies/nea.gif" class="align-text-bottom" alt=":nono:">',$comm);
+  $comm = str_replace(':ee:','<img src="/images/smilies/nea.gif" class="align-text-bottom" alt=":ee:">',$comm);
+  $comm = str_replace(':stop:','<img src="/images/smilies/stop.gif" class="align-text-bottom" alt=":stop:">',$comm);
+  $comm = str_replace(':pocuvam:','<img src="/images/smilies/music2.gif" class="align-text-bottom" alt=":pocuvam:">',$comm);
+  $comm = str_replace(':bomba:','<img src="/images/smilies/bomb.gif" class="align-text-bottom" alt=":bomba:">',$comm);
+  $comm = str_replace(':pifko:','<img src="/images/smilies/drinks.gif" class="align-text-bottom" alt=":pifko:">',$comm);
+  $comm = str_replace(':king:','<img src="/images/smilies/king.gif" class="align-text-bottom" alt=":king:">',$comm);
+  $comm = str_replace(':ok:','<img src="/images/smilies/ok.gif" class="align-text-bottom" alt=":ok:">',$comm);
+  $comm = str_replace(':plazujem:','<img src="/images/smilies/beach.gif" class="align-text-bottom" alt=":plazujem:">',$comm);
+  $comm = str_replace(':placem:','<img src="/images/smilies/cray.gif" class="align-text-bottom" alt=":placem:">',$comm);
+  $comm = str_replace(':tancujem:','<img src="/images/smilies/dance4.gif" class="align-text-bottom" alt=":tancujem:">',$comm);
+  $comm = str_replace(':rofl:','<img src="/images/smilies/ROFL.gif" class="align-text-bottom" alt=":rofl:">',$comm);
+  $comm = str_replace(':cmuk:','<img src="/images/smilies/kiss3.gif" class="align-text-bottom" alt=":cmuk:">',$comm);
+  $comm = str_replace(':lenivy:','<img src="/images/smilies/lazy.gif" class="align-text-bottom" alt=":lenivy:">',$comm);
+  $comm = str_replace(':sok:','<img src="/images/smilies/shok.gif" class="align-text-bottom" alt=":sok:">',$comm);
+  $comm = str_replace(':anjel:','<img src="/images/smilies/angel.gif" class="align-text-bottom" alt=":anjel:">',$comm);
+  $comm = str_replace(':ciga:','<img src="/images/smilies/smoke.gif" class="align-text-bottom" alt=":ciga:">',$comm);
+  $comm = str_replace(':hladam:','<img src="/images/smilies/search.gif" class="align-text-bottom" alt=":hladam:">',$comm);
+  $comm = str_replace(':jo:','<img src="/images/smilies/yes3.gif" class="align-text-bottom" alt=":jo:">',$comm);
+  $comm = str_replace(':mojesrdce:','<img src="/images/smilies/give_heart2.gif" class="align-text-bottom" alt=":mojesrdce:">',$comm);
+  $comm = str_replace(':dik:','<img src="/images/smilies/thank_you2.gif" class="align-text-bottom" alt=":dik:">',$comm);
+  $comm = str_replace(':sisi:','<img src="/images/smilies/wacko.gif" class="align-text-bottom" alt=":sisi:">',$comm);
+  $comm = str_replace(':lol:','<img src="/images/smilies/lol.gif" class="align-text-bottom" alt=":lol:">',$comm);
+  $comm = str_replace(':sorry:','<img src="/images/smilies/sorry.gif" class="align-text-bottom" alt=":sorry:">',$comm);
+  $comm = str_replace(':toto:','<img src="/images/smilies/this.gif" class="align-text-bottom" alt=":toto:">',$comm);
+  $comm = str_replace(':bodycheck:','<img src="/images/smilies/bodycheck.gif" class="align-text-bottom" alt=":bodycheck:">',$comm);
+  $comm = str_replace(':modry:','<img src="/images/smilies/modry.gif" class="align-text-bottom" alt=":modry:">',$comm);
+  $comm = str_replace(':cerveny:','<img src="/images/smilies/cerveny.gif" class="align-text-bottom" alt=":cerveny:">',$comm);
+  $comm = str_replace(':)','<img src="/images/smilies/smiley.png" alt=":)">',$comm);
+  $comm = str_replace(':-)','<img src="/images/smilies/smiley.png" alt=":-)">',$comm);
+  $comm = str_replace(':D','<img src="/images/smilies/smiley-lol.png" alt=":D">',$comm);
+  $comm = str_replace(':-D','<img src="/images/smilies/smiley-lol.png" alt=":-D">',$comm);
+  $comm = str_replace(';)','<img src="/images/smilies/smiley-wink.png" alt=";)">',$comm);
+  $comm = str_replace(';-)','<img src="/images/smilies/smiley-wink.png" alt=";-)">',$comm);
     $comment .= '<div class="card message bg-light mb-2"'.($item['main'][3]==$_SESSION[logged] ? ' style="background-color: #f5f5f5;"':'').'>
             <div class="card-body p-2">
                 <div class="media d-block d-sm-flex">';
     if($item['main'][3]==0) $comment .= '    
                 <div class="align-self-start mr-3 text-center float-left float-sm-none">
-                    <img class="img-thumbnail rounded-circle align-self-start" src="'.($item['main'][5]!='' ? '/images/user_avatars/'.$item['main'][3].'.'.$item['main'][5].'?'.filemtime('images/user_avatars/'.$item['main'][3].'.'.$item['main'][5]) : '/img/players/no_photo.jpg').'" style="width: 50px; height: 50px;">
+                    <img class="img-thumbnail rounded-circle align-self-start" src="'.($item['main'][5]!='' ? '/images/user_avatars/'.$item['main'][3].'.'.$item['main'][5].'?'.filemtime('images/user_avatars/'.$item['main'][3].'.'.$item['main'][5]) : '/img/players/no_photo.jpg').'" style="width: 50px; height: 50px;" alt="'.$nick.'">
                     <div class="text-muted text-center message-author"><small>'.$item['main'][1].'</small></div>
                 </div>';
     else $comment .= '    
                 <a href="/user/'.$item['main'][3].'-'.SEOtitle($nick).'" class="align-self-start mr-3 text-center float-left float-sm-none">
-                    <img class="img-thumbnail rounded-circle align-self-start" src="'.($item['main'][5]!='' ? '/images/user_avatars/'.$item['main'][3].'.'.$item['main'][5].'?'.filemtime('images/user_avatars/'.$item['main'][3].'.'.$item['main'][5]) : '/img/players/no_photo.jpg').'" style="width: 50px; height: 50px;">
+                    <img class="img-thumbnail rounded-circle align-self-start" src="'.($item['main'][5]!='' ? '/images/user_avatars/'.$item['main'][3].'.'.$item['main'][5].'?'.filemtime('images/user_avatars/'.$item['main'][3].'.'.$item['main'][5]) : '/img/players/no_photo.jpg').'" style="width: 50px; height: 50px;" alt="'.$nick.'">
                     <div class="text-muted text-center message-author"><small>'.$item['main'][1].'</small></div>
                 </a>';
     $comment .='
@@ -1245,7 +1255,7 @@ function SendMail($to, $subject, $message) {
             SendPush($to, $subject, $message);
         }
     }
-  }
+}
 
 function SendPush($to, $subject, $message) {
     $q = mysql_query("SELECT * FROM e_xoops_users WHERE email='".$to."'");

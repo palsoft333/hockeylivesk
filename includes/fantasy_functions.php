@@ -58,6 +58,7 @@ if($_GET[save]==1)
 function PreDraft()
   {
   Global $manazerov;
+  include("lang/lang_".strtolower($_SESSION["lang"]).".php");
   $q = mysql_query("SELECT * FROM ft_players ORDER BY round DESC, id DESC");
   $f = mysql_fetch_array($q);
   $po = mysql_query("SELECT * FROM ft_players WHERE round='$f[round]'");
@@ -302,8 +303,10 @@ function Show_Drafted()
   $drafted .= '</tbody></table></div></div></div></div>';
   }
   
+  $drafted .= '<div id="101390-1"><script src="//ads.themoneytizer.com/s/gen.js?type=1"></script><script src="//ads.themoneytizer.com/s/requestform.js?siteId=101390&formatId=1"></script></div>';
+  
   $drafted .= '
-    <div class="card mb-4 shadow animated--grow-in">
+    <div class="card my-4 shadow animated--grow-in">
     <div class="card-header">
       <h6 class="m-0 font-weight-bold text-'.$leaguecolor.'"">
         '.LANG_FANTASY_PICKSTITLE2.'

@@ -11,7 +11,7 @@ else {
 }
 
 $uid = $_SESSION['logged'];
-//if($uid==2) { $uid=1319; /*$_SESSION[logged]=215;*/ } 
+if($uid==2) { $uid=1319; $_SESSION[logged]=1319; } 
 
 // vymena hraca vo Fantasy Championship
 if($_GET[action]=="change")
@@ -49,13 +49,13 @@ if($_GET[action]=="change")
     $p = MySQL_Query("SELECT * FROM ft_players WHERE pid='$pid' && uid='$uid'");
     $o = mysql_fetch_array($p);
     if($o[gk]==1) {
-      $q = MySQL_Query("SELECT f.*, (f.w*2)+(f.so)*2 as points, p.name, 'GK' as pos, p.league FROM `ft_players` f LEFT JOIN 2004goalies p ON p.id=f.pid WHERE pid='$pid' && uid='$uid'");
+      $q = MySQL_Query("SELECT f.*, (f.w*2)+(f.so)*2 as points, p.name, 'GK' as pos, p.league, p.teamshort FROM `ft_players` f LEFT JOIN 2004goalies p ON p.id=f.pid WHERE pid='$pid' && uid='$uid'");
       $f = mysql_fetch_array($q);
       $hl = "Výmena brankára";
       $po = '('.$f[w].' výhier + '.$f[so].' čistých kont)';
     }
     else {
-      $q = MySQL_Query("SELECT f.*, f.g+f.a as points, p.name, p.pos, p.league FROM `ft_players` f LEFT JOIN 2004players p ON p.id=f.pid WHERE pid='$pid' && uid='$uid'");
+      $q = MySQL_Query("SELECT f.*, f.g+f.a as points, p.name, p.pos, p.league, p.teamshort FROM `ft_players` f LEFT JOIN 2004players p ON p.id=f.pid WHERE pid='$pid' && uid='$uid'");
       $f = mysql_fetch_array($q);
       $hl = "Výmena hráča";
       $po = '('.$f[g].'G + '.$f[a].'A)';
@@ -103,7 +103,7 @@ if($_GET[action]=="change")
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">'.LANG_CLOSE.'</button>
-          <button type="button" class="btn btn-hl change">Vymeniť</button>
+          <button type="button" class="btn btn-hl change"'.(in_array($f["teamshort"],$exc) ? " disabled":"").'>Vymeniť</button>
         </div>
       </div>
     </div>';

@@ -1,23 +1,23 @@
 <?php
 $params = explode("/", htmlspecialchars($_GET[id]));
 
-$nazov = "Fantasy Junior Championship";
-$menu = "MS U20 2024";
-$skratka = "MS U20";
+$nazov = "Fantasy Championship";
+$menu = "MS 2024";
+$skratka = "MS";
 $manazerov = 10;
-$article_id = 2436;
-$league_id = 150;
+$article_id = 2484;
+$league_id = 153;
 //$timeout = 480;
 $predraftt = 1; // = draftuje sa do zásobníka. ak 1, upraviť počet manažérov aj v includes/fantasy_functions.php
-$knownrosters = 1; // = su zname zostavy (do ft_choices pridat hracov, ktori sa zucastnia)
-$article_rosters = 2435;
-$draft_start = "2023-12-18 08:00:00";
-$league_start = "2023-12-26 12:00:00";
+$knownrosters = 0; // = su zname zostavy (do ft_choices pridat hracov, ktori sa zucastnia)
+$article_rosters = 2487;
+$draft_start = "2024-05-02 09:00:00";
+$league_start = "2024-05-10 16:20:00";
 
 /*
 1. nastaviť dátum deadlinu
 2. odremovať potrebné veci
-3. vyprázdniť ft_players, ft_predraft, ft_teams a ft_changes
+3. vyprázdniť ft_players, ft_predraft, ft_teams, ft_choices a ft_changes
 4. zmeniť link v menu
 5. vypnúť/zapnúť cronjob pre neaktivitu a nulovanie bodov
 6. ak je knownroster=1 do ft_choices pridat hracov a brankarov, ktori sa zucastnia
@@ -42,7 +42,7 @@ $leag = mysql_query("SELECT * FROM 2004leagues WHERE longname LIKE '%$skratka%' 
 $league = mysql_fetch_array($leag);
 $leaguecolor = $league[color];
 $active_league = $league[id];
-//if($uid==2) { $uid=215; /*$_SESSION[logged]=215;*/ } 
+//if($uid==2) { $uid=3203; /*$_SESSION[logged]=215;*/ } 
 
 // cron job pre vyber random hraca pri necinnosti manazera
 if($_GET[cron]==1)
@@ -92,7 +92,7 @@ if($_GET[cron]==1)
     else $y = mysql_query("SELECT * FROM `ft_choices` WHERE pos='GK' && id NOT IN (SELECT pid FROM ft_players) ORDER BY rand() LIMIT 1");
     $u = mysql_fetch_array($y);
     if($knownrosters==0) mysql_query("REPLACE INTO ft_choices (id, teamshort, teamlong, pos, name) VALUES ('$u[id]', '$u[teamshort]', '$u[teamlong]', 'GK', '$u[name]')");
-    mysql_query("INSERT INTO ft_players (uid, pid, round, type) VALUES ('$uid', '$u[id]', '$round', '1')");
+    mysql_query("INSERT INTO ft_players (uid, pid, round, type, gk) VALUES ('$uid', '$u[id]', '$round', '1', '1')");
     }
     
   function PickPlayer($uid, $pos)
@@ -177,6 +177,7 @@ if($params[0]=="draft")
   // odosle info o dostupnych zostavach do draft_autocomplete.php
   if($knownrosters==1) $_SESSION["knownrosters"]=1;
   else $_SESSION["knownrosters"]=0;
+  $title = $nazov." - ".LANG_FANTASY_PLAYERSDRAFT;
   $hra = mysql_query("SELECT t.*, u.push_id FROM ft_teams t LEFT JOIN e_xoops_users u ON u.uid=t.uid WHERE t.uid='$uid';");
   if(strtotime($draft_start)>time()) {
     // draft ešte nezačal

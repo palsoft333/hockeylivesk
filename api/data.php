@@ -168,8 +168,14 @@ if($_GET[team])
   else die("Incorrect tournament name");
   $q = mysql_query("SELECT * FROM 2004leagues WHERE longname LIKE '".$lname."'");
   $f = mysql_fetch_array($q);
-  if($el==1) $p = mysql_query("SELECT el_players.*, dt.injury FROM el_players LEFT JOIN (SELECT name, injury FROM el_injuries WHERE league='".$f[id]."')dt ON el_players.name=dt.name WHERE el_players.teamshort='".$team."' && el_players.league='".$f[id]."' ORDER BY points DESC, goals DESC, asists DESC, gwg DESC, gtg DESC, shg DESC, ppg DESC, penalty ASC");
-  else $p = mysql_query("SELECT 2004players.*, dt.injury FROM 2004players LEFT JOIN (SELECT name, injury FROM el_injuries WHERE league='".$f[id]."')dt ON 2004players.name=dt.name WHERE 2004players.teamshort='".$team."' && 2004players.league='".$f[id]."' ORDER BY points DESC, goals DESC, asists DESC, gwg DESC, gtg DESC, shg DESC, ppg DESC, penalty ASC");
+  if($el==1) {
+      $p = mysql_query("SELECT el_players.*, dt.injury FROM el_players LEFT JOIN (SELECT name, injury FROM el_injuries WHERE league='".$f[id]."')dt ON el_players.name=dt.name WHERE el_players.teamshort='".$team."' && el_players.league='".$f[id]."' ORDER BY points DESC, goals DESC, asists DESC, gwg DESC, gtg DESC, shg DESC, ppg DESC, penalty ASC");
+      $g = mysql_query("SELECT el_goalies.*, dt.injury FROM el_goalies LEFT JOIN (SELECT name, injury FROM el_injuries WHERE league='".$f[id]."')dt ON el_goalies.name=dt.name WHERE el_goalies.teamshort='".$team."' && el_goalies.league='".$f[id]."' ORDER BY name;");
+  }
+  else {
+      $p = mysql_query("SELECT 2004players.*, dt.injury FROM 2004players LEFT JOIN (SELECT name, injury FROM el_injuries WHERE league='".$f[id]."')dt ON 2004players.name=dt.name WHERE 2004players.teamshort='".$team."' && 2004players.league='".$f[id]."' ORDER BY points DESC, goals DESC, asists DESC, gwg DESC, gtg DESC, shg DESC, ppg DESC, penalty ASC");
+      $g = mysql_query("SELECT 2004goalies.*, dt.injury FROM 2004goalies LEFT JOIN (SELECT name, injury FROM el_injuries WHERE league='".$f[id]."')dt ON 2004goalies.name=dt.name WHERE 2004goalies.teamshort='".$team."' && 2004goalies.league='".$f[id]."' ORDER BY name");
+  }
   $i=0;
   while($y = mysql_fetch_array($p))
     {
@@ -200,18 +206,45 @@ if($_GET[team])
     $players["players"][$i]["stats"]["gwg"] = $y[gwg];
     $i++;
     }
-  if($el==1) $o = mysql_query("SELECT * FROM el_matches WHERE (team1short='".$team."' || team2short='".$team."') && league='".$f[id]."' ORDER BY datetime");
+  $i=0;
+  while($y = mysql_fetch_array($g))
+    {
+    $players["goalies"][$i]["id"] = $y[id].$el;
+    $players["goalies"][$i]["name"] = $y[name];
+    if($y[injury]!=NULL) $players["goalies"][$i]["injury"] = $y[injury];
+    else $players["goalies"][$i]["injury"] = 0;
+    $players["goalies"][$i]["bio"]["born"] = $y[born];
+    $players["goalies"][$i]["bio"]["hold"] = $y[hold];
+    $players["goalies"][$i]["bio"]["kg"] = $y[kg];
+    $players["goalies"][$i]["bio"]["cm"] = $y[cm];
+    $players["goalies"][$i]["stats"]["gp"] = $y[gp];
+    $players["goalies"][$i]["stats"]["sog"] = $y[sog];
+    $players["goalies"][$i]["stats"]["svs"] = $y[svs];
+    $players["goalies"][$i]["stats"]["ga"] = $y[ga];
+    $players["goalies"][$i]["stats"]["so"] = $y[so];
+    $players["goalies"][$i]["stats"]["pim"] = $y[pim];
+    $i++;
+    }
+  if($el==1) $o = mysql_query("SELECT m.*, IF(kolo=0,p.potype,NULL) as po_type FROM el_matches m LEFT JOIN el_playoff p ON (p.team1=m.team1short && p.team2=m.team2short && p.league='".$f[id]."') || (p.team2=m.team1short && p.team1=m.team2short && p.league='".$f[id]."') WHERE (m.team1short='".$team."' || m.team2short='".$team."') && m.league='".$f[id]."' ORDER BY m.datetime");
   else $o = mysql_query("SELECT * FROM 2004matches WHERE (team1short='$team' || team2short='$team') && league='".$f[id]."' ORDER BY datetime");
   $i=0;
   while($y = mysql_fetch_array($o))
     {
-    if($lang=="en") 
+    if($lang=="en")
       {
       $y[team1long] = TeamParser($y[team1long]);
       $y[team2long] = TeamParser($y[team2long]);
       $y[kedy] = StatusParser($y[kedy]);
       }
-    $players["games"][$i]["id"] = $y[id];
+    if($el==1) {
+        $y[po_type] = str_replace("stvrt", "QF", $y[po_type]);
+        $y[po_type] = str_replace("semi", "SF", $y[po_type]);
+        $y[po_type] = str_replace("final", "F", $y[po_type]);
+        $y[po_type] = str_replace("baraz", "Q", $y[po_type]);
+        $y[po_type] = str_replace("stanley", "SC", $y[po_type]);
+        if($y[po_type]=="") $y[po_type]=NULL;
+    }
+    $players["games"][$i]["id"] = $y[id].$el;
     $players["games"][$i]["po_type"] = $y[po_type];
     $players["games"][$i]["team1short"] = $y[team1short];
     $players["games"][$i]["team1long"] = $y[team1long];
@@ -417,7 +450,7 @@ elseif($_GET[game])
     $el = substr($id, -1);
     $dl = strlen($id);
     $ide = substr($id, 0, $dl-1);
-    if($el==1) $q = mysql_query("SELECT * FROM el_matches WHERE id='$ide'");
+    if($el==1) $q = mysql_query("SELECT m.*, IF(kolo=0,p.potype,NULL) as po_type FROM el_matches m LEFT JOIN el_playoff p ON (p.team1=m.team1short && p.team2=m.team2short && p.league=m.league) || (p.team2=m.team1short && p.team1=m.team2short && p.league=m.league) WHERE m.id='".$ide."'");
     else $q = mysql_query("SELECT * FROM 2004matches WHERE id='$ide'");
     }
   if(mysql_num_rows($q)>0)
@@ -431,6 +464,14 @@ elseif($_GET[game])
     $y[team2long] = TeamParser($y[team2long]);
     $y[kedy] = StatusParser($y[kedy]);
     }
+  if($el==1) {
+    $y[po_type] = str_replace("stvrt", "QF", $y[po_type]);
+    $y[po_type] = str_replace("semi", "SF", $y[po_type]);
+    $y[po_type] = str_replace("final", "F", $y[po_type]);
+    $y[po_type] = str_replace("baraz", "Q", $y[po_type]);
+    $y[po_type] = str_replace("stanley", "SC", $y[po_type]);
+    if($y[po_type]=="") $y[po_type]=NULL;
+  }
   $game["id"] = $y[id].$el;
   $game["po_type"] = $y[po_type];
   $game["team1short"] = $y[team1short];
@@ -708,7 +749,7 @@ elseif($_GET[games])
   else die("Incorrect tournament name");
   $q = mysql_query("SELECT * FROM 2004leagues WHERE longname LIKE '".$lname."'");
   $f = mysql_fetch_array($q);
-  if($el==1) $w = mysql_query("SELECT m.*, t.skupina FROM el_matches m LEFT JOIN el_teams t ON t.shortname=m.team1short && t.league='".$f[id]."' WHERE m.league='".$f[id]."' ORDER BY m.datetime ASC");
+  if($el==1) $w = mysql_query("SELECT m.*, IF(kolo=0,p.potype,NULL) as po_type FROM el_matches m LEFT JOIN el_playoff p ON (p.team1=m.team1short && p.team2=m.team2short && p.league=m.league) || (p.team2=m.team1short && p.team1=m.team2short && p.league=m.league) WHERE m.league='".$f[id]."' ORDER BY m.datetime ASC");
   else $w = mysql_query("SELECT m.*, t.skupina FROM 2004matches m LEFT JOIN 2004teams t ON t.shortname=m.team1short && t.league='".$f[id]."' WHERE m.league='".$f[id]."' ORDER BY m.datetime ASC");
   $i=0;
   while($e = mysql_fetch_array($w))
@@ -720,7 +761,15 @@ elseif($_GET[games])
       $e[kedy] = StatusParser($e[kedy]);
       }
     $games["games"][$i]["id"] = $e[id].$el;
-    $games["games"][$i]["group"] = $e[skupina];
+    if($el==0) $games["games"][$i]["group"] = $e[skupina];
+    else {
+        $e[po_type] = str_replace("stvrt", "QF", $e[po_type]);
+        $e[po_type] = str_replace("semi", "SF", $e[po_type]);
+        $e[po_type] = str_replace("final", "F", $e[po_type]);
+        $e[po_type] = str_replace("baraz", "Q", $e[po_type]);
+        $e[po_type] = str_replace("stanley", "SC", $e[po_type]);
+        if($e[po_type]=="") $e[po_type]=NULL;
+    }
     $games["games"][$i]["po_type"] = $e[po_type];
     $games["games"][$i]["team1short"] = $e[team1short];
     $games["games"][$i]["team1long"] = $e[team1long];

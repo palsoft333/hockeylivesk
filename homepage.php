@@ -63,10 +63,7 @@
                       <i class="fas fa-comments fa-2x text-gray-300"></i>
                     </div>
                   </div>
-                  <div class="overflow-auto mt-1" style="height:186px;">
-                    <div class="progress d-none" id="flash-progress">
-                      <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
-                    </div>
+                  <div class="overflow-auto mt-1 small-scrollbar" style="height:186px;">
                     <div id="flash-container" class="small"></div>
                   </div>
                 </div>
@@ -125,7 +122,7 @@
             
               <!-- Page Heading mobile only -->
               <div class="d-lg-none mb-4">
-              <h1 class="h3 mb-0 text-gray-800"><? if($_GET[topicID]) echo Get_SEO_title($_GET[topicID]); else echo LANG_NAV_NEWS; ?></h1>
+              <h2 class="h3 mb-0 text-gray-800"><? if($_GET[topicID]) echo Get_SEO_title($_GET[topicID]); else echo LANG_NAV_NEWS; ?></h2>
               </div>
               <? echo Get_news(10, $_GET[page], $_GET[topicID]); ?>
                          
@@ -142,9 +139,9 @@
               </div-->';
                 echo Get_Latest_Stats();
                 if(!$_SESSION["logged"]) echo '
-              <!--div class="advert-container card shadow mb-4">
-                <p class="m-auto p-2 small"></p>
-              </div-->';
+              <div class="advert-container card shadow mb-4">
+                <p class="m-auto p-2 small">Ak chcete získať <a href="https://skhra.com/free-spiny/">tocenia zdarma za registraciu</a>, navštívte stránku skhra.com</p>
+              </div>';
                 echo Transfers();
                 echo Favourite_Team();
                 echo Users_Online();

@@ -258,6 +258,23 @@
   background-size: 100% auto;
 }
 
+.small-scrollbar::-webkit-scrollbar {
+  width: 12px;
+}
+
+.small-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #90A4AE #f8f9fc;
+}
+.small-scrollbar::-webkit-scrollbar-track {
+  background: #f8f9fc;
+}
+.small-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #90A4AE;
+  border-radius: 6px;
+  border: 3px solid #f8f9fc;
+}
+
 .scroll-to-top {
   z-index: 2 !important;
   bottom: 2rem !important;
@@ -330,13 +347,68 @@ a.text-hl:hover, a.text-hl:focus {
   filter: alpha(opacity=60);
 }
 
+.winner {
+    transform: scale(1.5);
+    animation: 1s ease-in-out 0s 1 winnerGrow;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    height: 25% !important;
+    text-align: center !important;
+    pointer-events:none;
+}
+
+@keyframes winnerGrow {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.5);
+  }
+}
+
+.blur {
+    -webkit-filter: opacity(0.3) blur(1px);
+    filter: opacity(0.3) blur(1px);
+}
+
 .match-detail .badge {
   vertical-align: 1px;
+}
+
+.teamTable .badge {
+  width: 20px;
+  height: 20px;
+  font-size: 14px;
+  padding-left: .35rem;
+  padding-top: .2rem;
+  font-family: monospace;
 }
 
 .dataTables_wrapper label, .dataTables_info {
   white-space: normal!important;
   font-size: 80%;
+}
+
+.gamelog .game-holder {
+    margin-top:40px;
+}
+
+.gamelog .vs-team {
+    transform: rotate(270deg); 
+    position:absolute; 
+    font-size:10px; 
+    transform-origin: 0 0; 
+    height: 15px;
+}
+
+.gamelog .icons {
+    width:15px; 
+    line-height: 8px; 
+    font-size:10px;
 }
 
 .timeline {

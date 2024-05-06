@@ -238,6 +238,8 @@ function Get_Latest_Stats() {
   $brankari = array_merge($nhl_goalies, $brankari);
   $vcera = date('Y-m-d', mktime(0, 0, 0, date('m'), date('d')-1, date('Y')));
   $dnes = date("Y-m-d", mktime());
+  //array_walk($slovaks, function (&$i, $k) { $i = "'$k'"; });
+  //array_walk($brankari, function (&$i, $k) { $i = "'$k'"; });
   array_walk($slovaks, create_function('&$i,$k','$i="\'$k\'";'));
   array_walk($brankari, create_function('&$i,$k','$i="\'$k\'";'));
   $in = implode($slovaks,",");
@@ -259,16 +261,7 @@ function Get_Latest_Stats() {
       IF(JSON_UNQUOTE(JSON_EXTRACT(goalie2, '$[0]')) IN ($in_goalies),3,4)
       )
     ) as kde, ms.g1_goals, ms.g1_shots, ms.g2_goals, ms.g2_shots
-  FROM el_matches m LEFT JOIN el_matchstats ms ON ms.matchid=m.id LEFT JOIN 2004leagues l ON l.id=m.league WHERE m.kedy = 'konečný stav' && m.datetime > '$vcera 07:00' && m.datetime < '$dnes 07:00' && (JSON_UNQUOTE(JSON_EXTRACT(goalie1, '$[0]')) IN ($in_goalies) || JSON_UNQUOTE(JSON_EXTRACT(goalie1, '$[1]')) IN ($in_goalies) || JSON_UNQUOTE(JSON_EXTRACT(goalie2, '$[0]')) IN ($in_goalies) || JSON_UNQUOTE(JSON_EXTRACT(goalie2, '$[1]')) IN ($in_goalies)))
-  UNION
-(SELECT m.id, m.league, m.team1short, m.team2short, l.longname, ms.goalie1, ms.goalie2, 
-  IF(JSON_UNQUOTE(JSON_EXTRACT(goalie1, '$[0]')) IN (SELECT name FROM `2004goalies` WHERE teamshort='SVK' GROUP BY name),1,
-    IF(JSON_UNQUOTE(JSON_EXTRACT(goalie1, '$[1]')) IN (SELECT name FROM `2004goalies` WHERE teamshort='SVK' GROUP BY name),2,
-      IF(JSON_UNQUOTE(JSON_EXTRACT(goalie2, '$[0]')) IN (SELECT name FROM `2004goalies` WHERE teamshort='SVK' GROUP BY name),3,4)
-      )
-    ) as kde, ms.g1_goals, ms.g1_shots, ms.g2_goals, ms.g2_shots
-  FROM 2004matches m LEFT JOIN 2004matchstats ms ON ms.matchid=m.id LEFT JOIN 2004leagues l ON l.id=m.league WHERE m.kedy = 'konečný stav' && m.datetime > '$vcera 07:00' && m.datetime < '$dnes 07:00' && (JSON_UNQUOTE(JSON_EXTRACT(goalie1, '$[0]')) IN (SELECT name FROM `2004goalies` WHERE teamshort='SVK' GROUP BY name) || JSON_UNQUOTE(JSON_EXTRACT(goalie1, '$[1]')) IN (SELECT name FROM `2004goalies` WHERE teamshort='SVK' GROUP BY name) || JSON_UNQUOTE(JSON_EXTRACT(goalie2, '$[0]')) IN (SELECT name FROM `2004goalies` WHERE teamshort='SVK' GROUP BY name) || JSON_UNQUOTE(JSON_EXTRACT(goalie2, '$[1]')) IN (SELECT name FROM `2004goalies` WHERE teamshort='SVK' GROUP BY name)))
-  ");
+  FROM el_matches m LEFT JOIN el_matchstats ms ON ms.matchid=m.id LEFT JOIN 2004leagues l ON l.id=m.league WHERE m.kedy = 'konečný stav' && m.datetime > '$vcera 07:00' && m.datetime < '$dnes 07:00' && (JSON_UNQUOTE(JSON_EXTRACT(goalie1, '$[0]')) IN ($in_goalies) || JSON_UNQUOTE(JSON_EXTRACT(goalie1, '$[1]')) IN ($in_goalies) || JSON_UNQUOTE(JSON_EXTRACT(goalie2, '$[0]')) IN ($in_goalies) || JSON_UNQUOTE(JSON_EXTRACT(goalie2, '$[1]')) IN ($in_goalies)))");
       
   if(mysql_num_rows($q)==0 && mysql_num_rows($g)==0)
     {
@@ -447,16 +440,16 @@ function Transfers() {
             <div class="card-body">';
             $i=0;
             while($l = mysql_fetch_array($q)) {
-            $datum = date("j.n.Y", strtotime($l["datetime"]));
-            if(strtotime($l["datetime"])==mktime(0,0,0)) $datum='dnes';
-            if(strtotime($l["datetime"])==mktime(0,0,0,date("n"),date("j")-1)) $datum='včera';
+
+            $datum = (strtotime($l['datetime']) == mktime(0, 0, 0)) ? 'dnes' : (($datum == mktime(0, 0, 0, date('n'), date('j') - 1)) ? 'včera' : date('j.n.Y', strtotime($l['datetime'])));
+
             if($l["status"]=="0" && $l["to_name"]=="") $l["to_name"]=LANG_TEAMSTATS_FREEAGENT;
             if($l["pid"]!=NULL) {
                 if($l["goalie"]==0) $pl = mysql_query("SELECT name FROM el_players WHERE id='".$l["pid"]."'");
                 else $pl = mysql_query("SELECT name FROM el_goalies WHERE id='".$l["pid"]."'");
                 $player = mysql_fetch_array($pl);
-                if($l["goalie"]==0) $url = '/player/'.$l["pid"].'1-'.SEOtitle($player["name"]);
-                else $url = '/goalie/'.$l["pid"].'1-'.SEOtitle($player["name"]);
+                if($l["goalie"]==0) $url = sprintf('/player/%s1-%s', $l['pid'], SEOtitle($player['name']));
+                else $url = sprintf('/goalie/%s1-%s', $l['pid'], SEOtitle($player['name']));
             }
             else $player["name"] = $l["pname"];
             $trans .= '
@@ -1047,9 +1040,11 @@ function gotd()
       $g = mysql_query("SELECT count(id) as poc, ROUND(sum(tip1)/count(id),2) as vys1, ROUND(sum(tip2)/count(id),2) as vys2 FROM el_tips WHERE matchid='".$gotdid[0]."'");
       // stav serie
       if($gotf["kolo"]==0) {
-          $p = mysql_query("SELECT * FROM `el_playoff` WHERE league='143' && ((team1='".$gotf["team1short"]."' && team2='".$gotf["team2short"]."') || (team2='".$gotf["team1short"]."' && team1='".$gotf["team2short"]."'))");
+          $p = mysql_query("SELECT * FROM `el_playoff` WHERE league='".$gotf[league]."' && ((team1='".$gotf["team1short"]."' && team2='".$gotf["team2short"]."') || (team2='".$gotf["team1short"]."' && team1='".$gotf["team2short"]."'))");
           $po = mysql_fetch_array($p);
-          $pohl = '<p class="m-0"><span class="font-weight-bold">'.LANG_MATCHES_SERIES.':</span> '.$po["status1"].':'.$po["status2"].'</p>';
+          if($gotf["team1short"]!=$po["team1"]) $sstatus = $po["status2"].':'.$po["status1"];
+          else $sstatus = $po["status1"].':'.$po["status2"];
+          $pohl = '<p class="m-0"><span class="font-weight-bold">'.LANG_MATCHES_SERIES.':</span> '.$sstatus.'</p>';
       }
       // slovaci v akcii
       include('slovaks.php');
@@ -1169,7 +1164,7 @@ if($topicID != false && $topicID!="all")
   $topicID = $topic[0];
   $specifiedTopic = '&& s.topicid = '.$topicID;
   }
-$q = mysql_query("SELECT s.*, t.topic_id, t.topic_title, u.uname, u.name, count(c.id) as comment_count FROM e_xoops_stories s LEFT JOIN e_xoops_topics t ON t.topic_id=s.topicid LEFT JOIN e_xoops_users u ON u.uid=s.uid LEFT JOIN comments c ON c.what='0' && c.whatid=s.storyid WHERE langID = 'sk' $specifiedTopic && s.topicdisplay='1' && s.ihome='0' GROUP BY s.storyid ORDER BY s.published DESC LIMIT $limit_start, $limit");
+$q = mysql_query("SELECT s.*, t.topic_id, t.topic_title, u.uname, u.name, count(c.id) as comment_count FROM e_xoops_stories s LEFT JOIN e_xoops_topics t ON t.topic_id=s.topicid LEFT JOIN e_xoops_users u ON u.uid=s.uid LEFT JOIN comments c ON c.what='0' && c.whatid=s.storyid WHERE s.langID = 'sk' $specifiedTopic && s.topicdisplay='1' && s.ihome='0' && s.lid IS NULL GROUP BY s.storyid ORDER BY s.published DESC LIMIT $limit_start, $limit");
 $i=0;
 while ($f = mysql_fetch_array($q)) {
 $s="";

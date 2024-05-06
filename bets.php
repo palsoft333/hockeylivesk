@@ -52,7 +52,8 @@ $content .= '<div class="league-select">
               '.LANG_BETS_SHOWFOR.': 
               <select class="custom-select custom-select-sm w-auto" name="leagues" id="leagues">
                 <option value="0">'.LANG_BETS_OVERALL.'</option>
-                <optgroup label="'.LANG_BETS_ACTUAL.'">';
+                <optgroup label="'.LANG_BETS_ACTUAL.'">
+                    <!--option value="contest">Súťaž o hokejové kartičky</option-->';
                 $l1 = mysql_query("SELECT * FROM 2004leagues WHERE active='1' && id!='70' ORDER BY position ASC");
                 while($l1d = mysql_fetch_array($l1))
                   {
@@ -68,21 +69,18 @@ $content .= '<div class="league-select">
               </select>
             </div>
             
-            <!--<div class="animated--grow-in card mt-4 shadow">
-              <div class="card-header"><h6 class="font-weight-bold m-0 text-secondary">Súťaž o hokejové kartičky</h6></div>
-              <div class="bg-gradient-secondary card-body text-center"><img src="/images/kartickyEL.jpg" class="col-12 col-lg-5 col-sm-8"></div>
-            </div>
             <div class="row justify-content-center mt-4">
               <div class="col-12 col-lg-5 col-sm-8">
-                <div class="card">
-                  <img src="/images/kartickyMS.jpg" class="card-img-top" alt="Súťaž">
+                <div class="card shadow animated--grow-in">
+                  <img src="/images/kartickyMS.webp" class="card-img-top" alt="Súťaž">
                   <div class="card-body">
-                    <p class="card-text">Počas <b>Majstrovstiev sveta 2023</b> pokračujeme našou súťažou o zberateľské hokejové kartičky z našej najvyššej súťaže Tipos Extraliga sezóny 2022/2023! Medzi nimi aj prémiové kartičky s kúskom hráčskeho dresu alebo hokejky.</p>
-                    <p class="card-text">Zapojíte sa jednoducho - <a href="/games/147-ms-2023">tipovaním výsledkov</a> zápasov MS.</p>
+                    <p class="card-text">Počas <b>Majstrovstiev sveta v hokeji 2024</b> tu máme znovu našu súťaž o zberateľské hokejové kartičky z našej najvyššej súťaže Tipos Extraliga sezóny 2023/2024! Medzi nimi aj kartičky s kúskom hráčskeho dresu alebo originálnym podpisom.</p>
+                    <p class="card-text">Zapojíte sa jednoducho - <a href="/games/153-majstrovstva-sveta-v-hokeji-2024">tipovaním výsledkov</a> zápasov MS 2024.</p>
+                    <!--p class="card-text text-hl small">* pre vyrovnané šance pre všetkých rátame body do súťaže od 14.2.2024</p-->
                   </div>
                 </div>
               </div>
-            </div>-->
+            </div>
 
             <div class="card my-4 shadow animated--grow-in">
               <div class="card-header">
@@ -137,7 +135,14 @@ $content .= '<div class="league-select">
               <div class="card-body">
                  <p>'.LANG_BETS_FORWHATTEXT.'</p>
                  <div class="card-columns">
-                                                
+
+                  <div class="card bg-gradient-light">
+                    <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="https://sportzoo.s15.cdn-upgates.com/_cache/7/d/7d23067f53d1d0ca72633e4926d12bdf-balicek-retail.png" class="lazy card-img-top" alt="Cestovný batoh">
+                    <div class="card-body">
+                      <h5 class="card-title">Retail balíčky Tipos extraliga 2023/24 – 1. séria</h5>
+                    </div>
+                  </div>
+
                   <div class="card">
                     <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/images/ceny/batoh.jpg" class="lazy card-img-top" alt="Cestovný batoh">
                     <div class="card-body">

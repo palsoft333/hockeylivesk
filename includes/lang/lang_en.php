@@ -102,6 +102,8 @@ define("LANG_A","A");
 define("LANG_P","P");
 define("LANG_OT","OT");
 define("LANG_SO","SO");
+define("LANG_W","W");
+define("LANG_L","L");
 
 define("LANG_MATCHES_DETAIL","game detail");
 define("LANG_MATCHES_SLOVAKS","Slovaks in action");
@@ -233,6 +235,7 @@ define("LANG_TEAMTABLE_BRONZE","Bronze");
 define("LANG_TEAMTABLE_PLAYOFF","Playoff");
 define("LANG_TEAMTABLE_SHOW","Show");
 define("LANG_TEAMTABLE_SOON","Games will be added soon");
+define("LANG_TEAMTABLE_FORM","Form");
 
 define("LANG_REPORT_TITLE","Status of game");
 define("LANG_REPORT_TIME","Time");
@@ -274,6 +277,7 @@ define("LANG_PLAYERSTATS_LHOLD","left stick holding");
 define("LANG_PLAYERSTATS_RHOLD","right stick holding");
 define("LANG_PLAYERSTATS_NATIONAL","National team statistics");
 define("LANG_PLAYERSTATS_CLUB","Club statistics");
+define("LANG_PLAYERSTATS_GAMELOG","This season's game log");
 define("LANG_PLAYERSTATS_DIARY","Player diary");
 define("LANG_PLAYERS_INJURY","Injury");
 define("LANG_PLAYERS_INJUREDTITLE","List of injured players in the league");
@@ -284,10 +288,10 @@ define("LANG_PLAYERS_LASTPOTWTEXT","%s in a jersey of %s with"); // *20.11.2020 
 define("LANG_PLAYERS_TRANSFERSTITLE","List of last transfers in the league");
 define("LANG_PLAYERS_SHOOTERSTITLE","Betting tool");
 define("LANG_PLAYERS_SHOOTERSTEXT1","If you are interested in betting on hockey games or individual goal scorers, this tool will definitely come in handy for you. In order to find that some of the top scorers have not scored or recorder a point for a longer time, we have compiled a table of top scorers from each league and highlighted those who have not scored a goal at least 4 games in a row, so there is a good chance they could score in the next game.");
-define("LANG_PLAYERS_SHOOTERSTEXT2","For inspiration, we also present the latest odds from the betting company Tipsport, which indicate the odds for a given shooter / point scorer.");
+define("LANG_PLAYERS_SHOOTERSTEXT2","For inspiration, we also present the latest odds from the betting company Fortuna, which indicate the odds for a given shooter / point scorer.");
 define("LANG_PLAYERS_NOTES","Notes");
 define("LANG_PLAYERS_NOTE1","The last games for this league were calculated %s. All games played after this time are not included yet!"); // %s = dnes o 7:20
-define("LANG_PLAYERS_NOTE2","The odds for shooters are updated daily at <b>7:00</b>, <b>11:00</b> and <b>16:00</b> CET from the betting company Tipsport.sk.");
+define("LANG_PLAYERS_NOTE2","The odds for shooters are updated daily at <b>7:00</b>, <b>11:00</b> and <b>16:00</b> CET from the betting company Fortuna.");
 define("LANG_PLAYERS_BESTSHOOTERS","Top scorers of the league");
 define("LANG_PLAYERS_CANPOINTS","Points");
 define("LANG_PLAYERS_SCORED","Scored");
@@ -323,7 +327,7 @@ define("LANG_BETS_HOWWESCORE5","<b>1 point</b> if none of the above conditions a
 define("LANG_BETS_FORWHAT","What are we playing for?");
 define("LANG_BETS_FORWHATTEXT","After winning one of the announced competitions in a given season, you can choose one among the following prizes:");
 define("LANG_BETS_GOTOPROFILE","View %s's profile");
-define("LANG_BETS_BUYMEABEERTEXT","If you like our %s, buy us a beer:<br><a href='https://www.buymeacoffee.com/palsoft'><img src='https://img.buymeacoffee.com/button-api/?text=%s&emoji=🍺&slug=palsoft&button_colour=%s&font_colour=000000&font_family=Poppins&outline_colour=000000&coffee_colour=ffffff' class='my-1'></a><br>In the future we will be able to bring prizes for our winners for which we thank you.");
+define("LANG_BETS_BUYMEABEERTEXT","If you like our %s, buy us a beer:<br><a href='https://www.buymeacoffee.com/palsoft'><img src='https://img.buymeacoffee.com/button-api/?text=%s&emoji=🍺&slug=palsoft&button_colour=%s&font_colour=000000&font_family=Poppins&outline_colour=000000&coffee_colour=ffffff' class='my-1' alt='Buy us a beer'></a><br>In the future we will be able to bring prizes for our winners for which we thank you.");
 define("LANG_BETS_BUYMEABEER","Buy us a beer");
 
 define("LANG_GOTOTOP","^ to the top");

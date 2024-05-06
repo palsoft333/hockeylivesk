@@ -69,7 +69,7 @@ else
 
   <!-- Custom styles for this template-->
   <link href="css/template.min.css?v=1.0.2" rel="stylesheet">
-  <link href="css/main.css?v=1.2.1" rel="stylesheet">
+  <link href="css/main.min.css?v=1.2.1" rel="stylesheet">
 
 </head>
 
@@ -174,7 +174,7 @@ else
   <script src="/js/jquery.lazy.min.js"></script>
   <script src="/js/main.min.js?v=1.1.7"></script>
   <script src="/includes/lang/lang_<? echo $_SESSION[lang]; ?>.js?v=1.0.0"></script>
-  <script src="/js/login_events.js?v=1.0.1"></script>
+  <script src="/js/login_events.min.js?v=1.0.1"></script>
 
 </body>
 

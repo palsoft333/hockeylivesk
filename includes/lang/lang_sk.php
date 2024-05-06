@@ -101,6 +101,8 @@ define("LANG_A","A");
 define("LANG_P","B");
 define("LANG_OT","PP");
 define("LANG_SO","SN");
+define("LANG_W","V");
+define("LANG_L","P");
 
 define("LANG_MATCHES_DETAIL","detail zápasu");
 define("LANG_MATCHES_SLOVAKS","Slováci v akcii");
@@ -232,6 +234,7 @@ define("LANG_TEAMTABLE_BRONZE","Bronz");
 define("LANG_TEAMTABLE_PLAYOFF","Playoff");
 define("LANG_TEAMTABLE_SHOW","Zobraziť");
 define("LANG_TEAMTABLE_SOON","Zápasy budú pridané čoskoro");
+define("LANG_TEAMTABLE_FORM","Forma");
 
 define("LANG_REPORT_TITLE","Stav stretnutia");
 define("LANG_REPORT_TIME","Čas");
@@ -273,6 +276,7 @@ define("LANG_PLAYERSTATS_LHOLD","ľavé držanie hokejky");
 define("LANG_PLAYERSTATS_RHOLD","pravé držanie hokejky");
 define("LANG_PLAYERSTATS_NATIONAL","Reprezentačné štatistiky");
 define("LANG_PLAYERSTATS_CLUB","Klubové štatistiky");
+define("LANG_PLAYERSTATS_GAMELOG","Zápasový záznam tejto sezóny");
 define("LANG_PLAYERSTATS_DIARY","Denník hráča");
 define("LANG_PLAYERS_INJURY","Zranenie");
 define("LANG_PLAYERS_INJUREDTITLE","Zoznam zranených hráčov v lige");
@@ -283,10 +287,10 @@ define("LANG_PLAYERS_LASTPOTWTEXT","%s v drese %s s bilanciou"); // *20.11.2020 
 define("LANG_PLAYERS_TRANSFERSTITLE","Zoznam posledných prestupov v lige");
 define("LANG_PLAYERS_SHOOTERSTITLE","Pomôcka pre stávkarov");
 define("LANG_PLAYERS_SHOOTERSTEXT1","Ak sa zaujímate o stávkovanie na hokejové zápasy, či jednotlivých strelcov gólov, táto pomôcka vám príde určite vhod. Aby sme mohli skonštatovať, že niektorí z najlepších strelcov už dlho neskóroval, prípadne nebodoval, zostrojili sme tabuľku najlepších strelcov z každej ligy a zvýraznili tých, ktorí nestrelili gól aspoň 4 zápasy po sebe, čiže je veľká šanca, že by mohli skórovať v najbližšom zápase.");
-define("LANG_PLAYERS_SHOOTERSTEXT2","Pre inšpiráciu uvádzame aj najnovšie kurzy zo stávkovej spoločnosti Tipsport, ktoré udávajú kurz na daného strelca / bodovača.");
+define("LANG_PLAYERS_SHOOTERSTEXT2","Pre inšpiráciu uvádzame aj najnovšie kurzy zo stávkovej spoločnosti Fortuna, ktoré udávajú kurz na daného strelca / bodovača.");
 define("LANG_PLAYERS_NOTES","Poznámky");
 define("LANG_PLAYERS_NOTE1","Naposledy boli zarátané zápasy tejto ligy %s. Všetky zápasy odohrané po tomto čase ešte nie sú zarátané!"); // %s = dnes o 7:20
-define("LANG_PLAYERS_NOTE2","Kurzy strelcov sa aktualizujú denne o <b>7:00</b>, <b>11:00</b> a <b>16:00</b> zo stávkovej kancelárie Tipsport.sk.");
+define("LANG_PLAYERS_NOTE2","Kurzy strelcov sa aktualizujú denne o <b>7:00</b>, <b>11:00</b> a <b>16:00</b> zo stávkovej kancelárie Fortuna.");
 define("LANG_PLAYERS_BESTSHOOTERS","Najlepší strelci ligy");
 define("LANG_PLAYERS_CANPOINTS","Kanadské body");
 define("LANG_PLAYERS_SCORED","Dal gól v zápase");
@@ -322,7 +326,7 @@ define("LANG_BETS_HOWWESCORE5","<b>1 bod</b> ak nie je splnená ani jedna z vyš
 define("LANG_BETS_FORWHAT","O čo hráme?");
 define("LANG_BETS_FORWHATTEXT","Po výhre v jednej z vyhlásených súťaží v danej sezóne si môžete vybrať jednu z nasledujúcich vecných cien:");
 define("LANG_BETS_GOTOPROFILE","Prejsť na profil užívateľa %s");
-define("LANG_BETS_BUYMEABEERTEXT","Ak sa vám naše %s páči, kúpte nám pivo:<br><a href='https://www.buymeacoffee.com/palsoft'><img src='https://img.buymeacoffee.com/button-api/?text=%s&emoji=🍺&slug=palsoft&button_colour=%s&font_colour=000000&font_family=Poppins&outline_colour=000000&coffee_colour=ffffff' class='my-1 img-fluid'></a><br>Aj v budúcnosti tak budeme môcť pre našich výhercov prinášať vecné ceny do šúťaží, za čo vám ďakujeme.");
+define("LANG_BETS_BUYMEABEERTEXT","Ak sa vám naše %s páči, kúpte nám pivo:<br><a href='https://www.buymeacoffee.com/palsoft'><img src='https://img.buymeacoffee.com/button-api/?text=%s&emoji=🍺&slug=palsoft&button_colour=%s&font_colour=000000&font_family=Poppins&outline_colour=000000&coffee_colour=ffffff' class='my-1 img-fluid' alt='Kúpte nám pivo'></a><br>Aj v budúcnosti tak budeme môcť pre našich výhercov prinášať vecné ceny do šúťaží, za čo vám ďakujeme.");
 define("LANG_BETS_BUYMEABEER","Kúpte nám pivo");
 
 define("LANG_GOTOTOP","^ na vrch");

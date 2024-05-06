@@ -298,9 +298,9 @@ while ($t = mysql_fetch_array($r))
 	$content .= ' <tr>
                   <td style="width:15%;">'.$datum.'</td>
                   <td style="width:25%;" class="text-nowrap">'.($t["pid"]!=NULL ? '<a href="'.$url.'">'.$player["name"].'</a>':$player["name"]).'</td>
-                  <td style="width:28%;" class="text-nowrap">'.($t["from_image"]!="" ? '<img src="'.$t["from_image"].'" style="height:16px; vertical-align: -3px;"> ':'').''.$t["from_name"].'</td>
+                  <td style="width:28%;" class="text-nowrap">'.($t["from_image"]!="" ? '<img src="'.$t["from_image"].'" style="height:16px; vertical-align: -3px;" alt="'.$t["from_name"].'"> ':'').''.$t["from_name"].'</td>
                   <td class="text-center" style="width:4%;"><i class="fas fa-angle-double-right text-success"></i></td>
-                  <td style="width:28%;" class="text-nowrap">'.($t["to_image"]!="" ? '<img src="'.$t["to_image"].'" style="height:16px; vertical-align: -3px;"> ':'').''.$t["to_name"].'</td>
+                  <td style="width:28%;" class="text-nowrap">'.($t["to_image"]!="" ? '<img src="'.$t["to_image"].'" style="height:16px; vertical-align: -3px;" alt="'.$t["to_name"].'"> ':'').''.$t["to_name"].'</td>
                 </tr>';
       $p++;
       }
@@ -486,6 +486,7 @@ ORDER BY datetime DESC LIMIT 1)dt WHERE dt.id IS NOT NULL");
                 </tr>
               </thead>
               <tbody>';
+        $cs=0;
         while($f = mysql_fetch_array($w))
           {
           $content .= '<tr>
@@ -500,7 +501,17 @@ ORDER BY datetime DESC LIMIT 1)dt WHERE dt.id IS NOT NULL");
               <td class="text-center" style="width:7%;">'.$f[shg].'</td>
               <td class="text-center" style="width:7%;">'.$f[gwg].'</td>
             </tr>';
+            if(strstr($f["longname"], date("y"))) {
+                // hrá túto sezónu
+                $current_league = $f["league"];
+                $current_team = $f["teamshort"];
+                $cs++;
+            }
           }
+        if($cs>1) {
+            // prestúpil, nerobiť gamelog
+            unset($current_league);
+        }
         $content .= '</tbody>
           <tfoot class="font-weight-bold">
             <tr>
@@ -519,6 +530,47 @@ ORDER BY datetime DESC LIMIT 1)dt WHERE dt.id IS NOT NULL");
        </div>
       </div>';
         }
+
+    if(isset($current_league)) {
+        $content .= '<div class="card my-4 shadow animated--grow-in gamelog">
+              <div class="card-header">
+                <h6 class="m-0 font-weight-bold text-'.$leaguecolor.'">
+                  '.LANG_PLAYERSTATS_GAMELOG.'
+                  <span class="swipe d-none float-right text-gray-800"><i class="fas fa-hand-point-up"></i> <i class="fas fa-exchange-alt align-text-top text-xs"></i></span>
+                </h6>
+              </div>
+              <div class="card-body row">';
+              $gamelog = array();
+              $gl = mysql_query("SELECT m.id, g.goaler, g.asister1, g.asister2 FROM `el_matches` m JOIN el_goals g ON g.matchno=m.id && g.teamshort='".$current_team."' && (g.goaler='".$data["name"]."' || g.asister1='".$data["name"]."' || g.asister2='".$data["name"]."') WHERE m.league='".$current_league."' && (m.team1short='".$current_team."' || m.team2short='".$current_team."')");
+              while($glog = mysql_fetch_array($gl)) {
+                  //$g=$a=0;
+                  $gid = $glog["id"];
+                  if($glog["goaler"]==$data["name"]) $gamelog[$gid]["g"]=$gamelog[$gid]["g"]+1;
+                  if($glog["asister1"]==$data["name"] || $glog["asister2"]==$data["name"]) $gamelog[$gid]["a"]=$gamelog[$gid]["a"]+1;
+              }
+              $ts = mysql_query("SELECT id, kedy, IF(team1short='".$current_team."',team2short,team1short) as vsteam FROM `el_matches` WHERE league='".$current_league."' && (team1short='".$current_team."' || team2short='".$current_team."') ORDER BY datetime");
+                while($f=mysql_fetch_array($ts)) {
+                    $gid = $f["id"];
+                    $goals=$asists="";
+                    $g=$a=0;
+                    while($g<$gamelog[$gid]["g"]) {
+                        $goals .= '<i class="fa-fw fa-hockey-puck fas text-gray-900"></i>';
+                        $g++;
+                    }
+                    while($a<$gamelog[$gid]["a"]) {
+                        $asists .= '<i class="fa-fw fa-a fas text-danger"></i>';
+                        $a++;
+                    }
+                    $content .= '
+                    <div class="d-block position-relative game-holder'.($f["kedy"]=="na programe" ? ' text-gray-400':'').'">
+                        <div class="text-nowrap border border-left-0 border-right-0 vs-team">vs. '.$f["vsteam"].'</div>
+                        <div class="text-center border border-top-0 pt-1 icons">'.$goals.$asists.'</div>
+                    </div>';
+                }
+              $content .= '
+              </div>
+            </div>';
+    }
                
     $h = mysql_query("SELECT * FROM 2004playerdiary WHERE name='$data[name]'$coll ORDER BY msg_date DESC");
     if(mysql_num_rows($h)>0)
@@ -1159,10 +1211,16 @@ elseif($_GET[shooters])
     
     // prehladanie kurzov zo suboru
     $odd="";
-    $pname = "g ".mb_convert_case($f[goaler], MB_CASE_LOWER, "UTF-8");
+    $meno = explode(" ",$f["goaler"]);
+    $pname = "g ".mb_convert_case($meno[0]." ".substr($meno[1],0,1), MB_CASE_LOWER, "UTF-8");
+    $pname1 = "g ".mb_convert_case($f[goaler], MB_CASE_LOWER, "UTF-8");
     if(array_key_exists($pname,$kurzy))
       {
       $odd = number_format($kurzy[$pname], 2, '.', '');
+      }
+    if(array_key_exists($pname1,$kurzy))
+      {
+      $odd = number_format($kurzy[$pname1], 2, '.', '');
       }
 
     $content .= "<tr>
@@ -1238,10 +1296,16 @@ elseif($_GET[shooters])
     
     // prehladanie kurzov zo suboru
     $odd="";
-    $pname = "p ".mb_convert_case($p[name], MB_CASE_LOWER, "UTF-8");
+    $meno = explode(" ",$p["name"]);
+    $pname = "p ".mb_convert_case($meno[0]." ".substr($meno[1],0,1), MB_CASE_LOWER, "UTF-8");
+    $pname1 = "p ".mb_convert_case($p[name], MB_CASE_LOWER, "UTF-8");
     if(array_key_exists($pname,$kurzy))
       {
       $odd = number_format($kurzy[$pname], 2, '.', '');
+      }
+    if(array_key_exists($pname1,$kurzy))
+      {
+      $odd = number_format($kurzy[$pname1], 2, '.', '');
       }
 
     $content .= "<tr>

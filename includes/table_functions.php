@@ -46,6 +46,11 @@ function Get_Table($lid, $params, $table_type, $sim, $pos=false) {
                 <a class="page-link" tabindex="-1" href="#" aria-disabled="true">'.LANG_NAV_TABLE.'</a>
             </li>
             <li class="page-item">
+                <a class="page-link text-'.$leaguecolor.'" href="/table/'.$lid.'-'.SEOtitle($vyb[longname]).'/playoff" aria-label="'.LANG_TEAMTABLE_PLAYOFF.'">
+                    <span aria-hidden="true">'.LANG_TEAMTABLE_PLAYOFF.'</span>
+                </a>
+            </li>
+            <li class="page-item">
                 <a class="page-link text-'.$leaguecolor.'" href="/stats/'.$lid.'-'.SEOtitle($vyb[longname]).'" aria-label="'.LANG_NAV_STATS.'">
                     <span aria-hidden="true">'.LANG_NAV_STATS.'</span>
                 </a>
@@ -428,11 +433,11 @@ function Render_Playoff_Boxes($league_data, $po_type, $playoff_wins, $conf=FALSE
   $k=1;
   while($e = mysql_fetch_array($w))
     {
-    $los1=$los2=$opt=$bets=$bckg="";
+    $los1=$los2=$opt=$bets=$bckg=$blur=$winner="";
     if($league_data[el]==1)
       {
-      if($e[status1]==$playoff_wins) $los2=" loser";
-      if($e[status2]==$playoff_wins) $los1=" loser";
+      if($e[status1]==$playoff_wins) { $los2=" loser"; $blur=" blur"; $winner='<div class="winner"><img src="/images/vlajky/'.$e[team1].'.gif" alt="'.$e[t1].'" class="img-fluid"><div class="h6 h6-fluid mb-0 mt-1 font-weight-bold text-gray-800">'.$e[t1].'</div></div>'; }
+      if($e[status2]==$playoff_wins) { $los1=" loser"; $blur=" blur"; $winner='<div class="winner"><img src="/images/vlajky/'.$e[team2].'.gif" alt="'.$e[t2].'" class="img-fluid"><div class="h6 h6-fluid mb-0 mt-1 font-weight-bold text-gray-800">'.$e[t2].'</div></div>';}
       }
     else
       {
@@ -473,7 +478,7 @@ function Render_Playoff_Boxes($league_data, $po_type, $playoff_wins, $conf=FALSE
       // tipy
       if($uid && strtotime($e[datetime]) > mktime())
         {
-        $bets = '<div class="row align-items-center bg-light border mb-4 no-gutters py-3 rounded " id="bet-'.$k.'">
+        $bets = '<div class="row align-items-center bg-light border-top border-bottom mb-4 no-gutters py-3" id="bet-'.$k.'">
                   <div class="col-12 font-weight-bold small text-center">'.LANG_MATCHES_PLACEBET.'</div>
                   <div class="col-6 text-center">
                     <div class="text-xs font-weight-bold">'.LANG_TEAMSTATS_SCORE.' 1</div>
@@ -486,7 +491,7 @@ function Render_Playoff_Boxes($league_data, $po_type, $playoff_wins, $conf=FALSE
                 </div>';
         }
       }
-    $out .= '<div class="col-12 col-sm-6 col-lg-3 animated--grow-in mb-3">
+    $out .= '<div class="col-12 col-sm-6 col-lg-4 col-xl-3 animated--grow-in mb-3">
                   <div class="card shadow h-100">
                     <div class="card-header row no-gutters">
                       <div class="col text-xs font-weight-bold">
@@ -496,8 +501,9 @@ function Render_Playoff_Boxes($league_data, $po_type, $playoff_wins, $conf=FALSE
                         '.($noshow==1 ? "" : ($league_data[el]==0 ? date("G:i", strtotime($e[datetime])) : LANG_NUM.$k)).'
                       </div>
                     </div>
-                    <div class="card-body d-flex flex-column">
-                      <div class="row mb-4 align-items-center">
+                    <div class="card-body d-flex flex-column p-0">
+                      '.$winner.'
+                      <div class="row no-gutters my-3'.$blur.'">
                         <div class="col-6 text-center'.$los1.'">
                           <img src="/images/vlajky/'.$e[team1].'.gif" alt="'.$e[t1].'" class="img-fluid'.$suffix.'">
                           <div class="h6 h6-fluid mb-0 mt-1 font-weight-bold text-gray-800">'.$e[t1].'</div>
@@ -507,11 +513,11 @@ function Render_Playoff_Boxes($league_data, $po_type, $playoff_wins, $conf=FALSE
                           <div class="h6 h6-fluid mb-0 mt-1 font-weight-bold text-gray-800">'.$e[t2].'</div>
                         </div>
                       </div>
-                      <div class="row mb-2 align-items-center"><div class="col-6 text-center h1 h1-fluid">'.$e[status1].'</div><div class="col-6 text-center h1 h1-fluid">'.$e[status2].'</div></div>
+                      <div class="row mb-2 align-items-center no-gutters'.$blur.'"><div class="col-6 text-center h1 h1-fluid font-weight-bold">'.$e[status1].'</div><div class="col-6 text-center h1 h1-fluid font-weight-bold">'.$e[status2].'</div></div>
                       '.($league_data[el]==0 ? "" : Render_Playoff_Matches($league_data, $conf.$k, $e[team1], $e[team2], $e[status1], $e[status2], $po_type, $playoff_wins)).'
                       '.$bets.'
                       <div class="row no-gutters flex-fill align-items-end">
-                        <div class="w-100 text-center">'.$opt.'</div>
+                        <div class="w-100 text-center pb-3">'.$opt.'</div>
                       </div>
                     </div>
                   </div>
@@ -565,7 +571,8 @@ function Render_Playoff_Matches($league_data, $box_id, $team1, $team2, $status1,
     $kopa = $status1+$status2;
     $zapasov = $playoff_wins-$status1+$kopa;
     }
-  $zapasy .= "<table class='table-hover table-light table-striped w-100 small'>
+  $zapasy .= "<div class='p-2'>
+  <table class='table-hover table-light table-striped w-100 small'>
               <thead>
                 <tr>
                   <th>".LANG_DATE."</th>
@@ -592,7 +599,7 @@ function Render_Playoff_Matches($league_data, $box_id, $team1, $team2, $status1,
       $j++;
       }
     }
-  $zapasy .= "</tbody></table>";
+  $zapasy .= "</tbody></table></div>";
   return $zapasy;	
   }
 ?>

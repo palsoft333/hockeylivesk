@@ -266,17 +266,15 @@ function Get_Matches($lid, $params, $sel, $potype)
     if($g["fs_tv"]!=NULL && $g["fs_tv"]!='[]' && $g["kedy"]!="konečný stav")
       {
       $tvarr = json_decode($g["fs_tv"], true);
-      $tvarr = implode("<br>",$tvarr);
-      $tv .= '<div class="row justify-content-center">
-                <div class="col-auto border mb-3 py-1 rounded text-center text-xs">
-                  <p class="m-0"><strong><i class="fas fa-tv"></i> LIVE:</strong><br>'.$tvarr.'</p>
-                </div>
+      $tvarr = implode(", ",$tvarr);
+      $tv .= '<div class="bg-gray-300 border-bottom p-1 text-center text-xs">
+                  <p class="m-0"><strong><i class="fas fa-tv"></i> LIVE:</strong> '.$tvarr.'</p>
               </div>';
       }
     // tipy
     if($uid && strtotime($g[datetime]) > mktime())
       {
-      $bets .= '<div class="row align-items-center bg-light border mb-4 no-gutters py-3 rounded " id="bet-'.$poc.'">
+      $bets .= '<div class="row align-items-center bg-light border-top border-bottom mb-4 no-gutters py-3" id="bet-'.$poc.'">
                   <div class="col-12 font-weight-bold small text-center">'.LANG_MATCHES_PLACEBET.'</div>
                   <div class="col-6 text-center">
                     <div class="text-xs font-weight-bold">'.LANG_TEAMSTATS_SCORE.' 1</div>
@@ -338,10 +336,10 @@ function Get_Matches($lid, $params, $sel, $potype)
       elseif($g[kedy]=="konečný stav" && $g[goals1]<$g[goals2]) $los1=" loser";
       if($g[kedy]=="konečný stav" && ($g[cas]=="65.00" || $g[cas]=="70.00" || $g[cas]=="80.00")) $ot = LANG_SO;
       elseif($g[kedy]=="konečný stav" && ($g[cas]>"60.00")) $ot = LANG_OT;
-      $goals = '<div class="row mb-2 align-items-center">
-                    <div class="col-6 text-center h1 h1-fluid">'.$g[goals1].'</div>
+      $goals = '<div class="row mb-2 align-items-center no-gutters">
+                    <div class="col-6 text-center h1 h1-fluid font-weight-bold">'.$g[goals1].'</div>
                     '.($ot!="" ? '<div class="position-absolute text-center" style="left:0;right:0;"><span class="badge badge-secondary">'.$ot.'</span></div>':'').'
-                    <div class="col-6 text-center h1 h1-fluid">'.$g[goals2].'</div>
+                    <div class="col-6 text-center h1 h1-fluid font-weight-bold">'.$g[goals2].'</div>
                 </div>';
       if($g[kedy]=="konečný stav") $opt .= '<a href="/report/'.$g[id].$f[el].'-'.SEOtitle($g[team1long]." vs ".$g[team2long]).'" class="btn btn-sm btn-light btn-icon-split">
                                               <span class="icon text-gray-600">
@@ -377,7 +375,7 @@ function Get_Matches($lid, $params, $sel, $potype)
     if($f[el]==0) $suffix = " shadow-sm";
     if(strtotime($g[datetime])>mktime(7,0,0) && strtotime($g[datetime])<mktime(7,0,0,date("n"),date("j")+1,date("Y")) && $g[active]==0) $bckg .= " border-".$leaguecolor;
     $matches .= $scroll.'
-                <div class="col-12 col-sm-6 col-lg-3 animated--grow-in mb-3">
+                <div class="col-12 col-sm-6 col-lg-4 col-xl-3 animated--grow-in mb-3">
                   <div class="card shadow h-100'.$bckg.'">
                     <div class="card-header row no-gutters">
                       <div class="col text-xs font-weight-bold">
@@ -387,8 +385,8 @@ function Get_Matches($lid, $params, $sel, $potype)
                         '.date("G:i", strtotime($g[datetime])).'
                       </div>
                     </div>
-                    <div class="card-body d-flex flex-column">
-                      <div class="row mb-4">
+                    <div class="card-body d-flex flex-column p-0">
+                      <div class="row no-gutters my-3">
                         <div class="col-6 text-center'.$los1.'">
                           <img src="/images/vlajky/'.$g[team1short].'.gif" alt="'.$g[team1long].'" class="img-fluid'.$suffix.'">
                           <div class="h6 h6-fluid mb-0 mt-1 font-weight-bold text-gray-800">'.$g[team1long].'</div>
@@ -404,7 +402,7 @@ function Get_Matches($lid, $params, $sel, $potype)
                       '.$bets.'
                       '.$slov.'
                       <div class="row no-gutters flex-fill align-items-end">
-                        <div class="w-100 text-center">'.$opt.'</div>
+                        <div class="w-100 text-center py-3">'.$opt.'</div>
                       </div>
                     </div>
                   </div>

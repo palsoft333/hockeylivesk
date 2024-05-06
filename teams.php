@@ -103,7 +103,7 @@ if($id)
 
     $content .= '<div class="row">
                     <div class="col-auto mx-auto mx-md-0 mb-2 animated--fade-in">
-                      <img src="/images/vlajky/'.$f[shortname].'_big.gif" class="'.($el==1 ? 'h-100 img-thumbnail p-2 ':'').'shadow-sm mb-2"'.($el==1 ? '':' style="width:126px;"').'>
+                      <img src="/images/vlajky/'.$f[shortname].'_big.gif" alt="'.$f["longname"].'" class="'.($el==1 ? 'h-100 img-thumbnail p-2 ':'').'shadow-sm mb-2"'.($el==1 ? '':' style="width:126px;"').'>
                     </div>
                     <div class="col-auto justify-content-center mx-auto mx-md-0 mb-2 card pl-0 pr-2 animated--fade-in">
                       <ul class="list-unstyled px-3 py-2 mb-0 small">';
@@ -172,12 +172,12 @@ if($id)
                     while($t = mysql_fetch_array($g))
                       {
                       $bday=$injury=$slovak="";
-                      if(strtotime($t[datum])==mktime(0,0,0)) $bday = ' <i class="fas fa-birthday-cake" data-toggle="tooltip" data-placement="top" data-html="true" title="Dnes oslavuje <strong>'.$t[vek].'</strong> rokov<br>Blahoželáme!"></i>';
-                      if($t[injury]!=NULL) $injury = ' <i class="fas fa-user-injured text-danger" data-toggle="tooltip" data-placement="top" data-html="true" title="Zranený: <strong>'.$t[injury].'</strong>"></i>';
-                      if(array_key_exists($t[name], $slovaks)) $slovak = ' <img class="flag-iihf SVK-small" src="/img/blank.png" alt="Slovák">';
-                      $content .= '<tr'.($el==1 && $t[gp]==0 ? ' class="text-gray-500"':'').'>
+                      if(strtotime($t[datum])==mktime(0,0,0)) $bday = ' <i class="fas fa-birthday-cake align-self-center" data-toggle="tooltip" data-placement="top" data-html="true" title="Dnes oslavuje <strong>'.$t[vek].'</strong> rokov<br>Blahoželáme!"></i>';
+                      if($t[injury]!=NULL) $injury = ' <i class="fas fa-user-injured text-danger align-self-center" data-toggle="tooltip" data-placement="top" data-html="true" title="Zranený: <strong>'.$t[injury].'</strong>"></i>';
+                      if(array_key_exists($t[name], $slovaks)) $slovak = ' <img class="flag-iihf SVK-small align-self-center" src="/img/blank.png" alt="Slovák">';
+                      $content .= '<tr'.(($el==1 && $t[gp]==0) || $injury!="" ? ' class="text-gray-500"':'').'>
                       <td class="text-center">GK</td>
-                      <td class="text-nowrap"><a href="/goalie/'.$t[id].$el.'-'.SEOtitle($t[name]).'">'.$t[name].'</a>'.$slovak.''.$injury.''.$bday.'</td>
+                      <td class="text-nowrap'.($bday!="" || $injury!="" || $slovak!="" ? ' d-flex justify-content-between':'').'"><a href="/goalie/'.$t[id].$el.'-'.SEOtitle($t[name]).'">'.$t[name].'</a>'.$slovak.''.$injury.''.$bday.'</td>
                       <td class="text-center">'.$t[gp].'</td>
                       <td class="text-center">'.$t[sog].'</td>
                       <td class="text-center">'.$t[svs].'</td>
@@ -226,12 +226,12 @@ if($id)
                         if($y[pos]=="LD" || $y[pos]=="RD") $y[pos]="D";
                         if($y[pos]=="CE" || $y[pos]=="RW" || $y[pos]=="LW") $y[pos]="F";
                         }
-                      if(strtotime($y[datum])==mktime(0,0,0)) $bday = ' <i class="fas fa-birthday-cake" data-toggle="tooltip" data-placement="top" data-html="true" title="Dnes oslavuje <strong>'.$y[vek].'</strong> rokov<br>Blahoželáme!"></i>';
-                      if($y[injury]!=NULL) $injury = ' <i class="fas fa-user-injured text-danger" data-toggle="tooltip" data-placement="top" data-html="true" title="Zranený: <strong>'.$y[injury].'</strong>"></i>';
-                      if(array_key_exists($y[name], $slovaks)) $slovak = ' <img class="flag-iihf SVK-small" src="/img/blank.png" alt="Slovák">';
-                      $content .= '<tr'.($el==1 && $y[gp]==0 ? ' class="text-gray-500"':'').'>
+                      if(strtotime($y[datum])==mktime(0,0,0)) $bday = ' <i class="fas fa-birthday-cake align-self-center" data-toggle="tooltip" data-placement="top" data-html="true" title="Dnes oslavuje <strong>'.$y[vek].'</strong> rokov<br>Blahoželáme!"></i>';
+                      if($y[injury]!=NULL) $injury = ' <i class="fas fa-user-injured text-danger align-self-center" data-toggle="tooltip" data-placement="top" data-html="true" title="Zranený: <strong>'.$y[injury].'</strong>"></i>';
+                      if(array_key_exists($y[name], $slovaks)) $slovak = ' <img class="flag-iihf SVK-small align-self-center" src="/img/blank.png" alt="Slovák">';
+                      $content .= '<tr'.(($el==1 && $y[gp]==0) || $injury!="" ? ' class="text-gray-500"':'').'>
                       <td class="text-center">'.$y[pos].'</td>
-                      <td class="text-nowrap"><a href="/player/'.$y[id].$el.'-'.SEOtitle($y[name]).'">'.$y[name].'</a>'.$slovak.''.$injury.''.$bday.'</td>
+                      <td class="text-nowrap'.($bday!="" || $injury!="" || $slovak!="" ? ' d-flex justify-content-between':'').'"><a href="/player/'.$y[id].$el.'-'.SEOtitle($y[name]).'">'.$y[name].'</a>'.$slovak.''.$injury.''.$bday.'</td>
                       <td class="text-center">'.$y[gp].'</td>
                       <td class="text-center">'.$y[goals].'</td>
                       <td class="text-center">'.$y[asists].'</td>
@@ -321,9 +321,9 @@ if($id)
                     <div class="row p-fluid"'.($i%2==1 ? '':' style="background-color: rgba(0,0,0,.05);"').'>
                       <div class="col-5 col-sm-2 order-2 order-sm-1 small pt-1 text-right text-sm-left">'.$datum.'</div>
                       <div class="col-7 col-sm-3 order-1 order-sm-2 pb-2 pb-sm-0">'.($l["pid"]!=NULL ? '<a href="'.$url.'">'.$player["name"].'</a>':$player["name"]).'</div>
-                      <div class="col-5 col-sm-3 order-3 small bg-white border rounded text-center p-1">'.($l["from_image"]!="" ? '<img src="'.$l["from_image"].'" style="height:24px;"><br>':'').''.$l["from_name"].'</div>
+                      <div class="col-5 col-sm-3 order-3 small bg-white border rounded text-center p-1">'.($l["from_image"]!="" ? '<img src="'.$l["from_image"].'" style="height:24px;" alt="'.$l["from_name"].'"><br>':'').''.$l["from_name"].'</div>
                       <div class="col-2 col-sm-1 order-4 align-self-center"><i class="fas fa-angle-double-right '.($l["from_team"]==$f["shortname"] ? 'text-danger':'text-success').'"></i></div>
-                      <div class="col-5 col-sm-3 order-5 small bg-white border rounded text-center p-1">'.($l["to_image"]!="" ? '<img src="'.$l["to_image"].'" style="height:24px;"><br>':'').''.$l["to_name"].'</div>
+                      <div class="col-5 col-sm-3 order-5 small bg-white border rounded text-center p-1">'.($l["to_image"]!="" ? '<img src="'.$l["to_image"].'" style="height:24px;" alt="'.$l["to_name"].'"><br>':'').''.$l["to_name"].'</div>
                     </div>';
                     $i++;
                   }
