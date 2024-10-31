@@ -1,11 +1,11 @@
 <?php
     session_start();
   include("db.php");
-  if(isset($_SESSION[lang])) {
-    include("lang/lang_$_SESSION[lang].php");
+  if(isset($_SESSION["lang"])) {
+    include("lang/lang_".$_SESSION["lang"].".php");
   }
   else {
-     $_SESSION[lang] = 'sk';
+     $_SESSION["lang"] = 'sk';
       include("lang/lang_sk.php");
   }
 
@@ -32,27 +32,27 @@
 	$sLimit = "";
 	if ( isset( $_GET['iDisplayStart'] ) && $_GET['iDisplayLength'] != '-1' )
 	{
-		$sLimit = "LIMIT ".mysql_real_escape_string( $_GET['iDisplayStart'] ).", ".
-			mysql_real_escape_string( $_GET['iDisplayLength'] );
+		$sLimit = "LIMIT ".mysqli_real_escape_string($link, $_GET['iDisplayStart'] ).", ".
+			mysqli_real_escape_string($link, $_GET['iDisplayLength'] );
 	}
 	
 	
-	$sQuery = "SELECT SQL_CALC_FOUND_ROWS * FROM 2004playerdiary WHERE name='".$_GET[name]."'
+	$sQuery = "SELECT SQL_CALC_FOUND_ROWS * FROM 2004playerdiary WHERE name='".$_GET["name"]."'
     ORDER BY msg_date DESC
 		$sLimit";
-	$rResult = mysql_query( $sQuery ) or die(mysql_error());
+	$rResult = mysqli_query($link, $sQuery ) or die(mysqli_error($link));
 	
 	/* Data set length after filtering */
 	$sQuery = "
 		SELECT FOUND_ROWS()
 	";
-	$rResultFilterTotal = mysql_query( $sQuery ) or die(mysql_error());
-	$aResultFilterTotal = mysql_fetch_array($rResultFilterTotal);
+	$rResultFilterTotal = mysqli_query($link, $sQuery ) or die(mysqli_error($link));
+	$aResultFilterTotal = mysqli_fetch_array($rResultFilterTotal);
 	$iFilteredTotal = $aResultFilterTotal[0];
 	
 	/* Total data set length */
-	$sQuery = mysql_query("SELECT * FROM 2004playerdiary WHERE name='".$_GET[name]."'");
-	$rResultTotal = mysql_num_rows($sQuery);
+	$sQuery = mysqli_query($link, "SELECT * FROM 2004playerdiary WHERE name='".$_GET["name"]."'");
+	$rResultTotal = mysqli_num_rows($sQuery);
 	$iTotal = $rResultTotal;
 	
 
@@ -65,25 +65,25 @@
 	$sOutput .= '"iTotalRecords": '.$iTotal.', ';
 	$sOutput .= '"iTotalDisplayRecords": '.$iFilteredTotal.', ';
 	$sOutput .= '"aaData": [ ';
-	while ( $aRow = mysql_fetch_array( $rResult ) )
+	while ( $aRow = mysqli_fetch_array( $rResult ) )
 	{
-	$aRow[msg] = str_replace('"', '\'', $aRow[msg]);
+	$aRow["msg"] = str_replace('"', '\'', $aRow["msg"]);
   $icon="";
-  $datum = date("j.n.Y", strtotime($aRow[msg_date]));
-  if(strtotime($aRow[msg_date])==mktime(0,0,0)) $datum='dnes';
-  if(strtotime($aRow[msg_date])==mktime(0,0,0,date("n"),date("j")-1)) $datum='včera';
-  if($aRow[msg_type]==1) $icon = "<i class='fas fa-exchange-alt text-success'></i>"; //transfer
-  if($aRow[msg_type]==2) $icon = "<i class='fas fa-user-plus text-success'></i>"; //pridal sa
-  if($aRow[msg_type]==3) $icon = "<i class='fas fa-dice-three text-secondary'></i>"; //hattrick
-  if($aRow[msg_type]==4) $icon = "<i class='fas fa-certificate text-warning'></i>"; //jubilejny gol
-  if($aRow[msg_type]==5) $icon = "<i class='fas fa-hockey-puck text-primary'></i>"; //gwg
-  if($aRow[msg_type]==6) $icon = "<i class='fab fa-creative-commons-zero text-dark'></i>"; //shutout
-  if($aRow[msg_type]==7) $icon = "<i class='fas fa-user-injured text-danger'></i>"; //injury
-  if($aRow[msg_type]==8) $icon = "<i class='fas fa-trophy text-warning'></i>"; //titul
-  if($aRow[msg_type]==9) $icon = "<i class='fas fa-band-aid rotate-n-15 text-warning'></i>"; //uzdravil sa
-  if($aRow[msg_type]==10) $icon = "<i class='fas fa-user-slash text-success'></i>"; //volny hrac
+  $datum = date("j.n.Y", strtotime($aRow["msg_date"]));
+  if(strtotime($aRow["msg_date"])==mktime(0,0,0)) $datum='dnes';
+  if(strtotime($aRow["msg_date"])==mktime(0,0,0,date("n"),date("j")-1)) $datum='včera';
+  if($aRow["msg_type"]==1) $icon = "<i class='fas fa-exchange-alt text-success'></i>"; //transfer
+  if($aRow["msg_type"]==2) $icon = "<i class='fas fa-user-plus text-success'></i>"; //pridal sa
+  if($aRow["msg_type"]==3) $icon = "<i class='fas fa-dice-three text-secondary'></i>"; //hattrick
+  if($aRow["msg_type"]==4) $icon = "<i class='fas fa-certificate text-warning'></i>"; //jubilejny gol
+  if($aRow["msg_type"]==5) $icon = "<i class='fas fa-hockey-puck text-primary'></i>"; //gwg
+  if($aRow["msg_type"]==6) $icon = "<i class='fab fa-creative-commons-zero text-dark'></i>"; //shutout
+  if($aRow["msg_type"]==7) $icon = "<i class='fas fa-user-injured text-danger'></i>"; //injury
+  if($aRow["msg_type"]==8) $icon = "<i class='fas fa-trophy text-warning'></i>"; //titul
+  if($aRow["msg_type"]==9) $icon = "<i class='fas fa-band-aid rotate-n-15 text-warning'></i>"; //uzdravil sa
+  if($aRow["msg_type"]==10) $icon = "<i class='fas fa-user-slash text-success'></i>"; //volny hrac
 
-    $sOutput .= '["'.$datum.'","'.$icon.' '.$aRow[msg].'"],';
+    $sOutput .= '["'.$datum.'","'.$icon.' '.$aRow["msg"].'"],';
 		
 		/*
 		 * Optional Configuration:
@@ -96,7 +96,7 @@
 	$sOutput = substr_replace( $sOutput, "", -1 );
 	$sOutput .= '] }';
 	
-    if($_SESSION[lang]=="en") {
+    if($_SESSION["lang"]=="en") {
         $sOutput = str_replace("Zranil sa", "Got injured", $sOutput);
         $sOutput = str_replace("brucho", "Abdomen", $sOutput);
         $sOutput = str_replace("achilovka", "Achilles", $sOutput);

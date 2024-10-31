@@ -1,14 +1,14 @@
 <?
 include("../includes/db.php");
 
-$_GET[id] = htmlspecialchars($_GET[id]);
-$el = substr($_GET[id], -1);
-$dl = strlen($_GET[id]);
-$id = substr($_GET[id], 0, $dl-1);
+$_GET["id"] = htmlspecialchars($_GET["id"]);
+$el = substr($_GET["id"], -1);
+$dl = strlen($_GET["id"]);
+$id = substr($_GET["id"], 0, $dl-1);
 if($el==1) $matches_table = "el_matches";
 else $matches_table = "2004matches";
-$q = mysql_query("SELECT * FROM $matches_table WHERE id='$id'");
-$f = mysql_fetch_array($q);
+$q = mysqli_query($link, "SELECT * FROM ".$matches_table." WHERE id='".$id."'");
+$f = mysqli_fetch_array($q);
 ?>
 
 function ProcessMatch( data ){
@@ -57,12 +57,12 @@ else if(data['tstamp']!=cook) CheckUpdates(data['id']);
             {
             if(key=="goals1")
               {
-              var team = "<? echo $f[team1long]; ?>";
+              var team = "<? echo $f["team1long"]; ?>";
               var stav = $("#goals1").text()+':'+$("#goals2").text();
               }
             if(key=="goals2")
               {
-              var team = "<? echo $f[team2long]; ?>";
+              var team = "<? echo $f["team2long"]; ?>";
               var stav = $("#goals2").text()+':'+$("#goals1").text();
               }
             var say = team+" dáva gól na "+stav;
@@ -157,10 +157,10 @@ $().ready(function(){
    $.ajaxSetup ({
      cache: false
    });
-  $.cookie('hl-<? echo $_GET[id]; ?>', 'firstrun', { expires: 1, path: '/' });
+  $.cookie('hl-<? echo $_GET["id"]; ?>', 'firstrun', { expires: 1, path: '/' });
   $.ajax({
     type: "GET",
-    url: "/includes/report_fetch.php?id=<? echo $_GET[id]; ?>",
+    url: "/includes/report_fetch.php?id=<? echo $_GET["id"]; ?>",
     dataType: 'json',
     cache: false,
     success:  function(data) {
@@ -168,13 +168,13 @@ $().ready(function(){
             }
   });
 <?
-if($f[kedy]!="konečný stav")
+if($f["kedy"]!="konečný stav")
   {
   ?>
      setInterval(function(){
         $.ajax({
         type: "GET",
-        url: "/includes/report_fetch.php?id=<? echo $_GET[id]; ?>",
+        url: "/includes/report_fetch.php?id=<? echo $_GET["id"]; ?>",
         dataType: 'json',
         cache: false,
         success: function(data) {

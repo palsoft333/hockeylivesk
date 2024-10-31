@@ -1,36 +1,36 @@
 <?php
 include("../includes/db.php");
 
-$id = $_GET[id];
+$id = $_GET["id"];
 $el = substr($id, -1);
 $dl = strlen($id);
 $ide = substr($id, 0, $dl-1);
 
 if($el==1)
   {
-  $q = mysql_query("SELECT * FROM el_matches WHERE id='".$ide."'");
-  $f = mysql_fetch_array($q);
-  $w = mysql_query("SELECT t1.longname as team1, t2.longname as team2 FROM `el_teams` t1 LEFT JOIN el_teams t2 ON t2.shortname='".$f[team2short]."' && t2.league='".$f[league]."' WHERE t1.shortname='".$f[team1short]."' && t1.league='".$f[league]."'");
+  $q = mysqli_query($link, "SELECT * FROM el_matches WHERE id='".$ide."'");
+  $f = mysqli_fetch_array($q);
+  $w = mysqli_query($link, "SELECT t1.longname as team1, t2.longname as team2 FROM `el_teams` t1 LEFT JOIN el_teams t2 ON t2.shortname='".$f["team2short"]."' && t2.league='".$f["league"]."' WHERE t1.shortname='".$f["team1short"]."' && t1.league='".$f["league"]."'");
   $matches_table = "el_matches";
   }
 else
   {
-  $q = mysql_query("SELECT * FROM 2004matches WHERE id='".$ide."'");
-  $f = mysql_fetch_array($q);
-  $l = mysql_query("SELECT * FROM 2004leagues WHERE id='".$f[league]."'");
-  $linfo = mysql_fetch_array($l);
-  $w = mysql_query("SELECT t1.longname as team1, t2.longname as team2 FROM `2004teams` t1 LEFT JOIN 2004teams t2 ON t2.shortname='".$f[team2short]."' && t2.league='".$f[league]."' WHERE t1.shortname='".$f[team1short]."' && t1.league='".$f[league]."'");
+  $q = mysqli_query($link, "SELECT * FROM 2004matches WHERE id='".$ide."'");
+  $f = mysqli_fetch_array($q);
+  $l = mysqli_query($link, "SELECT * FROM 2004leagues WHERE id='".$f["league"]."'");
+  $linfo = mysqli_fetch_array($l);
+  $w = mysqli_query($link, "SELECT t1.longname as team1, t2.longname as team2 FROM `2004teams` t1 LEFT JOIN 2004teams t2 ON t2.shortname='".$f["team2short"]."' && t2.league='".$f["league"]."' WHERE t1.shortname='".$f["team1short"]."' && t1.league='".$f["league"]."'");
   $matches_table = "2004matches";
   }
-if(mysql_num_rows($w)>0) $e = mysql_fetch_array($w);
+if(mysqli_num_rows($w)>0) $e = mysqli_fetch_array($w);
 else die("Zle ID zapasu");
 
 /* Read the image into the object */
 $im = new Imagick( '../xadm/2004/images/zapasdna-podklad1.png' );
 $im->setImageFormat("png");
 
-$t1 = new Imagick("../images/vlajky/".$f[team1short]."_big.gif");
-$t2 = new Imagick("../images/vlajky/".$f[team2short]."_big.gif");
+$t1 = new Imagick("../images/vlajky/".$f["team1short"]."_big.gif");
+$t2 = new Imagick("../images/vlajky/".$f["team2short"]."_big.gif");
 
 /* Make the image a little smaller, maintain aspect ratio */
 $t1->thumbnailImage( 250, null );
@@ -76,23 +76,24 @@ $text1->setTextAlignment(\Imagick::ALIGN_RIGHT);
 $metrics1 = $im->queryFontMetrics($text, $team1);
 $metrics2 = $im->queryFontMetrics($text1, $team2);
 
-$im->annotateImage($text, 10, 320, 0, $e[team1]);
-$im->annotateImage($text1, 1069, 676, 0, $e[team2]);
+$im->annotateImage($text, 10, 320, 0, $e["team1"]);
+$im->annotateImage($text1, 1069, 676, 0, $e["team2"]);
 
-if(isset($linfo) && strstr($linfo[longname],"U20")) $i = mysql_query("(SELECT m.*, 1 as roz, l.longname FROM $matches_table m LEFT JOIN 2004leagues l ON l.id=m.league WHERE (m.team1short='$f[team1short]' || m.team2short='$f[team1short]') && m.kedy='konečný stav' && l.longname LIKE '%U20%' ORDER BY m.datetime DESC LIMIT 5) UNION (SELECT m.*, 2 as roz, l.longname FROM $matches_table m LEFT JOIN 2004leagues l ON l.id=m.league WHERE (m.team1short='$f[team2short]' || m.team2short='$f[team2short]') && m.kedy='konečný stav' && l.longname LIKE '%U20%' ORDER BY m.datetime DESC LIMIT 5)");
-else $i = mysql_query("(SELECT *, 1 as roz FROM $matches_table WHERE (team1short='$f[team1short]' || team2short='$f[team1short]') && kedy='konečný stav' ORDER BY datetime DESC LIMIT 5) UNION (SELECT *, 2 as roz FROM $matches_table WHERE (team1short='$f[team2short]' || team2short='$f[team2short]') && kedy='konečný stav' ORDER BY datetime DESC LIMIT 5)");
+if(isset($linfo) && strstr($linfo["longname"],"U20")) $i = mysqli_query($link, "(SELECT m.*, 1 as roz, l.longname FROM $matches_table m LEFT JOIN 2004leagues l ON l.id=m.league WHERE (m.team1short='".$f["team1short"]."' || m.team2short='".$f["team1short"]."') && m.kedy='konečný stav' && l.longname LIKE '%U20%' ORDER BY m.datetime DESC LIMIT 5) UNION (SELECT m.*, 2 as roz, l.longname FROM $matches_table m LEFT JOIN 2004leagues l ON l.id=m.league WHERE (m.team1short='".$f["team2short"]."' || m.team2short='".$f["team2short"]."') && m.kedy='konečný stav' && l.longname LIKE '%U20%' ORDER BY m.datetime DESC LIMIT 5)");
+else $i = mysqli_query($link, "(SELECT *, 1 as roz FROM $matches_table WHERE (team1short='".$f["team1short"]."' || team2short='".$f["team1short"]."') && kedy='konečný stav' ORDER BY datetime DESC LIMIT 5) UNION (SELECT *, 2 as roz FROM $matches_table WHERE (team1short='".$f["team2short"]."' || team2short='".$f["team2short"]."') && kedy='konečný stav' ORDER BY datetime DESC LIMIT 5)");
 $z1=$z2=0;
-while($j = mysql_fetch_array($i))
+$lastt1=$lastt2=[];
+while($j = mysqli_fetch_array($i))
   {
-  if($j[roz]==1)
+  if($j["roz"]==1)
     {
-    $lastt1[$z1] = array($j[team1short], $j[team1long], $j[team2short], $j[team2long], $j[goals1], $j[goals2], $j[datetime], $j[id]);
+    $lastt1[$z1] = array($j["team1short"], $j["team1long"], $j["team2short"], $j["team2long"], $j["goals1"], $j["goals2"], $j["datetime"], $j["id"]);
     $roz1++;
     $z1++;
     }
   else
     {
-    $lastt2[$z2] = array($j[team1short], $j[team1long], $j[team2short], $j[team2long], $j[goals1], $j[goals2], $j[datetime], $j[id]);
+    $lastt2[$z2] = array($j["team1short"], $j["team1long"], $j["team2short"], $j["team2long"], $j["goals1"], $j["goals2"], $j["datetime"], $j["id"]);
     $roz2++;
     $z2++;
     }
@@ -108,7 +109,7 @@ $lossfill = "#ff8647";
 while($x < count($lastt1))
   {
   $strokecolor=$fillcolor=$letter="";
-  if($lastt1[$x][0]==$f[team1short])
+  if($lastt1[$x][0]==$f["team1short"])
     {
     if($lastt1[$x][4]>$lastt1[$x][5]) { $strokecolor=$winstroke; $fillcolor = $winfill; $letter = "V"; }
     else { $strokecolor=$lossstroke; $fillcolor = $lossfill; $letter = "P"; }
@@ -143,7 +144,7 @@ $p=875;
 while($x < count($lastt2))
   {
   $strokecolor=$fillcolor=$letter="";
-  if($lastt2[$x][0]==$f[team2short])
+  if($lastt2[$x][0]==$f["team2short"])
     {
     if($lastt2[$x][4]>$lastt2[$x][5]) { $strokecolor=$winstroke; $fillcolor = $winfill; $letter = "V"; }
     else { $strokecolor=$lossstroke; $fillcolor = $lossfill; $letter = "P"; }
@@ -174,7 +175,7 @@ while($x < count($lastt2))
   }
 
 /* Display the image */
-mysql_close($link);
+mysqli_close($link);
 
 header( "Content-Type: image/jpeg" );
 echo $im;

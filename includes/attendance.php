@@ -8,8 +8,8 @@
 	/* Array of database columns which should be read and sent back to DataTables. Use a space where
 	 * you want to insert a non-database field (for example a counter or static image)
 	 */
-	$lid = $_GET[lid];
-	$el = $_GET[el];
+	$lid = mysqli_real_escape_string($link, $_GET["lid"] );
+	$el = mysqli_real_escape_string($link, $_GET["el"] );
 	
 	
 	/* Indexed column (used for fast and accurate table cardinality) */
@@ -34,8 +34,8 @@
 	$sLimit = "";
 	if ( isset( $_GET['iDisplayStart'] ) && $_GET['iDisplayLength'] != '-1' )
 	{
-		$sLimit = "LIMIT ".mysql_real_escape_string( $_GET['iDisplayStart'] ).", ".
-			mysql_real_escape_string( $_GET['iDisplayLength'] );
+		$sLimit = "LIMIT ".mysqli_real_escape_string($link, $_GET['iDisplayStart'] ).", ".
+			mysqli_real_escape_string($link, $_GET['iDisplayLength'] );
 	}
 	
 	
@@ -50,7 +50,7 @@
 			if ( $_GET[ 'bSortable_'.intval($_GET['iSortCol_'.$i]) ] == "true" )
 			{
 				$sOrder .= $aColumns[ intval( $_GET['iSortCol_'.$i] ) ]."
-				 	".mysql_real_escape_string( $_GET['sSortDir_'.$i] ) .", ";
+				 	".mysqli_real_escape_string($link, $_GET['sSortDir_'.$i] ) .", ";
 			}
 		}
 		
@@ -71,7 +71,7 @@
 	$sWhere = "";
 	if ( $_GET['sSearch'] != "" )
 	{
-		$sWhere = "WHERE name LIKE '%".mysql_real_escape_string( $_GET['sSearch'] )."%' && league='$lid'";
+		$sWhere = "WHERE name LIKE '%".mysqli_real_escape_string($link, $_GET['sSearch'] )."%' && league='$lid'";
 	}
 	
 	/* Individual column filtering */
@@ -87,7 +87,7 @@
 			{
 				$sWhere .= " AND ";
 			}
-			$sWhere .= $aColumns[$i]." LIKE '%".mysql_real_escape_string($_GET['sSearch_'.$i])."%' ";
+			$sWhere .= $aColumns[$i]." LIKE '%".mysqli_real_escape_string($link, $_GET['sSearch_'.$i])."%' ";
 		}
 	}
 	
@@ -99,26 +99,26 @@
 	 * Get data to display
 	 */
 
-  $sQuery = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
+  $sQuery = mysqli_query($link, "SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysqli_error($link));
 	$sQuery = "
 		SELECT SQL_CALC_FOUND_ROWS t1.*, t2.league, t2.team".$ident."short, t2.team".$ident."long, t3.arena, round(sum(attendance)/count(team".$ident."short),0) as navst, t3.capacity, (sum(attendance)/count(team".$ident."short))/t3.capacity as perc FROM `el_matchstats` t1 JOIN el_matches t2 ON t2.id=t1.matchid JOIN el_infos t3 ON t3.teamshort=t2.team".$ident."short WHERE league='$lid' && attendance>0 GROUP BY team".$ident."short
 		$sOrder
 		$sLimit
 	";
-	$rResult = mysql_query( $sQuery ) or die(mysql_error());
+	$rResult = mysqli_query($link, $sQuery ) or die(mysqli_error($link));
 	
 	/* Data set length after filtering */
 	$sQuery = "
 		SELECT FOUND_ROWS()
 	";
-	$rResultFilterTotal = mysql_query( $sQuery ) or die(mysql_error());
-	$aResultFilterTotal = mysql_fetch_array($rResultFilterTotal);
+	$rResultFilterTotal = mysqli_query($link, $sQuery ) or die(mysqli_error($link));
+	$aResultFilterTotal = mysqli_fetch_array($rResultFilterTotal);
 	$iFilteredTotal = $aResultFilterTotal[0];
 	
 	/* Total data set length */
-	$sQuery = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
-	$sQuery = mysql_query("SELECT t1.*, t2.league, t2.team1short FROM `el_matchstats` t1 JOIN el_matches t2 ON t2.id=t1.matchid WHERE league='$lid' && attendance>0 GROUP BY team1short");
-	$rResultTotal = mysql_num_rows($sQuery);
+	$sQuery = mysqli_query($link,"SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysqli_error($link));
+	$sQuery = mysqli_query($link,"SELECT t1.*, t2.league, t2.team1short FROM `el_matchstats` t1 JOIN el_matches t2 ON t2.id=t1.matchid WHERE league='$lid' && attendance>0 GROUP BY team1short");
+	$rResultTotal = mysqli_num_rows($sQuery);
 	//$aResultTotal = mysql_fetch_array($rResultTotal);
 	$iTotal = $rResultTotal;
 	
@@ -132,25 +132,25 @@
 	$sOutput .= '"iTotalRecords": '.$iTotal.', ';
 	$sOutput .= '"iTotalDisplayRecords": '.$iFilteredTotal.', ';
 	$sOutput .= '"aaData": [ ';
-	while ( $aRow = mysql_fetch_array( $rResult ) )
+	while ( $aRow = mysqli_fetch_array( $rResult ) )
 	{
 		$sOutput .= "[";
 		for ( $i=0 ; $i<count($aColumns) ; $i++ )
 		{
      	if ( $aColumns[$i] == "perc" )
 			{
-				$aRow[perc] = round($aRow[perc]*100,1)."%";
-				$sOutput .= '"'.$aRow[perc].'",';
+				$aRow["perc"] = round($aRow["perc"]*100,1)."%";
+				$sOutput .= '"'.$aRow["perc"].'",';
 			}
      	elseif ( $aColumns[$i] == "team".$ident."long" )
 			{
-        if(strstr($f[longname], "NHL")) { $obr = $aRow[team2short]; $text = $aRow[team2long]; }
-        else { $obr = $aRow[team1short]; $text = $aRow[team1long]; }
+        if(strstr($f["longname"], "NHL")) { $obr = $aRow["team2short"]; $text = $aRow["team2long"]; }
+        else { $obr = $aRow["team1short"]; $text = $aRow["team1long"]; }
 				$sOutput .= '"<img class=\'flag-'.($el==0 ? 'iihf':'el').' '.$obr.'-small\' src=\'/images/blank.png\' alt=\''.$obr.'\'> <b>'.$text.'</b>",';
 			}
      	elseif ( $aColumns[$i] == "arena" )
 			{
-				$sOutput .= '"'.$aRow[arena].'",';
+				$sOutput .= '"'.$aRow["arena"].'",';
 			}
 			else if ( $aColumns[$i] != ' ' )
 			{

@@ -2,11 +2,11 @@
 session_start();
 include("db.php");
 include("main_functions.php");
-if(isset($_SESSION[lang])) {
-  include("lang/lang_$_SESSION[lang].php");
+if(isset($_SESSION["lang"])) {
+  include("lang/lang_".$_SESSION["lang"].".php");
 }
 else {
-   $_SESSION[lang] = 'sk';
+   $_SESSION["lang"] = 'sk';
     include("lang/lang_sk.php");
 }
 
@@ -18,31 +18,31 @@ function DisplayTags($tags) {
         if($key=="p") {
             $el = substr($tag, -1);
             $id = substr($tag, 0, -1);
-            if($el==0) $q = mysql_query("SELECT * FROM 2004players WHERE id='".$id."'");
-            else $q = mysql_query("SELECT * FROM el_players WHERE id='".$id."'");
-            $f = mysql_fetch_array($q);
-            $out .= '<a href="/player/'.$id.$el.'-'.SEOtitle($f[name]).'" class="tag badge badge-primary mr-1">'.$f[name].'</a>';
+            if($el==0) $q = mysqli_query($link, "SELECT * FROM 2004players WHERE id='".$id."'");
+            else $q = mysqli_query($link, "SELECT * FROM el_players WHERE id='".$id."'");
+            $f = mysqli_fetch_array($q);
+            $out .= '<a href="/player/'.$id.$el.'-'.SEOtitle($f["name"]).'" class="tag badge badge-primary mr-1">'.$f["name"].'</a>';
         }
         elseif($key=="g") {
             $el = substr($tag, -1);
             $id = substr($tag, 0, -1);
-            if($el==0) $q = mysql_query("SELECT * FROM 2004goalies WHERE id='".$id."'");
-            else $q = mysql_query("SELECT * FROM el_goalies WHERE id='".$id."'");
-            $f = mysql_fetch_array($q);
-            $out .= '<a href="/goalie/'.$tag.'-'.SEOtitle($f[name]).'" class="tag badge badge-info mr-1">'.$f[name].'</a>';
+            if($el==0) $q = mysqli_query($link, "SELECT * FROM 2004goalies WHERE id='".$id."'");
+            else $q = mysqli_query($link, "SELECT * FROM el_goalies WHERE id='".$id."'");
+            $f = mysqli_fetch_array($q);
+            $out .= '<a href="/goalie/'.$tag.'-'.SEOtitle($f["name"]).'" class="tag badge badge-info mr-1">'.$f["name"].'</a>';
         }
         elseif($key=="t") {
             $el = substr($tag, -1);
             $id = substr($tag, 0, -1);
-            if($el==0) $q = mysql_query("SELECT * FROM 2004teams WHERE id='".$id."'");
-            else $q = mysql_query("SELECT * FROM el_teams WHERE id='".$id."'");
-            $f = mysql_fetch_array($q);
-            $out .= '<a href="/team/'.$id.$el.'-'.SEOtitle($f[longname]).'" class="tag badge badge-success mr-1">'.$f[longname].'</a>';
+            if($el==0) $q = mysqli_query($link, "SELECT * FROM 2004teams WHERE id='".$id."'");
+            else $q = mysqli_query($link, "SELECT * FROM el_teams WHERE id='".$id."'");
+            $f = mysqli_fetch_array($q);
+            $out .= '<a href="/team/'.$id.$el.'-'.SEOtitle($f["longname"]).'" class="tag badge badge-success mr-1">'.$f["longname"].'</a>';
         }
         elseif($key=="n") {
-            $q = mysql_query("SELECT * FROM e_xoops_topics WHERE topic_id='".$tag."'");
-            $f = mysql_fetch_array($q);
-            $out .= '<a href="/category/'.$tag.'-'.SEOtitle($f[topic_title]).'" class="tag badge badge-warning mr-1">'.$f[topic_title].'</a>';
+            $q = mysqli_query($link, "SELECT * FROM e_xoops_topics WHERE topic_id='".$tag."'");
+            $f = mysqli_fetch_array($q);
+            $out .= '<a href="/category/'.$tag.'-'.SEOtitle($f["topic_title"]).'" class="tag badge badge-warning mr-1">'.$f["topic_title"].'</a>';
         }
     }
 return $out;
@@ -67,29 +67,29 @@ $page_posts = json_decode($feedData, true);*/
 $page_posts['data'] = [];
 
 // nacitat 10 poslednych Google News a zlucit ich s FB feedom
-$s = mysql_query("SELECT s.* FROM gn_news s WHERE s.tags IS NOT NULL ORDER BY s.published DESC LIMIT 10") or die(mysql_error());
+$s = mysqli_query($link, "SELECT s.* FROM gn_news s WHERE s.tags IS NOT NULL ORDER BY s.published DESC LIMIT 10") or die(mysqli_error($link));
 $i=0;
-while($a = mysql_fetch_array($s))
+while($a = mysqli_fetch_array($s))
   {
     if(strlen($a["summary"]) > 500) {
         $stringCut = substr($a["summary"], 0, 500);
         $a["summary"] = substr($stringCut, 0, strrpos($stringCut, ' ')).' ...';
     }
-  array_push($page_posts['data'], array('id'=>$a[tags], 'story'=>$a[title], 'message'=>$a[summary], 'created_time'=>strtotime($a[published]), 'comments'=>$a[link], 'image'=>$a[image], 'publisher'=>$a[publisher]));
+  array_push($page_posts['data'], array('id'=>$a["tags"], 'story'=>$a["title"], 'message'=>$a["summary"], 'created_time'=>strtotime($a["published"]), 'comments'=>$a["link"], 'image'=>$a["image"], 'publisher'=>$a["publisher"]));
   $i++;
   }
 
 // nacitat nasich 5 poslednych rychlych noviniek a zlucit ich s FB feedom
-$s = mysql_query("SELECT s.*, count(c.id) as comment_count FROM e_xoops_stories s LEFT JOIN comments c ON c.what='0' && c.whatid=s.storyid WHERE s.ihome='1' GROUP BY s.storyid ORDER BY s.published DESC LIMIT 5") or die(mysql_error());
+$s = mysqli_query($link, "SELECT s.*, count(c.id) as comment_count FROM e_xoops_stories s LEFT JOIN comments c ON c.what='0' && c.whatid=s.storyid WHERE s.ihome='1' GROUP BY s.storyid ORDER BY s.published DESC LIMIT 5") or die(mysqli_error($link));
 $i=0;
-while($a = mysql_fetch_array($s))
+while($a = mysqli_fetch_array($s))
   {
-  array_push($page_posts['data'], array('id'=>$a[storyid], 'story'=>$a[title], 'message'=>$a[hometext], 'created_time'=>$a[created], 'comments'=>$a[comment_count], 'image'=>'', 'publisher'=>''));
+  array_push($page_posts['data'], array('id'=>$a["storyid"], 'story'=>$a["title"], 'message'=>$a["hometext"], 'created_time'=>$a["created"], 'comments'=>$a["comment_count"], 'image'=>'', 'publisher'=>''));
   $i++;
   }
    
 // zoradit podla casu
-usort($page_posts['data'], function($a,$b){ $c = $b[created_time] - $a[created_time]; return $c; });
+usort($page_posts['data'], function($a,$b){ $c = $b["created_time"] - $a["created_time"]; return $c; });
 // odstranit poslednych 5 prispevkov (limit je 25)
 unset($page_posts['data'][25], $page_posts['data'][26], $page_posts['data'][27], $page_posts['data'][28], $page_posts['data'][29]);
 
@@ -106,12 +106,12 @@ foreach($page_posts['data'] as $post){
       // z FB feedu
       $comments = count($post['comments']);
       $picture = ($post['picture']) ? $post['picture'] : "";
-      $link = "https://www.facebook.com/hockeylive/posts/".$post_id[1];
+      $url = "https://www.facebook.com/hockeylive/posts/".$post_id[1];
       }
     elseif(!is_numeric($post['comments'])) {
       // z Google News
       $comments = 0;
-      $link = $post['comments'];
+      $url = $post['comments'];
       $tags = json_decode($post_id[0], true);
       if($post["image"]!="") $picture = $post["image"];
       else {
@@ -121,19 +121,19 @@ foreach($page_posts['data'] as $post){
               $id = substr($tag, 0, -1);
               if($key=="p") { $nonel_table="2004players"; $el_table="el_players"; }
               if($key=="g") { $nonel_table="2004goalies"; $el_table="el_goalies"; }
-              if($el==0) $q = mysql_query("SELECT * FROM $nonel_table WHERE id='".$id."'");
-              else $q = mysql_query("SELECT * FROM $el_table WHERE id='".$id."'");
-              $f = mysql_fetch_array($q);
-              $picture = "/includes/player_photo.php?name=".$f[name];
+              if($el==0) $q = mysqli_query($link, "SELECT * FROM $nonel_table WHERE id='".$id."'");
+              else $q = mysqli_query($link, "SELECT * FROM $el_table WHERE id='".$id."'");
+              $f = mysqli_fetch_array($q);
+              $picture = "/includes/player_photo.php?name=".$f["name"];
             }
             elseif($key=="t" && $picture=="") {
               $el = substr($tag, -1);
               $id = substr($tag, 0, -1);
-              if($el==0) $q = mysql_query("SELECT * FROM 2004teams WHERE id='".$id."'");
-              else $q = mysql_query("SELECT * FROM el_teams WHERE id='".$id."'");
-              $f = mysql_fetch_array($q);
-              if($el==0) $picture = "/images/vlajky/".$f[shortname].".gif";
-              else $picture = "/images/vlajky/".$f[shortname]."_big.gif";
+              if($el==0) $q = mysqli_query($link, "SELECT * FROM 2004teams WHERE id='".$id."'");
+              else $q = mysqli_query($link, "SELECT * FROM el_teams WHERE id='".$id."'");
+              $f = mysqli_fetch_array($q);
+              if($el==0) $picture = "/images/vlajky/".$f["shortname"].".gif";
+              else $picture = "/images/vlajky/".$f["shortname"]."_big.gif";
             }
         }
       }
@@ -144,7 +144,7 @@ foreach($page_posts['data'] as $post){
       // nasa novinka
       $comments = $post['comments'];
       $message = str_replace("news-image","bg-gray-100 float-left img-thumbnail mr-2 p-1 shadow-sm w-25",$message);
-      $link = "/news/".$post_id[0]."-".SEOtitle($story);
+      $url = "/news/".$post_id[0]."-".SEOtitle($story);
       $our=1;
       }
     if($i % 2 == 0) {$tableclass = "";} 
@@ -152,11 +152,11 @@ foreach($page_posts['data'] as $post){
     echo "<table class='card d-table w-100 my-0 mb-2'>
             <tr class='card-header$tableclass'>
               <td style='width:69%;' class='pl-2'>
-                <b><a href='".$link."' ".($our==1 ? "" : " target='_blank'")." class='text-dark'>".($story ? $story : LANG_FLASH_FROMFB)."</a></b>
+                <b><a href='".$url."' ".($our==1 ? "" : " target='_blank'")." class='text-dark'>".($story ? $story : LANG_FLASH_FROMFB)."</a></b>
               </td>
               <td style='width:31%;' class='text-right align-top pr-2 pt-1 text-xs'>".date("j.n.Y G:i", $post_time)."</td>
             </tr>
-            ".($gn==1 ? "<tr class='$tableclass'><td colspan='2' class='pl-2 pt-1'>".DisplayTags($post_id[0])."<span class='float-right mr-1'><a href='".$link."' target='_blank'>".$post[publisher]."</a></span></td></tr>":"")."
+            ".($gn==1 ? "<tr class='$tableclass'><td colspan='2' class='pl-2 pt-1'>".DisplayTags($post_id[0])."<span class='float-right mr-1'><a href='".$url."' target='_blank'>".$post["publisher"]."</a></span></td></tr>":"")."
             <tr class='$tableclass'>
               <td colspan='2' class='p-2'>".($picture ? "<img src='data:image/svg+xml,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1 0.525\"%3E%3C/svg%3E' data-src='$picture' class='lazy bg-gray-100 float-left img-thumbnail mr-2 p-1 shadow-sm w-25'>" : "")."$message</td>
             </tr>";
@@ -169,5 +169,5 @@ foreach($page_posts['data'] as $post){
     $i++;
 }
 
-mysql_close($link);
+mysqli_close($link);
 ?>

@@ -48,11 +48,11 @@ function Bet(tipbox, previous) {
          success: function (data) {
             if(previous=="-" && tip1!=="-" && tip2!=="-") 
               {
-              ga('send', 'event', 'User', 'betPlace', gid+' - '+tip1+':'+tip2);
+              //ga('send', 'event', 'User', 'betPlace', gid+' - '+tip1+':'+tip2);
               }
             if(previous!=="-" && (tip1=="-" || tip2=="-"))
               {
-              ga('send', 'event', 'User', 'betRemove', gid);
+              //ga('send', 'event', 'User', 'betRemove', gid);
               }
             if(what=="place") Notification("chart-bar", LANG_GAMES_BETTING, smallText, LANG_GAMES_BET+' '+tip1+':'+tip2+' '+LANG_GAMES_BETADDED, 5000);
             else if(what=="delete") Notification("eraser", LANG_GAMES_BETTING, smallText, LANG_GAMES_BETREMOVED, 5000);

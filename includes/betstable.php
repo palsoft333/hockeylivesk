@@ -2,15 +2,15 @@
   session_start();
   include("db.php");
   include("main_functions.php");
-  if(isset($_SESSION[lang])) {
-    include("lang/lang_$_SESSION[lang].php");
+  if(isset($_SESSION["lang"])) {
+    include("lang/lang_".$_SESSION["lang"].".php");
   }
   else {
-     $_SESSION[lang] = 'sk';
+     $_SESSION["lang"] = 'sk';
       include("lang/lang_sk.php");
   }
   $uid = $_SESSION['logged'];
-  if($_GET[uid]) $uid=$_GET[uid];
+  if(isset($_GET["uid"])) $uid=$_GET["uid"];
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 	 * Easy set variables
 	 */
@@ -34,41 +34,41 @@
 	$sLimit = "";
 	if ( isset( $_GET['iDisplayStart'] ) && $_GET['iDisplayLength'] != '-1' )
 	{
-		$sLimit = "LIMIT ".mysql_real_escape_string( $_GET['iDisplayStart'] ).", ".
-			mysql_real_escape_string( $_GET['iDisplayLength'] );
+		$sLimit = "LIMIT ".mysqli_real_escape_string($link, $_GET['iDisplayStart'] ).", ".
+			mysqli_reali_escape_string($link, $_GET['iDisplayLength'] );
 	}
 	
-	if($_GET[lid])
+	if(isset($_GET["lid"]))
     {
-    $lid = $_GET[lid];
+    $lid = $_GET["lid"];
     if($lid=="contest") {
       // sutaz o karticky
       $sQuery = "SELECT SQL_CALC_FOUND_ROWS t.userid,t.matchid,m.datetime,sum(t.points) as points, count(t.id) as poc, u.uname, u.uid, u.user_avatar FROM el_tips t LEFT JOIN el_matches m ON m.id=t.matchid LEFT JOIN e_xoops_users u ON u.uid=t.userid WHERE t.league='154' && m.datetime>'2024-02-14 00:00:00' GROUP BY t.userid ORDER BY points DESC $sLimit";
     }
     else {
-      $sel = mysql_query("SELECT el FROM 2004leagues WHERE id='$lid'");
-      $vyb = mysql_fetch_array($sel);
-      if($vyb[el]==1) $tips_table="el_tips";
+      $sel = mysqli_query($link,"SELECT el FROM 2004leagues WHERE id='".$lid."'");
+      $vyb = mysqli_fetch_array($sel);
+      if($vyb["el"]==1) $tips_table="el_tips";
       else $tips_table="2004tips";
-    $sQuery = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
-    $sQuery = "SELECT SQL_CALC_FOUND_ROWS dt.*, e_xoops_users.uname as uname, e_xoops_users.uid as uid, e_xoops_users.user_avatar as user_avatar FROM e_xoops_users INNER JOIN (SELECT userid,sum(points) as points, count(id) as poc FROM $tips_table WHERE league='$lid' GROUP BY userid ORDER BY points DESC)dt ON (e_xoops_users.uid=dt.userid)
+    $sQuery = mysqli_query($link, "SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysqli_error($link));
+    $sQuery = "SELECT SQL_CALC_FOUND_ROWS dt.*, e_xoops_users.uname as uname, e_xoops_users.uid as uid, e_xoops_users.user_avatar as user_avatar FROM e_xoops_users INNER JOIN (SELECT userid,sum(points) as points, count(id) as poc FROM $tips_table WHERE league='".$lid."' GROUP BY userid ORDER BY points DESC)dt ON (e_xoops_users.uid=dt.userid)
       $sLimit";
       }
 		}
 	else 
     {
-    $sQuery = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
+    $sQuery = mysqli_query($link, "SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysqli_error($link));
     $sQuery = "SELECT SQL_CALC_FOUND_ROWS *, f.pocel, g.pocnonel, e_xoops_users.user_avatar as user_avatar FROM `e_xoops_users` JOIN (SELECT userid, count(id) as pocel FROM el_tips GROUP BY userid) f ON f.userid=e_xoops_users.uid JOIN (SELECT userid, count(id) as pocnonel FROM 2004tips GROUP BY userid) g ON g.userid=e_xoops_users.uid ORDER BY `tip_points` DESC
 		$sLimit";
 		}
-	$rResult = mysql_query( $sQuery ) or die(mysql_error());
+	$rResult = mysqli_query($link, $sQuery ) or die(mysqli_error($link));
 	
 	/* Data set length after filtering */
 	$sQuery = "
 		SELECT FOUND_ROWS()
 	";
-	$rResultFilterTotal = mysql_query( $sQuery ) or die(mysql_error());
-	$aResultFilterTotal = mysql_fetch_array($rResultFilterTotal);
+	$rResultFilterTotal = mysqli_query($link, $sQuery ) or die(mysqli_error($link));
+	$aResultFilterTotal = mysqli_fetch_array($rResultFilterTotal);
 	$iFilteredTotal = $aResultFilterTotal[0];
 	
 	/* Total data set length */
@@ -86,29 +86,29 @@
 	$sOutput .= '"recordsTotal": '.$iTotal.', ';
 	$sOutput .= '"recordsFiltered": '.$iFilteredTotal.', ';
 	$sOutput .= '"data": [ ';
-	while ( $aRow = mysql_fetch_array( $rResult ) )
+	while ( $aRow = mysqli_fetch_array( $rResult ) )
 	{
 	//$aRow[uname] = iconv("windows-1250", "utf-8", $aRow[uname]);
 	
-    if($_GET[lid]) 
+    if(isset($_GET["lid"]))
       {
-      $points = $aRow[points];
-      $pocet_tipov = $aRow[poc];
+      $points = $aRow["points"];
+      $pocet_tipov = $aRow["poc"];
       }
     else 
       {
-      $points = $aRow[tip_points];
-      $pocet_tipov = $aRow[pocel]+$aRow[pocnonel];
+      $points = $aRow["tip_points"];
+      $pocet_tipov = $aRow["pocel"]+$aRow["pocnonel"];
       }
     
     $uspesnost = round(($points/($pocet_tipov*10))*100,1);
     $startPoint=$_GET['iDisplayStart'];
     $counter=($startPoint) + ($j);
     
-    if($aRow[user_avatar]!="") $avatar = "<img class='rounded-circle mr-1' src='/images/user_avatars/".$aRow[uid].".".$aRow[user_avatar]."?".filemtime('../images/user_avatars/'.$aRow[uid].'.'.$aRow[user_avatar])."' alt='".$aRow[uname]."' style='width:2rem;height:2rem;vertical-align:-11px;'>";
+    if($aRow["user_avatar"]!="") $avatar = "<img class='rounded-circle mr-1' src='/images/user_avatars/".$aRow["uid"].".".$aRow["user_avatar"]."?".filemtime('../images/user_avatars/'.$aRow["uid"].'.'.$aRow["user_avatar"])."' alt='".$aRow["uname"]."' style='width:2rem;height:2rem;vertical-align:-11px;'>";
     else $avatar = "<i class='text-gray-300 fas fa-user-circle fa-2x mr-1' style='width:2rem;height:2rem;vertical-align:-7px;'></i>";
 
-    $sOutput .= '["'.$counter.'","<a href=\'/bets/'.$aRow[uid].'\'>'.$avatar.''.$aRow[uname].'</a>","<b>'.$points.'</b>","'.$pocet_tipov.'","'.$uspesnost.'%"],';
+    $sOutput .= '["'.$counter.'","<a href=\'/bets/'.$aRow["uid"].'\'>'.$avatar.''.$aRow["uname"].'</a>","<b>'.$points.'</b>","'.$pocet_tipov.'","'.$uspesnost.'%"],';
 		
 		/*
 		 * Optional Configuration:

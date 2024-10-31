@@ -1,6 +1,7 @@
 var LANG_ERROR = "Chyba";
 var LANG_SETTINGS = "Nastavenia";
 var LANG_MAIL = "e-mail";
+var LANG_PLAYERWATCH = "Sledovanie hráčov";
 
 var LANG_CALENDAR_GAMESFOR = "Zápasy pre";
 var LANG_FLASH_CANNOT = "Nemôžem načítať rýchle novinky.";
@@ -14,6 +15,9 @@ var LANG_USERPROFILE_SETTINGSCHANGED = "Nastavenia boli úspešne zmenené.";
 var LANG_USERPROFILE_SETTINGSERROR = "Nastala chyba pri zmene nastavení.";
 var LANG_USERPROFILE_MIKECHECK = "Slovensko dáva gól na 2:0";
 var LANG_USERPROFILE_VOICE = "Slovak Female";
+var LANG_USERPROFILE_PUSH = "push notifikácie";
+var LANG_USERPROFILE_LOADING = "nahrávam...";
+var LANG_USERPROFILE_INCOMPAT = "push notifikácie nie sú v tomto prehliadači kompatibilné";
 
 var LANG_GAMES_BETTING = "Tipovanie";
 var LANG_GAMES_BET = "Tip";
@@ -34,6 +38,8 @@ var LANG_FANTASY_ERRORSAVING = "Nastala chyba pri ukladaní vášho tímu.";
 var LANG_FANTASY_ALREADYPICKED = "Tohto hráča ste si už vybrali. Vyberte si prosím iného.";
 var LANG_FANTASY_PICKSACTIVE = "Vaše draftové výbery sú aktívne.";
 var LANG_FANTASY_PICKSINACTIVE = "Vaše draftové výbery nie sú kompletné. Draftujte všetkých 10 pozícií.";
+
+var LANG_PLAYERS_DELETED = "Hráč bol úspešne odstránený zo zoznamu na sledovanie";
 
 var LANG_COMMENTS_CAPTCHAERROR = "Vaša registrácia neprešla spam testom. Skúste prosím znovu, alebo nám napíšte";
 var LANG_COMMENTS_ADDED = "Komentár bol úspešne pridaný.";

@@ -17,14 +17,15 @@ $content .= '<h1 class="h3 h3-fluid mb-4">'.LANG_PARTNERS_TITLE.'</h1>
   </div>
   <div class="card-body">';
   
-  $q = mysql_query("SELECT * FROM hl_partners ORDER BY refered DESC");
-  while($data = mysql_fetch_array($q))
+  $q = mysqli_query($link, "SELECT * FROM hl_partners ORDER BY refered DESC");
+  $i=0;
+  while($data = mysqli_fetch_array($q))
     {
     $content .= '
     <div class="mb-4">
-      <a href="'.$data[url].'" target="_blank" rel="noopener">'.($data[image_url]==NULL ? '<i class="fas fa-globe fa-2x img-thumbnail mr-3 float-left text-center" style="width:98px; height:41px;"></i>':'<img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="'.$data[image_url].'" class="lazy img-thumbnail mr-3 float-left" style="width:98px; height:41px;" alt="'.$data[name].'">').'</a>
-      <h5 class="h5-fluid mt-2 d-inline-block d-sm-block">'.$data[name].'</h5>
-      <p class="p-fluid"><a href="'.$data[url].'" target="_blank" rel="noopener">'.$data[url].'</a></p>
+      <a href="'.$data["url"].'" target="_blank" rel="noopener">'.($data["image_url"]==NULL ? '<i class="fas fa-globe fa-2x img-thumbnail mr-3 float-left text-center" style="width:98px; height:41px;"></i>':'<img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="'.$data["image_url"].'" class="lazy img-thumbnail mr-3 float-left" style="width:98px; height:41px;" alt="'.$data["name"].'">').'</a>
+      <h5 class="h5-fluid mt-2 d-inline-block d-sm-block">'.$data["name"].'</h5>
+      <p class="p-fluid"><a href="'.$data["url"].'" target="_blank" rel="noopener">'.$data["url"].'</a></p>
     </div>';
     $i++;
     }

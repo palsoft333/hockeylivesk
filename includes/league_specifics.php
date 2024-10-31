@@ -1,7 +1,7 @@
 <?
 function LeagueSpecifics($lid, $longname, $condensed=FALSE) {
-    Global $sim;
-    $tt = new TeamTable($lid);
+    Global $sim, $link;
+    $tt = new TeamTable($lid, $link);
     if($sim==1 && !$condensed) $tt->simulation();
 
     if(strstr($longname, "liga")) {
@@ -11,7 +11,7 @@ function LeagueSpecifics($lid, $longname, $condensed=FALSE) {
         $tt->playoff_wins = 4;
         $tt->add_conference("");
         $tt->add_division("", 0);
-        $tt->add_teams(array("SBA", "ZVO", "NIT", "MII", "KOS", "POP", "SNV", "BBS", "TRE", "HCH", "NZO", "LMI"), "body desc, wins desc, diff desc, zapasov asc, goals desc, losts asc", 0, 0);
+        $tt->add_teams(array("SBA", "ZVO", "NIT", "MII", "KOS", "POP", "SNV", "BBS", "TRE", "ZIL", "NZO", "LMI"), "body desc, wins desc, diff desc, zapasov asc, goals desc, losts asc", 0, 0);
     }
     if(strstr($longname, "NHL")) {
         // NHL
@@ -24,7 +24,7 @@ function LeagueSpecifics($lid, $longname, $condensed=FALSE) {
         $tt->add_division(LANG_TEAMTABLE_PACIFIC, 0);
         $tt->add_division(LANG_TEAMTABLE_ATLANTIC, 1);
         $tt->add_division(LANG_TEAMTABLE_METROPOLITAN, 1);
-        $tt->add_teams(array("STL", "COL", "CHI", "MIN", "DAL", "WPG", "NSH", "ARI"), "body desc, zapasov asc, wins desc, diff desc", 0, 0);
+        $tt->add_teams(array("STL", "COL", "CHI", "MIN", "DAL", "WPG", "NSH", "UTA"), "body desc, zapasov asc, wins desc, diff desc", 0, 0);
         $tt->add_teams(array("ANA", "SJS", "LAK", "SEA", "VAN", "CGY", "EDM", "VGK"), "body desc, zapasov asc, wins desc, diff desc", 0, 1);
         $tt->add_teams(array("BOS", "MTL", "TBL", "DET", "TOR", "OTT", "FLA", "BUF"), "body desc, zapasov asc, wins desc, diff desc", 1, 0);
         $tt->add_teams(array("PIT", "NYR", "PHI", "CBJ", "WSH", "NJD", "CAR", "NYI"), "body desc, zapasov asc, wins desc, diff desc", 1, 1);

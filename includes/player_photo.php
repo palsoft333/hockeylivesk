@@ -1,6 +1,42 @@
 <?
 include("db.php");
 
+function webpImage($source, $quality = 100)
+    {
+        $opts = [
+            "http" => [
+                "method" => "GET",
+                "header" => "referer: https://www.iihf.com/\r\n" .
+                    "sec-fetch-dest: image\r\n" .
+                    "sec-fetch-mode: no-cors\r\n" .
+                    "sec-fetch-site: cross-site\r\n"
+            ]
+        ];
+
+        $context = stream_context_create($opts);
+
+        $info = getimagesize($source);
+        $isAlpha = false;
+        if ($info['mime'] == 'image/jpeg')
+            $image = imagecreatefromstring(file_get_contents($source, false, $context));
+        elseif ($isAlpha = $info['mime'] == 'image/gif') {
+            $image = imagecreatefromstring(file_get_contents($source, false, $context));
+        } elseif ($isAlpha = $info['mime'] == 'image/png') {
+            $image = imagecreatefromstring(file_get_contents($source, false, $context));
+        } else {
+            return $source;
+        }
+        if ($isAlpha && $image) {
+            imagepalettetotruecolor($image);
+            imagealphablending($image, true);
+            imagesavealpha($image, true);
+        }
+        if($image) $newImage = imagewebp($image, null, $quality);
+        else return false;
+
+        return $newImage;
+    }
+
 function ParseName($meno)
 	{
 	$kde = stripos($meno," ");
@@ -51,34 +87,24 @@ function Translate($player)
 	return $player;
   }
   
-$name = $_GET[name];
+$name = $_GET["name"] ?? null;
 
 // najprv skus nasu DB
-$q = mysql_query("SELECT * FROM player_photos WHERE name='".mysql_real_escape_string($name)."'");
-if(mysql_num_rows($q)>0) {
-    $f = mysql_fetch_array($q);
-    $our_url = $f[photo_url];
-    $opts = [
-        "http" => [
-            "method" => "GET",
-            "header" => "referer: https://www.iihf.com/\r\n" .
-                "sec-fetch-dest: image\r\n" .
-                "sec-fetch-mode: no-cors\r\n" .
-                "sec-fetch-site: cross-site\r\n"
-        ]
-    ];
+$q = mysqli_query($link, "SELECT * FROM player_photos WHERE name='".mysqli_real_escape_string($link, $name)."'");
+if(mysqli_num_rows($q)>0) {
+    $f = mysqli_fetch_array($q);
+    $our_url = $f["photo_url"];
 
-    $context = stream_context_create($opts);
-    $iihf = file_get_contents($our_url, false, $context);
-    if($iihf!="") $ourpid=$iihf;
+    $iihf = webpImage($our_url);
+    if($iihf) $ourpid=$iihf;
 }
     
 if(!$ourpid) {
     // NHL
     $nhlname = Translate($name);
-    $nhlname = ParseName($nhlname);
+    $nhlname = ParseName2($nhlname);
     $useragent="Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.1) Gecko/20061204 Firefox/2.0.0.1";
-    $ch = curl_init('https://suggest.svc.nhl.com/svc/suggest/v1/min_all/'.$nhlname.'/99999');
+    $ch = curl_init('https://search.d3.nhle.com/api/v1/search/player?culture=en-us&limit=1&q='.$nhlname);
 
     $file_path = '/data/2/5/25f84922-a486-4570-82bf-9b3e237ded76/hockey-live.sk/web/xadm/2004/cookies.txt';
     curl_setopt($ch, CURLOPT_USERAGENT, $useragent); 
@@ -93,8 +119,8 @@ if(!$ourpid) {
     curl_close($ch);
 
     $out = json_decode($r, true);
-    $out = explode("|", $out['suggestions'][0]);
-    $pid = $out[1];
+    $out[0]["playerId"] = $out[0]["playerId"] ?? 0;
+    $pid = $out[0]["playerId"];
 
     // KHL
     $khlname = str_replace("%20"," ",$name);
@@ -137,9 +163,9 @@ if(!$ourpid) {
     $szlhpid = $szlh[0]['Photo'];
     $szlhpid = str_replace(" ","%20",$szlhpid);
 
-    if($_GET[name]=="MIKÚŠ Juraj") $khlpid = 15348;
-    if($_GET[name]=="ČACHO Viliam Sr.") $szlhpid = "https://img.hockeyslovakia.sk/Player/186408/ViliamČACHO.jpg";
-    if($_GET[name]=="ČACHO Viliam") $szlhpid = "https://img.hockeyslovakia.sk/Player/208912/ViliamČACHO.jpg";
+    if($_GET["name"]=="MIKÚŠ Juraj") $khlpid = 15348;
+    if($_GET["name"]=="ČACHO Viliam Sr.") $szlhpid = "https://img.hockeyslovakia.sk/Player/186408/ViliamČACHO.jpg";
+    if($_GET["name"]=="ČACHO Viliam") $szlhpid = "https://img.hockeyslovakia.sk/Player/208912/ViliamČACHO.jpg";
 
     // our
     $filename = str_replace("%20"," ",$name);
@@ -148,37 +174,37 @@ if(!$ourpid) {
     $path = $_SERVER['DOCUMENT_ROOT']."photos/".$filename.".jpg";
 }
 
-header('Content-type: image/jpeg');
+header('Content-type: image/webp');
 if($ourpid)
   {
   // fotka citana cez URL z nasej DB
   echo $ourpid;
   }
-elseif($pid && @is_array(getimagesize("https://cms.nhl.bamgrid.com/images/headshots/current/168x168/".$pid.".jpg")))
-  {
-  // NHL
-  echo file_get_contents("http://nhl.bamcontent.com/images/headshots/current/168x168/".$pid.".jpg");
-  }
 elseif($khlpid && @is_array(getimagesize("https://en.khl.ru/images/teamplayers/0/".$khlpid.".jpg")))
   {
   // KHL
-  echo file_get_contents("https://en.khl.ru/images/teamplayers/0/".$khlpid.".jpg");
+  echo webpImage("https://en.khl.ru/images/teamplayers/0/".$khlpid.".jpg");
   }
 elseif($szlhpid && !strstr($szlhpid, "player_default") && @is_array(getimagesize($szlhpid)))
   {
   // SZLH
-  echo file_get_contents($szlhpid);
+  echo webpImage($szlhpid);
+  }
+elseif($pid && @is_array(getimagesize("https://assets.nhle.com/mugs/nhl/latest/".$pid.".png")))
+  {
+  // NHL
+  echo webpImage("https://assets.nhle.com/mugs/nhl/latest/".$pid.".png");
   }
 elseif(file_exists($path))
   {
   // vlastna databaza fotiek
-  echo file_get_contents($path);
+  echo webpImage($path);
   }
 else
   {
   // neexistuje
-  echo file_get_contents($_SERVER['DOCUMENT_ROOT']."/img/players/no_photo.jpg");
+  echo webpImage($_SERVER['DOCUMENT_ROOT']."/img/players/no_photo.jpg");
   }
 
-mysql_close($link);
+mysqli_close($link);
 ?>

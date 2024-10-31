@@ -19,8 +19,8 @@
 	$sLimit = "";
 	if ( isset( $_GET['iDisplayStart'] ) && $_GET['iDisplayLength'] != '-1' )
 	{
-		$sLimit = "LIMIT ".mysql_real_escape_string( $_GET['iDisplayStart'] ).", ".
-			mysql_real_escape_string( $_GET['iDisplayLength'] );
+		$sLimit = "LIMIT ".mysqli_real_escape_string($link, $_GET['iDisplayStart'] ).", ".
+			mysqli_real_escape_string($link, $_GET['iDisplayLength'] );
 	}
 	
 	
@@ -35,7 +35,7 @@
 			if ( $_GET[ 'bSortable_'.intval($_GET['iSortCol_'.$i]) ] == "true" )
 			{
 				$sOrder .= $aColumns[ intval( $_GET['iSortCol_'.$i] ) ]."
-				 	".mysql_real_escape_string( $_GET['sSortDir_'.$i] ) .", ";
+				 	".mysqli_real_escape_string($link, $_GET['sSortDir_'.$i] ) .", ";
 			}
 		}
 		
@@ -53,24 +53,24 @@
 	 * word by word on any field. It's possible to do here, but concerned about efficiency
 	 * on very large tables, and MySQL's regex functionality is very limited
 	 */
-	if ( $_GET['sSearch'] != "" || $_GET[vyb] != "" || $_GET[tshort] != "")
+	if ( $_GET['sSearch'] != "" || $_GET["vyb"] != "" || $_GET["tshort"] != "")
 	{
-    if($_GET[vyb])
+    if($_GET["vyb"])
       {
-      $regexp = "^".$_GET[vyb];
-      if($_GET[vyb]=="A") $regexp = "^A|^Á";
-      if($_GET[vyb]=="C") $regexp = "^C|^Č";
-      if($_GET[vyb]=="D") $regexp = "^D|^Ď";
-      if($_GET[vyb]=="L") $regexp = "^L|^Ľ";
-      if($_GET[vyb]=="R") $regexp = "^R|^Ř";
-      if($_GET[vyb]=="S") $regexp = "^S|^Š";
-      if($_GET[vyb]=="T") $regexp = "^T|^Ť";
-      if($_GET[vyb]=="Z") $regexp = "^Z|^Ž";
+      $regexp = "^".$_GET["vyb"];
+      if($_GET["vyb"]=="A") $regexp = "^A|^Á";
+      if($_GET["vyb"]=="C") $regexp = "^C|^Č";
+      if($_GET["vyb"]=="D") $regexp = "^D|^Ď";
+      if($_GET["vyb"]=="L") $regexp = "^L|^Ľ";
+      if($_GET["vyb"]=="R") $regexp = "^R|^Ř";
+      if($_GET["vyb"]=="S") $regexp = "^S|^Š";
+      if($_GET["vyb"]=="T") $regexp = "^T|^Ť";
+      if($_GET["vyb"]=="Z") $regexp = "^Z|^Ž";
       }
     
-    if($_GET[vyb]) $sWhere = "WHERE name REGEXP '".mysql_real_escape_string( $regexp )."'";
-    if($_GET[tshort]) $sWhere = "WHERE teamshort='".mysql_real_escape_string( $_GET[tshort] )."'";
-    if($_GET['sSearch']) $sWhere = "WHERE name LIKE '%".mysql_real_escape_string( $_GET['sSearch'] )."%'";
+    if($_GET["vyb"]) $sWhere = "WHERE name REGEXP '".mysqli_real_escape_string($link, $regexp )."'";
+    if($_GET["tshort"]) $sWhere = "WHERE teamshort='".mysqli_real_escape_string($link, $_GET["tshort"] )."'";
+    if($_GET['sSearch']) $sWhere = "WHERE name LIKE '%".mysqli_real_escape_string($link, $_GET['sSearch'] )."%'";
 	}
 	
 	/* Individual column filtering */
@@ -86,7 +86,7 @@
 			{
 				$sWhere .= " AND ";
 			}
-			$sWhere .= $aColumns[$i]." LIKE '%".mysql_real_escape_string($_GET['sSearch_'.$i])."%' ";
+			$sWhere .= $aColumns[$i]." LIKE '%".mysqli_real_escape_string($link, $_GET['sSearch_'.$i])."%' ";
 		}
 	}
 	
@@ -105,27 +105,27 @@
 		$sLimit
 	";*/
 
-  $sQuery = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
+  $sQuery = mysqli_query($link, "SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysqli_error($link));
 	$sQuery = "SELECT SQL_CALC_FOUND_ROWS *, GROUP_CONCAT(DISTINCT dt.teamshort
 ORDER BY dt.id ASC) AS timy, GROUP_CONCAT(DISTINCT dt.teamlong
 ORDER BY dt.id ASC) AS timylong, GROUP_CONCAT(DISTINCT dt.el
-ORDER BY dt.id ASC) AS timyel FROM ((SELECT id, name, teamshort, teamlong, 1 as el FROM el_players $sWhere) UNION (SELECT id, name, teamshort, teamlong, 0 as el FROM 2004players $sWhere) UNION (SELECT id, name, teamshort, teamlong, 2 as el FROM el_goalies $sWhere))dt GROUP BY dt.name
+ORDER BY dt.id ASC) AS timyel FROM ((SELECT id, name, teamshort, teamlong, 1 as el FROM el_players ".$sWhere.") UNION (SELECT id, name, teamshort, teamlong, 0 as el FROM 2004players ".$sWhere.") UNION (SELECT id, name, teamshort, teamlong, 2 as el FROM el_goalies ".$sWhere."))dt GROUP BY dt.name
     $sOrder
 		$sLimit";
-	$rResult = mysql_query( $sQuery ) or die(mysql_error());
+	$rResult = mysqli_query($link, $sQuery ) or die(mysqli_error($link));
 	
 	/* Data set length after filtering */
 	$sQuery = "
 		SELECT FOUND_ROWS()
 	";
-	$rResultFilterTotal = mysql_query( $sQuery ) or die(mysql_error());
-	$aResultFilterTotal = mysql_fetch_array($rResultFilterTotal);
+	$rResultFilterTotal = mysqli_query($link, $sQuery ) or die(mysqli_error($link));
+	$aResultFilterTotal = mysqli_fetch_array($rResultFilterTotal);
 	$iFilteredTotal = $aResultFilterTotal[0];
 	
 	/* Total data set length */
-	$sQuery = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
-	$sQuery = mysql_query("SELECT * FROM ((SELECT id, name, teamshort, teamlong, 1 as el FROM el_players) UNION (SELECT id, name, teamshort, teamlong, 0 as el FROM 2004players) UNION (SELECT id, name, teamshort, teamlong, 2 as el FROM el_goalies))dt GROUP BY dt.name");
-	$rResultTotal = mysql_num_rows($sQuery);
+	$sQuery = mysqli_query($link, "SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysqli_error($link));
+	$sQuery = mysqli_query($link, "SELECT * FROM ((SELECT id, name, teamshort, teamlong, 1 as el FROM el_players) UNION (SELECT id, name, teamshort, teamlong, 0 as el FROM 2004players) UNION (SELECT id, name, teamshort, teamlong, 2 as el FROM el_goalies))dt GROUP BY dt.name");
+	$rResultTotal = mysqli_num_rows($sQuery);
 	//$aResultTotal = mysql_fetch_array($rResultTotal);
 	$iTotal = $rResultTotal;
 	
@@ -139,7 +139,7 @@ ORDER BY dt.id ASC) AS timyel FROM ((SELECT id, name, teamshort, teamlong, 1 as 
 	$sOutput .= '"iTotalRecords": '.$iTotal.', ';
 	$sOutput .= '"iTotalDisplayRecords": '.$iFilteredTotal.', ';
 	$sOutput .= '"aaData": [ ';
-	while ( $aRow = mysql_fetch_array( $rResult ) )
+	while ( $aRow = mysqli_fetch_array( $rResult ) )
 	{
 		$sOutput .= "[";
 		for ( $i=0 ; $i<count($aColumns) ; $i++ )
@@ -147,17 +147,17 @@ ORDER BY dt.id ASC) AS timyel FROM ((SELECT id, name, teamshort, teamlong, 1 as 
 			if ( $aColumns[$i] == "name" )
 			{
 				/* Special output formatting for 'name' */
-				if($aRow[el]==2) { $aRow[el]=""; $pag="goalie"; $aRow[el]=1; }
+				if($aRow["el"]==2) { $aRow["el"]=""; $pag="goalie"; $aRow["el"]=1; }
 				else $pag="player";
-				$sOutput .= '"<a href=\'/'.$pag.'/'.$aRow[id].$aRow[el].'-'.SEOtitle($aRow[name]).'\'>'.str_replace('"', '\"', $aRow[ $aColumns[$i] ]).'</a>",';
+				$sOutput .= '"<a href=\'/'.$pag.'/'.$aRow["id"].$aRow["el"].'-'.SEOtitle($aRow["name"]).'\'>'.str_replace('"', '\"', $aRow[ $aColumns[$i] ]).'</a>",';
 			}
 			else if ( $aColumns[$i] == "timy" )
 			{
 				/* Special output formatting for 'timy' */
       $timy="";
       $tim = explode(",",$aRow[ $aColumns[$i] ]);
-      $timl = explode(",",$aRow[timylong]);
-      $time = explode(",",$aRow[timyel]);
+      $timl = explode(",",$aRow["timylong"]);
+      $time = explode(",",$aRow["timyel"]);
       $k=0;
       while($k < count($tim))
         {

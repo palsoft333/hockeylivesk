@@ -1,19 +1,19 @@
 <?
 session_start();
 include("db.php");
-if(isset($_SESSION[lang])) {
-  include("lang/lang_$_SESSION[lang].php");
+if(isset($_SESSION["lang"])) {
+  include("lang/lang_".$_SESSION["lang"].".php");
 }
 else {
-   $_SESSION[lang] = 'sk';
+   $_SESSION["lang"] = 'sk';
     include("lang/lang_sk.php");
 }
 
 header('Content-Type: text/html; charset=utf-8');
 
-if(preg_match('/[0-9]+/', $_GET[id])==1)
+if(preg_match('/[0-9]+/', $_GET["id"])==1)
   {
-  $id = $_GET[id];
+  $id = $_GET["id"];
   $ide = urldecode($_COOKIE['hl-'.$id]);
   }
 else
@@ -21,14 +21,14 @@ else
   exit;
   }
   
-$el = substr($_GET[id], -1);
-$dl = strlen($_GET[id]);
-$id = substr($_GET[id], 0, $dl-1);
+$el = substr($_GET["id"], -1);
+$dl = strlen($_GET["id"]);
+$id = substr($_GET["id"], 0, $dl-1);
 if($el==1) $desc_table = "el_desc";
 else $desc_table = "2004desc";
 
-$q = mysql_query("SELECT * FROM $desc_table WHERE matchno='$id' && type != '5' ORDER BY time DESC, id DESC");
-$n = mysql_num_rows($q);
+$q = mysqli_query($link, "SELECT * FROM $desc_table WHERE matchno='$id' && type != '5' ORDER BY time DESC, id DESC");
+$n = mysqli_num_rows($q);
 
 $out .= '<div class="card my-4 shadow animated--grow-in">
                   <div class="card-header">
@@ -48,17 +48,17 @@ $out .= '<div class="card my-4 shadow animated--grow-in">
                   <tbody>';
 
 $i=$n;
-while($f = mysql_fetch_array($q))
+while($f = mysqli_fetch_array($q))
   {
   $pridaj="";
-  if($f[tstamp]>=$ide) $pridaj=" deschigh";
+  if($f["tstamp"]>=$ide) $pridaj=" deschigh";
   
-  if($f[type]==0) $typ = ""; //normal
-  if($f[type]==1) { $typ = "<i class='fas fa-hockey-puck'></i>"; $f[description] = "<b>$f[description]</b>"; } //goal
-  if($f[type]==2) $typ = "<i class='fas fa-user-times text-danger'></i>"; //penalty
-  if($f[type]==3) $typ = "<i class='fas fa-info-circle text-info'></i>"; //info
-  if($f[type]==4) $typ = ""; //Singularity advert
-  if($f[type]==5) $typ = ""; //SME advert
+  if($f["type"]==0) $typ = ""; //normal
+  if($f["type"]==1) { $typ = "<i class='fas fa-hockey-puck'></i>"; $f["description"] = "<b>".$f["description"]."</b>"; } //goal
+  if($f["type"]==2) $typ = "<i class='fas fa-user-times text-danger'></i>"; //penalty
+  if($f["type"]==3) $typ = "<i class='fas fa-info-circle text-info'></i>"; //info
+  if($f["type"]==4) $typ = ""; //Singularity advert
+  if($f["type"]==5) $typ = ""; //SME advert
   
   if ($i % 20 == 0) {
   $out .= "<tr>
@@ -68,9 +68,9 @@ while($f = mysql_fetch_array($q))
   $i--;
   
   $out .= "<tr>
-            <td class='text-center align-top$pridaj' style='width:7%;'>$f[time]</td>
-            <td class='text-center align-top$pridaj' style='width:5%;'>$typ</td>
-            <td class='$pridaj' style='width:88%;'>$f[description]</td>
+            <td class='text-center align-top$pridaj' style='width:7%;'>".$f["time"]."</td>
+            <td class='text-center align-top$pridaj' style='width:5%;'>".$typ."</td>
+            <td class='$pridaj' style='width:88%;'>".$f["description"]."</td>
            </tr>";
   }
   
@@ -80,5 +80,5 @@ while($f = mysql_fetch_array($q))
   
 echo $out;
 
-mysql_close($link);
+mysqli_close($link);
 ?>

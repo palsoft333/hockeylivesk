@@ -31,24 +31,27 @@ function Get_Seasson($longname)
 */
 function Get_Appearances($shortname, $el, $current)
   {
-	if($el==1) $r = mysql_query("SELECT dt.*, 2004leagues.longname FROM 2004leagues JOIN (SELECT * FROM el_teams WHERE shortname='$shortname')dt ON 2004leagues.id=dt.league ORDER BY dt.id ASC");
-	else $r = mysql_query("SELECT dt.*, 2004leagues.longname, 2004leagues.country, LEFT(2004leagues.longname, LENGTH(2004leagues.longname)-5) as tr, RIGHT(2004leagues.longname, 4) as tr1 FROM 2004leagues JOIN (SELECT * FROM 2004teams WHERE shortname='$shortname')dt ON 2004leagues.id=dt.league ORDER BY 2004leagues.country ASC, tr1 ASC, tr ASC, dt.league ASC");
+  Global $link;
+  $select="";
+  $optlabel="";
+	if($el==1) $r = mysqli_query($link, "SELECT dt.*, 2004leagues.longname, null as country FROM 2004leagues JOIN (SELECT * FROM el_teams WHERE shortname='$shortname')dt ON 2004leagues.id=dt.league ORDER BY dt.id ASC");
+	else $r = mysqli_query($link, "SELECT dt.*, 2004leagues.longname, 2004leagues.country, LEFT(2004leagues.longname, LENGTH(2004leagues.longname)-5) as tr, RIGHT(2004leagues.longname, 4) as tr1 FROM 2004leagues JOIN (SELECT * FROM 2004teams WHERE shortname='$shortname')dt ON 2004leagues.id=dt.league ORDER BY 2004leagues.country ASC, tr1 ASC, tr ASC, dt.league ASC");
 	$nab = "";
 	$nabpred = "";
 	$i=0;
-	while($k = mysql_fetch_array($r))
+	while($k = mysqli_fetch_array($r))
 		{
-    if($k[country]=="SVK") $optlabel = "Slovenské";
-    elseif($k[country]=="GER") $optlabel = "Nemecké";
-    elseif($k[country]=="SUI") $optlabel = "Švajčiarske";
-    elseif($k[country]=="INT") $optlabel = "Medzinárodné";
+    if($k["country"]=="SVK") $optlabel = "Slovenské";
+    elseif($k["country"]=="GER") $optlabel = "Nemecké";
+    elseif($k["country"]=="SUI") $optlabel = "Švajčiarske";
+    elseif($k["country"]=="INT") $optlabel = "Medzinárodné";
 		if($i==0) 
       {
       $select = "<select id='league' class='custom-select custom-select-sm w-auto ml-2'>";
       if($el==0) $select .= "<optgroup label='".$optlabel."'>";
-      $nabpred=$k[country];
+      $nabpred=$k["country"];
       }
-		$nab = $k[country];
+		$nab = $k["country"];
 		//if($k[tr]=="Swiss Ice Hockey Challenge") { $nab="Arosa Challenge"; }
 		//if(substr($k[tr],0,3)=="ZOH") { $nab="ZOH"; }
     if($nab!=$nabpred && $i!=0)
@@ -58,7 +61,7 @@ function Get_Appearances($shortname, $el, $current)
       $select .= "</optgroup><optgroup label='".$optlabel."'>";
       $nabpred=$nab;
       }
-		$select .= "<option value='".$k[id].$el."'".($k[id]==$current ? " selected" : "").">".$k[longname]."</option>";
+		$select .= "<option value='".$k["id"].$el."'".($k["id"]==$current ? " selected" : "").">".$k["longname"]."</option>";
 		$i++;
 		}
   if($el==0) $select .= "</optgroup>";

@@ -8,16 +8,17 @@
 
 function GetBets($user = false)
   {
-  Global $title, $script_end;
+  Global $title, $script_end, $link;
+  $bets="";
   $locale = explode(";",setlocale(LC_ALL, '0'));
   $locale = explode("=",$locale[0]);
   $locale = $locale[1];
   if($user)
     {
-    $q = mysql_query("SELECT uname FROM e_xoops_users WHERE uid='$user'");
-    $f = mysql_fetch_array($q);
+    $q = mysqli_query($link, "SELECT uname FROM e_xoops_users WHERE uid='".$user."'");
+    $f = mysqli_fetch_array($q);
     }
-  $title = ($user ? LANG_BETS_TITLE2.' '.$f[uname] : LANG_BETS_TITLE);
+  $title = ($user ? LANG_BETS_TITLE2.' '.$f["uname"] : LANG_BETS_TITLE);
   
 $script_end .= '<script type="text/javascript">
 	$(document).ready(function() {
@@ -40,7 +41,7 @@ $script_end .= '<script type="text/javascript">
 } );
 	</script>';
 	
-if($user) $bets .= '<a class="btn btn-hl" href="/user/'.$user.'"><i class="fas fa-user mr-2"></i>'.sprintf(LANG_BETS_GOTOPROFILE, $f[uname]).'</a>';
+if($user) $bets .= '<a class="btn btn-hl" href="/user/'.$user.'"><i class="fas fa-user mr-2"></i>'.sprintf(LANG_BETS_GOTOPROFILE, $f["uname"]).'</a>';
 
 $bets .= '  <div class="card my-4 shadow animated--grow-in">
               <div class="card-header">

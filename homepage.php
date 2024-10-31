@@ -1,5 +1,5 @@
           <?
-          if(!$_GET[topicID]) {
+          if(!isset($_GET["topicID"])) {
           ?>
           <!-- Content Row -->
           <div class="row">
@@ -82,11 +82,11 @@
           
           <!-- Page Heading -->
           <div class="d-flex align-items-center justify-content-between mb-4">
-            <h1 class="d-none d-lg-block h3 mb-0 text-gray-800"><? if($_GET[topicID] && $_GET[topicID]!="all") echo Get_SEO_title($_GET[topicID]); else echo LANG_NAV_NEWS; ?></h1>
+            <h1 class="d-none d-lg-block h3 mb-0 text-gray-800"><? if(isset($_GET["topicID"]) && $_GET["topicID"]!="all") echo Get_SEO_title($_GET["topicID"]); else echo LANG_NAV_NEWS; ?></h1>
             <!--<div class="banner468x60">-->
             <div class="banner468x60 col-12 col-xl-6">
           <?
-              if(!$_GET[topicID] && !$_SESSION["logged"]) echo '
+              if(!isset($_GET["topicID"]) && !isset($_SESSION["logged"])) echo '
                 <div id="101390-1">
                     <script src="//ads.themoneytizer.com/s/gen.js?type=1" defer></script>
                     <script src="//ads.themoneytizer.com/s/requestform.js?siteId=101390&formatId=1" defer></script>
@@ -122,23 +122,26 @@
             
               <!-- Page Heading mobile only -->
               <div class="d-lg-none mb-4">
-              <h2 class="h3 mb-0 text-gray-800"><? if($_GET[topicID]) echo Get_SEO_title($_GET[topicID]); else echo LANG_NAV_NEWS; ?></h2>
+              <h2 class="h3 mb-0 text-gray-800"><? if(isset($_GET["topicID"])) echo Get_SEO_title($_GET["topicID"]); else echo LANG_NAV_NEWS; ?></h2>
               </div>
-              <? echo Get_news(10, $_GET[page], $_GET[topicID]); ?>
+              <? 
+              $_GET["page"] = $_GET["page"] ?? null;
+              $_GET["topicID"] = $_GET["topicID"] ?? null;
+              echo Get_news(10, $_GET["page"], $_GET["topicID"]); ?>
                          
             </div>
             
-            <div class="col-xl-3 mb-4 order-<? echo (!$_GET[topicID] ? '1':'3'); ?> order-lg-2">
+            <div class="col-xl-3 mb-4 order-<? echo (!$_GET["topicID"] ? '1':'3'); ?> order-lg-2">
               <?
-              if(!$_GET[topicID])
+              if(!$_GET["topicID"])
                 {
                 echo Get_upcomming();
-                if(!$_SESSION["logged"]) echo '
+                if(!isset($_SESSION["logged"])) echo '
               <!--div class="advert-container card shadow mb-4 text-center">
                 <p class="m-auto p-2 small"></p>
               </div-->';
                 echo Get_Latest_Stats();
-                if(!$_SESSION["logged"]) echo '
+                if(!isset($_SESSION["logged"])) echo '
               <div class="advert-container card shadow mb-4">
                 <p class="m-auto p-2 small">Ak chcete získať <a href="https://skhra.com/free-spiny/">tocenia zdarma za registraciu</a>, navštívte stránku skhra.com</p>
               </div>';
@@ -146,7 +149,7 @@
                 echo Favourite_Team();
                 echo Users_Online();
                 echo Sending_Prize();
-                if(!$_SESSION["logged"]) echo '
+                if(!isset($_SESSION["logged"])) echo '
               <div class="advert-container card shadow">
                 <p class="m-auto p-2 small">Najlepšie <a href="http://casino-hry.sk/">Slovenské Online Casino</a> recenzie a hry zadarmo</p>
               </div>';
@@ -178,7 +181,7 @@
                 }
               else
                 {
-                $topicid = explode("-", $_GET[topicID]);
+                $topicid = explode("-", $_GET["topicID"]);
                 echo '
                   <div class="card shadow mb-2 articleBanner">
                     <div class="card-body">

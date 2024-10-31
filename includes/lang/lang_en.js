@@ -19,6 +19,7 @@ if($("#calendar").length != 0) {
 var LANG_ERROR = "Error";
 var LANG_SETTINGS = "Settings";
 var LANG_MAIL = "email";
+var LANG_PLAYERWATCH = "Player tracking";
 
 var LANG_CALENDAR_GAMESFOR = "Games for";
 var LANG_FLASH_CANNOT = "Cannot load quick news.";
@@ -32,6 +33,9 @@ var LANG_USERPROFILE_SETTINGSCHANGED = "Settings changed successfully.";
 var LANG_USERPROFILE_SETTINGSERROR = "An error occurred while changing the settings.";
 var LANG_USERPROFILE_MIKECHECK = "USA scores 2:0";
 var LANG_USERPROFILE_VOICE = "UK English Female";
+var LANG_USERPROFILE_PUSH = "push notifications";
+var LANG_USERPROFILE_LOADING = "loading...";
+var LANG_USERPROFILE_INCOMPAT = "push notifications are not compatible with this browser";
 
 var LANG_GAMES_BETTING = "Betting";
 var LANG_GAMES_BET = "Bet";
@@ -52,6 +56,8 @@ var LANG_FANTASY_ERRORSAVING = "There was an error saving your team.";
 var LANG_FANTASY_ALREADYPICKED = "You have already selected this player. Please choose another.";
 var LANG_FANTASY_PICKSACTIVE = "Your draft picks are active.";
 var LANG_FANTASY_PICKSINACTIVE = "Your draft picks are not complete. Please draft all 10 positions.";
+
+var LANG_PLAYERS_DELETED = "The player has been successfully removed from the watchlist";
 
 var LANG_COMMENTS_CAPTCHAERROR = "Your registration did not pass the spam test. Please try again or send us an";
 var LANG_COMMENTS_ADDED = "Comment added successfully.";

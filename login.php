@@ -2,9 +2,9 @@
 session_start();
 if($_SESSION['logged']) header("Location:/");
 include("includes/login.php");
-$langs = array();
+$langs = [];
 
-if(!isset($_SESSION[lang]))
+if(!isset($_SESSION["lang"]))
   {
   if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
       preg_match_all('/([a-z]{1,8}(-[a-z]{1,8})?)\s*(;\s*q\s*=\s*(1|0\.[0-9]+))?/i', $_SERVER['HTTP_ACCEPT_LANGUAGE'], $lang_parse);
@@ -24,25 +24,25 @@ if(!isset($_SESSION[lang]))
   
   foreach ($langs as $lang => $val) {
     if (strpos($lang, 'sk') === 0) {
-      $_SESSION[lang] = "sk";
+      $_SESSION["lang"] = "sk";
       break;
     }
      else if (strpos($lang, 'en') === 0) {
-      $_SESSION[lang] = "en";
+      $_SESSION["lang"] = "en";
       break;
     }
     else {
-      $_SESSION[lang] = "sk";
+      $_SESSION["lang"] = "sk";
       }
     }
   if(count($langs)==0) {
-    $_SESSION[lang] = "sk";
+    $_SESSION["lang"] = "sk";
     }
-  include("includes/lang/lang_".strtolower($_SESSION[lang]).".php");
+  include("includes/lang/lang_".strtolower($_SESSION["lang"]).".php");
   }
 else
   {
-  if($_SESSION[lang]=="en" || $_SESSION[lang]=="sk") include("includes/lang/lang_".strtolower($_SESSION[lang]).".php");
+  if($_SESSION["lang"]=="en" || $_SESSION["lang"]=="sk") include("includes/lang/lang_".strtolower($_SESSION["lang"]).".php");
   else include("includes/lang/lang_sk.php");
   }
 ?>
@@ -114,7 +114,9 @@ else
           <div class="card-body p-0">
             <!-- Nested Row within Card Body -->
             <div class="row">
-              <div class="col-lg-6 d-none d-lg-block animated--fade-in lazy" data-src="https://source.unsplash.com/collection/3668324/600x800" style="    background-position: center; background-size: cover;"></div>
+              <div class="col-lg-6 d-none d-lg-block animated--fade-in lazy" id="unsplash-image" style="background-position: center; background-size: cover;">
+                <div class="badge badge-light badge-pill position-absolute" id="author-info" style="font-size: 10px;bottom: 0;right: 0;background-color: #f8f9fc85;">Nahrávam...</div>
+              </div>
               <div class="col-lg-6">
                 <div class="p-5">
                   <div class="text-center">
@@ -173,8 +175,8 @@ else
   
   <script src="/js/jquery.lazy.min.js"></script>
   <script src="/js/main.min.js?v=1.1.7"></script>
-  <script src="/includes/lang/lang_<? echo $_SESSION[lang]; ?>.js?v=1.0.0"></script>
-  <script src="/js/login_events.min.js?v=1.0.1"></script>
+  <script src="/includes/lang/lang_<? echo $_SESSION["lang"]; ?>.js?v=1.0.0"></script>
+  <script src="/js/login_events.min.js?v=1.0.2"></script>
 
 </body>
 

@@ -1,6 +1,7 @@
 <?
 require __DIR__ . '/../vendor/Webpush/vendor/autoload.php';
 use Minishlink\WebPush\WebPush;
+use Minishlink\WebPush\Subscription;
 
 /*
 * Funkcia pre konverziu akéhokoľvek reťazca na URL v SEO forme
@@ -22,15 +23,19 @@ function SEOtitle($title) {
 }
 
 function Get_SEO_title($topicID, $provided=false) {
+    Global $link;
     if($provided) $f["topic_title"]=$topicID;
     else {
-        $q = mysql_query("SELECT * FROM e_xoops_topics WHERE topic_id='".$topicID."'");
-        $f = mysql_fetch_array($q);
+        $q = mysqli_query($link, "SELECT * FROM e_xoops_topics WHERE topic_id='".$topicID."'");
+        $f = mysqli_fetch_array($q);
     }
-    if(strstr($f["topic_title"], "U20")) $title = "Majstrovstvá sveta v hokeji do 20 rokov";
-    elseif(strstr($f["topic_title"], "MS ")) $title = str_replace("MS ", "Majstrovstvá sveta v hokeji ", $f["topic_title"]);
-    elseif(strstr($f["topic_title"], "ZOH ")) $title = str_replace("ZOH ", "Zimné olympijské hry ", $f["topic_title"]);
-    else $title = $f["topic_title"];
+    if(isset($f["topic_title"])) {
+      if(strstr($f["topic_title"], "U20")) $title = "Majstrovstvá sveta v hokeji do 20 rokov";
+      elseif(strstr($f["topic_title"], "MS ")) $title = str_replace("MS ", "Majstrovstvá sveta v hokeji ", $f["topic_title"]);
+      elseif(strstr($f["topic_title"], "ZOH ")) $title = str_replace("ZOH ", "Zimné olympijské hry ", $f["topic_title"]);
+      else $title = $f["topic_title"];
+    }
+    else $title = "Novinky";
     return $title;
 }
 
@@ -84,6 +89,7 @@ function LeagueColor($name) {
 */
 
 function LeagueFont($name) {
+    if($name==null) return false;
     $name = mb_strtolower($name, 'UTF-8');
 
     $leagueFontMapping = [
@@ -105,6 +111,51 @@ function LeagueFont($name) {
     return 'dcup';
 }
 
+
+function Tournament_Strip() {
+  Global $link;
+  $ts="";
+  $q = mysqli_query($link, "SELECT l.*, (SELECT COUNT(*) FROM 2004players p WHERE p.league = l.id && p.teamshort='SVK') AS player_count, t.id as tid, t.longname as tlong, m.datetime, m.id as mid, IF(m.team1short='SVK', m.team2long, m.team1long) as vsteam, m.team1long, m.team2long FROM 2004leagues l LEFT JOIN 2004teams t ON t.league=l.id && t.shortname='SVK' LEFT JOIN 2004matches m ON m.league=l.id && (m.team1short='SVK' || m.team2short='SVK') && m.datetime>NOW() && m.kedy='na programe' WHERE l.start_date <= DATE_ADD(CURDATE(), INTERVAL 1 WEEK) AND l.end_date >= DATE_SUB(CURDATE(), INTERVAL 3 DAY) LIMIT 1");
+  if(mysqli_num_rows($q)>0) {
+    $f = mysqli_fetch_array($q);
+    $longname = $f["longname"];
+    $longname = str_replace("Nemecký pohár", "Nemeckom pohári", $longname);
+    $longname = str_replace("Vianočný Kaufland Cup", "Vianočnom Kaufland Cupe", $longname);
+    $longname = str_replace("Kaufland Cup", "Kaufland Cupe", $longname);
+    $ts = '
+    <div class="bg-secondary border-bottom border-dark d-flex justify-content-between justify-content-sm-start p-1 small text-white" id="tournamentStrip">
+      <div class="align-self-center mr-2 tournamentName"><b class="text-gray-300">Slovensko</b> na <b>'.$longname.'</b></div>
+      <div class="d-none d-sm-block vr mr-2"></div>
+      <div class="text-center">';
+        if($f["player_count"]>0) $ts .= '<a class="btn btn-dark btn-sm py-0 d-inline-flex mr-1" href="/team/'.$f["tid"].'0-'.SEOtitle($f["tlong"]).'">Zostava</a>';
+        if($f["mid"]!=NULL) {
+
+          $date = new DateTime($f["datetime"]);
+          $today = new DateTime();
+          $today->setTime(0, 0);
+          $tomorrow = (clone $today)->modify('+1 day');
+          $day_after_tomorrow = (clone $today)->modify('+2 days');
+
+          if ($date->format('Y-m-d') == $today->format('Y-m-d')) {
+              $hl = "dnes";
+          } elseif ($date->format('Y-m-d') == $tomorrow->format('Y-m-d')) {
+              $hl = "zajtra";
+          } elseif ($date->format('Y-m-d') == $day_after_tomorrow->format('Y-m-d')) {
+              $hl = "pozajtra";
+          } else {
+              $hl = $date->format('j.n. H:i');
+          }
+
+          $ts .= '<a class="btn btn-dark btn-sm py-0 d-inline-flex" href="/game/'.$f["mid"].'0-'.SEOtitle($f["team1long"]." vs ".$f["team2long"]).'">Ďalší zápas<span class="d-none d-sm-block ml-1">'.$hl.' vs. <b>'.$f["vsteam"].'</b></span></a>';
+        }
+        if($f["place"]!=0) $ts .= '<a class="btn btn-dark btn-sm py-0 d-inline-flex" href="/table/'.$f["id"].'-'.SEOtitle($f["longname"]).'">Konečné <b class="ml-1">'.$f["place"].'.miesto</b></a>';
+    $ts .= '
+      </div>
+    </div>';
+  }
+return $ts;
+}
+
 /*
 * Funkcia pre vygenerovanie menu jednotlivých aktívnych líg
 * version: 3.0.0 (29.1.2020 - prispôsobenie pre Boostrap4 template)
@@ -113,69 +164,71 @@ function LeagueFont($name) {
 */
 
 function Generate_Menu($active_league = FALSE) {
-    $q = mysql_query("SELECT dt.*, e_xoops_topics.topic_title FROM e_xoops_topics JOIN (SELECT * FROM 2004leagues WHERE position > '0' && id!='70')dt ON dt.topic_id=e_xoops_topics.topic_id ORDER BY el DESC, position ASC");
-    while($f = mysql_fetch_array($q))
+    Global $link;
+    $menu = $elpred = "";
+    $q = mysqli_query($link, "SELECT dt.*, e_xoops_topics.topic_title FROM e_xoops_topics JOIN (SELECT * FROM 2004leagues WHERE position > '0' && id!='70')dt ON dt.topic_id=e_xoops_topics.topic_id ORDER BY el DESC, position ASC");
+    while($f = mysqli_fetch_array($q))
       {
       $badge_num=$live=0;
       $badge="";
-      if($f[el]==0) $matches_table="2004matches";
-      elseif($f[el]==1) $matches_table="el_matches";
+      if($f["el"]==0) $matches_table="2004matches";
+      elseif($f["el"]==1) $matches_table="el_matches";
       else $matches_table="al_matches";
-      $font = LeagueFont($f[longname]);
-      $bg = LeagueColor($f[longname]);
-      if(strstr($f[longname], 'NHL')) $w = mysql_query("SELECT * FROM $matches_table WHERE datetime > '".date("Y-m-d",mktime())." 10:00' && datetime < '".date('Y-m-d', mktime(0, 0, 0, date('m'), date('d')+1, date('Y')))." 10:00' && league='$f[id]'");
-      else $w = mysql_query("SELECT * FROM $matches_table WHERE datetime LIKE '".date("Y-m-d",mktime())."%' && league='$f[id]'");
-      $badge_num = mysql_num_rows($w);
+      $font = LeagueFont($f["longname"]);
+      $bg = LeagueColor($f["longname"]);
+      if(strstr($f["longname"], 'NHL')) $w = mysqli_query($link, "SELECT * FROM $matches_table WHERE datetime > '".date("Y-m-d")." 10:00' && datetime < '".date('Y-m-d', mktime(0, 0, 0, date('m'), date('d')+1, date('Y')))." 10:00' && league='".$f["id"]."'");
+      else $w = mysqli_query($link, "SELECT * FROM $matches_table WHERE datetime LIKE '".date("Y-m-d")."%' && league='".$f["id"]."'");
+      $badge_num = mysqli_num_rows($w);
       if($badge_num>0)
         {
-        while($g = mysql_fetch_array($w)) 
+        while($g = mysqli_fetch_array($w)) 
           {
-          if($g[active]==1) $live=1;
+          if($g["active"]==1) $live=1;
           }
         $badge = '<span class="badge badge-'.$bg.' float-right mr-2 text-xs">'.$badge_num.'</span>';
         if($live==1) $badge .= '<span class="badge live" style="margin-right:2px;color:#FFEB3B;">LIVE</span>';
         }
       $sim=0;
-      $tt = LeagueSpecifics($f[id], $f[longname], 1);
-      if(strstr($f[longname], "KHL") || strstr($f[longname], "NHL")) $table_type="conference";
-      if(strstr($f[longname], "liga")) $table_type="conference";
-      if($f[el]==0) $table_type="division";
-      if($f[el]!=$elpred) $menu .= '<!-- Divider -->
+      $tt = LeagueSpecifics($f["id"], $f["longname"], 1);
+      if(strstr($f["longname"], "KHL") || strstr($f["longname"], "NHL")) $table_type="conference";
+      if(strstr($f["longname"], "liga")) $table_type="conference";
+      if($f["el"]==0) $table_type="division";
+      if($f["el"]!=$elpred) $menu .= '<!-- Divider -->
       <hr class="sidebar-divider">
 
       <!-- Heading -->
       <div class="sidebar-heading">
-        '.($f[el]==1 ? 'Ligy':'Turnaje').'
+        '.($f["el"]==1 ? 'Ligy':'Turnaje').'
       </div>';
-      $menu .= '<li class="nav-item'.($active_league==$f[id] ? ' active':'').'" itemscope="itemscope" itemtype="http://www.schema.org/SiteNavigationElement">
-                  <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapse-'.$f[id].'" aria-expanded="true" aria-controls="collapse-'.$f[id].'" role="button">
+      $menu .= '<li class="nav-item'.($active_league==$f["id"] ? ' active':'').'" itemscope="itemscope" itemtype="http://www.schema.org/SiteNavigationElement">
+                  <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapse-'.$f["id"].'" aria-expanded="true" aria-controls="collapse-'.$f["id"].'" role="button">
                     <i class="ll-'.$font.'"></i>
-                    <span>'.($f[el]==1 ? substr($f[longname],0,-6):$f[longname]).'</span>
+                    <span>'.($f["el"]==1 ? substr($f["longname"],0,-6):$f["longname"]).'</span>
                   </a>
-                  <div id="collapse-'.$f[id].'" class="collapse" aria-labelledby="heading-'.$f[id].'" data-parent="#accordionSidebar">
+                  <div id="collapse-'.$f["id"].'" class="collapse" aria-labelledby="heading-'.$f["id"].'" data-parent="#accordionSidebar">
                     <div class="bg-white border-left-'.$bg.' py-2 collapse-inner rounded">
                       <h6 class="collapse-header">'.LANG_NAV_TABLE.':</h6>
                       <div class="text-xs pb-2">
-                        '.($f[endbasic]==1 && $f[el]>0 ? Get_Series($f[id]) : ($f[endbasic]==1 && $f[el]==0 ? Get_team_table($f[id]):$tt->render_table($table_type, 1))).'
+                        '.($f["endbasic"]==1 && $f["el"]>0 ? Get_Series($f["id"]) : ($f["endbasic"]==1 && $f["el"]==0 ? Get_team_table($f["id"]):$tt->render_table($table_type, 1))).'
                       </div>
                       <div class="collapse-divider"></div>
                       <h6 class="collapse-header">Odkazy:</h6>
-                      '.($f["info_id"]!=null ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/info/'.$f["info_id"].'-'.SEOtitle(Get_SEO_title($f[topic_title],1)).'"><span itemprop="name">Informácie</span><i class="fas fa-circle-info fa-fw float-right text-gray-500 my-1"></i></a>':'').'
-                      <a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/category/'.$f[topic_id].'-'.SEOtitle(Get_SEO_title($f[topic_title],1)).'"><span itemprop="name">'.LANG_NAV_NEWS.'</span><i class="fas fa-newspaper fa-fw float-right text-gray-500 my-1"></i></a>
-                      '.($f[el]>0 && $f[endbasic]==1 ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/table/'.$f[id].'-'.SEOtitle(Get_SEO_title($f[topic_title],1)).'/playoff"><span itemprop="name">'.LANG_TEAMTABLE_PLAYOFF.'</span><i class="fas fa-trophy fa-fw float-right text-gray-500 my-1"></i></a>':'').'
-                      <a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="'.($f[endbasic]==1 && $f[el]==0 ? "/table/".$f[id]."-".SEOtitle(Get_SEO_title($f[topic_title],1))."/playoff" : "/games/".$f[id]."-".SEOtitle(Get_SEO_title($f[topic_title],1))).'"><span itemprop="name">'.LANG_NAV_UPCOMMING.'</span><i class="fas fa-hockey-puck fa-fw float-right text-gray-500 my-1"></i>'.$badge.'</a>
-                      <a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/table/'.$f[id].'-'.SEOtitle(Get_SEO_title($f[topic_title],1)).''.($f[groups]!="" ? "/groups" : "").'"><span itemprop="name">'.LANG_NAV_TABLE.'</span><i class="fas fa-table-list fa-fw float-right text-gray-500 my-1"></i></a>
-                      <a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/stats/'.$f[id].'-'.SEOtitle(Get_SEO_title($f[topic_title],1)).'"><span itemprop="name">'.LANG_NAV_STATS.'</span><i class="fas fa-chart-bar fa-fw float-right text-gray-500 my-1"></i></a>
-                      '.(strstr($f[longname], 'NHL') ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/slovaks/'.$f[id].'-'.SEOtitle(Get_SEO_title($f[topic_title],1)).'"><span itemprop="name">'.LANG_NAV_SLOVAKS.'</span><i class="fas fa-user-shield fa-fw float-right text-gray-500 my-1"></i></a>':'').'
-                      '.(strstr($f[longname], 'KHL') ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/slovaks/'.$f[id].'-'.SEOtitle(Get_SEO_title($f[topic_title],1)).'"><span itemprop="name">'.LANG_NAV_SLOVAKI.'</span><i class="fas fa-user-shield fa-fw float-right text-gray-500 my-1"></i></a>':'').'
-                      '.($f[el]>0 && $f[topic_id]!=60 ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/injured/'.$f[id].'-'.SEOtitle(Get_SEO_title($f[topic_title],1)).'"><span itemprop="name">'.LANG_NAV_INJURED.'</span><i class="fas fa-user-injured fa-fw float-right text-gray-500 my-1"></i></a>':'').'
-                      '.($f[el]>0 ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/transfers/'.$f[id].'-'.SEOtitle(Get_SEO_title($f[topic_title],1)).'"><span itemprop="name">'.LANG_NAV_TRANSFERS.'</span><i class="fas fa-exchange-alt fa-fw float-right text-gray-500 my-1"></i></a>':'').'
-                      '.($f[id]==153 ? '<a itemprop="url" class="collapse-item font-weight-bold text-success" href="/fantasy/draft"><span itemprop="name">Fantasy MS</span><i class="fas fa-wand-magic-sparkles fa-fw float-right text-gray-500 my-1"></i></a>':'').'
-                      '.($f[id]==144 ? '<a itemprop="url" class="collapse-item font-weight-bold text-danger" href="/fantasy/main"><span itemprop="name">Fantasy KHL</span><i class="fas fa-wand-magic-sparkles fa-fw float-right text-gray-500 my-1"></i></a>':'').'
+                      '.($f["info_id"]!=null ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/info/'.$f["info_id"].'-'.SEOtitle(Get_SEO_title($f["topic_title"],1)).'"><span itemprop="name">Informácie</span><i class="fas fa-circle-info fa-fw float-right text-gray-500 my-1"></i></a>':'').'
+                      <a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/category/'.$f["topic_id"].'-'.SEOtitle(Get_SEO_title($f["topic_title"],1)).'"><span itemprop="name">'.LANG_NAV_NEWS.'</span><i class="fas fa-newspaper fa-fw float-right text-gray-500 my-1"></i></a>
+                      '.($f["el"]>0 && $f["endbasic"]==1 ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/table/'.$f["id"].'-'.SEOtitle(Get_SEO_title($f["topic_title"],1)).'/playoff"><span itemprop="name">'.LANG_TEAMTABLE_PLAYOFF.'</span><i class="fas fa-trophy fa-fw float-right text-gray-500 my-1"></i></a>':'').'
+                      <a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="'.($f["endbasic"]==1 && $f["el"]==0 ? "/table/".$f["id"]."-".SEOtitle(Get_SEO_title($f["topic_title"],1))."/playoff" : "/games/".$f["id"]."-".SEOtitle(Get_SEO_title($f["topic_title"],1))).'"><span itemprop="name">'.LANG_NAV_UPCOMMING.'</span><i class="fas fa-hockey-puck fa-fw float-right text-gray-500 my-1"></i>'.$badge.'</a>
+                      <a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/table/'.$f["id"].'-'.SEOtitle(Get_SEO_title($f["topic_title"],1)).''.($f["groups"]!="" ? "/groups" : "").'"><span itemprop="name">'.LANG_NAV_TABLE.'</span><i class="fas fa-table-list fa-fw float-right text-gray-500 my-1"></i></a>
+                      <a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/stats/'.$f["id"].'-'.SEOtitle(Get_SEO_title($f["topic_title"],1)).'"><span itemprop="name">'.LANG_NAV_STATS.'</span><i class="fas fa-chart-bar fa-fw float-right text-gray-500 my-1"></i></a>
+                      '.(strstr($f["longname"], 'NHL') ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/slovaks/'.$f["id"].'-'.SEOtitle(Get_SEO_title($f["topic_title"],1)).'"><span itemprop="name">'.LANG_NAV_SLOVAKS.'</span><i class="fas fa-user-shield fa-fw float-right text-gray-500 my-1"></i></a>':'').'
+                      '.(strstr($f["longname"], 'KHL') ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/slovaks/'.$f["id"].'-'.SEOtitle(Get_SEO_title($f["topic_title"],1)).'"><span itemprop="name">'.LANG_NAV_SLOVAKI.'</span><i class="fas fa-user-shield fa-fw float-right text-gray-500 my-1"></i></a>':'').'
+                      '.($f["el"]>0 && $f["topic_id"]!=60 ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/injured/'.$f["id"].'-'.SEOtitle(Get_SEO_title($f["topic_title"],1)).'"><span itemprop="name">'.LANG_NAV_INJURED.'</span><i class="fas fa-user-injured fa-fw float-right text-gray-500 my-1"></i></a>':'').'
+                      '.($f["el"]>0 ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/transfers/'.$f["id"].'-'.SEOtitle(Get_SEO_title($f["topic_title"],1)).'"><span itemprop="name">'.LANG_NAV_TRANSFERS.'</span><i class="fas fa-exchange-alt fa-fw float-right text-gray-500 my-1"></i></a>':'').'
+                      '.($f["id"]==153 ? '<a itemprop="url" class="collapse-item font-weight-bold text-success" href="/fantasy/picks"><span itemprop="name">Fantasy MS</span><i class="fas fa-wand-magic-sparkles fa-fw float-right text-gray-500 my-1"></i></a>':'').'
+                      '.($f["id"]==144 ? '<a itemprop="url" class="collapse-item font-weight-bold text-danger" href="/fantasy/main"><span itemprop="name">Fantasy KHL</span><i class="fas fa-wand-magic-sparkles fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                     </div>
                   </div>
                 </li>';
-      $elpred=$f[el];
+      $elpred=$f["el"];
       }
    return $menu;
 }
@@ -191,108 +244,108 @@ function Generate_Menu($active_league = FALSE) {
 */
 
 function Get_team_table($league, $pos = FALSE) {
-Global $another;
+Global $another, $link;
 
 $ttable="";
 
-$a = mysql_query("SELECT * FROM 2004leagues WHERE id='$league'");
-$b = mysql_fetch_array($a);
-$wpoints=$b[points];
-if($b[el]==1) 
+$a = mysqli_query($link, "SELECT * FROM 2004leagues WHERE id='".$league."'");
+$b = mysqli_fetch_array($a);
+$wpoints=$b["points"];
+if($b["el"]==1) 
 	{
 	$teams_table="el_teams";
 	$el=1;
-	if(strstr($b[longname], 'KHL'))
+	if(strstr($b["longname"], 'KHL'))
     {
-    $kol[kolo]=56;
-    $dev = mysql_query("SELECT ($kol[kolo]-dt.zapasov)*$wpoints+body as ce FROM (SELECT *, goals-ga as diff FROM el_teams WHERE league='$league' && (shortname='SPA' || shortname='VIT' || shortname='SOC' || shortname='JOK' || shortname='PET' || shortname='TNN' || shortname='DYN' || shortname='DMN' || shortname='LOK' || shortname='DIR' || shortname='CSK' || shortname='SEV') ORDER BY body desc, wins desc, diff DESC, zapasov asc LIMIT 8,8)dt ORDER BY ce DESC LIMIT 1");
-	$deviaty = mysql_fetch_array($dev);
-    $osm = mysql_query("SELECT *, goals-ga as diff FROM el_teams WHERE league='$league' && (shortname='SPA' || shortname='VIT' || shortname='SOC' || shortname='JOK' || shortname='PET' || shortname='TNN' || shortname='DYN' || shortname='DMN' || shortname='LOK' || shortname='DIR' || shortname='CSK' || shortname='SEV') ORDER BY body desc, wins desc, diff DESC, zapasov asc LIMIT 7,1");
-	$osmy = mysql_fetch_array($osm);
+    $kol["kolo"]=56;
+    $dev = mysqli_query($link, "SELECT (".$kol["kolo"]."-dt.zapasov)*".$wpoints."+body as ce FROM (SELECT *, goals-ga as diff FROM el_teams WHERE league='".$league."' && (shortname='SPA' || shortname='VIT' || shortname='SOC' || shortname='JOK' || shortname='PET' || shortname='TNN' || shortname='DYN' || shortname='DMN' || shortname='LOK' || shortname='DIR' || shortname='CSK' || shortname='SEV') ORDER BY body desc, wins desc, diff DESC, zapasov asc LIMIT 8,8)dt ORDER BY ce DESC LIMIT 1");
+	$deviaty = mysqli_fetch_array($dev);
+    $osm = mysqli_query($link, "SELECT *, goals-ga as diff FROM el_teams WHERE league='".$league."' && (shortname='SPA' || shortname='VIT' || shortname='SOC' || shortname='JOK' || shortname='PET' || shortname='TNN' || shortname='DYN' || shortname='DMN' || shortname='LOK' || shortname='DIR' || shortname='CSK' || shortname='SEV') ORDER BY body desc, wins desc, diff DESC, zapasov asc LIMIT 7,1");
+	$osmy = mysqli_fetch_array($osm);
     }
-	elseif(strstr($b[longname], 'NHL'))
+	elseif(strstr($b["longname"], 'NHL'))
     {
-		$kol[kolo]=82;
-		$wpoints=$b[points];
+		$kol["kolo"]=82;
+		$wpoints=$b["points"];
     if($another)
       {
-      $dev = mysql_query("SELECT ($kol[kolo]-dt.zapasov)*$wpoints+body as ce FROM (SELECT *, goals-ga as diff FROM el_teams WHERE league='$league' && (shortname='CHI' || shortname='WPG' || shortname='NSH' || shortname='STL' || shortname='CGY' || shortname='COL' || shortname='EDM' || shortname='MIN' || shortname='VAN' || shortname='ANA' || shortname='DAL' || shortname='LAK' || shortname='ARI' || shortname='SJS' || shortname='VGK') ORDER BY body desc, zapasov asc, wins desc, diff desc LIMIT 8,8)dt ORDER BY ce DESC LIMIT 1");
-      $deviaty = mysql_fetch_array($dev);
-      $osm = mysql_query("SELECT *, goals-ga as diff FROM el_teams WHERE league='$league' && (shortname='CHI' || shortname='WPG' || shortname='NSH' || shortname='STL' || shortname='CGY' || shortname='COL' || shortname='EDM' || shortname='MIN' || shortname='*VAN' || shortname='ANA' || shortname='DAL' || shortname='LAK' || shortname='ARI' || shortname='SJS' || shortname='VGK') ORDER BY body desc, zapasov asc, wins desc, diff desc LIMIT 7,1");
-      $osmy = mysql_fetch_array($osm);
+      $dev = mysqli_query($link, "SELECT (".$kol["kolo"]."-dt.zapasov)*".$wpoints."+body as ce FROM (SELECT *, goals-ga as diff FROM el_teams WHERE league='".$league."' && (shortname='CHI' || shortname='WPG' || shortname='NSH' || shortname='STL' || shortname='CGY' || shortname='COL' || shortname='EDM' || shortname='MIN' || shortname='VAN' || shortname='ANA' || shortname='DAL' || shortname='LAK' || shortname='ARI' || shortname='SJS' || shortname='VGK') ORDER BY body desc, zapasov asc, wins desc, diff desc LIMIT 8,8)dt ORDER BY ce DESC LIMIT 1");
+      $deviaty = mysqli_fetch_array($dev);
+      $osm = mysqli_query($link, "SELECT *, goals-ga as diff FROM el_teams WHERE league='".$league."' && (shortname='CHI' || shortname='WPG' || shortname='NSH' || shortname='STL' || shortname='CGY' || shortname='COL' || shortname='EDM' || shortname='MIN' || shortname='*VAN' || shortname='ANA' || shortname='DAL' || shortname='LAK' || shortname='ARI' || shortname='SJS' || shortname='VGK') ORDER BY body desc, zapasov asc, wins desc, diff desc LIMIT 7,1");
+      $osmy = mysqli_fetch_array($osm);
       }
     else
       {
-      $dev = mysql_query("SELECT ($kol[kolo]-dt.zapasov)*$wpoints+body as ce FROM (SELECT *, goals-ga as diff FROM el_teams WHERE league='$league' && (shortname='NJD' || shortname='NYI' || shortname='NYR' || shortname='PHI' || shortname='PIT' || shortname='BOS' || shortname='BUF' || shortname='MTL' || shortname='OTT' || shortname='TOR' || shortname='WPG' || shortname='CAR' || shortname='FLA' || shortname='TBL' || shortname='WSH') ORDER BY body desc, zapasov asc, wins desc, diff desc LIMIT 8,8)dt ORDER BY ce DESC LIMIT 1");
-      $deviaty = mysql_fetch_array($dev);
-      $osm = mysql_query("SELECT *, goals-ga as diff FROM el_teams WHERE league='$league' && (shortname='NJD' || shortname='NYI' || shortname='NYR' || shortname='PHI' || shortname='PIT' || shortname='BOS' || shortname='BUF' || shortname='MTL' || shortname='OTT' || shortname='TOR' || shortname='WPG' || shortname='CAR' || shortname='FLA' || shortname='TBL' || shortname='WSH') ORDER BY body desc, zapasov asc, wins desc, diff desc LIMIT 7,1");
-      $osmy = mysql_fetch_array($osm);
+      $dev = mysqli_query($link, "SELECT (".$kol["kolo"]."-dt.zapasov)*".$wpoints."+body as ce FROM (SELECT *, goals-ga as diff FROM el_teams WHERE league='".$league."' && (shortname='NJD' || shortname='NYI' || shortname='NYR' || shortname='PHI' || shortname='PIT' || shortname='BOS' || shortname='BUF' || shortname='MTL' || shortname='OTT' || shortname='TOR' || shortname='WPG' || shortname='CAR' || shortname='FLA' || shortname='TBL' || shortname='WSH') ORDER BY body desc, zapasov asc, wins desc, diff desc LIMIT 8,8)dt ORDER BY ce DESC LIMIT 1");
+      $deviaty = mysqli_fetch_array($dev);
+      $osm = mysqli_query($link, "SELECT *, goals-ga as diff FROM el_teams WHERE league='".$league."' && (shortname='NJD' || shortname='NYI' || shortname='NYR' || shortname='PHI' || shortname='PIT' || shortname='BOS' || shortname='BUF' || shortname='MTL' || shortname='OTT' || shortname='TOR' || shortname='WPG' || shortname='CAR' || shortname='FLA' || shortname='TBL' || shortname='WSH') ORDER BY body desc, zapasov asc, wins desc, diff desc LIMIT 7,1");
+      $osmy = mysqli_fetch_array($osm);
       }
     }
   else
     {
-    $kol[kolo]=50;
+    $kol["kolo"]=50;
     /*$dev = mysql_query("SELECT ($kol[kolo]-dt.zapasov)*$wpoints+body as ce FROM (SELECT *, goals-ga as diff FROM el_teams WHERE league='$league' && shortname!='S20' ORDER BY body desc, diff desc, goals desc, wins desc, losts asc, ties desc LIMIT 8,8)dt ORDER BY ce DESC LIMIT 1");
     $deviaty = mysql_fetch_array($dev);
     $osm = mysql_query("SELECT *, goals-ga as diff FROM el_teams WHERE league='$league' ORDER BY body desc, diff desc, goals desc, wins desc, losts asc, ties desc LIMIT 7,1");
     $osmy = mysql_fetch_array($osm);*/
-    $dev = mysql_query("SELECT ($kol[kolo]-dt.zapasov)*$wpoints+body as ce FROM (SELECT *, goals-ga as diff FROM el_teams WHERE league='$league' && shortname!='S20' ORDER BY body desc, diff desc, goals desc, wins desc, losts asc, ties desc LIMIT 6,6)dt ORDER BY ce DESC LIMIT 1");
-    $deviaty = mysql_fetch_array($dev);
-    $osm = mysql_query("SELECT *, goals-ga as diff FROM el_teams WHERE league='$league' ORDER BY body desc, diff desc, goals desc, wins desc, losts asc, ties desc LIMIT 5,1");
-    $osmy = mysql_fetch_array($osm);
-    $des = mysql_query("SELECT *, goals-ga as diff FROM el_teams WHERE league='$league' ORDER BY body desc, diff desc, goals desc, wins desc, losts asc, ties desc LIMIT 9,1");
-    $desiaty = mysql_fetch_array($des);
+    $dev = mysqli_query($link, "SELECT (".$kol["kolo"]."-dt.zapasov)*".$wpoints."+body as ce FROM (SELECT *, goals-ga as diff FROM el_teams WHERE league='".$league."' && shortname!='S20' ORDER BY body desc, diff desc, goals desc, wins desc, losts asc, ties desc LIMIT 6,6)dt ORDER BY ce DESC LIMIT 1");
+    $deviaty = mysqli_fetch_array($dev);
+    $osm = mysqli_query($link, "SELECT *, goals-ga as diff FROM el_teams WHERE league='".$league."' ORDER BY body desc, diff desc, goals desc, wins desc, losts asc, ties desc LIMIT 5,1");
+    $osmy = mysqli_fetch_array($osm);
+    $des = mysqli_query($link, "SELECT *, goals-ga as diff FROM el_teams WHERE league='".$league."' ORDER BY body desc, diff desc, goals desc, wins desc, losts asc, ties desc LIMIT 9,1");
+    $desiaty = mysqli_fetch_array($des);
     }
 	}
 else { $teams_table="2004teams"; $el="0"; }
-if($b[el]==1 && strstr($b[longname], 'KHL'))
+if($b["el"]==1 && strstr($b["longname"], 'KHL'))
   {
   // Tabulka KHL zapadnej konferencie
-  $b[longname] = "KHL";
-	$uloha = mysql_query("(SELECT *, goals-ga as diff, 2 as leader FROM el_teams WHERE league='$league' && (shortname='SPA' || shortname='VIT' || shortname='SOC' || shortname='JOK' || shortname='PET' || shortname='TNN') ORDER BY body desc, wins desc, diff DESC, zapasov asc, id asc)
+  $b["longname"] = "KHL";
+	$uloha = mysqli_query($link, "(SELECT *, goals-ga as diff, 2 as leader FROM el_teams WHERE league='".$league."' && (shortname='SPA' || shortname='VIT' || shortname='SOC' || shortname='JOK' || shortname='PET' || shortname='TNN') ORDER BY body desc, wins desc, diff DESC, zapasov asc, id asc)
 UNION
-(SELECT *, goals-ga as diff, 2 as leader FROM el_teams WHERE league='$league' && (shortname='DYN' || shortname='DMN' || shortname='LOK' || shortname='DIR' || shortname='CSK' || shortname='SEV')  ORDER BY body desc, wins desc, diff DESC, zapasov asc, id asc)
+(SELECT *, goals-ga as diff, 2 as leader FROM el_teams WHERE league='".$league."' && (shortname='DYN' || shortname='DMN' || shortname='LOK' || shortname='DIR' || shortname='CSK' || shortname='SEV')  ORDER BY body desc, wins desc, diff DESC, zapasov asc, id asc)
 ORDER BY leader asc, body desc, wins desc, diff desc, zapasov asc");
   }
-elseif($b[el]==1 && strstr($b[longname], 'NHL'))
+elseif($b["el"]==1 && strstr($b["longname"], 'NHL'))
   {
-  $b[longname] = "NHL";
+  $b["longname"] = "NHL";
   // Tabulky konferencii NHL
 	if($another)
     {
-    $uloha = mysql_query("(SELECT dt.* FROM ((SELECT *, goals-ga as diff, 1 as leader FROM el_teams WHERE league='$league' && (shortname='STL' || shortname='COL' || shortname='CHI' || shortname='MIN' || shortname='DAL' || shortname='WPG' || shortname='NSH' || shortname='ARI') ORDER BY body desc, zapasov asc, wins desc, diff desc LIMIT 3)
+    $uloha = mysqli_query($link, "(SELECT dt.* FROM ((SELECT *, goals-ga as diff, 1 as leader FROM el_teams WHERE league='".$league."' && (shortname='STL' || shortname='COL' || shortname='CHI' || shortname='MIN' || shortname='DAL' || shortname='WPG' || shortname='NSH' || shortname='ARI') ORDER BY body desc, zapasov asc, wins desc, diff desc LIMIT 3)
 UNION
-(SELECT *, goals-ga as diff, 1 as leader FROM el_teams WHERE league='$league' && (shortname='ANA' || shortname='SJS' || shortname='LAK' || shortname='SEA' || shortname='VAN' || shortname='CGY' || shortname='EDM' || shortname='VGK')  ORDER BY body desc, zapasov asc, wins desc, diff desc LIMIT 3))dt)
+(SELECT *, goals-ga as diff, 1 as leader FROM el_teams WHERE league='".$league."' && (shortname='ANA' || shortname='SJS' || shortname='LAK' || shortname='SEA' || shortname='VAN' || shortname='CGY' || shortname='EDM' || shortname='VGK')  ORDER BY body desc, zapasov asc, wins desc, diff desc LIMIT 3))dt)
 UNION
-(SELECT *, goals-ga as diff, 2 as leader FROM el_teams WHERE league='$league' && (shortname='STL' || shortname='COL' || shortname='CHI' || shortname='MIN' || shortname='DAL' || shortname='WPG' || shortname='NSH') ORDER BY body desc, zapasov asc, wins desc, diff desc LIMIT 3,6)
+(SELECT *, goals-ga as diff, 2 as leader FROM el_teams WHERE league='".$league."' && (shortname='STL' || shortname='COL' || shortname='CHI' || shortname='MIN' || shortname='DAL' || shortname='WPG' || shortname='NSH') ORDER BY body desc, zapasov asc, wins desc, diff desc LIMIT 3,6)
 UNION
-(SELECT *, goals-ga as diff, 2 as leader FROM el_teams WHERE league='$league' && (shortname='ANA' || shortname='SJS' || shortname='LAK' || shortname='ARI' || shortname='VAN' || shortname='CGY' || shortname='EDM' || shortname='VGK')  ORDER BY body desc, zapasov asc, wins desc, diff desc LIMIT 3,6)
+(SELECT *, goals-ga as diff, 2 as leader FROM el_teams WHERE league='".$league."' && (shortname='ANA' || shortname='SJS' || shortname='LAK' || shortname='ARI' || shortname='VAN' || shortname='CGY' || shortname='EDM' || shortname='VGK')  ORDER BY body desc, zapasov asc, wins desc, diff desc LIMIT 3,6)
 ORDER BY leader asc, body desc, zapasov asc, wins desc, diff desc");
     }
   else
     {
-    $uloha = mysql_query("(SELECT dt.* FROM ((SELECT *, goals-ga as diff, 1 as leader FROM el_teams WHERE league='$league' && (shortname='BOS' || shortname='MTL' || shortname='TBL' || shortname='DET' || shortname='TOR' || shortname='OTT' || shortname='FLA' || shortname='BUF') ORDER BY body desc, zapasov asc, wins desc, diff desc LIMIT 3)
+    $uloha = mysqli_query($link, "(SELECT dt.* FROM ((SELECT *, goals-ga as diff, 1 as leader FROM el_teams WHERE league='".$league."' && (shortname='BOS' || shortname='MTL' || shortname='TBL' || shortname='DET' || shortname='TOR' || shortname='OTT' || shortname='FLA' || shortname='BUF') ORDER BY body desc, zapasov asc, wins desc, diff desc LIMIT 3)
 UNION
-(SELECT *, goals-ga as diff, 1 as leader FROM el_teams WHERE league='$league' && (shortname='PIT' || shortname='NYR' || shortname='PHI' || shortname='CBJ' || shortname='WSH' || shortname='NJD' || shortname='CAR' || shortname='NYI')  ORDER BY body desc, zapasov asc, wins desc, diff desc LIMIT 3))dt)
+(SELECT *, goals-ga as diff, 1 as leader FROM el_teams WHERE league='".$league."' && (shortname='PIT' || shortname='NYR' || shortname='PHI' || shortname='CBJ' || shortname='WSH' || shortname='NJD' || shortname='CAR' || shortname='NYI')  ORDER BY body desc, zapasov asc, wins desc, diff desc LIMIT 3))dt)
 UNION
-(SELECT *, goals-ga as diff, 2 as leader FROM el_teams WHERE league='$league' && (shortname='BOS' || shortname='MTL' || shortname='TBL' || shortname='DET' || shortname='TOR' || shortname='OTT' || shortname='FLA' || shortname='BUF') ORDER BY body desc, zapasov asc, wins desc, diff desc LIMIT 3,7)
+(SELECT *, goals-ga as diff, 2 as leader FROM el_teams WHERE league='".$league."' && (shortname='BOS' || shortname='MTL' || shortname='TBL' || shortname='DET' || shortname='TOR' || shortname='OTT' || shortname='FLA' || shortname='BUF') ORDER BY body desc, zapasov asc, wins desc, diff desc LIMIT 3,7)
 UNION
-(SELECT *, goals-ga as diff, 2 as leader FROM el_teams WHERE league='$league' && (shortname='PIT' || shortname='NYR' || shortname='PHI' || shortname='CBJ' || shortname='WSH' || shortname='NJD' || shortname='CAR' || shortname='NYI')  ORDER BY body desc, zapasov asc, wins desc, diff desc LIMIT 3,7)
+(SELECT *, goals-ga as diff, 2 as leader FROM el_teams WHERE league='".$league."' && (shortname='PIT' || shortname='NYR' || shortname='PHI' || shortname='CBJ' || shortname='WSH' || shortname='NJD' || shortname='CAR' || shortname='NYI')  ORDER BY body desc, zapasov asc, wins desc, diff desc LIMIT 3,7)
 ORDER BY leader asc, body desc, zapasov asc, wins desc, diff desc");
     }
   }
 else
   {
   // Tabulka extraligy
-  if(strstr($b[longname], 'Tipos')) $b[longname] = "Tipos Extraliga";
-  if($b[el]==1 && $b[endbasic]==1) $uloha = mysql_query("SELECT *, gf_basic-ga_basic as diff FROM $teams_table WHERE league='$league' && skupina!=1 ORDER BY p_basic desc, diff desc, gf_basic desc, w_basic desc, l_basic asc, t_basic desc");
-  else $uloha = mysql_query("(SELECT *, goals-ga as diff, 0 as hore FROM $teams_table WHERE league='$league' && shortname!='S20')
+  if(strstr($b["longname"], 'Tipos')) $b["longname"] = "Tipos Extraliga";
+  if($b["el"]==1 && $b["endbasic"]==1) $uloha = mysqli_query($link, "SELECT *, gf_basic-ga_basic as diff FROM ".$teams_table." WHERE league='".$league."' && skupina!=1 ORDER BY p_basic desc, diff desc, gf_basic desc, w_basic desc, l_basic asc, t_basic desc");
+  else $uloha = mysqli_query($link, "(SELECT *, goals-ga as diff, 0 as hore FROM ".$teams_table." WHERE league='".$league."' && shortname!='S20')
   UNION
-  (SELECT *, goals-ga as diff, 1 as hore FROM $teams_table WHERE league='$league' && shortname='S20') ORDER BY hore asc, body desc, diff desc, zapasov asc, goals desc, wins desc, losts asc, ties desc");
+  (SELECT *, goals-ga as diff, 1 as hore FROM ".$teams_table." WHERE league='".$league."' && shortname='S20') ORDER BY hore asc, body desc, diff desc, zapasov asc, goals desc, wins desc, losts asc, ties desc");
   }
 
-$m = mysql_query("SELECT * FROM 2004teams WHERE final_pos!='' && league='$league'");
-if($b[groups]=="" || $b[groups]!="" && $b[endbasic]==1 && $b[osem]==0 && mysql_num_rows($m)==0)
+$m = mysqli_query($link, "SELECT * FROM 2004teams WHERE final_pos!='' && league='".$league."'");
+if($b["groups"]=="" || $b["groups"]!="" && $b["endbasic"]==1 && $b["osem"]==0 && mysqli_num_rows($m)==0)
 	{
 	$ttable .= "<table class='w-100 table-striped table-hover'>
     <thead>
@@ -305,42 +358,42 @@ if($b[groups]=="" || $b[groups]!="" && $b[endbasic]==1 && $b[osem]==0 && mysql_n
     <tbody>";
 $i=0;
 $p=1;
-while ($i < mysql_num_rows($uloha))
+while ($i < mysqli_num_rows($uloha))
 		{
 	$clinch=$line="";
-	$data = mysql_fetch_array($uloha);
+	$data = mysqli_fetch_array($uloha);
 	//$data[mediumname] = iconv("windows-1250","utf-8",$data[mediumname]);
 	//$data[mediumname] = urldecode($data[mediumname]);
-	if($b[el]==1) $shortname = $data[mediumname];
-	else $shortname = $data[longname];
-	if($_SESSION[lang] != 'sk') $shortname = TeamParser($shortname);
-	$points = $data[body];
-	if($b[el]==1 && $b[endbasic]==1) $points = $data[p_basic];
+	if($b["el"]==1) $shortname = $data["mediumname"];
+	else $shortname = $data["longname"];
+	if($_SESSION["lang"] != 'sk') $shortname = TeamParser($shortname);
+	$points = $data["body"];
+	if($b["el"]==1 && $b["endbasic"]==1) $points = $data["p_basic"];
   // play-off line
-  if(strstr($b[longname], 'Tipos')) {
+  if(strstr($b["longname"], 'Tipos')) {
     if($i==5 || $i==9) $line=" style='border-bottom:1px dashed black !important;'";
     }
   elseif($i==7) $line=" style='border-bottom:1px dashed black !important;'";
 	// clinched playoff
 	//$kol[kolo]=55;
-	if($b[el]==1 && $points > $deviaty[ce]) { $clinch = "<span class='text-success'>*</span>"; $clinchwas=1; }
+	if($b["el"]==1 && $points > $deviaty["ce"]) { $clinch = "<span class='text-success'>*</span>"; $clinchwas=1; }
 	// cannot make playoff's
-	if($b[el]==1 && strstr($b[longname], 'Tipos') && (($kol[kolo]-$data[zapasov])*$wpoints)+$points < $desiaty[body] || $data[shortname]=="S20") { $clinch = "<sup><span class='text-danger font-weight-bold'>x</span></sup>"; $cannotwas=1; }
-	if($b[el]==1 && !strstr($b[longname], 'Tipos') && (($kol[kolo]-$data[zapasov])*$wpoints)+$points < $osmy[body] || $data[shortname]=="S20") { $clinch = "<sup><span class='text-danger font-weight-bold'>x</span></sup>"; $cannotwas=1; }
-	$ttable .= "<tr><td class='text-center'$line'>$p.</td><td$line><a href='/team/$data[id]$el-".SEOtitle($data[longname])."'><img class='flag-".($b[el]==1 ? 'el':'iihf')." ".$data[shortname]."-small mr-1' src='/images/blank.png' alt='".$shortname."'>$shortname</a>$clinch</td><td class='text-center'$line'><b>$points</b></td></tr>";
-	if($pos==$data[shortname] && $b[el]==1) { $a = array($p,$kol[kolo],$wpoints); return $a; }
-	if($pos==$data[shortname] && $b[el]==0) { return $p; }
+	if($b["el"]==1 && strstr($b["longname"], 'Tipos') && (($kol["kolo"]-$data["zapasov"])*$wpoints)+$points < $desiaty["body"] || $data["shortname"]=="S20") { $clinch = "<sup><span class='text-danger font-weight-bold'>x</span></sup>"; $cannotwas=1; }
+	if($b["el"]==1 && !strstr($b["longname"], 'Tipos') && (($kol["kolo"]-$data["zapasov"])*$wpoints)+$points < $osmy["body"] || $data["shortname"]=="S20") { $clinch = "<sup><span class='text-danger font-weight-bold'>x</span></sup>"; $cannotwas=1; }
+	$ttable .= "<tr><td class='text-center'$line'>$p.</td><td$line><a href='/team/$data[id]$el-".SEOtitle($data["longname"])."'><img class='flag-".($b["el"]==1 ? 'el':'iihf')." ".$data["shortname"]."-small mr-1' src='/images/blank.png' alt='".$shortname."'>$shortname</a>$clinch</td><td class='text-center'$line'><b>$points</b></td></tr>";
+	if($pos==$data["shortname"] && $b["el"]==1) { $a = array($p,$kol["kolo"],$wpoints); return $a; }
+	if($pos==$data["shortname"] && $b["el"]==0) { return $p; }
 $i++;
 $p++;
 		}
   $ttable .= '</tbody>
   <tfoot class="small">';
-	if($b[el]==1 && $clinchwas==1) $ttable .= "<tr><td colspan='3' class='pl-2'><span class='text-success'>*</span> - ".LANG_TEAMTABLE_CLINCHEDSHORT."</td></tr>";
-	if($b[el]==1 && $cannotwas==1) $ttable .= "<tr><td colspan='3' class='pl-2'><span class='text-danger'>x</span> - ".LANG_TEAMTABLE_CANNOTMAKEPOSHORT."</td></tr>";
-	if($b[el]==1 && (strstr($b[longname], 'KHL') || strstr($b[longname], 'NHL'))) $ttable .= "<tr><td colspan='3' class='text-right pr-2'><a href='/table/$league-".SEOtitle($b[longname])."'>".LANG_TEAMTABLE_FULLTABLE." &raquo;</a></td></tr>";
+	if($b["el"]==1 && $clinchwas==1) $ttable .= "<tr><td colspan='3' class='pl-2'><span class='text-success'>*</span> - ".LANG_TEAMTABLE_CLINCHEDSHORT."</td></tr>";
+	if($b["el"]==1 && $cannotwas==1) $ttable .= "<tr><td colspan='3' class='pl-2'><span class='text-danger'>x</span> - ".LANG_TEAMTABLE_CANNOTMAKEPOSHORT."</td></tr>";
+	if($b["el"]==1 && (strstr($b["longname"], 'KHL') || strstr($b["longname"], 'NHL'))) $ttable .= "<tr><td colspan='3' class='text-right pr-2'><a href='/table/$league-".SEOtitle($b["longname"])."'>".LANG_TEAMTABLE_FULLTABLE." &raquo;</a></td></tr>";
 	$ttable .= "</tfoot>
 	</table>";
-  if($b[el]==1 && strstr($b[longname], 'NHL') && !$another)
+  if($b["el"]==1 && strstr($b["longname"], 'NHL') && !$another)
     {
     $another=1;
     Get_team_table($league);
@@ -348,20 +401,20 @@ $p++;
 	}
 else
 	{
-	if($b[osem]==1)
+	if($b["osem"]==1)
 		{
 		// SKUPINY OSEMFINALE
 		//$q = mysql_query("SELECT skup_osem FROM 2004teams WHERE league='$league' GROUP BY skup_osem ORDER BY skup_osem ASC");
-		$q = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
-		$q = mysql_query("SELECT skup_osem FROM 2004teams WHERE league='$league' && skup_osem!='G' GROUP BY skup_osem ORDER BY skup_osem ASC");
+		$q = mysqli_query($link, "SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysqli_error($link));
+		$q = mysqli_query($link, "SELECT skup_osem FROM 2004teams WHERE league='".$league."' && skup_osem!='G' GROUP BY skup_osem ORDER BY skup_osem ASC");
 	$j=0;
-	while ($j <= mysql_num_rows($q)-1)
+	while ($j <= mysqli_num_rows($q)-1)
 			{
-		$f = mysql_fetch_array($q);
+		$f = mysqli_fetch_array($q);
 	$ttable .= "<table class='w-100 table-striped table-hover'>
     <thead>
      <tr> 
-          <td colspan='3' class='pl-2'><b>".LANG_TEAMTABLE_GROUP." $f[skup_osem]</b></td>
+          <td colspan='3' class='pl-2'><b>".LANG_TEAMTABLE_GROUP." ".$f["skup_osem"]."</b></td>
      </tr>
      <tr> 
           <td scope='col' class='text-center'>#</td>
@@ -370,18 +423,18 @@ else
      </tr>
     </thead>
     <tbody>";
-$coto = mysql_query("SELECT *, gf_osem-ga_osem as diff FROM $teams_table WHERE league='$league' && skup_osem='$f[skup_osem]' ORDER BY p_osem desc, diff desc, gf_osem, w_osem desc, l_osem asc, t_osem desc");
-if($b[el]!=1)
+$coto = mysqli_query($link, "SELECT *, gf_osem-ga_osem as diff FROM ".$teams_table." WHERE league='".$league."' && skup_osem='".$f["skup_osem"]."' ORDER BY p_osem desc, diff desc, gf_osem, w_osem desc, l_osem asc, t_osem desc");
+if($b["el"]!=1)
 {
 $m=0;
-while($data = mysql_fetch_array($coto))
+while($data = mysqli_fetch_array($coto))
 	{
 	$posun=0;
-	if($points==$data[p_osem])
+	if($points==$data["p_osem"])
 		{
-		$vzaj = mysql_query("SELECT IF(team1short='$data[shortname]',IF(goals1>goals2,1,0),IF(goals1>goals2,0,1)) as posun FROM 2004matches WHERE (team1short='$data[shortname]' && team2short='$tshort' || team1short='$tshort' && team2short='$data[shortname]') && league='$league' && kedy='konečný stav'");
-		$vzajom = mysql_fetch_array($vzaj);
-		if($vzajom[posun]==1)
+		$vzaj = mysqli_query($link, "SELECT IF(team1short='".$data["shortname"]."',IF(goals1>goals2,1,0),IF(goals1>goals2,0,1)) as posun FROM 2004matches WHERE (team1short='".$data["shortname"]."' && team2short='".$tshort."' || team1short='".$tshort."' && team2short='".$data["shortname"]."') && league='".$league."' && kedy='konečný stav'");
+		$vzajom = mysqli_fetch_array($vzaj);
+		if($vzajom["posun"]==1)
 			{
 			$mm = $m-1;
 			$tabul[$m] = $tabul[$mm];
@@ -389,11 +442,11 @@ while($data = mysql_fetch_array($coto))
 			$posun=1;
 			}
 		}
-	$points = $data[p_osem];
-	$tshort = $data[shortname];
-	if($b[el]==1) $data[longname] = $data[mediumname];
-	else $shortname = $data[longname];
-	$tabul[$m] = array($data[id], $data[shortname], $shortname, $data[p_osem]);
+	$points = $data["p_osem"];
+	$tshort = $data["shortname"];
+	if($b["el"]==1) $data["longname"] = $data["mediumname"];
+	else $shortname = $data["longname"];
+	$tabul[$m] = array($data["id"], $data["shortname"], $shortname, $data["p_osem"]);
 	$m++;
 	if($posun==1) $m++;
 	}
@@ -401,8 +454,8 @@ $i=0;
 $p=1;
 while ($i < count($tabul))
 	{
-	if($_SESSION[lang] != 'sk') $tabul[$i][2] = TeamParser($tabul[$i][2]);
-	$ttable .= "<tr><td class='text-center'>$p.</td><td><a href='/team/".$tabul[$i][0]."$el-".SEOtitle($tabul[$i][2])."'><img class='flag-iihf ".$tabul[$i][1]."-small mr-1' src='/images/blank.png' alt='".$tabul[$i][2]."'>".$tabul[$i][2]."</a></td><td class='text-center'><b>".$tabul[$i][3]."</b></td></tr>";
+	if($_SESSION["lang"] != 'sk') $tabul[$i][2] = TeamParser($tabul[$i][2]);
+	$ttable .= "<tr><td class='text-center'>".$p.".</td><td><a href='/team/".$tabul[$i][0].$el."-".SEOtitle($tabul[$i][2])."'><img class='flag-iihf ".$tabul[$i][1]."-small mr-1' src='/images/blank.png' alt='".$tabul[$i][2]."'>".$tabul[$i][2]."</a></td><td class='text-center'><b>".$tabul[$i][3]."</b></td></tr>";
 	if($pos==$tabul[$i][1]) return $p;
 	$i++;
 	$p++;
@@ -412,14 +465,14 @@ else
 {
 $i=0;
 $p=1;
-while ($i <= mysql_num_rows($coto)-1)
+while ($i <= mysqli_num_rows($coto)-1)
 		{
-	$data = mysql_fetch_array($coto);
-	if($pos==$data[shortname]) return $p;
-	if($b[el]==1) $data[shortname] = $data[mediumname];
-	else $shortname = $data[longname];
-	if($_SESSION[lang] != 'sk') $data[longname] = TeamParser($data[longname]);
-	$ttable .= "<tr><td class='text-center'>$p.</td><td><a href='/team/$data[id]$el-".SEOtitle($data[longname])."'>$shortname</a></td><td class='text-center'><b>$data[p_osem]</b></td></tr>";
+	$data = mysqli_fetch_array($coto);
+	if($pos==$data["shortname"]) return $p;
+	if($b["el"]==1) $data["shortname"] = $data["mediumname"];
+	else $shortname = $data["longname"];
+	if($_SESSION["lang"] != 'sk') $data["longname"] = TeamParser($data["longname"]);
+	$ttable .= "<tr><td class='text-center'>".$p.".</td><td><a href='/team/".$data["id"].$el."-".SEOtitle($data["longname"])."'>".$shortname."</a></td><td class='text-center'><b>".$data["p_osem"]."</b></td></tr>";
 $i++;
 $p++;
 		}
@@ -432,17 +485,17 @@ $p++;
 	else
 		{
 		// SKUPINOVY SYSTEM, MIMO OSEMFINALE
-		if($b[endbasic]==1 && mysql_num_rows($m)>0)
+		if($b["endbasic"]==1 && mysqli_num_rows($m)>0)
 			{
 			// SKONCILI SKUPINY A ZOBRAZI SA FINALNE UMIESTNENIE
-			$n = mysql_query("SELECT * FROM 2004teams WHERE league='$b[id]' ORDER BY final_pos ASC");
-            $teamsnum = mysql_num_rows($n);
+			$n = mysqli_query($link, "SELECT * FROM 2004teams WHERE league='".$b["id"]."' ORDER BY final_pos ASC");
+            $teamsnum = mysqli_num_rows($n);
             $i=1;
             $finalpos=array();
-			while($h = mysql_fetch_array($n))
+			while($h = mysqli_fetch_array($n))
 				{
-                $posi = $h[final_pos];
-                if($posi>0) $finalpos[$posi] = array($h[id], $h[longname], $h[shortname]);
+                $posi = $h["final_pos"];
+                if($posi>0) $finalpos[$posi] = array($h["id"], $h["longname"], $h["shortname"]);
                 $i++;
                 }
             echo $pos;
@@ -464,17 +517,17 @@ $p++;
 				if($c==1) $ci = "<img src='https://www.hockey-live.sk/img/medal_gold_3.png' class='align-top' alt='".LANG_TEAMTABLE_GOLD."' title='".LANG_TEAMTABLE_GOLD."'>";
 				elseif($c==2) $ci = "<img src='https://www.hockey-live.sk/img/medal_silver_3.png' class='align-top' alt='".LANG_TEAMTABLE_SILVER."' title='".LANG_TEAMTABLE_SILVER."'>";
 				elseif($c==3) $ci = "<img src='https://www.hockey-live.sk/img/medal_bronze_3.png' class='align-top' alt='".LANG_TEAMTABLE_BRONZE."' title='".LANG_TEAMTABLE_BRONZE."'>";
-        else $ci = "$c.";
+        else $ci = $c.".";
         if($c==14) $line=" style='border-bottom:1px dashed black !important;'";
 				if(array_key_exists($c, $finalpos))
 					{
                     if($pos==$finalpos[$c][2]) return $c;
-					if($_SESSION[lang] != 'sk') $finalpos[$c][1] = TeamParser($finalpos[$c][1]);
-					$ttable .= "<tr><td class='text-center'$line>$ci</td><td$line><a href='/team/".$finalpos[$c][0].$el."-".SEOtitle($finalpos[$c][1])."'>".$finalpos[$c][1]."</a></td></tr>";
+					if($_SESSION["lang"] != 'sk') $finalpos[$c][1] = TeamParser($finalpos[$c][1]);
+					$ttable .= "<tr><td class='text-center'".$line.">".$ci."</td><td".$line."><a href='/team/".$finalpos[$c][0].$el."-".SEOtitle($finalpos[$c][1])."'>".$finalpos[$c][1]."</a></td></tr>";
 					}
 				else
 					{
-					$ttable .= "<tr><td class='text-center'$line>$ci</td><td$line>&nbsp;</td></tr>";
+					$ttable .= "<tr><td class='text-center'".$line.">".$ci."</td><td".$line.">&nbsp;</td></tr>";
 					}
 				$c++;
 				}
@@ -484,7 +537,7 @@ $p++;
 		else
 			{
 			// PREBIEHAJU ZAKLADNE SKUPINY
-			$crop = explode("|", $b[groups]);
+			$crop = explode("|", $b["groups"]);
 			$j=0;
 			while ($j <= count($crop)-1)
 				{
@@ -492,7 +545,7 @@ $p++;
 				$ttable .= "<table class='w-100 table-striped table-hover'>
 				<thead>
           <tr> 
-            <td colspan='3' class='pl-2'><b>".LANG_TEAMTABLE_GROUP." $skup</b></td>
+            <td colspan='3' class='pl-2'><b>".LANG_TEAMTABLE_GROUP." ".$skup."</b></td>
           </tr>
            <tr> 
                 <td scope='col' class='text-center'>#</td>
@@ -501,19 +554,19 @@ $p++;
            </tr>
         </thead>
         <tbody>";
-				if($b[endbasic]==1) $coto = mysql_query("SELECT *, gf_basic-ga_basic as diff FROM $teams_table WHERE league='$league' && skupina='$skup' ORDER BY p_basic desc, diff desc, w_basic desc, l_basic asc, t_basic desc");
-				else $coto = mysql_query("SELECT *, goals-ga as diff FROM $teams_table WHERE league='$league' && skupina='$skup' ORDER BY body desc, zapasov asc, diff desc, wins desc, losts asc, ties desc");
+				if($b["endbasic"]==1) $coto = mysqli_query($link, "SELECT *, gf_basic-ga_basic as diff FROM ".$teams_table." WHERE league='".$league."' && skupina='".$skup."' ORDER BY p_basic desc, diff desc, w_basic desc, l_basic asc, t_basic desc");
+				else $coto = mysqli_query($link, "SELECT *, goals-ga as diff FROM ".$teams_table." WHERE league='".$league."' && skupina='".$skup."' ORDER BY body desc, zapasov asc, diff desc, wins desc, losts asc, ties desc");
 				
 				// BODY >> VZAJOMNY ZAPAS >> ROZDIEL SKORE (START)
         $m=0;
-        while($data = mysql_fetch_array($coto))
+        while($data = mysqli_fetch_array($coto))
           {
           $posun=0;
-          if($points==$data[body])
+          if($points==$data["body"])
             {
-            $vzaj = mysql_query("SELECT IF(team1short='$data[shortname]',IF(goals1>goals2,1,0),IF(goals1>goals2,0,1)) as posun FROM 2004matches WHERE (team1short='$data[shortname]' && team2short='$tshort' || team1short='$tshort' && team2short='$data[shortname]') && league='$league' && kedy='konečný stav'");
-            $vzajom = mysql_fetch_array($vzaj);
-            if($vzajom[posun]==1)
+            $vzaj = mysqli_query($link, "SELECT IF(team1short='".$data["shortname"]."',IF(goals1>goals2,1,0),IF(goals1>goals2,0,1)) as posun FROM 2004matches WHERE (team1short='".$data["shortname"]."' && team2short='".$tshort."' || team1short='".$tshort."' && team2short='".$data["shortname"]."') && league='".$league."' && kedy='konečný stav'");
+            $vzajom = mysqli_fetch_array($vzaj);
+            if($vzajom["posun"]==1)
               {
               $mm = $m-1;
               $tabul[$m] = $tabul[$mm];
@@ -521,11 +574,11 @@ $p++;
               $posun=1;
               }
             }
-          $points = $data[body];
-          $tshort = $data[shortname];
-          if($b[el]==1) $data[longname] = $data[mediumname];
-          else $shortname = $data[longname];
-          $tabul[$m] = array($data[id], $data[shortname], $shortname, $data[body]);
+          $points = $data["body"];
+          $tshort = $data["shortname"];
+          if($b["el"]==1) $data["longname"] = $data["mediumname"];
+          else $shortname = $data["longname"];
+          $tabul[$m] = array($data["id"], $data["shortname"], $shortname, $data["body"]);
           $m++;
           if($posun==1) $m++;
           }
@@ -534,18 +587,18 @@ $p++;
         while ($i < count($tabul))
           {
           $line="";
-          if(strstr($b[longname], 'Svetový pohár'))
+          if(strstr($b["longname"], 'Svetový pohár'))
             {
             if($i==1) $line=" style='border-bottom:1px dashed black !important;'";
             }
-          elseif(strstr($b[longname], 'ZOH'))
+          elseif(strstr($b["longname"], 'ZOH'))
             {
             if($i==0) $line=" style='border-bottom:1px dashed black !important;'";
             }
           //elseif($i==3 || $i==6) $line=" style='border-bottom:1px dashed black !important;'";
           elseif($i==3) $line=" style='border-bottom:1px dashed black !important;'";
-          if($_SESSION[lang] != 'sk') $tabul[$i][2] = TeamParser($tabul[$i][2]);
-          $ttable .= "<tr><td class='text-center'$line>$p.</td><td$line><a href='/team/".$tabul[$i][0]."$el-".SEOtitle($tabul[$i][2])."'><img class='flag-iihf ".$tabul[$i][1]."-small mr-1' src='/images/blank.png' alt='".$tabul[$i][2]."'>".$tabul[$i][2]."</a></td><td class='text-center'$line><b>".$tabul[$i][3]."</b></td></tr>";
+          if($_SESSION["lang"] != 'sk') $tabul[$i][2] = TeamParser($tabul[$i][2]);
+          $ttable .= "<tr><td class='text-center'".$line.">".$p.".</td><td".$line."><a href='/team/".$tabul[$i][0].$el."-".SEOtitle($tabul[$i][2])."'><img class='flag-iihf ".$tabul[$i][1]."-small mr-1' src='/images/blank.png' alt='".$tabul[$i][2]."'>".$tabul[$i][2]."</a></td><td class='text-center'".$line."><b>".$tabul[$i][3]."</b></td></tr>";
           if($pos==$tabul[$i][1]) return $p;
           $i++;
           $p++;
@@ -596,46 +649,47 @@ return $ttable;
 
 function Get_Series($lid)
   {
+  Global $link;
   $series="";
-  $q = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
-	$q = mysql_query("SELECT potype, 2004leagues.longname FROM el_playoff JOIN 2004leagues ON 2004leagues.id=el_playoff.league WHERE league='$lid' && played='0' GROUP BY potype LIMIT 1");
-	if(mysql_num_rows($q)==0) {
-	$q = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
-	$q = mysql_query("SELECT potype, 2004leagues.longname FROM el_playoff JOIN 2004leagues ON 2004leagues.id=el_playoff.league WHERE league='$lid' && played='1' GROUP BY potype ORDER BY el_playoff.id DESC LIMIT 1");
+  $q = mysqli_query($link, "SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysqli_error($link));
+	$q = mysqli_query($link, "SELECT potype, 2004leagues.longname FROM el_playoff JOIN 2004leagues ON 2004leagues.id=el_playoff.league WHERE league='".$lid."' && played='0' GROUP BY potype LIMIT 1");
+	if(mysqli_num_rows($q)==0) {
+	$q = mysqli_query($link, "SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysqli_error($link));
+	$q = mysqli_query($link, "SELECT potype, 2004leagues.longname FROM el_playoff JOIN 2004leagues ON 2004leagues.id=el_playoff.league WHERE league='".$lid."' && played='1' GROUP BY potype ORDER BY el_playoff.id DESC LIMIT 1");
 	}
-	$f = mysql_fetch_array($q);
-	$w = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
-	$w = mysql_query("SELECT el_playoff.*, t1.longname as t1, t2.longname as t2, t1.id as t1id, t2.id as t2id FROM el_playoff JOIN el_teams t1 ON (el_playoff.team1=t1.shortname && el_playoff.league=t1.league) JOIN el_teams t2 ON (el_playoff.team2=t2.shortname && el_playoff.league=t2.league) WHERE el_playoff.league='$lid' && el_playoff.potype='$f[potype]' GROUP BY id ORDER BY el_playoff.id ASC");
-  if($f[potype]=="baraz") $hl=LANG_TEAMTABLE_PLAYOFF." - ".LANG_QUALIFYROUND;
-  elseif($f[potype]=="stvrt") $hl=LANG_TEAMTABLE_PLAYOFF." - ".LANG_QUARTERFINAL;
-  elseif($f[potype]=="semi") $hl=LANG_TEAMTABLE_PLAYOFF." - ".LANG_SEMIFINAL;
-  elseif($f[potype]=="final") $hl=LANG_TEAMTABLE_PLAYOFF." - ".LANG_FINAL;
-  elseif($f[potype]=="stanley")
+	$f = mysqli_fetch_array($q);
+	$w = mysqli_query($link, "SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysqli_error($link));
+	$w = mysqli_query($link, "SELECT el_playoff.*, t1.longname as t1, t2.longname as t2, t1.id as t1id, t2.id as t2id FROM el_playoff JOIN el_teams t1 ON (el_playoff.team1=t1.shortname && el_playoff.league=t1.league) JOIN el_teams t2 ON (el_playoff.team2=t2.shortname && el_playoff.league=t2.league) WHERE el_playoff.league='".$lid."' && el_playoff.potype='".$f["potype"]."' GROUP BY id ORDER BY el_playoff.id ASC");
+  if($f["potype"]=="baraz") $hl=LANG_TEAMTABLE_PLAYOFF." - ".LANG_QUALIFYROUND;
+  elseif($f["potype"]=="stvrt") $hl=LANG_TEAMTABLE_PLAYOFF." - ".LANG_QUARTERFINAL;
+  elseif($f["potype"]=="semi") $hl=LANG_TEAMTABLE_PLAYOFF." - ".LANG_SEMIFINAL;
+  elseif($f["potype"]=="final") $hl=LANG_TEAMTABLE_PLAYOFF." - ".LANG_FINAL;
+  elseif($f["potype"]=="stanley")
     {
-    if(strstr($f[longname], 'NHL')) $hl=LANG_STANLEYFINALS;
-    if(strstr($f[longname], 'KHL')) $hl=LANG_GAGARINFINALS;
+    if(strstr($f["longname"], 'NHL')) $hl=LANG_STANLEYFINALS;
+    if(strstr($f["longname"], 'KHL')) $hl=LANG_GAGARINFINALS;
     }
 	$series .= "<table class='w-100 table-striped table-hover'>
                 <thead>
                   <tr>
-                    <td colspan='3' class='text-center font-weight-bold'>$hl</td>
+                    <td colspan='3' class='text-center font-weight-bold'>".$hl."</td>
                   </tr>
                 </thead>
                 <tbody>";
 	$i=0;
 	$k=1;
-	while ($e = mysql_fetch_array($w))
+	while ($e = mysqli_fetch_array($w))
 		{
 		$add1=$add2=$line="";
-		if($e[status1]==4 || ($e[status1]==3 && $f[potype]=="baraz")) $add1 = " class='font-weight-bold'";
-		if($e[status2]==4 || ($e[status2]==3 && $f[potype]=="baraz")) $add2 = " class='font-weight-bold'";
+		if($e["status1"]==4 || ($e["status1"]==3 && $f["potype"]=="baraz")) $add1 = " class='font-weight-bold'";
+		if($e["status2"]==4 || ($e["status2"]==3 && $f["potype"]=="baraz")) $add2 = " class='font-weight-bold'";
 		
-		if(strstr($f[longname], 'HL') && $f[potype]=="stvrt" && $i==3 || strstr($f[longname], 'HL') && $f[potype]=="semi" && $i==1 || strstr($f[longname], 'HL') && $f[potype]=="final" && $i==0) $line=" style='border-bottom:1px dashed black !important;'";
+		if(strstr($f["longname"], 'HL') && $f["potype"]=="stvrt" && $i==3 || strstr($f["longname"], 'HL') && $f["potype"]=="semi" && $i==1 || strstr($f["longname"], 'HL') && $f["potype"]=="final" && $i==0) $line=" style='border-bottom:1px dashed black !important;'";
 		
 		$series .= "<tr>
-                  <td$line><a href='/team/".$e[t1id]."1-".SEOTitle($e[t1])."'$add1><img class='flag-el ".$e[team1]."-small' src='/images/blank.png' alt='".$e[t1]."'> $e[team1]</a></td>
-                  <td class='font-weight-bold text-center'$line>$e[status1]:$e[status2]</td>
-                  <td class='text-right'$line><a href='/team/".$e[t2id]."1-".SEOTitle($e[t2])."'$add2>$e[team2] <img class='flag-el ".$e[team2]."-small' src='/images/blank.png' alt='".$e[t2]."'></a></td>
+                  <td$line><a href='/team/".$e["t1id"]."1-".SEOTitle($e["t1"])."'".$add1."><img class='flag-el ".$e["team1"]."-small' src='/images/blank.png' alt='".$e["t1"]."'> ".$e["team1"]."</a></td>
+                  <td class='font-weight-bold text-center'".$line.">".$e["status1"].":".$e["status2"]."</td>
+                  <td class='text-right'".$line."><a href='/team/".$e["t2id"]."1-".SEOTitle($e["t2"])."'".$add2.">".$e["team2"]." <img class='flag-el ".$e["team2"]."-small' src='/images/blank.png' alt='".$e["t2"]."'></a></td>
                 </tr>";
 		$i++;
 		$k++;
@@ -646,6 +700,9 @@ return $series;
 
 function ShowComment($item, $from_latest=false)
   {
+  Global $link;
+  if(!isset($item["main"])) return false;
+  $comment=$url=$hl=$hl1="";
   $nick = $item['main'][1];
   if($item['main'][3]==0 && $item['main'][4]!=NULL) $item['main'][1] = $item['main'][4];
   if($item['main'][3]==0 && $item['main'][4]==NULL) $item['main'][1] = "neregistrovaný";
@@ -689,7 +746,7 @@ function ShowComment($item, $from_latest=false)
   $comm = str_replace(':-D','<img src="/images/smilies/smiley-lol.png" alt=":-D">',$comm);
   $comm = str_replace(';)','<img src="/images/smilies/smiley-wink.png" alt=";)">',$comm);
   $comm = str_replace(';-)','<img src="/images/smilies/smiley-wink.png" alt=";-)">',$comm);
-    $comment .= '<div class="card message bg-light mb-2"'.($item['main'][3]==$_SESSION[logged] ? ' style="background-color: #f5f5f5;"':'').'>
+    $comment .= '<div class="card message bg-light mb-2"'.($item['main'][3]==$_SESSION["logged"] ? ' style="background-color: #f5f5f5;"':'').'>
             <div class="card-body p-2">
                 <div class="media d-block d-sm-flex">';
     if($item['main'][3]==0) $comment .= '    
@@ -709,34 +766,34 @@ function ShowComment($item, $from_latest=false)
                       {
                       if($item['main'][9]==0)
                         {
-                        $q = mysql_query("SELECT * FROM e_xoops_stories WHERE storyid='".$item['main'][10]."'");
-                        $f = mysql_fetch_array($q);
+                        $q = mysqli_query($link, "SELECT * FROM e_xoops_stories WHERE storyid='".$item['main'][10]."'");
+                        $f = mysqli_fetch_array($q);
                         $hl = LANG_USERPROFILE_TOTHESTORY;
-                        $hl1 = $f[title];
-                        $url = "/news/".$item['main'][10]."-".SEOtitle($f[title]);
+                        $hl1 = $f["title"];
+                        $url = "/news/".$item['main'][10]."-".SEOtitle($f["title"]);
                         }
                       elseif($item['main'][9]==1)
                         {
                         $el = substr($item['main'][10], -1);
                         $ide = substr($item['main'][10], 0, -1);
-                        if($el==1) $q = mysql_query("SELECT * FROM el_teams WHERE id='".$ide."'");
-                        else $q = mysql_query("SELECT * FROM 2004teams WHERE id='".$ide."'");
-                        $f = mysql_fetch_array($q);
+                        if($el==1) $q = mysqli_query($link, "SELECT * FROM el_teams WHERE id='".$ide."'");
+                        else $q = mysqli_query($link, "SELECT * FROM 2004teams WHERE id='".$ide."'");
+                        $f = mysqli_fetch_array($q);
                         $hl = LANG_USERPROFILE_TOTHETEAM;
-                        $hl1 = $f[longname];
-                        $url = "/team/".$item['main'][10]."-".SEOtitle($f[longname]);
+                        $hl1 = $f["longname"];
+                        $url = "/team/".$item['main'][10]."-".SEOtitle($f["longname"]);
                         }
                       elseif($item['main'][9]==2)
                         {
                         $el = substr($item['main'][10], -1);
                         $ide = substr($item['main'][10], 0, -1);
-                        if($el==1) $q = mysql_query("SELECT * FROM el_matches WHERE id='".$ide."'");
-                        else $q = mysql_query("SELECT * FROM 2004matches WHERE id='".$ide."'");
-                        $f = mysql_fetch_array($q);
+                        if($el==1) $q = mysqli_query($link, "SELECT * FROM el_matches WHERE id='".$ide."'");
+                        else $q = mysqli_query($link, "SELECT * FROM 2004matches WHERE id='".$ide."'");
+                        $f = mysqli_fetch_array($q);
                         $hl = LANG_USERPROFILE_TOTHEGAME;
-                        if($_SESSION[lang]!='sk') { $f[team1long] = TeamParser($f[team1long]); $f[team2long] = TeamParser($f[team2long]); }
-                        $hl1 = $f[team1long]." vs. ".$f[team2long];
-                        $url = "/game/".$item['main'][10]."-".SEOtitle($f[team1long]." vs ".$f[team2long]);
+                        if($_SESSION["lang"]!='sk') { $f["team1long"] = TeamParser($f["team1long"]); $f["team2long"] = TeamParser($f["team2long"]); }
+                        $hl1 = $f["team1long"]." vs. ".$f["team2long"];
+                        $url = "/game/".$item['main'][10]."-".SEOtitle($f["team1long"]." vs ".$f["team2long"]);
                         }
                       elseif($item['main'][9]==3)
                         {
@@ -744,15 +801,15 @@ function ShowComment($item, $from_latest=false)
                         $ide = substr($item['main'][10], 0, -1);
                         if($el=="p") 
                           {
-                          $q = mysql_query("SELECT id, 1 as el FROM `el_players` WHERE name='".$ide."' UNION SELECT id, 0 as el FROM `2004players` WHERE name='".$ide."' ORDER BY id DESC");
-                          $f = mysql_fetch_array($q);
-                          $url = "/player/".$f[id].$f[el]."-".SEOtitle($f[name]);
+                          $q = mysqli_query($link, "SELECT id, 1 as el, name FROM `el_players` WHERE name='".$ide."' UNION SELECT id, 0 as el, name FROM `2004players` WHERE name='".$ide."' ORDER BY id DESC");
+                          $f = mysqli_fetch_array($q);
+                          $url = "/player/".$f["id"].$f["el"]."-".SEOtitle($f["name"]);
                           }
                         else 
                           {
-                          $q = mysql_query("SELECT id, 1 as el FROM `el_goalies` WHERE name='".$ide."' UNION SELECT id, 0 as el FROM `2004goalies` WHERE name='".$ide."' ORDER BY id DESC");
-                          $f = mysql_fetch_array($q);
-                          $url = "/goalie/".$f[id].$f[el]."-".SEOtitle($f[name]);
+                          $q = mysqli_query($link, "SELECT id, 1 as el, name FROM `el_goalies` WHERE name='".$ide."' UNION SELECT id, 0 as el, name FROM `2004goalies` WHERE name='".$ide."' ORDER BY id DESC");
+                          $f = mysqli_fetch_array($q);
+                          $url = "/goalie/".$f["id"].$f["el"]."-".SEOtitle($f["name"]);
                           }
                         $hl = LANG_USERPROFILE_TOTHEPLAYER;
                         $hl1 = $ide;
@@ -760,7 +817,7 @@ function ShowComment($item, $from_latest=false)
                       $comment .='<p class="p-fluid"><a href="'.$url.'">'.$hl.' '.$hl1.'</a></p>';
                       }
                     $comment .= date("j.n.Y G:i",strtotime($item['main'][8]));
-                    if(!$from_latest) $comment .=' <a href="#" class="btn btn-success btn-sm ml-2 replyComment" data-cid="'.($item['main'][7]!=0 ? $item['main'][7]:$item['main'][0]).'"><i class="fas fa-reply"></i></a>'.($item['main'][3]==$_SESSION[logged] ? ' <a href="#" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteComment" data-cid="'.$item['main'][0].'"><i class="far fa-trash-alt"></i></a>':'');
+                    if(!$from_latest) $comment .=' <a href="#" class="btn btn-success btn-sm ml-2 replyComment" data-cid="'.($item['main'][7]!=0 ? $item['main'][7]:$item['main'][0]).'"><i class="fas fa-reply"></i></a>'.($item['main'][3]==$_SESSION["logged"] ? ' <a href="#" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteComment" data-cid="'.$item['main'][0].'"><i class="far fa-trash-alt"></i></a>':'');
         $comment .='</div>
                     <div class="clearfix"></div>
                     <p class="p-fluid">'.nl2br($comm).'</p>
@@ -773,35 +830,38 @@ function ShowComment($item, $from_latest=false)
 
 function GetComments($what, $whatid)
   {
-  $w = mysql_query("SELECT c.*, u.uname, u.user_avatar FROM comments c LEFT JOIN e_xoops_users u ON u.uid=c.uid WHERE what='$what' && whatid='$whatid' ORDER BY c.datum");
-  while($e=mysql_fetch_array($w))
+  Global $link;
+  $comments=[];
+  $comms="";
+  $w = mysqli_query($link, "SELECT c.*, u.uname, u.user_avatar FROM comments c LEFT JOIN e_xoops_users u ON u.uid=c.uid WHERE what='".$what."' && whatid='".$whatid."' ORDER BY c.datum");
+  while($e=mysqli_fetch_array($w))
     {
-    $id = $e[id];
-    if($e[replyto]!=0) 
+    $id = $e["id"];
+    if($e["replyto"]!=0) 
       {
-      $replyto = $e[replyto];
-      $comments[$replyto]['replies'][$id]['main'] = array($e[id], $e[uname], 0, $e[uid], $e[name], $e[user_avatar], $e[comment], $e[replyto], $e[datum], $what, $whatid);
+      $replyto = $e["replyto"];
+      $comments[$replyto]['replies'][$id]['main'] = array($e["id"], $e["uname"], 0, $e["uid"], $e["name"], $e["user_avatar"], $e["comment"], $e["replyto"], $e["datum"], $what, $whatid);
       }
-    else $comments[$id]['main'] = array($e[id], $e[uname], 0, $e[uid], $e[name], $e[user_avatar], $e[comment], $e[replyto], $e[datum], $what, $whatid);
+    else $comments[$id]['main'] = array($e["id"], $e["uname"], 0, $e["uid"], $e["name"], $e["user_avatar"], $e["comment"], $e["replyto"], $e["datum"], $what, $whatid);
     }
-  foreach($comments as $item)
-    {
+  foreach($comments as $item) {
     $comms .= ShowComment($item);
-    foreach($item['replies'] as $reply)
-      {
+    if(isset($item['replies'])) {
+    foreach($item['replies'] as $reply) {
       $comms .= '<div class="offset-1">'.ShowComment($reply).'</div>';
       }
     }
+  }
   return $comms;
   }
   
 function GenerateComments($what, $whatid)
   {
-  Global $leaguecolor;
-  if($_SESSION[logged])
+  Global $leaguecolor, $link;
+  if(isset($_SESSION["logged"]))
     {
-    $q = mysql_query("SELECT * FROM e_xoops_users WHERE uid='".$_SESSION[logged]."'");
-    $f = mysql_fetch_array($q);
+    $q = mysqli_query($link, "SELECT * FROM e_xoops_users WHERE uid='".$_SESSION["logged"]."'");
+    $f = mysqli_fetch_array($q);
     }
   $comms = '<!-- Delete comment modal -->      
       <div class="modal" id="deleteComment" tabindex="-1" role="dialog">
@@ -834,8 +894,8 @@ function GenerateComments($what, $whatid)
   <form>
     <div class="form-group">
       <label for="name" class="p-fluid">'.LANG_TEAMSTATS_NAME.'</label>
-      <input type="text" class="form-control" id="name" placeholder="'.LANG_TEAMSTATS_NAME.'"'.($_SESSION[logged] ? ' value="'.$f[uname].'" readonly':'').'>
-      <input type="hidden" id="uid"'.($_SESSION[logged] ? ' value="'.$_SESSION[logged].'"':'').'>
+      <input type="text" class="form-control" id="name" placeholder="'.LANG_TEAMSTATS_NAME.'"'.($_SESSION["logged"] ? ' value="'.$f["uname"].'" readonly':'').'>
+      <input type="hidden" id="uid"'.($_SESSION["logged"] ? ' value="'.$_SESSION["logged"].'"':'').'>
       <input type="hidden" id="what" value="'.$what.'">
       <input type="hidden" id="whatid" value="'.$whatid.'">
       <input type="hidden" id="replyid">
@@ -859,85 +919,87 @@ function GenerateComments($what, $whatid)
 
 function Notifications($lite=FALSE)
   {
-  if($_SESSION['logged'])
+  Global $link;
+  $notif="";
+  if(isset($_SESSION['logged']))
     {
-    $q = mysql_query("SELECT * FROM user_notifications WHERE uid='$_SESSION[logged]' ORDER BY datetime DESC LIMIT 5");
-    $w = mysql_query("SELECT * FROM user_notifications WHERE uid='$_SESSION[logged]' && isread='0'");
+    $q = mysqli_query($link, "SELECT * FROM user_notifications WHERE uid='".$_SESSION["logged"]."' ORDER BY datetime DESC LIMIT 5");
+    $w = mysqli_query($link, "SELECT * FROM user_notifications WHERE uid='".$_SESSION["logged"]."' && isread='0'");
     $notif .= '<li class="nav-item dropdown no-arrow mx-1">
               <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-label="'.LANG_NAV_NOTIFTITLE.'">
                 <i class="fas fa-bell fa-fw"></i>
-                '.(mysql_num_rows($w)>0 ? '<span class="badge badge-danger badge-counter">'.mysql_num_rows($w).'</span>':'').'
+                '.(mysqli_num_rows($w)>0 ? '<span class="badge badge-danger badge-counter">'.mysqli_num_rows($w).'</span>':'').'
               </a>
               <!-- Dropdown - Notifications -->
               <div class="notifications dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="alertsDropdown">
                 <h6 class="dropdown-header">
                   '.LANG_NAV_NOTIFTITLE.'
                 </h6>';
-           while($f = mysql_fetch_array($q))
+           while($f = mysqli_fetch_array($q))
                {
                // zmenit aj v user.php
-               if($f[what]==0)
+               if($f["what"]==0)
                 {
-                $el = substr($f[whatid], -1);
-                $dl = strlen($f[whatid]);
-                $ide = substr($f[whatid], 0, $dl-1);
-                if($el==1) $e = mysql_query("SELECT * FROM el_matches WHERE id='".$ide."'");
-                else $e = mysql_query("SELECT * FROM 2004matches WHERE id='".$ide."'");
-                $r = mysql_fetch_array($e);
+                $el = substr($f["whatid"], -1);
+                $dl = strlen($f["whatid"]);
+                $ide = substr($f["whatid"], 0, $dl-1);
+                if($el==1) $e = mysqli_query($link, "SELECT * FROM el_matches WHERE id='".$ide."'");
+                else $e = mysqli_query($link, "SELECT * FROM 2004matches WHERE id='".$ide."'");
+                $r = mysqli_fetch_array($e);
                 $icon = 'trophy';
                 $color = 'success';
-                $url = '/report/'.$f[whatid].'-'.SEOtitle($r[team1long]." vs. ".$r[team2long]);
-                $text = sprintf(LANG_NOTIF_FAVTEAM, $r[team1long], $r[team2long], $r[goals1], $r[goals2]);
+                $url = '/report/'.$f["whatid"].'-'.SEOtitle($r["team1long"]." vs. ".$r["team2long"]);
+                $text = sprintf(LANG_NOTIF_FAVTEAM, $r["team1long"], $r["team2long"], $r["goals1"], $r["goals2"]);
                 }
-               elseif($f[what]==1)
+               elseif($f["what"]==1)
                 {
-                $exp = explode("-", $f[whatid]);
-                $e = mysql_query("SELECT * FROM 2004leagues WHERE id='".$exp[0]."'");
-                $r = mysql_fetch_array($e);
+                $exp = explode("-", $f["whatid"]);
+                $e = mysqli_query($link, "SELECT * FROM 2004leagues WHERE id='".$exp[0]."'");
+                $r = mysqli_fetch_array($e);
                 $icon = 'plus';
                 $color = 'primary';
                 $url = '/bets';
-                $text = sprintf(LANG_NOTIF_BET, $r[longname], $exp[1]);
+                $text = sprintf(LANG_NOTIF_BET, $r["longname"], $exp[1]);
                 }
-               elseif($f[what]==2)
+               elseif($f["what"]==2)
                 {
                 $icon = 'user-clock';
                 $color = 'danger';
                 $url = '/fantasy/draft';
                 $text = LANG_FANTASY_MAILSUBJECT;
                 }
-               elseif($f[what]==3)
+               elseif($f["what"]==3)
                 {
-                $e = mysql_query("SELECT c.*, u.uname FROM comments c LEFT JOIN e_xoops_users u ON u.uid=c.uid WHERE c.id='".$f[whatid]."'");
-                $r = mysql_fetch_array($e);
-                if($r[what]==0) { $url = "/news/".$r[whatid]."#comments"; }
-                if($r[what]==1) { $url = "/team/".$r[whatid]."#comments"; }
-                if($r[what]==2) { $url = "/game/".$r[whatid]."#comments"; }
-                if($r[what]==3) 
+                $e = mysqli_query($link, "SELECT c.*, u.uname FROM comments c LEFT JOIN e_xoops_users u ON u.uid=c.uid WHERE c.id='".$f[whatid]."'");
+                $r = mysqli_fetch_array($e);
+                if($r["what"]==0) { $url = "/news/".$r["whatid"]."#comments"; }
+                if($r["what"]==1) { $url = "/team/".$r["whatid"]."#comments"; }
+                if($r["what"]==2) { $url = "/game/".$r["whatid"]."#comments"; }
+                if($r["what"]==3) 
                   {
-                  if(substr($r[whatid], -1)=="p") $url = "/player/".substr($r[whatid], 0, -1)."#comments";
-                  if(substr($r[whatid], -1)=="g") $url = "/goalie/".substr($r[whatid], 0, -1)."#comments";
+                  if(substr($r["whatid"], -1)=="p") $url = "/player/".substr($r["whatid"], 0, -1)."#comments";
+                  if(substr($r["whatid"], -1)=="g") $url = "/goalie/".substr($r["whatid"], 0, -1)."#comments";
                   }
                 $icon = 'reply';
                 $color = 'danger';
-                if($r[uid]==0) $name = LANG_NOTIF_SOMEBODY;
-                else $name = LANG_LOGED_AS." ".$r[uname];
+                if($r["uid"]==0) $name = LANG_NOTIF_SOMEBODY;
+                else $name = LANG_LOGED_AS." ".$r["uname"];
                 $text = sprintf(LANG_NOTIF_REPLY, $name);
                 }
                $notif .= '
-                <a class="dropdown-item d-flex align-items-center'.($f[isread]==0 ? ' alert-warning':'').'" href="'.$url.'" data-id="'.$f[id].'">
+                <a class="dropdown-item d-flex align-items-center'.($f["isread"]==0 ? ' alert-warning':'').'" href="'.$url.'" data-id="'.$f["id"].'">
                   <div class="mr-3">
                     <div class="icon-circle bg-'.$color.'">
                       <i class="fas fa-'.$icon.' text-white"></i>
                     </div>
                   </div>
                   <div>
-                    <div class="small text-gray-500">'.date("j.n.Y H:i", strtotime($f[datetime])).'</div>
-                    <span'.($f[isread]==0 ? ' class="font-weight-bold"':'').'>'.$text.'</span>
+                    <div class="small text-gray-500">'.date("j.n.Y H:i", strtotime($f["datetime"])).'</div>
+                    <span'.($f["isread"]==0 ? ' class="font-weight-bold"':'').'>'.$text.'</span>
                   </div>
                 </a>';
                }
-    if(mysql_num_rows($q)==0) $notif .= '<p class="dropdown-item text-gray-600">'.LANG_NAV_NOTIFNO.' ...</p>';
+    if(mysqli_num_rows($q)==0) $notif .= '<p class="dropdown-item text-gray-600">'.LANG_NAV_NOTIFNO.' ...</p>';
     $notif .= ' <a class="dropdown-item text-center small text-gray-500" href="/alerts">'.LANG_NAV_NOTIFALL.'</a>
               </div>
             </li>';
@@ -960,34 +1022,35 @@ function Notifications($lite=FALSE)
 
 function Insert_Notification($uid, $what, $whatid)
   {
+  Global $link;
   if($what==0)
     {
     // whatid = tshort-matchid
     $exp = explode("-", $whatid);
-    $q = mysql_query("SELECT * FROM `e_xoops_users` WHERE user_favteam='".$exp[0]."'");
-    while($f = mysql_fetch_array($q))
+    $q = mysqli_query($link, "SELECT * FROM `e_xoops_users` WHERE user_favteam='".$exp[0]."'");
+    while($f = mysqli_fetch_array($q))
       {
-      mysql_query("INSERT INTO user_notifications (uid, what, whatid, datetime) VALUES ('".$f[uid]."', '0', '".$exp[1]."', NOW())");
+      mysqli_query($link, "INSERT INTO user_notifications (uid, what, whatid, datetime) VALUES ('".$f["uid"]."', '0', '".$exp[1]."', NOW())");
       }
     }
   elseif($what==1)
     {
     // whatid = leagueid-kolo
     $exp = explode("-", $whatid);
-    $q = mysql_query("SELECT et.userid, SUM(et.points) as poc FROM `el_matches` em LEFT JOIN el_tips et ON et.matchid=em.id WHERE em.league='".$exp[0]."' && em.kolo='".$exp[1]."' GROUP BY userid");
-    while($f = mysql_fetch_array($q))
+    $q = mysqli_query($link, "SELECT et.userid, SUM(et.points) as poc FROM `el_matches` em LEFT JOIN el_tips et ON et.matchid=em.id WHERE em.league='".$exp[0]."' && em.kolo='".$exp[1]."' GROUP BY userid");
+    while($f = mysqli_fetch_array($q))
       {
-      mysql_query("INSERT INTO user_notifications (uid, what, whatid, datetime) VALUES ('".$f[uid]."', '1', '".$exp[0]."-".$f[poc]."', NOW())");
+      mysqli_query($link, "INSERT INTO user_notifications (uid, what, whatid, datetime) VALUES ('".$f["uid"]."', '1', '".$exp[0]."-".$f["poc"]."', NOW())");
       }
     }
   elseif($what==2)
     {
-    mysql_query("INSERT INTO user_notifications (uid, what, whatid, datetime) VALUES ('".$uid."', '2', '0', NOW())");
+    mysqli_query($link, "INSERT INTO user_notifications (uid, what, whatid, datetime) VALUES ('".$uid."', '2', '0', NOW())");
     }
   elseif($what==3)
     {
     // whatid = comment_id
-    mysql_query("INSERT INTO user_notifications (uid, what, whatid, datetime) VALUES ('".$uid."', '3', '".$whatid."', NOW())");
+    mysqli_query($link, "INSERT INTO user_notifications (uid, what, whatid, datetime) VALUES ('".$uid."', '3', '".$whatid."', NOW())");
     }
   return false;
   }
@@ -1002,16 +1065,25 @@ function Insert_Notification($uid, $what, $whatid)
 
 function User_Menu()
   {
-  if($_SESSION['logged'])
+  Global $link;
+  $usermenu="";
+  if(isset($_SESSION['logged']))
     {
-    $q = mysql_query("SELECT * FROM e_xoops_users WHERE uid='$_SESSION[logged]'");
-    $f = mysql_fetch_array($q);
-    if($f[user_avatar]!="") $avatar = '<img class="img-profile rounded-circle" src="/images/user_avatars/'.$_SESSION[logged].'.'.$f[user_avatar].'?'.filemtime('images/user_avatars/'.$_SESSION['logged'].'.'.$f[user_avatar]).'" alt="'.$f[uname].'">';
+    $q = mysqli_query($link, "SELECT * FROM e_xoops_users WHERE uid='".$_SESSION["logged"]."'");
+    $f = mysqli_fetch_array($q);
+    if(!isset($f)) { $f["user_avatar"]=""; $f["uname"]=""; }
+    if($f["user_avatar"]!="") $avatar = '<img class="img-profile rounded-circle" src="/images/user_avatars/'.$_SESSION["logged"].'.'.$f["user_avatar"].'?'.filemtime('images/user_avatars/'.$_SESSION['logged'].'.'.$f["user_avatar"]).'" alt="'.$f["uname"].'">';
     else $avatar = '<i class="fas fa-user-circle fa-2x"></i>';
+    if($f["user_favteam"]!=0) {
+        $w = mysqli_query($link, "SELECT et.* FROM ((SELECT id, shortname as name, longname as pos, 0 as el FROM `2004teams` WHERE shortname='".$f["user_favteam"]."' ORDER BY id DESC LIMIT 5)
+UNION
+(SELECT id, shortname as name, longname as pos, 1 as el FROM `el_teams` WHERE shortname='".$f["user_favteam"]."' ORDER BY id DESC LIMIT 5))et GROUP BY et.name, et.pos");
+        $e = mysqli_fetch_array($w);
+    }
     $usermenu .= '
             <li class="nav-item dropdown no-arrow">
               <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-label="'.LANG_USERPROFILE_TITLE.'">
-                <span class="mr-2 d-none d-lg-inline text-gray-600 small">'.$f[uname].'</span>
+                <span class="mr-2 d-none d-lg-inline text-gray-600 small">'.$f["uname"].'</span>
                 '.$avatar.'
               </a>
               <!-- Dropdown - User Information -->
@@ -1023,6 +1095,19 @@ function User_Menu()
                 <a class="dropdown-item" href="/bets">
                   <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
                   '.LANG_NAV_BETOVERVIEW.'
+                </a>';
+                if(isset($e["id"])) {
+                    $usermenu .= '
+                <a class="dropdown-item" href="/team/'.$e["id"].$e["el"].'-'.SEOtitle($e["pos"]).'">
+                  <i class="fas fa-star fa-sm fa-fw mr-2 text-gray-400"></i>
+                  '.LANG_USERPROFILE_FAVTEAM.'
+                </a>
+                    ';
+                }
+    $usermenu .= '
+                <a class="dropdown-item" href="/watched">
+                  <i class="fas fa-magnifying-glass fa-sm fa-fw mr-2 text-gray-400"></i>
+                  '.LANG_PLAYERS_WATCHEDTITLE.'
                 </a>
                 <div class="dropdown-divider"></div>
                 <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
@@ -1093,37 +1178,41 @@ function StatusParser($name)
 function GoogleNews($type, $id)
   {
   Global $link, $leaguecolor;
+  $news = "";
     if($type=="p") {
         $el = substr($id, -1);
         $id = substr($id, 0, -1);
-        if($el==0) $q = mysql_query("SELECT * FROM 2004players WHERE id='".$id."'");
-        else $q = mysql_query("SELECT * FROM el_players WHERE id='".$id."'");
-        $f = mysql_fetch_array($q);
-        $search = $f[name];
-        $w = mysql_query("SELECT * FROM (SELECT g.*, IF(SUBSTRING(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.p')),-1)=0, p1.name, p2.name) as name FROM gn_news g LEFT JOIN 2004players p1 ON p1.id=SUBSTRING(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.p')),1,LENGTH(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.p')))-1) LEFT JOIN el_players p2 ON p2.id=SUBSTRING(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.p')),1,LENGTH(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.p')))-1))dt WHERE dt.name='".$search."' ORDER BY dt.published DESC LIMIT 5");
+        if($el==0) $q = mysqli_query($link, "SELECT * FROM 2004players WHERE id='".$id."'");
+        else $q = mysqli_query($link, "SELECT * FROM el_players WHERE id='".$id."'");
+        $f = mysqli_fetch_array($q);
+        if(!isset($f["name"])) $f["name"]="";
+        $search = $f["name"];
+        $w = mysqli_query($link, "SELECT * FROM (SELECT g.*, IF(SUBSTRING(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.p')),-1)=0, p1.name, p2.name) as name FROM gn_news g LEFT JOIN 2004players p1 ON p1.id=SUBSTRING(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.p')),1,LENGTH(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.p')))-1) LEFT JOIN el_players p2 ON p2.id=SUBSTRING(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.p')),1,LENGTH(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.p')))-1))dt WHERE dt.name='".$search."' ORDER BY dt.published DESC LIMIT 5");
     }
     elseif($type=="g") {
         $el = substr($id, -1);
         $id = substr($id, 0, -1);
-        if($el==0) $q = mysql_query("SELECT * FROM 2004goalies WHERE id='".$id."'");
-        else $q = mysql_query("SELECT * FROM el_goalies WHERE id='".$id."'");
-        $f = mysql_fetch_array($q);
-        $search = $f[name];
-        $w = mysql_query("SELECT * FROM (SELECT g.*, IF(SUBSTRING(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.g')),-1)=0, p1.name, p2.name) as name FROM gn_news g LEFT JOIN 2004goalies p1 ON p1.id=SUBSTRING(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.g')),1,LENGTH(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.g')))-1) LEFT JOIN el_goalies p2 ON p2.id=SUBSTRING(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.g')),1,LENGTH(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.g')))-1))dt WHERE dt.name='".$search."' ORDER BY dt.published DESC LIMIT 5");
+        if($el==0) $q = mysqli_query($link, "SELECT * FROM 2004goalies WHERE id='".$id."'");
+        else $q = mysqli_query($link, "SELECT * FROM el_goalies WHERE id='".$id."'");
+        $f = mysqli_fetch_array($q);
+        if(!isset($f["name"])) $f["name"]="";
+        $search = $f["name"];
+        $w = mysqli_query($link, "SELECT * FROM (SELECT g.*, IF(SUBSTRING(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.g')),-1)=0, p1.name, p2.name) as name FROM gn_news g LEFT JOIN 2004goalies p1 ON p1.id=SUBSTRING(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.g')),1,LENGTH(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.g')))-1) LEFT JOIN el_goalies p2 ON p2.id=SUBSTRING(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.g')),1,LENGTH(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.g')))-1))dt WHERE dt.name='".$search."' ORDER BY dt.published DESC LIMIT 5");
     }
     elseif($type=="t") {
         $el = substr($id, -1);
         $id = substr($id, 0, -1);
-        if($el==0) $q = mysql_query("SELECT * FROM 2004teams WHERE id='".$id."'");
-        else $q = mysql_query("SELECT * FROM el_teams WHERE id='".$id."'");
-        $f = mysql_fetch_array($q);
-        $search = $f[shortname];
-        $w = mysql_query("SELECT * FROM (SELECT g.*, IF(SUBSTRING(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.t')),-1)=0, p1.shortname, p2.shortname) as shortname FROM gn_news g LEFT JOIN 2004teams p1 ON p1.id=SUBSTRING(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.t')),1,LENGTH(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.t')))-1) LEFT JOIN el_teams p2 ON p2.id=SUBSTRING(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.t')),1,LENGTH(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.t')))-1))dt WHERE dt.shortname='".$search."' ORDER BY dt.published DESC LIMIT 5");
+        if($el==0) $q = mysqli_query($link, "SELECT * FROM 2004teams WHERE id='".$id."'");
+        else $q = mysqli_query($link, "SELECT * FROM el_teams WHERE id='".$id."'");
+        $f = mysqli_fetch_array($q);
+        if(!isset($f["shortname"])) $f["shortname"]="";
+        $search = $f["shortname"];
+        $w = mysqli_query($link, "SELECT * FROM (SELECT g.*, IF(SUBSTRING(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.t')),-1)=0, p1.shortname, p2.shortname) as shortname FROM gn_news g LEFT JOIN 2004teams p1 ON p1.id=SUBSTRING(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.t')),1,LENGTH(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.t')))-1) LEFT JOIN el_teams p2 ON p2.id=SUBSTRING(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.t')),1,LENGTH(JSON_UNQUOTE(JSON_EXTRACT(g.tags, '$.t')))-1))dt WHERE dt.shortname='".$search."' ORDER BY dt.published DESC LIMIT 5");
     }
     elseif($type=="n") {
-        $w = mysql_query("SELECT * FROM gn_news WHERE JSON_UNQUOTE(JSON_EXTRACT(tags, '$.n'))='".$id."' ORDER BY published DESC LIMIT 5");
+        $w = mysqli_query($link, "SELECT * FROM gn_news WHERE JSON_UNQUOTE(JSON_EXTRACT(tags, '$.n'))='".$id."' ORDER BY published DESC LIMIT 5");
     }
-  if(mysql_num_rows($w)>0) {
+  if(mysqli_num_rows($w)>0) {
     $news = '
     <div class="card shadow mb-2">
         <div class="card-header">
@@ -1131,9 +1220,9 @@ function GoogleNews($type, $id)
         </div>
         <div class="card-body">';
     $i=0;
-    while($e = mysql_fetch_array($w)) {
+    while($e = mysqli_fetch_array($w)) {
         $picture="";
-        $tags = json_decode($e[tags], true);
+        $tags = json_decode($e["tags"], true);
         if($e["image"]!="") $picture = $e["image"];
         elseif($type=="n" || $type=="t") {
             foreach($tags as $key => $tag) {
@@ -1142,19 +1231,19 @@ function GoogleNews($type, $id)
                     $id = substr($tag, 0, -1);
                     if($key=="p") { $nonel_table="2004players"; $el_table="el_players"; }
                     if($key=="g") { $nonel_table="2004goalies"; $el_table="el_goalies"; }
-                    if($el==0) $q = mysql_query("SELECT * FROM $nonel_table WHERE id='".$id."'");
-                    else $q = mysql_query("SELECT * FROM $el_table WHERE id='".$id."'");
-                    $f = mysql_fetch_array($q);
-                    $picture = "/includes/player_photo.php?name=".$f[name];
+                    if($el==0) $q = mysqli_query($link, "SELECT * FROM ".$nonel_table." WHERE id='".$id."'");
+                    else $q = mysqli_query($link, "SELECT * FROM $el_table WHERE id='".$id."'");
+                    $f = mysqli_fetch_array($q);
+                    $picture = "/includes/player_photo.php?name=".$f["name"];
                 }
                 elseif($type!="t" && $key=="t" && $picture=="") {
                     $el = substr($tag, -1);
                     $id = substr($tag, 0, -1);
-                    if($el==0) $q = mysql_query("SELECT * FROM 2004teams WHERE id='".$id."'");
-                    else $q = mysql_query("SELECT * FROM el_teams WHERE id='".$id."'");
-                    $f = mysql_fetch_array($q);
-                    if($el==0) $picture = "/images/vlajky/".$f[shortname].".gif";
-                    else $picture = "/images/vlajky/".$f[shortname]."_big.gif";
+                    if($el==0) $q = mysqli_query($link, "SELECT * FROM 2004teams WHERE id='".$id."'");
+                    else $q = mysqli_query($link, "SELECT * FROM el_teams WHERE id='".$id."'");
+                    $f = mysqli_fetch_array($q);
+                    if($el==0) $picture = "/images/vlajky/".$f["shortname"].".gif";
+                    else $picture = "/images/vlajky/".$f["shortname"]."_big.gif";
                 }
             }
         }
@@ -1167,15 +1256,15 @@ function GoogleNews($type, $id)
         $news .= "<table class='card d-table w-100 my-0 mb-2 position-relative small'>
                 <tr class='card-header$tableclass'>
                 <td style='width:60%;' class='pl-2'>
-                    <b><a href='".$e[link]."' target='_blank' class='stretched-link'>".$e[title]."</a></b>
+                    <b><a href='".$e["link"]."' target='_blank' class='stretched-link'>".$e["title"]."</a></b>
                 </td>
-                  <td style='width:40%;' class='text-right align-top pr-2'>".date("j.n.Y H:i", strtotime($e[published]))."</td>
+                  <td style='width:40%;' class='text-right align-top pr-2'>".date("j.n.Y H:i", strtotime($e["published"]))."</td>
                 </tr>
                 <tr class='$tableclass'>
                   <td colspan='2' class='p-2'>".($picture!="" ? "<img src='data:image/svg+xml,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1 0.525\"%3E%3C/svg%3E' data-src='$picture' class='lazy bg-gray-100 float-left img-thumbnail mr-2 p-1 shadow-sm col-8 col-sm-5 col-md-4 col-lg-3'>" : "").$e["summary"]."</td>
                 </tr>
                 <tr class='$tableclass'>
-                  <td colspan='2' class='px-2 text-right'>".$e[publisher]."</td>
+                  <td colspan='2' class='px-2 text-right'>".$e["publisher"]."</td>
                 </tr>
             </table>";
         $i++;
@@ -1188,35 +1277,38 @@ function GoogleNews($type, $id)
   }
 
 function time_elapsed_string($datetime, $full = false) {
-    $now = new DateTime;
+    $now = new DateTime();
     $ago = new DateTime($datetime);
     $diff = $now->diff($ago);
 
-    $diff->w = floor($diff->d / 7);
-    $diff->d -= $diff->w * 7;
+    $weeks = intdiv($diff->days, 7);
+    $days = $diff->days % 7;
 
     $string = array(
-        'y' => LANG_TIME_YEARS,
-        'm' => LANG_TIME_MONTHS,
-        'w' => LANG_TIME_WEEKS,
-        'd' => LANG_TIME_DAYS,
-        'h' => LANG_TIME_HOURS,
-        'i' => LANG_TIME_MINUTES,
-        's' => LANG_TIME_SECONDS,
+        'y' => $diff->y ? $diff->y . ' ' . LANG_TIME_YEARS : '',
+        'm' => $diff->m ? $diff->m . ' ' . LANG_TIME_MONTHS : '',
+        'w' => $weeks ? $weeks . ' ' . LANG_TIME_WEEKS : '',
+        'd' => $days ? $days . ' ' . LANG_TIME_DAYS : '',
+        'h' => $diff->h ? $diff->h . ' ' . LANG_TIME_HOURS : '',
+        'i' => $diff->i ? $diff->i . ' ' . LANG_TIME_MINUTES : '',
+        's' => $diff->s ? $diff->s . ' ' . LANG_TIME_SECONDS : '',
     );
-    foreach ($string as $k => &$v) {
-        if ($diff->$k) {
-            $v = $diff->$k . ' ' . $v . ($diff->$k > 1 ? '' : '');
-        } else {
-            unset($string[$k]);
-        }
+
+    $string = array_filter($string);
+
+    if (!$full) {
+        $string = array_slice($string, 0, 1);
     }
 
-    if (!$full) $string = array_slice($string, 0, 1);
-    if(strtolower($_SESSION[lang])=="sk") $hl = LANG_TIME_AGO.' '. implode(', ', $string);
-    else $hl = implode(', ', $string).' '.LANG_TIME_AGO;
+    if (strtolower($_SESSION["lang"]) == "sk") {
+        $hl = LANG_TIME_AGO . ' ' . implode(', ', $string);
+    } else {
+        $hl = implode(', ', $string) . ' ' . LANG_TIME_AGO;
+    }
+
     return $string ? $hl : LANG_TIME_RIGHTNOW;
 }
+
 
 /*
 * Funkcia na overenie zapamätaného prihlásenia
@@ -1225,25 +1317,27 @@ function time_elapsed_string($datetime, $full = false) {
 */
 
 function CheckCookieLogin() {
-    $uname = $_COOKIE['uname']; 
+    Global $link;
+    $uname = $_COOKIE['uname'] ?? null; 
     if (!empty($uname)) {
-        $q = mysql_query("SELECT dt.* FROM (SELECT uid, JSON_SEARCH(login_session, 'one', '".$uname."') as search FROM `e_xoops_users`)dt WHERE dt.search IS NOT NULL");
-        if(mysql_num_rows($q)>0)
+        $q = mysqli_query($link, "SELECT dt.* FROM (SELECT uid, JSON_SEARCH(login_session, 'one', '".$uname."') as search FROM `e_xoops_users`)dt WHERE dt.search IS NOT NULL");
+        if(mysqli_num_rows($q)>0)
           {
-          $f = mysql_fetch_array($q);
-          $_SESSION['logged'] = $f[uid];
+          $f = mysqli_fetch_array($q);
+          $_SESSION['logged'] = $f["uid"];
           setcookie("uname",$uname,time()+3600*24*365,'/','.hockey-live.sk');
           }
         }
 }
 
 function SendMail($to, $subject, $message) {
-    $q = mysql_query("SELECT * FROM e_xoops_users WHERE email='".$to."'");
-    if(mysql_num_rows($q)>0) {
-        $f = mysql_fetch_array($q);
+    Global $link;
+    $q = mysqli_query($link, "SELECT * FROM e_xoops_users WHERE email='".$to."'");
+    if(mysqli_num_rows($q)>0) {
+        $f = mysqli_fetch_array($q);
         if($f["mail_notify"]==1) {
             // send e-mail
-            if($_SESSION[user]!=1) {
+            if($_SESSION["user"]!=1) {
                 $headers = 'From: '.SITE_MAIL. "\r\n" .
                 'Reply-To: '.SITE_MAIL. "\r\n" .
                 'X-Mailer: PHP/' . phpversion();
@@ -1258,9 +1352,10 @@ function SendMail($to, $subject, $message) {
 }
 
 function SendPush($to, $subject, $message) {
-    $q = mysql_query("SELECT * FROM e_xoops_users WHERE email='".$to."'");
-    if(mysql_num_rows($q)>0) {
-        $f = mysql_fetch_array($q);
+    Global $link;
+    $q = mysqli_query($link, "SELECT * FROM e_xoops_users WHERE email='".$to."'");
+    if(mysqli_num_rows($q)>0) {
+        $f = mysqli_fetch_array($q);
 
         $auth = array(
             'VAPID' => array(
@@ -1272,14 +1367,16 @@ function SendPush($to, $subject, $message) {
 
         $webPush = new WebPush($auth);
 
-        $subscription = json_decode($f["push_id"], true);
+        $sub = json_decode($f["push_id"], true);
+        $subscription = Subscription::create([
+            'endpoint' => $sub["endpoint"],
+            'publicKey' => $sub["key"],
+            'authToken' => $sub["token"]
+        ]);
 
-        $res = $webPush->sendNotification(
-            $subscription['endpoint'],
-            $subject." - ".$message,
-            $subscription['key'],
-            $subscription['token'],
-            true
+        $res = $webPush->sendOneNotification(
+            $subscription,
+            $message,
         );
     }
 }

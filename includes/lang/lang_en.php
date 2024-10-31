@@ -5,6 +5,7 @@
 
 --------------------------------------------*/
 
+$globalFormatter = new IntlDateFormatter('en_US', IntlDateFormatter::FULL, IntlDateFormatter::FULL);
 setlocale(LC_ALL, 'en_EN.UTF8');
 setlocale(LC_NUMERIC, 'C');
 setlocale(LC_MONETARY, 'en_US');
@@ -20,6 +21,8 @@ define("LANG_TIME_SECONDS","seconds");
 define("LANG_TIME_RIGHTNOW","just now");
 define("LANG_TIME_TODAY","today");
 define("LANG_TIME_YESTERDAY","yesterday");
+define("LANG_TIME_TOMORROW","tomorrow");
+define("LANG_TIME_DAYAFTERTOMORROW","day after tomorrow");
 define("LANG_AGE_YEARS","years");
 
 define("LANG_AUTHOR","Author");
@@ -39,6 +42,7 @@ define("LANG_AT","at"); // at 11:00
 define("LANG_SEND","Send");
 define("LANG_NO","No");
 define("LANG_REMOVE","Remove");
+define("LANG_NEW","new");
 define("LANG_MAIN_COMMENTS","Comments");
 define("LANG_MAIN_COMMENT","Comment");
 define("LANG_MAIN_REMOVECOMMENT","Comment removal");
@@ -49,6 +53,9 @@ define("LANG_LOGOUT","Logout");
 define("LANG_ROUND","round");
 define("LANG_NUM","no."); // ako skratka čísla
 define("LANG_MATCH1","Game");
+define("LANG_MATCH2","game");
+define("LANG_MATCH3","games");
+define("LANG_MATCH4","games");
 
 define("LANG_MATCH_DESCRIPTION","Game process - LIVE commentary");
 define("LANG_PENALTY","Penalties");
@@ -303,6 +310,21 @@ define("LANG_PLAYERS_POINTS","Recorded a point");
 define("LANG_PLAYERS_POINTSTIMES","recorded a point %dx in a row"); // bodoval 2x po sebe
 define("LANG_PLAYERS_NOTPOINTSTIMES","didn't record a point %dx in a row"); // nebodoval 2x po sebe
 define("LANG_PLAYERS_INJUREDSINCE","Injured since");
+define("LANG_PLAYERS_WATCHEDTITLE","Watched players");
+define("LANG_PLAYERS_DELETEWATCHED","Watched player delete");
+define("LANG_PLAYERS_WATCHEDREALLY","Are you sure you want to remove this watched player?");
+define("LANG_PLAYERS_ADDWATCHED","Add player to watch");
+define("LANG_PLAYERS_SEARCHPLAYER","Search for a player");
+define("LANG_PLAYERS_MYWATCHED","My watched players");
+define("LANG_PLAYERS_AGAINST","against");
+define("LANG_PLAYERS_TOI","Time on ice");
+define("LANG_PLAYERS_SUMMARYSTATS","Summary statistics");
+define("LANG_PLAYERS_PPG","Points per game");
+define("LANG_PLAYERS_LASTGAME","Last game");
+define("LANG_PLAYERS_NEXTGAME","Next game");
+define("LANG_PLAYERS_LASTDIARY","Last diary entry");
+define("LANG_PLAYERS_WATCHEDTEASER","Follow the progress of your favorite players");
+define("LANG_PLAYERS_WATCHEDTEXT","<a href='/login'>Log in</a> to your account and discover the benefits of our exclusive <b>Player Tracker</b> section! Follow the performances of your favorite players in real time, get access to their latest statistics and find out when they will be back on the ice. Whether you're an avid fantasy league player or a dedicated fan, don't miss the opportunity to always be one step ahead. Just add the players you care about and be informed about everything important!");
 
 define("LANG_BETS_BEST","Best betters");
 define("LANG_BETS_SHOWFOR","Show for league");
@@ -336,6 +358,7 @@ define("LANG_OTHER_GAMES_LIVE","Other games");
 define("LANG_NAV_HOME","Home");
 define("LANG_NAV_MAINPAGE","Main page");
 define("LANG_NAV_PLAYERDB","Player database");
+define("LANG_NAV_PLAYERTRACKER","Player tracker");
 define("LANG_NAV_SHOOTERS","Shooters");
 define("LANG_NAV_FORUM","Forum");
 define("LANG_NAV_IMPERSSUM","Contact");
@@ -556,7 +579,7 @@ define("LANG_FANTASY_PICKSINACTIVE",'Your draft picks are not complete. Please d
 define("LANG_FANTASY_PICKSTITLE3",'Your draft picks');
 define("LANG_FANTASY_ONLYFROMROSTERS",'Team lineups for %s are known. Draft allows you to select players only from <a href="/news/%d" class="alert-link">known lineups</a>');
 define("LANG_FANTASY_ONLYFROMDB1",'Team lineups for %s will be known later. Draft players you think could participate.');
-define("LANG_FANTASY_PICKPLACEHOLDER",'Start typing the player\'s name...');
+define("LANG_FANTASY_PICKPLACEHOLDER","Start typing the player name...");
 define("LANG_FANTASY_ALREADYTOOLTIP",'We have detected that this player could be drafted by another manager before you. We recommend replacing him.');
 define("LANG_FANTASY_TURNONPUSH",'We recommend that you turn on push notifications in your <a href="/profile" class="alert-link">profile</a> to be informed about your next draft pick.');
 

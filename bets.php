@@ -1,21 +1,22 @@
 <?
-$params = explode("/", htmlspecialchars($_GET[uid]));
+$_GET["uid"] = $_GET["uid"] ?? null;
+if(isset($_GET["uid"])) $params = explode("/", htmlspecialchars($_GET["uid"]));
 $content = "";
-$uid = $_SESSION['logged'];
+$uid = $_SESSION['logged'] ?? null;
 $leaguecolor="hl";
 // prehlad tipov
 if($uid)
   {
   // prehlad tipov ineho uzivatela
-  if($params[0])
+  if(isset($_GET["uid"]) && $params[0])
     {
     $content .= GetBets($params[0]);
     }
   // prehlad tipov prihlaseneho uzivatela
   else
     {
-    $q = mysql_query("SELECT uname FROM e_xoops_users WHERE uid='$uid'");
-    $f = mysql_fetch_array($q);
+    $q = mysqli_query($link, "SELECT uname FROM e_xoops_users WHERE uid='".$uid."'");
+    $f = mysqli_fetch_array($q);
     $locale = explode(";",setlocale(LC_ALL, '0'));
     $locale = explode("=",$locale[0]);
     $locale = $locale[1];
@@ -32,7 +33,7 @@ $script_end = '  <script type="text/javascript">
       "bJQueryUI": false,
       "ajax": "/includes/betstable.php",
       "createdRow": function( row, data, dataIndex ) {
-        if ( data[1] == "<a href=\'/bets/'.$uid.'\'>'.$f[uname].'</a>" ) {
+        if ( data[1] == "<a href=\'/bets/'.$uid.'\'>'.$f["uname"].'</a>" ) {
           $(row).addClass(\'highlight\');
         }
        }
@@ -54,21 +55,21 @@ $content .= '<div class="league-select">
                 <option value="0">'.LANG_BETS_OVERALL.'</option>
                 <optgroup label="'.LANG_BETS_ACTUAL.'">
                     <!--option value="contest">Súťaž o hokejové kartičky</option-->';
-                $l1 = mysql_query("SELECT * FROM 2004leagues WHERE active='1' && id!='70' ORDER BY position ASC");
-                while($l1d = mysql_fetch_array($l1))
+                $l1 = mysqli_query($link, "SELECT * FROM 2004leagues WHERE active='1' && id!='70' ORDER BY position ASC");
+                while($l1d = mysqli_fetch_array($l1))
                   {
-                  $content .= '<option value="'.$l1d[id].'">'.$l1d[longname].'</option>';
+                  $content .= '<option value="'.$l1d["id"].'">'.$l1d["longname"].'</option>';
                   }
                 $content .= '</optgroup><optgroup label="'.LANG_BETS_PLAYED.'">';
-                $l2 = mysql_query("SELECT * FROM 2004leagues WHERE active='0' && id!='70' ORDER BY longname ASC");
-                while($l2d = mysql_fetch_array($l2))
+                $l2 = mysqli_query($link, "SELECT * FROM 2004leagues WHERE active='0' && id!='70' ORDER BY longname ASC");
+                while($l2d = mysqli_fetch_array($l2))
                   {
-                  $content .= '<option value="'.$l2d[id].'">'.$l2d[longname].'</option>';
+                  $content .= '<option value="'.$l2d["id"].'">'.$l2d["longname"].'</option>';
                   }
                 $content .= '</optgroup>
               </select>
-            </div>
-            
+            </div>';
+            /*
             <div class="row justify-content-center mt-4">
               <div class="col-12 col-lg-5 col-sm-8">
                 <div class="card shadow animated--grow-in">
@@ -81,7 +82,8 @@ $content .= '<div class="league-select">
                 </div>
               </div>
             </div>
-
+*/
+$content .= '
             <div class="card my-4 shadow animated--grow-in">
               <div class="card-header">
                 <h6 class="m-0 font-weight-bold text-hl">
@@ -136,12 +138,12 @@ $content .= '<div class="league-select">
                  <p>'.LANG_BETS_FORWHATTEXT.'</p>
                  <div class="card-columns">
 
-                  <div class="card bg-gradient-light">
+                  <!--div class="card bg-gradient-light">
                     <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="https://sportzoo.s15.cdn-upgates.com/_cache/7/d/7d23067f53d1d0ca72633e4926d12bdf-balicek-retail.png" class="lazy card-img-top" alt="Cestovný batoh">
                     <div class="card-body">
                       <h5 class="card-title">Retail balíčky Tipos extraliga 2023/24 – 1. séria</h5>
                     </div>
-                  </div>
+                  </div-->
 
                   <div class="card">
                     <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/images/ceny/batoh.jpg" class="lazy card-img-top" alt="Cestovný batoh">

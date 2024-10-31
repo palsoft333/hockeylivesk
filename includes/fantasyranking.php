@@ -2,11 +2,11 @@
   session_start();
   include("db.php");
   include("main_functions.php");
-  if(isset($_SESSION[lang])) {
-    include("lang/lang_$_SESSION[lang].php");
+  if(isset($_SESSION["lang"])) {
+    include("lang/lang_".$_SESSION["lang"].".php");
   }
   else {
-     $_SESSION[lang] = 'sk';
+     $_SESSION["lang"] = 'sk';
       include("lang/lang_sk.php");
   }
   $uid = $_SESSION['logged'];
@@ -33,23 +33,23 @@
 	$sLimit = "";
 	if ( isset( $_GET['iDisplayStart'] ) && $_GET['iDisplayLength'] != '-1' )
 	{
-		$sLimit = "LIMIT ".mysql_real_escape_string( $_GET['iDisplayStart'] ).", ".
-			mysql_real_escape_string( $_GET['iDisplayLength'] );
+		$sLimit = "LIMIT ".mysqli_real_escape_string($link, $_GET['iDisplayStart'] ).", ".
+			mysqli_real_escape_string($link, $_GET['iDisplayLength'] );
 	}
 	
-    $lid = $_GET[lid];
+    $lid = $_GET["lid"];
 	//$sQuery = "SELECT SQL_CALC_FOUND_ROWS dt.*, e_xoops_users.uname as uname FROM e_xoops_users INNER JOIN (SELECT * FROM fl_wallet WHERE league='$lid' ORDER BY points DESC)dt ON (e_xoops_users.uid=dt.uid) $sLimit";
-	$sQuery = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
-	$sQuery = "SELECT fl_selects.*, sum(t1.price)+sum(t2.price) as aktual, t3.points, t3.prev_points, t3.active, t4.uname FROM `fl_selects` LEFT JOIN fl_prices t1 ON t1.playerid=fl_selects.pid LEFT JOIN fl_prices_g t2 ON t2.playerid=fl_selects.pid JOIN fl_wallet t3 ON t3.uid=fl_selects.uid && t3.league='$lid' JOIN e_xoops_users t4 ON t4.uid=fl_selects.uid GROUP BY uid ORDER BY points DESC, aktual DESC $sLimit";
+	$sQuery = mysqli_query($link, "SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysqli_error($link));
+	$sQuery = "SELECT fl_selects.*, sum(t1.price)+sum(t2.price) as aktual, t3.points, t3.prev_points, t3.active, t4.uname FROM `fl_selects` LEFT JOIN fl_prices t1 ON t1.playerid=fl_selects.pid LEFT JOIN fl_prices_g t2 ON t2.playerid=fl_selects.pid JOIN fl_wallet t3 ON t3.uid=fl_selects.uid && t3.league='".$lid."' JOIN e_xoops_users t4 ON t4.uid=fl_selects.uid GROUP BY uid ORDER BY points DESC, aktual DESC $sLimit";
 		
-	$rResult = mysql_query( $sQuery ) or die(mysql_error());
+	$rResult = mysqli_query($link, $sQuery ) or die(mysqli_error($link));
 	
 	/* Data set length after filtering */
 	$sQuery = "
 		SELECT FOUND_ROWS()
 	";
-	$rResultFilterTotal = mysql_query( $sQuery ) or die(mysql_error());
-	$aResultFilterTotal = mysql_fetch_array($rResultFilterTotal);
+	$rResultFilterTotal = mysqli_query($link, $sQuery ) or die(mysqli_error($link));
+	$aResultFilterTotal = mysqli_fetch_array($rResultFilterTotal);
 	$iFilteredTotal = $aResultFilterTotal[0];
 	
 	/* Total data set length */
@@ -67,30 +67,30 @@
 	$sOutput .= '"recordsTotal": '.$iTotal.', ';
 	$sOutput .= '"recordsFiltered": '.$iFilteredTotal.', ';
 	$sOutput .= '"data": [ ';
-	while ( $aRow = mysql_fetch_array( $rResult ) )
+	while ( $aRow = mysqli_fetch_array( $rResult ) )
 	{
     $startPoint=$_GET['iDisplayStart'];
     $counter=($startPoint) + ($j);
     
-    if($aRow[uid]==$uid) $link = 'select';
-    else $link = 'roster/'.$aRow[uid].'/'.$lid;
+    if($aRow["uid"]==$uid) $link = 'select';
+    else $link = 'roster/'.$aRow["uid"].'/'.$lid;
     
-    if ($aRow[aktual] > 999 && $aRow[aktual] <= 999999) {
-    $result = floor($aRow[aktual] / 1000) . ' K';
-    } elseif ($aRow[aktual] > 999999) {
-        $result = floor($aRow[aktual] / 1000000) . ' M';
+    if ($aRow["aktual"] > 999 && $aRow["aktual"] <= 999999) {
+    $result = floor($aRow["aktual"] / 1000) . ' K';
+    } elseif ($aRow["aktual"] > 999999) {
+        $result = floor($aRow["aktual"] / 1000000) . ' M';
     } else {
-        $result = $aRow[aktual];
+        $result = $aRow["aktual"];
     }
-    if($aRow[aktual]==NULL) $result=0;
-    if($aRow[prev_points]<>$aRow[points]) 
+    if($aRow["aktual"]==NULL) $result=0;
+    if($aRow["prev_points"]<>$aRow["points"]) 
       {
-      $diffn = $aRow[points]-$aRow[prev_points];
+      $diffn = $aRow["points"]-$aRow["prev_points"];
       $diff = '<span class=\"text-success text-xs\"> (+'.$diffn.')</span>';
       }
     else $diff='';
 
-    $sOutput .= '["'.$counter.'.","<a href=\'/fantasy/'.$link.'\'>'.$aRow[uname].'</a>","<b>'.$aRow[points].'</b>'.$diff.'","'.$result.'","'.$aRow[active].'"],';
+    $sOutput .= '["'.$counter.'.","<a href=\'/fantasy/'.$link.'\'>'.$aRow["uname"].'</a>","<b>'.$aRow["points"].'</b>'.$diff.'","'.$result.'","'.$aRow["active"].'"],';
 		
 		/*
 		 * Optional Configuration:

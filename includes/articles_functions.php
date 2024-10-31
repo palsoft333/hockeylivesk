@@ -1,9 +1,11 @@
 <?
 function generateGamesTable($lid) {
-    $q = mysql_query("SELECT * FROM 2004leagues WHERE id='".$lid."'");
-    $f = mysql_fetch_assoc($q);
-    if($f["el"]==1) $w = mysql_query("SELECT * FROM el_matches WHERE league='".$lid."' ORDER BY datetime");
-    else $w = mysql_query("SELECT m.*, t.skupina FROM 2004matches m LEFT JOIN 2004teams t ON t.shortname=m.team1short && t.league='".$lid."' WHERE m.league='".$lid."' ORDER BY m.datetime;");
+    Global $link;
+    $q = mysqli_query($link, "SELECT * FROM 2004leagues WHERE id='".$lid."'");
+    $f = mysqli_fetch_assoc($q);
+    $f["el"]=$f["el"] ?? 0;
+    if($f["el"]==1) $w = mysqli_query($link, "SELECT * FROM el_matches WHERE league='".$lid."' ORDER BY datetime");
+    else $w = mysqli_query($link, "SELECT m.*, t.skupina FROM 2004matches m LEFT JOIN 2004teams t ON t.shortname=m.team1short && t.league='".$lid."' WHERE m.league='".$lid."' ORDER BY m.datetime;");
     $table = '
     <table class="table table-sm table-striped table-responsive-sm">
         <tr>
@@ -15,7 +17,7 @@ function generateGamesTable($lid) {
             <th>Výsledok</th>
         </tr>
     ';
-    while($game = mysql_fetch_assoc($w)) {
+    while($game = mysqli_fetch_assoc($w)) {
         $table .= '
         <tr>
             <td>'.($game["po_type"]==null ? 'základná časť':($game["po_type"]=="QF" ? 'štvrťfinále':($game["po_type"]=="SF" ? 'semifinále':($game["po_type"]=="F" ? 'finále':($game["po_type"]=="B" ? 'súboj o bronz':'kvalifikácia'))))).'</td>
@@ -34,12 +36,15 @@ function generateGamesTable($lid) {
 }
 
 function generateRoster($tshort, $lid) {
-    $q = mysql_query("SELECT * FROM 2004leagues WHERE id='".$lid."'");
-    $f = mysql_fetch_assoc($q);
-    if($f["el"]==1) $w = mysql_query("SELECT id, name, pos FROM `el_players` WHERE teamshort='".$tshort."' && league='".$lid."' UNION SELECT id, name, 'GK' as pos FROM `el_goalies` WHERE teamshort='".$tshort."' && league='".$lid."' ORDER BY pos DESC, name");
-    else $w = mysql_query("SELECT id, name, pos FROM `2004players` WHERE teamshort='".$tshort."' && league='".$lid."' UNION SELECT id, name, 'GK' as pos FROM `2004goalies` WHERE teamshort='".$tshort."' && league='".$lid."' ORDER BY pos DESC, name");
+    Global $link;
+    $q = mysqli_query($link, "SELECT * FROM 2004leagues WHERE id='".$lid."'");
+    $f = mysqli_fetch_assoc($q);
+    $f["el"]=$f["el"] ?? 0;
+    if($f["el"]==1) $w = mysqli_query($link, "SELECT id, name, pos FROM `el_players` WHERE teamshort='".$tshort."' && league='".$lid."' UNION SELECT id, name, 'GK' as pos FROM `el_goalies` WHERE teamshort='".$tshort."' && league='".$lid."' ORDER BY pos DESC, name");
+    else $w = mysqli_query($link, "SELECT id, name, pos FROM `2004players` WHERE teamshort='".$tshort."' && league='".$lid."' UNION SELECT id, name, 'GK' as pos FROM `2004goalies` WHERE teamshort='".$tshort."' && league='".$lid."' ORDER BY pos DESC, name");
 
-    if(mysql_num_rows($w)>0) {
+    $table = '';
+    if(mysqli_num_rows($w)>0) {
         $table = '
         <table class="table table-sm table-striped w-50">
             <tr>
@@ -47,7 +52,7 @@ function generateRoster($tshort, $lid) {
                 <th>Meno</th>
             </tr>
         ';
-        while($player = mysql_fetch_assoc($w)) {
+        while($player = mysqli_fetch_assoc($w)) {
             $table .= '
             <tr>
                 <td>'.$player["pos"].'</td>

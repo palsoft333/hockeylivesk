@@ -8,6 +8,17 @@ var delay = (function(){
 
 $(document).ready( function() {
 
+  fetch('/includes/unsplash_get.php?collection=3668324')
+      .then(response => response.json())
+      .then(data => {
+          const dynamicImage = document.getElementById('unsplash-image');
+          dynamicImage.style.backgroundImage = `url(${data.image})`;
+
+          const authorInfo = document.getElementById('author-info');
+          authorInfo.innerHTML = `Photo by <a href="${data.link}" target="_blank">${data.author}</a> on <a href="https://unsplash.com/?utm_source=hockey-LIVE.sk&utm_medium=referral">Unsplash</a>`;
+      })
+      .catch(error => console.error('Error fetching unsplash image:', error));
+
   $(".register-proceed-button").on('click', function(e) {
       e.preventDefault();
       grecaptcha.ready(function() {
@@ -34,9 +45,6 @@ $(document).ready( function() {
             success: function(data){
               if(data=="OK")
                 {
-                gtag('event', 'registracia', {
-                'user': username
-                });
                 location.href = "/";
                 }
               else if(data=="CAPTCHAERROR")

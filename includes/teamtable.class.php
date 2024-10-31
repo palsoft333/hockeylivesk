@@ -1,5 +1,7 @@
 <?
 class TeamTable {
+    public $db;
+    public $favteam;
     public $lid;
     public $name;
     public $el;
@@ -12,20 +14,23 @@ class TeamTable {
     public $playoff_wins;
     public $conference;
 
-    public function __construct($lid) {
-        $q = mysql_query("SELECT * FROM 2004leagues WHERE id='".$lid."'");
-        $f = mysql_fetch_array($q);
-        if($_SESSION[logged]) {
-          $w = mysql_query("SELECT user_favteam FROM e_xoops_users WHERE uid='$_SESSION[logged]'");
-          $e = mysql_fetch_array($w);
-          $this->favteam = $e[user_favteam];
+    public function __construct($lid, $db) {
+        $q = mysqli_query($db, "SELECT * FROM 2004leagues WHERE id='".$lid."'");
+        $f = mysqli_fetch_array($q);
+        $this->favteam = "0";
+        if(isset($_SESSION["logged"])) {
+          $w = mysqli_query($db, "SELECT user_favteam FROM e_xoops_users WHERE uid='".$_SESSION["logged"]."'");
+          $e = mysqli_fetch_array($w);
+          $e["user_favteam"] = $e["user_favteam"] ?? null;
+          $this->favteam = $e["user_favteam"];
         }
+        $this->db = $db;
         $this->lid = $lid;
-        $this->name = $f[longname];
-        $this->el = $f[el];
-        $this->wpoints = $f[points];
-        $this->groups = explode("|", $f[groups]);
-        $this->end_basic = $f[endbasic];
+        $this->name = $f["longname"];
+        $this->el = $f["el"];
+        $this->wpoints = $f["points"];
+        $this->groups = explode("|", $f["groups"]);
+        $this->end_basic = $f["endbasic"];
     }
     
     public function add_conference($conference_name) {
@@ -41,7 +46,7 @@ class TeamTable {
     }
 
     public function add_teams($teams, $orderby, $to_conference, $to_division) {
-        $teams = implode("','", $teams);
+        if(is_array($teams)) $teams = implode("','", $teams);
         $i=0;
         if($this->teams_table=="") {
             if($this->el==1) $this->teams_table = "el_teams";
@@ -49,11 +54,11 @@ class TeamTable {
         }
         if(count($this->groups)>1) {
             $group = $this->groups[$to_division];
-            $q = mysql_query("SELECT *, goals-ga as diff FROM ".$this->teams_table." WHERE skupina='".$group."' && league='".$this->lid."' ORDER BY ".$orderby);
+            $q = mysqli_query($this->db, "SELECT *, goals-ga as diff FROM ".$this->teams_table." WHERE skupina='".$group."' && league='".$this->lid."' ORDER BY ".$orderby);
         }
-        elseif($teams=="") $q = mysql_query("SELECT *, goals-ga as diff FROM ".$this->teams_table." WHERE league='".$this->lid."' ORDER BY ".$orderby); 
-        else $q = mysql_query("SELECT *, goals-ga as diff FROM ".$this->teams_table." WHERE shortname IN ('".$teams."') && league='".$this->lid."' ORDER BY ".$orderby);
-        while($f = mysql_fetch_array($q)) {
+        elseif($teams=="") $q = mysqli_query($this->db, "SELECT *, goals-ga as diff FROM ".$this->teams_table." WHERE league='".$this->lid."' ORDER BY ".$orderby); 
+        else $q = mysqli_query($this->db, "SELECT *, goals-ga as diff FROM ".$this->teams_table." WHERE shortname IN ('".$teams."') && league='".$this->lid."' ORDER BY ".$orderby);
+        while($f = mysqli_fetch_array($q)) {
             $this->conference[$to_conference]["division"][$to_division]["teams"][$i]["tid"] = $f["id"];
             $this->conference[$to_conference]["division"][$to_division]["teams"][$i]["tshort"] = $f["shortname"];
             $this->conference[$to_conference]["division"][$to_division]["teams"][$i]["tmedium"] = ($this->el==1 ? $f["mediumname"]:$f["longname"]);
@@ -73,20 +78,24 @@ class TeamTable {
             $this->conference[$to_conference]["division"][$to_division]["teams"][$i]["shga"] = $f["shga"];
             $this->conference[$to_conference]["division"][$to_division]["teams"][$i]["so"] = $f["so"];
             $this->conference[$to_conference]["division"][$to_division]["teams"][$i]["can_earn"] = $this->conference[$to_conference]["division"][$to_division]["teams"][$i]["points"]+(($this->games_total-$this->conference[$to_conference]["division"][$to_division]["teams"][$i]["games"])*$this->wpoints);
-            $this->conference[$to_conference]["division"][$to_division]["teams"][$i]["last5games"] = $this->last5games($f["shortname"]);
+            if($f["zapasov"]>0) $this->conference[$to_conference]["division"][$to_division]["teams"][$i]["last5games"] = $this->last5games($f["shortname"]);
             $i++;
         }
     }
     
     public function last5games($tshort) {
+      if (!function_exists('SEOtitle')) {
+        return false;
+      }
       if($this->el==1) {
-        $q = mysql_query("SELECT * FROM el_matches WHERE (team1short='".$tshort."' || team2short='".$tshort."') && league='".$this->lid."' && kolo!=0 && kedy='konečný stav' ORDER BY datetime DESC LIMIT 5");
+        $q = mysqli_query($this->db, "SELECT * FROM el_matches WHERE (team1short='".$tshort."' || team2short='".$tshort."') && league='".$this->lid."' && kolo!=0 && kedy='konečný stav' ORDER BY datetime DESC LIMIT 5");
       }
       else {
-        $q = mysql_query("SELECT * FROM 2004matches WHERE (team1short='".$tshort."' || team2short='".$tshort."') && league='".$this->lid."' && po_type IS NULL && kedy='konečný stav' ORDER BY datetime DESC LIMIT 5");
+        $q = mysqli_query($this->db, "SELECT * FROM 2004matches WHERE (team1short='".$tshort."' || team2short='".$tshort."') && league='".$this->lid."' && po_type IS NULL && kedy='konečný stav' ORDER BY datetime DESC LIMIT 5");
       }
       $i=0;
-      while($f = mysql_fetch_array($q)) {
+      $l5g = [];
+      while($f = mysqli_fetch_array($q)) {
         if($f["team1short"]==$tshort) {
           if($f["goals1"]>$f["goals2"]) $l5g[$i]["result"] = "W";
           else $l5g[$i]["result"] = "L";
@@ -106,10 +115,13 @@ class TeamTable {
     public function render_table($type, $condensed=FALSE, $json=FALSE) {
         Global $clinchwas, $cannotwas, $relegwas, $leaderwas;
         $clinchwas=$cannotwas=$relegwas=$leaderwas=0;
+        $table="";
+        if(!is_array($this->conference)) return false;
         switch ($type) {
           case "league":
             foreach($this->conference as $conf) {
               foreach($conf["division"] as $div) {
+                if(!isset($div["teams"])) return false;
                 foreach($div["teams"] as $team) {
                   $league_teams[] = $team;
                   }
@@ -123,6 +135,7 @@ class TeamTable {
               if($conf["name"]=="") $conf["name"]=$this->name;
               $conf_teams[$key]["name"] = $conf["name"];
               foreach($conf["division"] as $div) {
+                if(!isset($div["teams"])) return false;
                 foreach($div["teams"] as $team) {
                   $conf_teams[$key]["teams"][] = $team;
                   }
@@ -131,6 +144,7 @@ class TeamTable {
               else usort($conf_teams[$key]["teams"], function($a,$b){ $c = $b["points"] - $a["points"]; $c .= $b["gdiff"] - $a["gdiff"]; $c .= $a["games"] - $b["games"]; $c .= $b["gf"] - $a["gf"]; $c .= $b["wins"] - $a["wins"]; $c .= $a["losts"] - $b["losts"]; return $c; });
             if($condensed) break;
             }
+            $table = "";
             foreach($conf_teams as $conf) {
               $table .= $this->output_table($type, $conf["name"], $conf["teams"], $condensed, $json);
             }
@@ -140,6 +154,7 @@ class TeamTable {
             foreach($this->conference as $conf) {
               foreach($conf["division"] as $div) {
                 $div_teams[$i]["name"] = $div["name"];
+                if(!isset($div["teams"])) return false;
                 foreach($div["teams"] as $team) {
                   $div_teams[$i]["teams"][] = $team;
                   }
@@ -219,41 +234,45 @@ class TeamTable {
                     <th class="text-center">'.LANG_TEAMSTATS_LOSTS.'</th>
                     <th class="text-center">'.LANG_TEAMSTATS_SCORE.'</th>
                     <th class="text-center">'.LANG_TEAMSTATS_POINTS.'</th>
-                    <th class="text-center">'.LANG_TEAMTABLE_FORM.'</th>
+                    <th class="text-center">'.LANG_TEAMTABLE_FORM.'<i class="fa-solid fa-caret-right ml-1" style="vertical-align: -1px;"></i></th>
                 </tr>
                 </thead>
                 <tbody>';
       } 
       $p=1;
       foreach($teams as $key => $team) {
-        $bs=$be=$clinchout=$fav="";
+        $bs=$be=$clinchout=$fav=$leader=$line="";
         if($type=="conference" || $type=="division" && $this->el==0 && $this->playoff_line) {
           $clinch = $this->check_clinch($key, $teams);
           if($clinch=="x") { $clinchwas=1; $bs = "<b>"; $be="</b>"; $clinchout = "<sup><span class='text-success font-weight-bold'>x</span></sup>"; }
           if($clinch=="y") { $cannotwas=1; $bs = "<span class='font-italic'>"; $be="</span>"; $clinchout = "<sup><span class='text-danger font-weight-bold'>y</span></sup>"; }
           if($clinch=="z") { $relegwas=1; $bs = "<span class='font-italic'>"; $be="</span>"; $clinchout = "<sup><span class='text-primary font-weight-bold'>z</span></sup>"; }
           if($clinch=="*") { $leaderwas=1; $clinchout = "*"; }
-          if(in_array($p, $this->playoff_line) || $p==$this->playoff_line) $line=" style='border-bottom:1px dashed black !important;'";
+          if(is_array($this->playoff_line) && in_array($p, $this->playoff_line) || $p==$this->playoff_line) $line=" style='border-bottom:1px dashed black !important;'";
           else $line="";
         }
-        if($this->favteam!="0" && $this->favteam==$team[tshort]) $fav=" class='bg-gray-400'";
+        if($this->favteam!="0" && $this->favteam==$team["tshort"]) $fav=" class='bg-gray-400'";
         if(!$json) {
-            if($condensed) $table .= "<tr><td class='text-center'$line>$p.</td><td$line><a href='/team/".$team[tid].$this->el."-".SEOtitle($team[tlong])."'><img class='flag-".($this->el==0 ? 'iihf':'el')." ".$team[tshort]."-small mr-1' src='/images/blank.png' alt='".$team[tlong]."'>".($this->el==0 ? $team[tlong]:$team[tmedium])."</a> $clinchout</td><td class='text-center'$line><b>".$team[points]."</b></td></tr>";
-            else $table .= "<tr$fav><td class='text-center'$line>$p.</td><td class='text-nowrap'$line><img class='flag-".($this->el==0 ? 'iihf':'el')." ".$team[tshort]."-small' src='/img/blank.png' alt='".$team[tlong]."'> $leader<a href='/team/".$team[tid].$this->el."-".SEOtitle($team[tlong])."'>$bs<span class='d-none d-md-inline'>$team[tlong]</span><span class='d-inline d-md-none'>$team[tmedium]</span>$be</a> $clinchout</td><td class='text-center'$line>$team[games]</td><td class='text-center'$line>$team[wins]</td><td class='text-center'$line>$team[losts]</td><td class='text-center'$line>$team[gf]:$team[ga]</td><td class='text-center'$line><span class='font-weight-bold'>$team[points]</span></td>
-            <td class='text-center text-nowrap'$line>";
-            foreach($team["last5games"] as $game) {
-              $table .= "<a href='/report/".$game["gid"]."-".$game["seo"]."' class='badge badge-pill badge-".($game["result"]=="W" ? 'success':'danger')."'>".($game["result"]=="W" ? LANG_W:LANG_L)."</a>";
+            if($condensed) $table .= "<tr><td class='text-center'".$line.">".$p.".</td><td".$line."><a href='/team/".$team["tid"].$this->el."-".SEOtitle($team["tlong"])."'><img class='flag-".($this->el==0 ? 'iihf':'el')." ".$team["tshort"]."-small mr-1' src='/images/blank.png' alt='".$team["tlong"]."'>".($this->el==0 ? $team["tlong"]:$team["tmedium"])."</a> ".$clinchout."</td><td class='text-center'".$line."><b>".$team["points"]."</b></td></tr>";
+            else $table .= "<tr".$fav."><td class='text-center'".$line.">".$p.".</td><td class='text-nowrap'".$line."><img class='flag-".($this->el==0 ? 'iihf':'el')." ".$team["tshort"]."-small' src='/img/blank.png' alt='".$team["tlong"]."'> ".$leader."<a href='/team/".$team["tid"].$this->el."-".SEOtitle($team["tlong"])."'>".$bs."<span class='d-none d-md-inline'>".$team["tlong"]."</span><span class='d-inline d-md-none'>".$team["tmedium"]."</span>".$be."</a> ".$clinchout."</td><td class='text-center'".$line.">".$team["games"]."</td><td class='text-center'".$line.">".$team["wins"]."</td><td class='text-center'".$line.">".$team["losts"]."</td><td class='text-center'".$line.">".$team["gf"].":".$team["ga"]."</td><td class='text-center'".$line."><span class='font-weight-bold'>".$team["points"]."</span></td>
+            <td class='text-center text-nowrap'".$line.">";
+            if(!$condensed) {
+              if(isset($team["last5games"])) {
+                foreach($team["last5games"] as $game) {
+                    $table .= "<a href='/report/".$game["gid"]."-".$game["seo"]."' class='badge badge-pill badge-".($game["result"]=="W" ? 'success':'danger')."'>".($game["result"]=="W" ? LANG_W:LANG_L)."</a>";
+                }
+              }
             }
             $table .= "</td></tr>";
         }
         else {
-            $table["conference"][$name][$p]["shortname"] = $team[tshort];
-            $table["conference"][$name][$p]["longname"] = $team[tlong];
-            $table["conference"][$name][$p]["gp"] = $team[games];
-            $table["conference"][$name][$p]["wins"] = $team[wins];
-            $table["conference"][$name][$p]["losts"] = $team[losts];
-            $table["conference"][$name][$p]["score"] = $team[gf].":".$team[ga];
-            $table["conference"][$name][$p]["points"] = $team[points];
+            $table["conference"][$name][$p]["shortname"] = $team["tshort"];
+            $table["conference"][$name][$p]["longname"] = $team["tlong"];
+            $table["conference"][$name][$p]["gp"] = $team["games"];
+            $table["conference"][$name][$p]["wins"] = $team["wins"];
+            $table["conference"][$name][$p]["losts"] = $team["losts"];
+            $table["conference"][$name][$p]["score"] = $team["gf"].":".$team["ga"];
+            $table["conference"][$name][$p]["points"] = $team["points"];
             $table["conference"][$name][$p]["clinch"] = $clinch;
         }
         $p++;
@@ -279,22 +298,22 @@ class TeamTable {
       $playoff_line = $tpos_under_line;
       $can_earn = 0;
       while($tpos_under_line < count($teams)) {
-        if($teams[$tpos_under_line][can_earn]>$can_earn) $can_earn = $teams[$tpos_under_line][can_earn];
+        if($teams[$tpos_under_line]["can_earn"]>$can_earn) $can_earn = $teams[$tpos_under_line]["can_earn"];
         $tpos_under_line++;
       }
       //if($teams[$team_pos][points]>$can_earn || $teams[$team_pos][games]==$this->games_total && $team_pos < $playoff_line) $clinch = "x";
-      if($teams[$team_pos][points]>$can_earn) $clinch = "x";
+      if($teams[$team_pos]["points"]>$can_earn) $clinch = "x";
       // cannot make playoffs
       if(is_array($this->playoff_line)) {
           if(strstr($this->name, "Tipos")) $tpos_over_line = $this->playoff_line[1]-1;
           else $tpos_over_line = $this->playoff_line[0]-1;
       }
       else $tpos_over_line = $this->playoff_line-1;
-      if($teams[$team_pos][can_earn]<$teams[$tpos_over_line][points] || $teams[$team_pos][games]==$this->games_total && $team_pos >= $playoff_line) $clinch = "y";
+      if($teams[$team_pos]["can_earn"]<$teams[$tpos_over_line]["points"] || $teams[$team_pos]["games"]==$this->games_total && $team_pos >= $playoff_line) $clinch = "y";
       // relegated to I.DIV
       if(is_array($this->playoff_line) && strstr($this->name, "MS")) {
         $tpos_over_line = end($this->playoff_line)-1;
-        if($teams[$team_pos][can_earn]<$teams[$tpos_over_line][points] || $teams[$team_pos][games]==$this->games_total && $team_pos > $tpos_over_line) $clinch = "z";
+        if($teams[$team_pos]["can_earn"]<$teams[$tpos_over_line]["points"] || $teams[$team_pos]["games"]==$this->games_total && $team_pos > $tpos_over_line) $clinch = "z";
       }
       return $clinch;
     }
@@ -305,9 +324,9 @@ class TeamTable {
         if(count($point_value)==2) {
           $t1 = $point_value[0]["tshort"];
           $t2 = $point_value[1]["tshort"];
-          $vzaj = mysql_query("SELECT IF(team1short='$t2',IF(goals1>goals2,1,0),IF(goals1>goals2,0,1)) as posun FROM 2004matches WHERE (team1short='$t2' && team2short='$t1' || team1short='$t1' && team2short='$t2') && league='".$this->lid."' && kedy='konečný stav'");
-          $vzajom = mysql_fetch_array($vzaj);
-          if($vzajom[posun]==1) {
+          $vzaj = mysqli_query($this->db, "SELECT IF(team1short='".$t2."',IF(goals1>goals2,1,0),IF(goals1>goals2,0,1)) as posun FROM 2004matches WHERE (team1short='".$t2."' && team2short='".$t1."' || team1short='".$t1."' && team2short='".$t2."') && league='".$this->lid."' && kedy='konečný stav'");
+          $vzajom = mysqli_fetch_array($vzaj);
+          if(isset($vzajom["posun"]) && $vzajom["posun"]==1) {
             // change teams between them
             foreach($teams as $key => $team) {
               $t1_key = array_search($t1, array_column($team["teams"], 'tshort'));
@@ -318,23 +337,28 @@ class TeamTable {
               $teams[$key]["teams"][$t1_key] = $val2;
             }
           }
-        else return $teams;
         }
         // tie-breaking procedure for 3 or more teams tied on points
         elseif(count($point_value)>2) {
-          $tied_teams=[];
+          $tied_teams=$sub_points=$sub_goalsdiff=$sub_goalsfor=[];
           foreach($point_value as $tied_team) {
             $tied_teams[] = $tied_team["tshort"];
           }
           $tied_teams = implode("','", $tied_teams);
-          $vzaj = mysql_query("SELECT m.*, MAX(g.time) as time FROM 2004matches m LEFT JOIN 2004goals g ON g.matchno=m.id WHERE m.team1short IN ('".$tied_teams."') && m.team2short IN ('".$tied_teams."') && m.league='".$this->lid."' && m.kedy='konečný stav' GROUP BY m.id");
-          while($vzajom = mysql_fetch_array($vzaj)) {
+          $vzaj = mysqli_query($this->db, "SELECT m.*, MAX(g.time) as time FROM 2004matches m LEFT JOIN 2004goals g ON g.matchno=m.id WHERE m.team1short IN ('".$tied_teams."') && m.team2short IN ('".$tied_teams."') && m.league='".$this->lid."' && m.kedy='konečný stav' GROUP BY m.id");
+          while($vzajom = mysqli_fetch_array($vzaj)) {
             if($vzajom["time"]>60) { $pts = 2; $lpts = 1; }
             else { $pts = 3; $lpts = 0; }
             $t1 = $vzajom["team1short"];
             $t2 = $vzajom["team2short"];
             if($vzajom["goals1"]>$vzajom["goals2"]) { $winner = $t1; $loser = $t2; }
             else { $winner = $t2; $loser = $t1; }
+            if(!isset($sub_points[$winner])) $sub_points[$winner]=0;
+            if(!isset($sub_points[$loser])) $sub_points[$loser]=0;
+            if(!isset($sub_goalsdiff[$t1])) $sub_goalsdiff[$t1]=0;
+            if(!isset($sub_goalsdiff[$t2])) $sub_goalsdiff[$t2]=0;
+            if(!isset($sub_goalsfor[$t1])) $sub_goalsfor[$t1]=0;
+            if(!isset($sub_goalsfor[$t2])) $sub_goalsfor[$t2]=0;
             $sub_points[$winner]=$sub_points[$winner]+$pts;
             $sub_points[$loser]=$sub_points[$loser]+$lpts;
             $sub_goalsdiff[$t1]=$sub_goalsdiff[$t1]+$vzajom["goals1"]-$vzajom["goals2"];
@@ -347,7 +371,7 @@ class TeamTable {
           arsort($sub_goalsfor);
           $num_val = array_count_values($sub_points);
           $num_val_gms = array_count_values($num_val);
-          if($num_val_gms[1]==count($point_value)) {
+          if(isset($num_val_gms[1]) && $num_val_gms[1]==count($point_value)) {
             // teams succesfully sorted by h2h games, no need to apply other tie-breaking steps, change teams according to new keys
             foreach($teams as $key => $team) {
               foreach($sub_points as $tshort => $value) {
@@ -365,7 +389,7 @@ class TeamTable {
                   $new_key = ceil($old_key-(($old_key-$avg)*2));
                   $teams[$key]["teams"][$old_key] = ${"val".$new_key};
                 }
-                $i++;
+                if(!is_bool($i)) $i++;
                 $j++;
               }
             }
@@ -378,25 +402,27 @@ class TeamTable {
     
     public function check_position($tshort) {
       $i=0;
-      foreach($this->conference as $conf) {
-        foreach($conf["division"] as $div) {
-          $div_teams[$i]["name"] = $div["name"];
-          foreach($div["teams"] as $team) {
-            $div_teams[$i]["teams"][] = $team;
+      if(is_array($this->conference)) {
+        foreach($this->conference as $conf) {
+          foreach($conf["division"] as $div) {
+            $div_teams[$i]["name"] = $div["name"];
+            foreach($div["teams"] as $team) {
+              $div_teams[$i]["teams"][] = $team;
+              }
+            usort($div_teams[$i]["teams"], function($a,$b){ $c = $b["points"] - $a["points"]; $c .= $a["games"] - $b["games"]; $c .= $b["gdiff"] - $a["gdiff"]; $c .= $b["gf"] - $a["gf"]; $c .= $b["wins"] - $a["wins"]; $c .= $a["losts"] - $b["losts"]; return $c; });
+            if($this->el==0) {
+              $same_points = array();
+              foreach($div_teams[$i]["teams"] as $team) {
+                $points = $team["points"];
+                $same_points[$points][] = $team;
+              }
+            $div_teams = $this->tie_break($same_points, $div_teams);
             }
-          usort($div_teams[$i]["teams"], function($a,$b){ $c = $b["points"] - $a["points"]; $c .= $a["games"] - $b["games"]; $c .= $b["gdiff"] - $a["gdiff"]; $c .= $b["gf"] - $a["gf"]; $c .= $b["wins"] - $a["wins"]; $c .= $a["losts"] - $b["losts"]; return $c; });
-          if($this->el==0) {
-            $same_points = array();
-            foreach($div_teams[$i]["teams"] as $team) {
-              $points = $team["points"];
-              $same_points[$points][] = $team;
-            }
-          $div_teams = $this->tie_break($same_points, $div_teams);
-          }
-          $i++;
-          foreach($div_teams as $div) {
-            foreach($div["teams"] as $key => $team) {
-              if($team["tshort"]==$tshort) { $key++; return $key; }
+            $i++;
+            foreach($div_teams as $div) {
+              foreach($div["teams"] as $key => $team) {
+                if($team["tshort"]==$tshort) { $key++; return $key; }
+              }
             }
           }
         }
@@ -404,10 +430,12 @@ class TeamTable {
     }
     
     public function check_canearn($tshort) {
-      foreach($this->conference as $conf) {
-        foreach($conf["division"] as $div) {
-          foreach($div["teams"] as $team) {
-            if($team["tshort"]==$tshort) return $team["can_earn"];
+      if(is_array($this->conference)) {
+        foreach($this->conference as $conf) {
+          foreach($conf["division"] as $div) {
+            foreach($div["teams"] as $team) {
+              if($team["tshort"]==$tshort) return $team["can_earn"];
+            }
           }
         }
       }

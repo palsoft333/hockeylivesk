@@ -1,6 +1,28 @@
 <?
+if(isset($_POST["add"])) {
+  session_start();
+  include("db.php");
+  $player = mysqli_real_escape_string($link, $_POST["add"]);
+  mysqli_query($link, "UPDATE e_xoops_users SET user_favplayers = JSON_ARRAY_APPEND(COALESCE(user_favplayers, JSON_ARRAY()), '$', '".$player."') WHERE uid='".$_SESSION['logged']."'");
+  echo "ADDED";
+  mysqli_close($link);
+}
+
+if(isset($_POST["del"])) {
+  session_start();
+  include("db.php");
+  $player = mysqli_real_escape_string($link, $_POST["del"]);
+  $q = mysqli_query($link, "SELECT * FROM e_xoops_users WHERE JSON_CONTAINS(user_favplayers, '\"".$player."\"') && uid='".$_SESSION['logged']."'");
+  if(mysqli_num_rows($q)>0) {
+    mysqli_query($link, "UPDATE e_xoops_users SET user_favplayers = JSON_REMOVE(user_favplayers, JSON_UNQUOTE(JSON_SEARCH(user_favplayers, 'one', '".$player."'))) WHERE uid = '".$_SESSION['logged']."'");
+    echo "DELETED";
+    }
+  mysqli_close($link);
+}
+
 function Show_Draft_Button($playername,$pid)
   {
+  Global $link;
   $nejdu = array(
 "ČAJKOVSKÝ Michal",
 "BAKOŠ Martin"
@@ -8,32 +30,32 @@ function Show_Draft_Button($playername,$pid)
   $uid = $_SESSION['logged'];
   if($uid)
     {
-    $m = mysql_query("SELECT * FROM ft_teams WHERE uid='$uid'");
-    if(mysql_num_rows($m)>0) // ak je prihlasenym manazerom
+    $m = mysqli_query($link, "SELECT * FROM ft_teams WHERE uid='$uid'");
+    if(mysqli_num_rows($m)>0) // ak je prihlasenym manazerom
       {
-      $u = mysql_fetch_array($m);
-      $q = mysql_query("SELECT * FROM ft_players ORDER BY round DESC, id DESC");
-      $f = mysql_fetch_array($q);
-      $po = mysql_query("SELECT * FROM ft_players WHERE round='$f[round]'");
-      $poc = mysql_num_rows($po);
-      $v = mysql_query("SELECT * FROM ft_choices c JOIN ft_players p ON p.pid=c.id WHERE c.name='$playername'");
-      $c = mysql_num_rows($v);
+      $u = mysqli_fetch_array($m);
+      $q = mysqli_query($link, "SELECT * FROM ft_players ORDER BY round DESC, id DESC");
+      $f = mysqli_fetch_array($q);
+      $po = mysqli_query($link, "SELECT * FROM ft_players WHERE round='".$f["round"]."'");
+      $poc = mysqli_num_rows($po);
+      $v = mysqli_query($link, "SELECT * FROM ft_choices c JOIN ft_players p ON p.pid=c.id WHERE c.name='$playername'");
+      $c = mysqli_num_rows($v);
       
       if($poc<10)
         {
         $pick = $poc+1;
-        $round = $f[round];
-        if(mysql_num_rows($q)==0) $round=1;
+        $round = $f["round"];
+        if(mysqli_num_rows($q)==0) $round=1;
         }
       else
         {
         $pick = 1;
-        $round = $f[round]+1;
+        $round = $f["round"]+1;
         }
       if($round % 2 == 0) $narade = 10-$pick+1;
       else $narade = $pick;
       
-      if($narade==$u[pos] || $_SESSION['olddraft'])
+      if($narade==$u["pos"] || $_SESSION['olddraft'])
         {
         $draft .= '<div class="draft">';
         if($_SESSION['olddraft']) $add = '/'.$_SESSION['olddraft'];
@@ -48,9 +70,9 @@ function Show_Draft_Button($playername,$pid)
             $draft .= '<button type="button" class="btn btn-primary" onclick="location.href=\'/fantasy/draft/'.$pid.$add.'\';">DRAFTOVAŤ HRÁČA</button>';
             if($_SESSION['olddraft']) 
               {
-              $x = mysql_query("SELECT * FROM ft_choices WHERE id='".$_SESSION['olddraft']."'");
-              $z = mysql_fetch_array($x);
-              $draft .= '<br>(za hráča '.$z[name].' <a href="'.$_SERVER[REQUEST_URI].'/newdraft"><i class="fas fa-window-close text-secondary"></i></a>)';
+              $x = mysqli_query($link, "SELECT * FROM ft_choices WHERE id='".$_SESSION['olddraft']."'");
+              $z = mysqli_fetch_array($x);
+              $draft .= '<br>(za hráča '.$z["name"].' <a href="'.$_SERVER["REQUEST_URI"].'/newdraft"><i class="fas fa-window-close text-secondary"></i></a>)';
               }
             }
           }
@@ -63,11 +85,12 @@ function Show_Draft_Button($playername,$pid)
   }
   
 function GetBio($name, $gk) {
+  Global $link;
   if($gk==0) {
-    $pos=$born=$hold=$kg=$cm="";
+    $pos=$born=$hold=$kg=$cm=$hl=$hl1="";
     $bio=array();
-    $q = mysql_query("SELECT id, pos, born, hold, kg, cm, league FROM 2004players WHERE name='".$name."' UNION SELECT id, pos, born, hold, kg, cm, league FROM el_players WHERE name='".$name."' ORDER BY league DESC, id DESC;");
-    while($f = mysql_fetch_array($q)) {
+    $q = mysqli_query($link, "SELECT id, pos, born, hold, kg, cm, league FROM 2004players WHERE name='".$name."' UNION SELECT id, pos, born, hold, kg, cm, league FROM el_players WHERE name='".$name."' ORDER BY league DESC, id DESC;");
+    while($f = mysqli_fetch_array($q)) {
       if($pos=="" && $f["pos"]!="") $pos=$f["pos"];
       if($born=="" && $f["born"]!="1970-01-01") $born=$f["born"];
       if($hold=="" && $f["hold"]!="") $hold=$f["hold"];
@@ -93,8 +116,8 @@ function GetBio($name, $gk) {
   else {
     $born=$hold=$kg=$cm="";
     $bio=array();
-    $q = mysql_query("SELECT id, born, hold, kg, cm, league FROM 2004goalies WHERE name='".$name."' UNION SELECT id, born, hold, kg, cm, league FROM el_goalies WHERE name='".$name."' ORDER BY league DESC, id DESC;");
-    while($f = mysql_fetch_array($q)) {
+    $q = mysqli_query($link, "SELECT id, born, hold, kg, cm, league FROM 2004goalies WHERE name='".$name."' UNION SELECT id, born, hold, kg, cm, league FROM el_goalies WHERE name='".$name."' ORDER BY league DESC, id DESC;");
+    while($f = mysqli_fetch_array($q)) {
       if($born=="" && $f["born"]!="1970-01-01") $born=$f["born"];
       if($hold=="" && $f["hold"]!="") $hold=$f["hold"];
       if($kg=="" && $f["kg"]!=0) $kg=$f["kg"];

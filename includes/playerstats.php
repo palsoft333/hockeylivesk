@@ -8,8 +8,8 @@
 	/* Array of database columns which should be read and sent back to DataTables. Use a space where
 	 * you want to insert a non-database field (for example a counter or static image)
 	 */
-	$lid = $_GET[lid];
-	$el = $_GET[el];
+	$lid = mysqli_real_escape_string($link, $_GET["lid"] );
+	$el = mysqli_real_escape_string($link, $_GET["el"] );
 	$aColumns = array( ' ', 'name', 'teamshort', 'id', 'pos', 'gp', 'goals', 'asists', 'points', 'penalty', 'ppg', 'shg', 'gwg' );
 	
 	/* Indexed column (used for fast and accurate table cardinality) */
@@ -27,8 +27,8 @@
 	$sLimit = "";
 	if ( isset( $_GET['iDisplayStart'] ) && $_GET['iDisplayLength'] != '-1' )
 	{
-		$sLimit = "LIMIT ".mysql_real_escape_string( $_GET['iDisplayStart'] ).", ".
-			mysql_real_escape_string( $_GET['iDisplayLength'] );
+		$sLimit = "LIMIT ".mysqli_real_escape_string($link, $_GET['iDisplayStart'] ).", ".
+			mysqli_real_escape_string($link, $_GET['iDisplayLength'] );
 	}
 	
 	
@@ -43,7 +43,7 @@
 			if ( $_GET[ 'bSortable_'.intval($_GET['iSortCol_'.$i]) ] == "true" )
 			{
 				$sOrder .= $aColumns[ intval( $_GET['iSortCol_'.$i] ) ]."
-				 	".mysql_real_escape_string( $_GET['sSortDir_'.$i] ) .", ";
+				 	".mysqli_real_escape_string($link, $_GET['sSortDir_'.$i] ) .", ";
 			}
 		}
 		
@@ -64,7 +64,7 @@
 	$sWhere = "";
 	if ( $_GET['sSearch'] != "" )
 	{
-		$sWhere = "WHERE name LIKE '%".mysql_real_escape_string( $_GET['sSearch'] )."%' && league='$lid'";
+		$sWhere = "WHERE name LIKE '%".mysqli_real_escape_string($link, $_GET['sSearch'] )."%' && league='$lid'";
 		/*for ( $i=0 ; $i<count($aColumns) ; $i++ )
 		{
 			$sWhere .= $aColumns[$i]." LIKE '%".mysql_real_escape_string( $_GET['sSearch'] )."%' OR ";
@@ -86,7 +86,7 @@
 			{
 				$sWhere .= " AND ";
 			}
-			$sWhere .= $aColumns[$i]." LIKE '%".mysql_real_escape_string($_GET['sSearch_'.$i])."%' ";
+			$sWhere .= $aColumns[$i]." LIKE '%".mysqli_real_escape_string($link, $_GET['sSearch_'.$i])."%' ";
 		}
 	}
 	
@@ -104,7 +104,7 @@
 		$sOrder
 		$sLimit
 	";*/
-	$sQuery = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
+	$sQuery = mysqli_query($link, "SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysqli_error($link));
 	$sQuery = "
 		SELECT SQL_CALC_FOUND_ROWS id, teamshort, name, sum(gp) as gp, pos, sum(goals) as goals, sum(asists) as asists, sum(points) as points, sum(penalty) as penalty, sum(ppg) as ppg, sum(shg) as shg, sum(gwg) as gwg
 		FROM   $sTable
@@ -113,20 +113,20 @@
 		$sOrder
 		$sLimit
 	";
-	$rResult = mysql_query( $sQuery ) or die(mysql_error());
+	$rResult = mysqli_query($link, $sQuery ) or die(mysqli_error($link));
 	
 	/* Data set length after filtering */
 	$sQuery = "
 		SELECT FOUND_ROWS()
 	";
-	$rResultFilterTotal = mysql_query( $sQuery ) or die(mysql_error());
-	$aResultFilterTotal = mysql_fetch_array($rResultFilterTotal);
+	$rResultFilterTotal = mysqli_query($link, $sQuery ) or die(mysqli_error($link));
+	$aResultFilterTotal = mysqli_fetch_array($rResultFilterTotal);
 	$iFilteredTotal = $aResultFilterTotal[0];
 	
 	/* Total data set length */
-	$sQuery = mysql_query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysql_error());
-	$sQuery = mysql_query("SELECT *		FROM   $sTable WHERE league='$lid' GROUP BY name, league");
-	$rResultTotal = mysql_num_rows($sQuery);
+	$sQuery = mysqli_query($link,"SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysqli_error($link));
+	$sQuery = mysqli_query($link,"SELECT *		FROM   $sTable WHERE league='$lid' GROUP BY name, league");
+	$rResultTotal = mysqli_num_rows($sQuery);
 	//$aResultTotal = mysql_fetch_array($rResultTotal);
 	$iTotal = $rResultTotal;
 	
@@ -140,7 +140,7 @@
 	$sOutput .= '"iTotalRecords": '.$iTotal.', ';
 	$sOutput .= '"iTotalDisplayRecords": '.$iFilteredTotal.', ';
 	$sOutput .= '"aaData": [ ';
-	while ( $aRow = mysql_fetch_array( $rResult ) )
+	while ( $aRow = mysqli_fetch_array( $rResult ) )
 	{
 		$sOutput .= "[";
 		for ( $i=0 ; $i<count($aColumns) ; $i++ )
@@ -148,7 +148,7 @@
 			if ( $aColumns[$i] == "name" )
 			{
 				/* Special output formatting for 'version' */
-				$sOutput .= '"<img class=\'flag-'.($el==0 ? 'iihf':'el').' '.$aRow[teamshort].'-small\' src=\'/images/blank.png\' alt=\''.$aRow[teamlong].'\'> <a href=\'/player/'.$aRow[id].$el.'-'.SEOtitle($aRow[name]).'\'>'.str_replace('"', '\"', $aRow[ $aColumns[$i] ]).'</a>",';
+				$sOutput .= '"<img class=\'flag-'.($el==0 ? 'iihf':'el').' '.$aRow["teamshort"].'-small\' src=\'/images/blank.png\' alt=\''.$aRow["teamlong"].'\'> <a href=\'/player/'.$aRow["id"].$el.'-'.SEOtitle($aRow["name"]).'\'>'.str_replace('"', '\"', $aRow[ $aColumns[$i] ]).'</a>",';
 				//$sOutput .= iconv("windows-1250", "utf-8", $aRow[ $aColumns[$i] ]);
 			}
 			else if ( $aColumns[$i] != ' ' )

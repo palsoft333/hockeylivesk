@@ -1,24 +1,26 @@
 <?php
-$params = explode("/", htmlspecialchars($_GET[id]));
+$params = explode("/", htmlspecialchars($_GET["id"]));
 include("includes/advert_bigscreenside.php");
 
 // pred zaciatkom ligy vyprazdnit tabulku fl_prices, fl_prices_g a fl_selects
 $league = 144;
-$uid = $_SESSION['logged'];
-$m = mysql_query("SELECT * FROM 2004leagues WHERE id='$league'");
-$n = mysql_fetch_array($m);
+$uid = $_SESSION['logged'] ?? null;
+$script_end = $script_end ?? "";
+$content="";
+$m = mysqli_query($link, "SELECT * FROM 2004leagues WHERE id='".$league."'");
+$n = mysqli_fetch_array($m);
 if(!$uid) 
   {
-  $leaguecolor = $n[color];
+  $leaguecolor = $n["color"];
   $active_league = $league;
-  $title = 'Fantasy '.$n[longname];
-  $content .= "<i class='float-left h1 h1-fluid ll-".LeagueFont($n[longname])." text-gray-600 mr-1'></i>
+  $title = 'Fantasy '.$n["longname"];
+  $content .= "<i class='float-left h1 h1-fluid ll-".LeagueFont($n["longname"])." text-gray-600 mr-1'></i>
                  <h1 class='h3 h3-fluid mb-1'>".LANG_FANTASY_TITLE."</h1>
-                 <h2 class='h6 h6-fluid text-".$leaguecolor." text-uppercase font-weight-bold mb-3'>".$n[longname]."</h2>
+                 <h2 class='h6 h6-fluid text-".$leaguecolor." text-uppercase font-weight-bold mb-3'>".$n["longname"]."</h2>
                  <div style='max-width: 1000px;'>";
                  
   $content .= '<div class="alert alert-danger" role="alert">
-                '.sprintf(LANG_FANTASY_NOTLOGGED, $n[longname]).'
+                '.sprintf(LANG_FANTASY_NOTLOGGED, $n["longname"]).'
                </div>
   </div>';
   }
@@ -26,15 +28,18 @@ else
 {
 function Generate_Roster($userid)
   {
-  Global $league, $uid, $leaguecolor;
+  Global $league, $uid, $leaguecolor, $link;
+  $roster="";
+  $value=0;
+  $bol=false;
   if($userid==$uid) $hl = LANG_FANTASY_MYROSTER;
   else
     {
-    $q = mysql_query("SELECT uname FROM e_xoops_users WHERE uid='$userid'");
-    $f = mysql_fetch_array($q);
-    $hl = LANG_FANTASY_ROSTEROF.' '.$f[uname];
+    $q = mysqli_query($link, "SELECT uname FROM e_xoops_users WHERE uid='".$userid."'");
+    $f = mysqli_fetch_array($q);
+    $hl = LANG_FANTASY_ROSTEROF.' '.$f["uname"];
     }
-  $y = mysql_query("SELECT *, t2.price as aktual FROM fl_selects JOIN el_players t1 ON t1.id=fl_selects.pid JOIN fl_prices t2 ON t2.playerid=fl_selects.pid WHERE uid='$userid' && league='$league'");
+  $y = mysqli_query($link, "SELECT *, t2.price as aktual FROM fl_selects JOIN el_players t1 ON t1.id=fl_selects.pid JOIN fl_prices t2 ON t2.playerid=fl_selects.pid WHERE uid='".$userid."' && league='".$league."'");
   $roster .= '
      <div class="card shadow animated--grow-in">
       <div class="card-header">
@@ -45,17 +50,17 @@ function Generate_Roster($userid)
       <div class="card-body">
         <h5 class="card-title text-danger h5-fluid">'.LANG_FANTASY_FORWARDS.'</h5>
         <div class="row">';
-          $y = mysql_query("SELECT *, t2.price as aktual FROM fl_selects JOIN el_players t1 ON t1.id=fl_selects.pid JOIN fl_prices t2 ON t2.playerid=fl_selects.pid WHERE fl_selects.pos='F' && uid='$userid' && league='$league'");
+          $y = mysqli_query($link, "SELECT *, t2.price as aktual FROM fl_selects JOIN el_players t1 ON t1.id=fl_selects.pid JOIN fl_prices t2 ON t2.playerid=fl_selects.pid WHERE fl_selects.pos='F' && uid='".$userid."' && league='".$league."'");
           $i=0;
-          while($u = mysql_fetch_array($y))
+          while($u = mysqli_fetch_array($y))
             {
-            $players[$i] = array($u[teamshort], $u[name], $u[pos], $u[g], $u[a], $u[aktual], $u[delta], $u[pid]);
+            $players[$i] = array($u["teamshort"], $u["name"], $u["pos"], $u["g"], $u["a"], $u["aktual"], $u["delta"], $u["pid"]);
             $i++;
             }
           $i=0;
           while($i < 5)
             {
-            if(!$players[$i][1])
+            if(!isset($players[$i][1]))
               {
               if($userid==$uid) $butt = '<button class="btn btn-'.$leaguecolor.' btn-circle playerbutton show-dialog" id="buy-'.$i.'-0-F" data-toggle="tooltip" data-placement="bottom" title="'.LANG_FANTASY_BUYFORWARD.'"><i class="fas fa-user-plus"></i></button>';
               else $butt = '';
@@ -66,11 +71,11 @@ function Generate_Roster($userid)
               {
               if($userid==$uid) $butt = '<br><button class="btn btn-outline-'.$leaguecolor.' mt-2 playerbutton show-dialog" id="sell-'.$players[$i][7].'-0" data-toggle="tooltip" data-placement="bottom" title="'.LANG_FANTASY_SELLFORWARD.'"><i class="fas fa-money-bill-alt"></i> '.LANG_FANTASY_SELL.'</button>';
               else $butt = '';
-              if($players[$i][6]>0) $delta = '<p class="text-center text-success small">(<i class="fas fa-caret-up"></i>'.money_format('%.0n', $players[$i][6]).')</p>';
-              elseif($players[$i][6]<0) $delta = '<p class="text-center text-danger small">(<i class="fas fa-caret-down"></i>'.money_format('%.0n', $players[$i][6]).')</p>';
+              if($players[$i][6]>0) $delta = '<p class="text-center text-success small">(<i class="fas fa-caret-up"></i>'.number_format($players[$i][6], 0, ',', ' ').')</p>';
+              elseif($players[$i][6]<0) $delta = '<p class="text-center text-danger small">(<i class="fas fa-caret-down"></i>'.number_format($players[$i][6], 0, ',', ' ').')</p>';
               else $delta = '<p class="small"></p>';
               $body = '<div class="col text-center">
-                        <p class="text-center font-weight-bold p-fluid">'.money_format('%.0n', $players[$i][5]).'</p>
+                        <p class="text-center font-weight-bold p-fluid">'.number_format($players[$i][5], 0, ',', ' ').'</p>
                         '.$delta.'
                         <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/includes/player_photo.php?name='.$players[$i][1].'" class="lazy rounded-circle img-thumbnail" style="width:100px; max-width:100px;">
                         <p class="p-fluid"><span class="font-weight-bold"><img class="flag-el '.$players[$i][0].'-small" src="/images/blank.png" alt="'.$players[$i][0].'">'.$players[$i][1].'</span><br>
@@ -88,17 +93,17 @@ function Generate_Roster($userid)
         </div>
         <h5 class="card-title text-danger h5-fluid">'.LANG_FANTASY_DEFENSE.'</h5>
         <div class="row">';
-          $y = mysql_query("SELECT *, t2.price as aktual FROM fl_selects JOIN el_players t1 ON t1.id=fl_selects.pid JOIN fl_prices t2 ON t2.playerid=fl_selects.pid WHERE fl_selects.pos='D' && uid='$userid' && league='$league'");
+          $y = mysqli_query($link, "SELECT *, t2.price as aktual FROM fl_selects JOIN el_players t1 ON t1.id=fl_selects.pid JOIN fl_prices t2 ON t2.playerid=fl_selects.pid WHERE fl_selects.pos='D' && uid='".$userid."' && league='".$league."'");
           $i=5;
-          while($u = mysql_fetch_array($y))
+          while($u = mysqli_fetch_array($y))
             {
-            $players[$i] = array($u[teamshort], $u[name], $u[pos], $u[g], $u[a], $u[aktual], $u[delta], $u[pid]);
+            $players[$i] = array($u["teamshort"], $u["name"], $u["pos"], $u["g"], $u["a"], $u["aktual"], $u["delta"], $u["pid"]);
             $i++;
             }
           $i=5;
           while($i < 8)
             {
-            if(!$players[$i][1])
+            if(!isset($players[$i][1]))
               {
               if($userid==$uid) $butt = '<button class="btn btn-'.$leaguecolor.' btn-circle playerbutton show-dialog" id="buy-'.$i.'-0-D" data-toggle="tooltip" data-placement="bottom" title="'.LANG_FANTASY_BUYDEFENSE.'"><i class="fas fa-user-plus"></i></button>';
               else $butt = '';
@@ -109,11 +114,11 @@ function Generate_Roster($userid)
               {
               if($userid==$uid) $butt = '<br><button class="btn btn-outline-'.$leaguecolor.' mt-2 playerbutton show-dialog" id="sell-'.$players[$i][7].'-0" data-toggle="tooltip" data-placement="bottom" title="'.LANG_FANTASY_SELLDEFENSE.'"><i class="fas fa-money-bill-alt"></i> '.LANG_FANTASY_SELL.'</button>';
               else $butt = '';
-              if($players[$i][6]>0) $delta = '<p class="text-center text-success small">(<i class="fas fa-caret-up"></i>'.money_format('%.0n', $players[$i][6]).')</p>';
-              elseif($players[$i][6]<0) $delta = '<p class="text-center text-danger small">(<i class="fas fa-caret-down"></i>'.money_format('%.0n', $players[$i][6]).')</p>';
+              if($players[$i][6]>0) $delta = '<p class="text-center text-success small">(<i class="fas fa-caret-up"></i>'.number_format($players[$i][6], 0, ',', ' ').')</p>';
+              elseif($players[$i][6]<0) $delta = '<p class="text-center text-danger small">(<i class="fas fa-caret-down"></i>'.number_format($players[$i][6], 0, ',', ' ').')</p>';
               else $delta = '<p class="small"></p>';
               $body = '<div class="col text-center">
-                        <p class="text-center font-weight-bold p-fluid">'.money_format('%.0n', $players[$i][5]).'</p>
+                        <p class="text-center font-weight-bold p-fluid">'.number_format($players[$i][5], 0, ',', ' ').'</p>
                         '.$delta.'
                         <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/includes/player_photo.php?name='.$players[$i][1].'" class="lazy rounded-circle img-thumbnail" style="width:100px; max-width:100px;">
                         <p class="p-fluid"><span class="font-weight-bold"><img class="flag-el '.$players[$i][0].'-small" src="/images/blank.png" alt="'.$players[$i][0].'">'.$players[$i][1].'</span><br>
@@ -131,15 +136,15 @@ function Generate_Roster($userid)
         </div>
         <h5 class="card-title text-danger h5-fluid">'.LANG_FANTASY_GOALIE.'</h5>
         <div class="row">';
-          $y = mysql_query("SELECT *, t2.price as aktual FROM fl_selects JOIN el_goalies t1 ON t1.id=fl_selects.pid JOIN fl_prices_g t2 ON t2.playerid=fl_selects.pid WHERE fl_selects.pos='GK' && uid='$userid' && league='$league'");
+          $y = mysqli_query($link, "SELECT *, t2.price as aktual FROM fl_selects JOIN el_goalies t1 ON t1.id=fl_selects.pid JOIN fl_prices_g t2 ON t2.playerid=fl_selects.pid WHERE fl_selects.pos='GK' && uid='".$userid."' && league='".$league."'");
           $i=8;
-          while($u = mysql_fetch_array($y))
+          while($u = mysqli_fetch_array($y))
             {
-            $players[$i] = array($u[teamshort], $u[name], $u[pos], $u[w], $u[s], $u[aktual], $u[delta], $u[pid]);
+            $players[$i] = array($u["teamshort"], $u["name"], $u["pos"], $u["w"], $u["s"], $u["aktual"], $u["delta"], $u["pid"]);
             $i++;
             }
           $i=8;
-          if(!$players[$i][1])
+          if(!isset($players[$i][1]))
             {
             if($userid==$uid) $butt = '<button class="btn btn-'.$leaguecolor.' btn-circle playerbutton show-dialog" id="buy-'.$i.'-1-GK" data-toggle="tooltip" data-placement="bottom" title="'.LANG_FANTASY_BUYGOALIE.'"><i class="fas fa-user-plus"></i></button>';
             else $butt = '';
@@ -150,11 +155,11 @@ function Generate_Roster($userid)
             {
             if($userid==$uid) $butt = '<br><button class="btn btn-outline-'.$leaguecolor.' mt-2 playerbutton show-dialog" id="sell-'.$players[$i][7].'-1" data-toggle="tooltip" data-placement="bottom" title="'.LANG_FANTASY_SELLGOALIE.'"><i class="fas fa-money-bill-alt"></i> '.LANG_FANTASY_SELL.'</button>';
             else $butt = '';
-            if($players[$i][6]>0) $delta = '<p class="text-center text-success small">(<i class="fas fa-caret-up"></i>'.money_format('%.0n', $players[$i][6]).')</p>';
-            elseif($players[$i][6]<0) $delta = '<p class="text-center text-danger small">(<i class="fas fa-caret-down"></i>'.money_format('%.0n', $players[$i][6]).')</p>';
+            if($players[$i][6]>0) $delta = '<p class="text-center text-success small">(<i class="fas fa-caret-up"></i>'.number_format($players[$i][6], 0, ',', ' ').')</p>';
+            elseif($players[$i][6]<0) $delta = '<p class="text-center text-danger small">(<i class="fas fa-caret-down"></i>'.number_format($players[$i][6], 0, ',', ' ').')</p>';
             else $delta = '<p class="small"></p>';
             $body = '<div class="col text-center">
-                      <p class="text-center font-weight-bold p-fluid">'.money_format('%.0n', $players[$i][5]).'</p>
+                      <p class="text-center font-weight-bold p-fluid">'.number_format($players[$i][5], 0, ',', ' ').'</p>
                       '.$delta.'
                       <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/includes/player_photo.php?name='.$players[$i][1].'" class="lazy rounded-circle img-thumbnail" style="width:100px; max-width:100px;">
                       <p class="p-fluid"><span class="font-weight-bold"><img class="flag-el '.$players[$i][0].'-small" src="/images/blank.png" alt="'.$players[$i][0].'">'.$players[$i][1].'</span><br>
@@ -171,7 +176,7 @@ function Generate_Roster($userid)
         </div>
       </div>
       <div class="card-footer">
-        <p class="text-center">'.LANG_FANTASY_ROSTERVALUE.': <strong>'.money_format('%.0n', $value).'</strong></p>';
+        <p class="text-center">'.LANG_FANTASY_ROSTERVALUE.': <strong>'.number_format($value, 0, ',', ' ').'</strong></p>';
 if($userid==$uid) $roster .= '
         <p class="text-center">
           <button class="btn btn-sm btn-'.$leaguecolor.' btn-icon-split show-dialog" id="sellteam"'.(!$bol ? ' disabled':'').'>
@@ -203,17 +208,17 @@ if($params[0]=="main")
   $locale = explode(";",setlocale(LC_ALL, '0'));
   $locale = explode("=",$locale[0]);
   $locale = $locale[1];
-  $q = mysql_query("SELECT * FROM fl_wallet WHERE uid='$uid' && league='$league'");
-  $leaguecolor = $n[color];
+  $q = mysqli_query($link, "SELECT * FROM fl_wallet WHERE uid='".$uid."' && league='".$league."'");
+  $leaguecolor = $n["color"];
   $active_league = $league;
-  $title = 'Fantasy '.$n[longname];
-  if(mysql_num_rows($q)>0)
+  $title = 'Fantasy '.$n["longname"];
+  if(mysqli_num_rows($q)>0)
     {
-    $f = mysql_fetch_array($q);
+    $f = mysqli_fetch_array($q);
     
-    $content .= "<i class='float-left h1 h1-fluid ll-".LeagueFont($n[longname])." text-gray-600 mr-1'></i>
+    $content .= "<i class='float-left h1 h1-fluid ll-".LeagueFont($n["longname"])." text-gray-600 mr-1'></i>
                  <h1 class='h3 h3-fluid mb-1'>".LANG_FANTASY_TITLE."</h1>
-                 <h2 class='h6 h6-fluid text-".$leaguecolor." text-uppercase font-weight-bold mb-3'>".$n[longname]."</h2>
+                 <h2 class='h6 h6-fluid text-".$leaguecolor." text-uppercase font-weight-bold mb-3'>".$n["longname"]."</h2>
                  <div class='row'>
                     <div class='col-12' style='max-width: 1000px;'>";
     
@@ -280,15 +285,15 @@ if($params[0]=="main")
                 </tr>
               </thead>
               <tbody>';
-            $w = mysql_query("SELECT id, price, delta, teamshort, name, pos FROM fl_prices JOIN el_players t1 ON t1.id=fl_prices.playerid WHERE league='$league' UNION SELECT id, price, delta, teamshort, name, 'GK' as pos FROM fl_prices_g JOIN el_goalies t1 ON t1.id=fl_prices_g.playerid WHERE league='$league' ORDER BY delta DESC LIMIT 10");
-            while($e = mysql_fetch_array($w))
+            $w = mysqli_query($link, "SELECT id, price, delta, teamshort, name, pos FROM fl_prices JOIN el_players t1 ON t1.id=fl_prices.playerid WHERE league='".$league."' UNION SELECT id, price, delta, teamshort, name, 'GK' as pos FROM fl_prices_g JOIN el_goalies t1 ON t1.id=fl_prices_g.playerid WHERE league='".$league."' ORDER BY delta DESC LIMIT 10");
+            while($e = mysqli_fetch_array($w))
               {
-              if($e[delta]>0) $delta = '<span class="text-success"><i class="fas fa-caret-up"></i>'.$e[delta].'</span>';
-              elseif($e[delta]<0) $delta = '<span class="text-danger"><i class="fas fa-caret-down"></i>'.$e[delta].'</span>';
+              if($e["delta"]>0) $delta = '<span class="text-success"><i class="fas fa-caret-up"></i>'.$e["delta"].'</span>';
+              elseif($e["delta"]<0) $delta = '<span class="text-danger"><i class="fas fa-caret-down"></i>'.$e["delta"].'</span>';
               else $delta = '-';
               $content .= '<tr>
-              <td class="text-nowrap" style="width:50%;"><img class="flag-el '.$e[teamshort].'-small" src="/images/blank.png" alt="'.$e[teamshort].'"> '.$e[name].' <span class="text-muted text-xs">('.$e[pos].')</span></td>
-              <td class="text-center" style="width:25%;">'.$e[price].'</td>
+              <td class="text-nowrap" style="width:50%;"><img class="flag-el '.$e["teamshort"].'-small" src="/images/blank.png" alt="'.$e["teamshort"].'"> '.$e["name"].' <span class="text-muted text-xs">('.$e["pos"].')</span></td>
+              <td class="text-center" style="width:25%;">'.$e["price"].'</td>
               <td class="text-nowrap" style="width:25%;">'.$delta.'</td>
               </tr>';
               }
@@ -317,15 +322,15 @@ if($params[0]=="main")
                 </tr>
               </thead>
               <tbody>';
-            $w = mysql_query("SELECT id, price, delta, teamshort, name, pos FROM fl_prices JOIN el_players t1 ON t1.id=fl_prices.playerid WHERE league='$league' UNION SELECT id, price, delta, teamshort, name, 'GK' as pos FROM fl_prices_g JOIN el_goalies t1 ON t1.id=fl_prices_g.playerid WHERE league='$league' ORDER BY delta ASC LIMIT 10");
-            while($e = mysql_fetch_array($w))
+            $w = mysqli_query($link, "SELECT id, price, delta, teamshort, name, pos FROM fl_prices JOIN el_players t1 ON t1.id=fl_prices.playerid WHERE league='".$league."' UNION SELECT id, price, delta, teamshort, name, 'GK' as pos FROM fl_prices_g JOIN el_goalies t1 ON t1.id=fl_prices_g.playerid WHERE league='".$league."' ORDER BY delta ASC LIMIT 10");
+            while($e = mysqli_fetch_array($w))
               {
-              if($e[delta]>0) $delta = '<span class="text-success"><i class="fas fa-caret-up"></i>'.$e[delta].'</span>';
-              elseif($e[delta]<0) $delta = '<span class="text-danger"><i class="fas fa-caret-down"></i>'.$e[delta].'</span>';
+              if($e["delta"]>0) $delta = '<span class="text-success"><i class="fas fa-caret-up"></i>'.$e["delta"].'</span>';
+              elseif($e["delta"]<0) $delta = '<span class="text-danger"><i class="fas fa-caret-down"></i>'.$e["delta"].'</span>';
               else $delta = '-';
               $content .= '<tr>
-              <td class="text-nowrap" style="width:50%;"><img class="flag-el '.$e[teamshort].'-small" src="/images/blank.png" alt="'.$e[teamshort].'"> '.$e[name].' <span class="text-muted text-xs">('.$e[pos].')</span></td>
-              <td class="text-center" style="width:25%;">'.$e[price].'</td>
+              <td class="text-nowrap" style="width:50%;"><img class="flag-el '.$e["teamshort"].'-small" src="/images/blank.png" alt="'.$e["teamshort"].'"> '.$e["name"].' <span class="text-muted text-xs">('.$e["pos"].')</span></td>
+              <td class="text-center" style="width:25%;">'.$e["price"].'</td>
               <td class="text-nowrap" style="width:25%;">'.$delta.'</td>
               </tr>';
               }
@@ -354,16 +359,16 @@ if($params[0]=="main")
             </tr>
           </thead>
           <tbody>';
-          $w = mysql_query("SELECT t1.*, t2.uname, t3.name as pname, t3.teamshort as pshort, t4.name as gname, t4.teamshort as gshort FROM `fl_transactions` t1 JOIN e_xoops_users t2 ON t2.uid=t1.uid LEFT JOIN el_players t3 ON t3.id=t1.pid LEFT JOIN el_goalies t4 ON t4.id=t1.pid ORDER BY tstamp DESC LIMIT 20");
-          while($e = mysql_fetch_array($w))
+          $w = mysqli_query($link, "SELECT t1.*, t2.uname, t3.name as pname, t3.teamshort as pshort, t4.name as gname, t4.teamshort as gshort FROM `fl_transactions` t1 JOIN e_xoops_users t2 ON t2.uid=t1.uid LEFT JOIN el_players t3 ON t3.id=t1.pid LEFT JOIN el_goalies t4 ON t4.id=t1.pid ORDER BY tstamp DESC LIMIT 20");
+          while($e = mysqli_fetch_array($w))
             {
-            if($e[pos]=="GK")
+            if($e["pos"]=="GK")
               {
-              $meno = $e[gname];
-              $tshort = '<img class="flag-el '.$e[gshort].'-small" src="/images/blank.png" alt="'.$e[gshort].'">';
+              $meno = $e["gname"];
+              $tshort = '<img class="flag-el '.$e["gshort"].'-small" src="/images/blank.png" alt="'.$e["gshort"].'">';
               $koho = LANG_FANTASY_AGOALIE;
               }
-            elseif($e[pos]=="T")
+            elseif($e["pos"]=="T")
               {
               $koho = LANG_FANTASY_WHOLETEAM;
               $tshort = "";
@@ -371,26 +376,26 @@ if($params[0]=="main")
               }
             else
               {
-              if($e[pos]=="F") $koho = LANG_FANTASY_AFORWARD;
-              if($e[pos]=="D") $koho = LANG_FANTASY_ADEFENSE;
-              $meno = $e[pname];
-              $tshort = '<img class="flag-el '.$e[pshort].'-small" src="/images/blank.png" alt="'.$e[pshort].'">';
+              if($e["pos"]=="F") $koho = LANG_FANTASY_AFORWARD;
+              if($e["pos"]=="D") $koho = LANG_FANTASY_ADEFENSE;
+              $meno = $e["pname"];
+              $tshort = '<img class="flag-el '.$e["pshort"].'-small" src="/images/blank.png" alt="'.$e["pshort"].'">';
               }
-            if($e[type]==1)
+            if($e["type"]==1)
               {
-              if($e[price]>0) $delta = LANG_FANTASY_WITHAPROFIT.' <span class="text-success">+'.money_format('%.0n', $e[price]).'</span>';
-              elseif($e[price]<0) $delta = LANG_FANTASY_WITHLOSSOF.' <span class="text-danger">'.money_format('%.0n', $e[price]).'</span>';
+              if($e["price"]>0) $delta = LANG_FANTASY_WITHAPROFIT.' <span class="text-success">+'.number_format($e["price"], 0, ',', ' ').'</span>';
+              elseif($e["price"]<0) $delta = LANG_FANTASY_WITHLOSSOF.' <span class="text-danger">'.number_format($e["price"], 0, ',', ' ').'</span>';
               else $delta = LANG_FANTASY_WITHOUTPROFIT;
               $hl = LANG_FANTASY_SOLD;
               }
             else
               {
               $hl = LANG_FANTASY_BOUGHT;
-              $delta = LANG_FANTASY_FORPRICE." ".money_format('%.0n', $e[price]);
+              $delta = LANG_FANTASY_FORPRICE." ".number_format($e["price"], 0, ',', ' ');
               }
             $content .= '<tr>
-            <td class="text-nowrap align-top" style="width:15%;">'.time_elapsed_string($e[tstamp]).'</td>
-            <td style="width:85%;">'.LANG_FANTASY_MANAGER.' <b>'.$e[uname].'</b> '.$hl.' '.$koho.' '.$tshort.' <b>'.$meno.'</b> '.$delta.'</td>
+            <td class="text-nowrap align-top" style="width:15%;">'.time_elapsed_string($e["tstamp"]).'</td>
+            <td style="width:85%;">'.LANG_FANTASY_MANAGER.' <b>'.$e["uname"].'</b> '.$hl.' '.$koho.' '.$tshort.' <b>'.$meno.'</b> '.$delta.'</td>
             </tr>';
             }
           $content .= '
@@ -509,9 +514,9 @@ if($params[0]=="main")
     }
   else
     {
-    $content .= "<i class='float-left h1 h1-fluid ll-".LeagueFont($n[longname])." text-gray-600 mr-1'></i>
+    $content .= "<i class='float-left h1 h1-fluid ll-".LeagueFont($n["longname"])." text-gray-600 mr-1'></i>
                  <h1 class='h3 h3-fluid mb-1'>".LANG_FANTASY_TITLE."</h1>
-                 <h2 class='h6 h6-fluid text-".$leaguecolor." text-uppercase font-weight-bold mb-3'>".$n[longname]."</h2>
+                 <h2 class='h6 h6-fluid text-".$leaguecolor." text-uppercase font-weight-bold mb-3'>".$n["longname"]."</h2>
                  <div class='row'>
                     <div class='col-12' style='max-width: 1000px;'>";
     
@@ -519,11 +524,11 @@ if($params[0]=="main")
     <div class="row">
       <div class="col-lg-7">
         <div class="card mb-4 shadow animated--grow-in">
-          <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/images/khlfantasy.jpg" class="lazy card-img-top" alt="Fantasy '.$n[longname].'">
+          <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/images/khlfantasy.jpg" class="lazy card-img-top" alt="Fantasy '.$n["longname"].'">
           <div class="card-body">
-            <h5 class="card-title">Fantasy '.$n[longname].' - pravidlá</h5>
+            <h5 class="card-title">Fantasy '.$n["longname"].' - pravidlá</h5>
             <ol type="1">
-              <li>Zúčastniť sa môžu iba <a href="/register">registrovaní</a> užívatelia stránky hockey-LIVE.sk (po prihlásení sa, kliknite na Fantasy '.$n[longname].' v ľavom menu '.$n[longname].').</li>
+              <li>Zúčastniť sa môžu iba <a href="/register">registrovaní</a> užívatelia stránky hockey-LIVE.sk (po prihlásení sa, kliknite na Fantasy '.$n["longname"].' v ľavom menu '.$n["longname"].').</li>
               <li>Každý manažér (užívateľ) má na začiatku na konte k dispozícii 180 000 EUR.</li>
               <li>Každý manažér si kúpi 5 útočníkov, 3 obrancov a 1 brankára z dostupných hráčov ligy.</li>
               <li>Manažér za hráčov nezačne zbierať body, až kým jeho tím nebude kompletný (8 hráčov a 1 brankár).</li>
@@ -563,13 +568,13 @@ if($params[0]=="roster")
   {
   $lid = $params[2];
   $userid = $params[1];
-  $leaguecolor = $n[color];
+  $leaguecolor = $n["color"];
   $active_league = $league;
-  $title = 'Fantasy '.$n[longname].' - zostava manažéra';
+  $title = 'Fantasy '.$n["longname"].' - zostava manažéra';
   
-  $content .= "<i class='float-left h1 h1-fluid ll-".LeagueFont($n[longname])." text-gray-600 mr-1'></i>
+  $content .= "<i class='float-left h1 h1-fluid ll-".LeagueFont($n["longname"])." text-gray-600 mr-1'></i>
                <h1 class='h3 h3-fluid mb-1'>".LANG_FANTASY_TITLE."</h1>
-               <h2 class='h6 h6-fluid text-".$leaguecolor." text-uppercase font-weight-bold mb-3'>".$n[longname]."</h2>
+               <h2 class='h6 h6-fluid text-".$leaguecolor." text-uppercase font-weight-bold mb-3'>".$n["longname"]."</h2>
                  <div class='row'>
                     <div class='col-12' style='max-width: 1000px;'>";
   
@@ -592,8 +597,8 @@ if($params[0]=="roster")
                     </li>
                   </ul>
                  </nav>';
-  $q = mysql_query("SELECT * FROM fl_wallet WHERE uid='$userid' && league='$lid'");
-  if(mysql_num_rows($q)>0)
+  $q = mysqli_query($link, "SELECT * FROM fl_wallet WHERE uid='".$userid."' && league='".$lid."'");
+  if(mysqli_num_rows($q)>0)
     {
     $content .= Generate_Roster($userid);
     }
@@ -612,14 +617,14 @@ if($params[0]=="roster")
 // moja zostava
 if($params[0]=="select")
   {
-  $leaguecolor = $n[color];
+  $leaguecolor = $n["color"];
   $active_league = $league;
-  $title = 'Fantasy '.$n[longname].' - moja zostava';
+  $title = 'Fantasy '.$n["longname"].' - moja zostava';
   
   $content .= '<div id="toasts" class="fixed-top" style="top: 80px; right: 23px; left: initial; z-index:1051;"></div>';
-  $content .= "<i class='float-left h1 h1-fluid ll-".LeagueFont($n[longname])." text-gray-600 mr-1'></i>
+  $content .= "<i class='float-left h1 h1-fluid ll-".LeagueFont($n["longname"])." text-gray-600 mr-1'></i>
                <h1 class='h3 h3-fluid mb-1'>".LANG_FANTASY_TITLE."</h1>
-               <h2 class='h6 h6-fluid text-".$leaguecolor." text-uppercase font-weight-bold mb-3'>".$n[longname]."</h2>
+               <h2 class='h6 h6-fluid text-".$leaguecolor." text-uppercase font-weight-bold mb-3'>".$n["longname"]."</h2>
                  <div class='row mb-4'>
                     <div class='col-12' style='max-width: 1000px;'>";
                
@@ -638,8 +643,8 @@ if($params[0]=="select")
                   </ul>
                  </nav>';
   
-    $w = mysql_query("SELECT * FROM fl_wallet WHERE uid='$uid' && league='$league'");
-    $e = mysql_fetch_array($w);
+    $w = mysqli_query($link, "SELECT * FROM fl_wallet WHERE uid='".$uid."' && league='".$league."'");
+    $e = mysqli_fetch_array($w);
     
     $content .='
     <div class="row justify-content-center">
@@ -651,11 +656,11 @@ if($params[0]=="select")
             </h6>
           </div>
           <div class="card-body">
-            <p class="h4 h4-fluid">'.money_format('%.0n', $e[balance]).'</p>
-            <p class="h6 h6-fluid">'.$e[points].' '.LANG_TEAMSTATS_PTS.'</p>
+            <p class="h4 h4-fluid">'.number_format($e["balance"], 0, ',', ' ').'</p>
+            <p class="h6 h6-fluid">'.$e["points"].' '.LANG_TEAMSTATS_PTS.'</p>
           </div>
-          <div class="card-footer text-light '.($e[active]==0 ? 'bg-danger':'bg-success').'">
-            '.($e[active]==0 ? LANG_FANTASY_NOTACTIVE:LANG_FANTASY_ACTIVE).'
+          <div class="card-footer text-light '.($e["active"]==0 ? 'bg-danger':'bg-success').'">
+            '.($e["active"]==0 ? LANG_FANTASY_NOTACTIVE:LANG_FANTASY_ACTIVE).'
           </div>
         </div>
       </div>

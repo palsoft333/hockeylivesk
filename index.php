@@ -1,16 +1,24 @@
 <?
+error_reporting(E_ALL);
 session_start();
-			
+		
 include("includes/db.php");
 include("includes/main_functions.php");
 include("includes/teamtable.class.php");
 include("includes/league_specifics.php");
 
+$_SESSION['logged'] = $_SESSION['logged'] ?? null;
+$active_league = $active_league ?? null;
+$leaguecolor = $leaguecolor ?? "hl";
+
 if(isset($_SESSION['logged']))
   {
-  $la = mysql_query("SELECT lang FROM e_xoops_users WHERE uid='".$_SESSION['logged']."'");
-  $lng = mysql_fetch_array($la);
-  $_SESSION["lang"] = $lng["lang"];
+  $la = mysqli_query($link, "SELECT lang FROM e_xoops_users WHERE uid='".$_SESSION['logged']."'");
+  if ($lng = mysqli_fetch_array($la)) {
+      $_SESSION["lang"] = $lng["lang"] ?? "sk";
+  } else {
+      $_SESSION["lang"] = "sk";
+  }
   include("includes/lang/lang_".strtolower($_SESSION["lang"]).".php");
   }
 else
@@ -60,13 +68,14 @@ else
     }
   }
   
-if($_GET["changeLang"] != '' && ($_GET["changeLang"] == 'sk' || $_GET["changeLang"] == 'en')) {
+if(isset($_GET["changeLang"]) && $_GET["changeLang"] != '' && ($_GET["changeLang"] == 'sk' || $_GET["changeLang"] == 'en')) {
 			$_SESSION["lang"] = $_GET["changeLang"];
-			if(isset($_SESSION['logged'])) mysql_query("UPDATE e_xoops_users SET lang='".$_GET["changeLang"]."' WHERE uid='".$_SESSION['logged']."'");
+			if(isset($_SESSION['logged'])) mysqli_query($link, "UPDATE e_xoops_users SET lang='".$_GET["changeLang"]."' WHERE uid='".$_SESSION['logged']."'");
 			header("Location: index.php");
 			die();
 			}
 
+$_GET["p"] = $_GET["p"] ?? null;
 switch ($_GET["p"]) {
     case "articles":
         include("includes/articles_functions.php");
@@ -121,9 +130,9 @@ switch ($_GET["p"]) {
         include("forum.php");
         break;
     case "fantasy":
-        if(strstr($_GET[id], "select")) include("fantasyleague.php");
-        elseif(strstr($_GET[id], "main")) include("fantasyleague.php");
-        elseif(strstr($_GET[id], "roster")) include("fantasyleague.php");
+        if(strstr($_GET["id"], "select")) include("fantasyleague.php");
+        elseif(strstr($_GET["id"], "main")) include("fantasyleague.php");
+        elseif(strstr($_GET["id"], "roster")) include("fantasyleague.php");
         else {
         include("includes/fantasy_functions.php");
         include("fantasy.php");
@@ -131,25 +140,32 @@ switch ($_GET["p"]) {
         break;
     default:
         include("includes/homepage_functions.php");
-        if($_GET[topicID] && $_GET[topicID]!="all")
-          {
-          $q = mysql_query("SELECT * FROM 2004leagues WHERE topic_id='".$_GET[topicID]."' ORDER BY id DESC LIMIT 1");
-          $f = mysql_fetch_array($q);
-          $leaguecolor = LeagueColor($f[longname]);
-          $active_league = $f[id];
-          $title = Get_SEO_title($_GET[topicID]);
+        if(isset($_GET["topicID"]) && $_GET["topicID"]!="all") {
+          $q = mysqli_query($link, "SELECT * FROM 2004leagues WHERE topic_id='".$_GET["topicID"]."' ORDER BY id DESC LIMIT 1");
+          if(mysqli_num_rows($q)>0) {
+            $f = mysqli_fetch_array($q);
+            $leaguecolor = LeagueColor($f["longname"]);
+            $active_league = $f["id"];
+            $title = Get_SEO_title($_GET["topicID"]);
           }
+          else {
+              $leaguecolor = "hl";
+              $active_league = null;
+              $title = LANG_NAV_NEWS;
+          }
+        }
         else {
           $leaguecolor = "hl";
-          if($_GET[topicID]) $title = LANG_NAV_NEWS;
+          $active_league = null;
+          if(isset($_GET["topicID"])) $title = LANG_NAV_NEWS;
         }
 }
 header('Content-Type: text/html; charset=utf-8');
-if(!$title) $title="hockey-LIVE.sk | Každodenná dávka hokejovej eufórie";
+if(!isset($title)) $title="hockey-LIVE.sk | Každodenná dávka hokejovej eufórie";
 if(!isset($meta_image)) $meta_image = "https://www.hockey-live.sk/images/hl_avatar.png";
 
 if(!isset($_SESSION['logged'])) CheckCookieLogin();
-else mysql_query("UPDATE e_xoops_users SET last_login='".time()."' WHERE uid='".$_SESSION['logged']."'");
+else mysqli_query($link, "UPDATE e_xoops_users SET last_login='".time()."' WHERE uid='".$_SESSION['logged']."'");
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -159,14 +175,14 @@ else mysql_query("UPDATE e_xoops_users SET last_login='".time()."' WHERE uid='".
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="<? if(!$_GET[p] && !$_GET[topicID]) echo "Portál pokrývajúci slovenský a zahraničný ľadový hokej. Štatistiky, tipovanie, databáza hráčov, výsledkový servis z domácich líg, zahraničných turnajov, KHL a NHL."; else echo $title; ?>">
+  <meta name="description" content="<? if(!isset($_GET["p"]) && !isset($_GET["topicID"])) echo "Portál pokrývajúci slovenský a zahraničný ľadový hokej. Štatistiky, tipovanie, databáza hráčov, výsledkový servis z domácich líg, zahraničných turnajov, KHL a NHL."; else echo $title; ?>">
 
   <meta name="author" content="<? if(isset($author)) echo $author; else echo "hockey-LIVE.sk"; ?>" />
   <meta name="title" content="<? echo $title; ?>" />
   <meta property="og:image" content="<? echo $meta_image; ?>" />
   <meta name="twitter:image" content="<? echo $meta_image; ?>" />
-  <? if(!$_GET[p]) echo '<meta property="og:description" content="Portál pokrývajúci slovenský a zahraničný ľadový hokej. Štatistiky, tipovanie, databáza hráčov, výsledkový servis z domácich líg, zahraničných turnajov, KHL a NHL." />'; ?>
-  <? echo $article_meta_tags; ?>
+  <? if(!isset($_GET["p"])) echo '<meta property="og:description" content="Portál pokrývajúci slovenský a zahraničný ľadový hokej. Štatistiky, tipovanie, databáza hráčov, výsledkový servis z domácich líg, zahraničných turnajov, KHL a NHL." />'; ?>
+  <? if(isset($article_meta_tags)) echo $article_meta_tags; ?>
   <link rel="apple-touch-icon" sizes="57x57" href="/img/favicon/apple-icon-57x57.png">
   <link rel="apple-touch-icon" sizes="60x60" href="/img/favicon/apple-icon-60x60.png">
   <link rel="apple-touch-icon" sizes="72x72" href="/img/favicon/apple-icon-72x72.png">
@@ -194,11 +210,11 @@ else mysql_query("UPDATE e_xoops_users SET last_login='".time()."' WHERE uid='".
     }
   </style>
   <?
-  echo '<link href="/css/flagsprites.css?v=1.0.1" rel="stylesheet">';
-  if($_GET[p]=="stats") echo '<link href="/vendor/datatables/dataTables.bootstrap4.min.css?v=1.13.4" rel="stylesheet">';
-  if($_GET[p]=="users") echo '<link href="/css/croppie.min.css?v=2.6.4" rel="stylesheet">';
-  if($_GET[p]=="articles") echo '<link rel="stylesheet" href="/css/jquery.fancybox.min.css?v=3.5.7" />';
-  if($_GET[p]=="games" || $_GET[p]=="teams" || $_GET[p]=="report" || $_GET[p]=="articles" || $_GET[p]=="players" || $_GET[p]=="fantasy") echo '<link rel="stylesheet" href="/css/jquery.emojiarea.css?v=1.0.0" />';
+  echo '<link href="/css/flagsprites.css?v=1.0.2" rel="stylesheet">';
+  if($_GET["p"]=="stats") echo '<link href="/vendor/datatables/dataTables.bootstrap4.min.css?v=1.13.4" rel="stylesheet">';
+  if($_GET["p"]=="users") echo '<link href="/css/croppie.min.css?v=2.6.4" rel="stylesheet">';
+  if($_GET["p"]=="articles") echo '<link rel="stylesheet" href="/css/jquery.fancybox.min.css?v=3.5.7" />';
+  if($_GET["p"]=="games" || $_GET["p"]=="teams" || $_GET["p"]=="report" || $_GET["p"]=="articles" || $_GET["p"]=="players" || $_GET["p"]=="fantasy") echo '<link rel="stylesheet" href="/css/jquery.emojiarea.css?v=1.0.0" />';
   ?>
 
 <!-- Quantcast Choice. Consent Manager Tag v2.0 (for TCF 2.0) -->
@@ -365,8 +381,9 @@ else mysql_query("UPDATE e_xoops_users SET last_login='".time()."' WHERE uid='".
 <!-- End Quantcast Choice. Consent Manager Tag v2.0 (for TCF 2.0) -->
 </head>
 
-<body id="page-top">
+<body id="page-top" class="bg-gradient-<? echo $leaguecolor; ?>-darken">
 
+  <? echo Tournament_Strip(); ?>
   <!-- Page Wrapper -->
   <div id="wrapper">
 
@@ -384,7 +401,7 @@ else mysql_query("UPDATE e_xoops_users SET last_login='".time()."' WHERE uid='".
       <hr class="sidebar-divider my-0">
 
       <!-- Nav Item - Main Page -->
-      <li class="nav-item<? if(!$_GET[p]) echo " active"; ?>">
+      <li class="nav-item<? if(!isset($_GET["p"])) echo " active"; ?>">
         <a class="nav-link" href="/">
           <span><? echo LANG_NAV_MAINPAGE; ?></span></a>
       </li>
@@ -399,17 +416,22 @@ else mysql_query("UPDATE e_xoops_users SET last_login='".time()."' WHERE uid='".
         Stránka
       </div>
           
-      <li class="nav-item<? if($_GET[p]=="players" && $_GET[database]) echo " active"; ?>">
+      <li class="nav-item<? if($_GET["p"]=="players" && isset($_GET["database"])) echo " active"; ?>">
         <a class="nav-link" href="/database">
           <span><? echo LANG_NAV_PLAYERDB; ?></span></a>
       </li>
 
-      <li class="nav-item<? if($_GET[p]=="players" && $_GET[shooters]) echo " active"; ?>">
+      <li class="nav-item<? if($_GET["p"]=="players" && isset($_GET["watched"])) echo " active"; ?>">
+        <a class="nav-link" href="/watched">
+          <span><? echo LANG_NAV_PLAYERTRACKER; ?></span><span class="badge badge-light float-right" style="font-size: 12px; line-height: 16px;"><? echo LANG_NEW; ?></span></a>
+      </li>
+
+      <li class="nav-item<? if($_GET["p"]=="players" && isset($_GET["shooters"])) echo " active"; ?>">
         <a class="nav-link" href="/shooters">
           <span><? echo LANG_NAV_SHOOTERS; ?></span></a>
       </li>
       
-      <li class="nav-item<? if($_GET[p]=="forum") echo " active"; ?>">
+      <li class="nav-item<? if($_GET["p"]=="forum") echo " active"; ?>">
         <a class="nav-link" href="/forum">
           <span><? echo LANG_NAV_FORUM; ?></span></a>
       </li>
@@ -420,7 +442,7 @@ else mysql_query("UPDATE e_xoops_users SET last_login='".time()."' WHERE uid='".
       <!-- Language dropdown -->
       <div class="dropdown text-center mb-3">
         <button class="btn btn-sm dropdown-toggle text-white-50" type="button" id="langselect" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="border: 1px solid rgba(255,255,255,.15);">
-          <? if($_SESSION[lang]=="sk") echo '<img class="SVK-small flag-iihf rounded-pill" src="/img/blank.png" alt="Slovensky">';
+          <? if($_SESSION["lang"]=="sk") echo '<img class="SVK-small flag-iihf rounded-pill" src="/img/blank.png" alt="Slovensky">';
              else echo '<img class="GBR-small flag-iihf rounded-pill" src="/img/blank.png" alt="English">';
           ?>
         </button>
@@ -503,7 +525,8 @@ else mysql_query("UPDATE e_xoops_users SET last_login='".time()."' WHERE uid='".
         <!-- Begin Page Content -->
         <div class="container-fluid position-relative">
           <?
-          if(!$_GET[p]) include("homepage.php");
+          $content=$content ?? "";
+          if(!$_GET["p"]) include("homepage.php");
           else echo $content;
           ?>
         </div>
@@ -589,42 +612,42 @@ else mysql_query("UPDATE e_xoops_users SET last_login='".time()."' WHERE uid='".
   <!-- Custom scripts for all pages-->
   <script src="/js/jquery-ui.min.js?v=1.13.2"></script>
   <script src="/js/jquery.lazy.min.js"></script>
-  <script src="/js/main.min.js?v=1.2.4"></script>
+  <script src="/js/main.min.js?v=1.2.7"></script>
 <? 
-if(!$_GET[p] && !$_GET[topicID]) echo '  <script type="text/javascript" src="/js/jquery.calendario.min.js?v=1.0.6"></script>
-  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION[lang].'.js?v=1.0.0"></script>
+if(!isset($_GET["p"]) && !isset($_GET["topicID"])) echo '  <script type="text/javascript" src="/js/jquery.calendario.min.js?v=1.0.6"></script>
+  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION["lang"].'.js?v=1.0.0"></script>
   <script type="text/javascript" src="/js/homepage_events.min.js?v=1.1.3"></script>';
-elseif($_GET[p]=="games")
+elseif($_GET["p"]=="games")
   {
-  echo '  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION[lang].'.js?v=1.0.0"></script>
-  <script type="text/javascript" src="/js/games_events.min.js?v=1.0.4"></script>';
-  if($_GET[gid]) echo '  <script src="/js/jquery.emojiarea.min.js?v=1.0.0"></script>
+  echo '  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION["lang"].'.js?v=1.0.0"></script>
+  <script type="text/javascript" src="/js/games_events.min.js?v=1.0.5"></script>';
+  if(isset($_GET["gid"])) echo '  <script src="/js/jquery.emojiarea.min.js?v=1.0.0"></script>
   <script src="/images/smilies/emojis.js?v=1.0.0"></script>
   <script src="/js/comments.min.js?v=1.0.2"></script>
   <script src="https://www.google.com/recaptcha/api.js?render=explicit&onload=onRecaptchaLoadCallback" defer></script>';
   }
-elseif($_GET[p]=="table") 
+elseif($_GET["p"]=="table") 
   {
-  if(strstr($_GET[lid], "playoff")) echo '  <script type="text/javascript" src="/js/games_events.min.js?v=1.0.4"></script>';
+  if(strstr($_GET["lid"], "playoff")) echo '  <script type="text/javascript" src="/js/games_events.min.js?v=1.0.5"></script>';
   echo '  <script type="text/javascript" src="/js/table_events.min.js?v=1.0.1"></script>';
   }
-elseif($_GET[p]=="teams") echo '  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION[lang].'.js?v=1.0.0"></script>
+elseif($_GET["p"]=="teams") echo '  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION["lang"].'.js?v=1.0.0"></script>
   <script type="text/javascript" src="/js/teams_events.js?v=1.0.1"></script>
   <script src="/js/jquery.emojiarea.min.js?v=1.0.0"></script>
   <script src="/images/smilies/emojis.js?v=1.0.0"></script>
   <script src="/js/comments.min.js?v=1.0.2"></script>
   <script src="https://www.google.com/recaptcha/api.js?render=explicit&onload=onRecaptchaLoadCallback" defer></script>';
-elseif($_GET[p]=="fantasy") echo '  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION[lang].'.js?v=1.0.0"></script>
+elseif($_GET["p"]=="fantasy") echo '  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION["lang"].'.js?v=1.0.0"></script>
   <script type="text/javascript" src="/js/fantasy_events.min.js?v=1.0.3"></script>
   <script src="/js/jquery.emojiarea.min.js?v=1.0.0"></script>
   <script src="/images/smilies/emojis.js?v=1.0.0"></script>
   <script src="/js/comments.min.js?v=1.0.2"></script>
   <script src="https://www.google.com/recaptcha/api.js?render=explicit&onload=onRecaptchaLoadCallback" defer></script>';
-elseif($_GET[p]=="users" && !$_GET[notif] && !$id) echo '  <script src="/js/croppie.min.js?v=2.6.4"></script>
+elseif($_GET["p"]=="users" && !isset($_GET["notif"]) && !isset($id)) echo '  <script src="/js/croppie.min.js?v=2.6.4"></script>
   <script src="https://code.responsivevoice.org/responsivevoice.js?key=ZN9dlYeg" defer></script>
-  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION[lang].'.js?v=1.0.1"></script>
+  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION["lang"].'.js?v=1.0.1"></script>
   <script type="text/javascript" src="/js/user_events.min.js?v=1.0.7"></script>';
-elseif($_GET[p]=="report") echo '  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION[lang].'.js?v=1.0.0"></script>
+elseif($_GET["p"]=="report") echo '  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION["lang"].'.js?v=1.0.0"></script>
   <script type="text/javascript" src="/js/jquery.cookie.js"></script>
   <script src="https://code.responsivevoice.org/responsivevoice.js?key=ZN9dlYeg" defer></script>
   <script type="text/javascript" src="/js/report_events.php?id='.$id.$el.'"></script>
@@ -632,21 +655,29 @@ elseif($_GET[p]=="report") echo '  <script type="text/javascript" src="/includes
   <script src="/images/smilies/emojis.js?v=1.0.0"></script>
   <script src="/js/comments.min.js?v=1.0.2"></script>
   <script src="https://www.google.com/recaptcha/api.js?render=explicit&onload=onRecaptchaLoadCallback" defer></script>';
-elseif($_GET[p]=="articles") echo '  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION[lang].'.js?v=1.0.0"></script>
+elseif($_GET["p"]=="articles") echo '  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION["lang"].'.js?v=1.0.0"></script>
   <script src="/js/jquery.fancybox.min.js?v=3.5.7"></script>
   <script src="/js/jquery.emojiarea.min.js?v=1.0.0"></script>
   <script src="/images/smilies/emojis.js?v=1.0.0"></script>
   <script src="/js/comments.min.js?v=1.0.2"></script>
   <script src="https://www.google.com/recaptcha/api.js?render=explicit&onload=onRecaptchaLoadCallback" defer></script>';
-elseif($_GET[p]=="players") echo '  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION[lang].'.js?v=1.0.0"></script>
-  <script src="/js/jquery.emojiarea.min.js?v=1.0.0"></script>
+elseif($_GET["p"]=="players") {
+  echo '  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION["lang"].'.js?v=1.0.1"></script>';
+  if(isset($_GET["pid"]) || isset($_GET["gid"])) {
+    echo '  <script src="/js/jquery.emojiarea.min.js?v=1.0.0"></script>
   <script src="/images/smilies/emojis.js?v=1.0.0"></script>
   <script src="/js/comments.min.js?v=1.0.2"></script>
   <script src="https://www.google.com/recaptcha/api.js?render=explicit&onload=onRecaptchaLoadCallback" defer></script>';
+  }
+  if(isset($_GET["watched"])) {
+      echo '  <script src="/js/watched_events.js?v=1.1.7"></script>';
+  }
+}
 
-if($_GET[p]=="stats" || $_GET[p]=="players" || $_GET[p]=="teams" || $_GET[p]=="bets" || $_GET[p]=="fantasy") echo '  <script type="text/javascript" src="/vendor/datatables/jquery.dataTables.min.js?v=1.13.4"></script>
+if($_GET["p"]=="stats" || $_GET["p"]=="players" || $_GET["p"]=="teams" || $_GET["p"]=="bets" || $_GET["p"]=="fantasy") echo '  <script type="text/javascript" src="/vendor/datatables/jquery.dataTables.min.js?v=1.13.4"></script>
   <script src="/vendor/datatables/dataTables.bootstrap4.min.js?v=1.13.4"></script>';
-  
+
+$script_end = $script_end ?? null;
 echo $script_end;
 ?>
   <link href="/vendor/fontawesome-free/css/all.min.css?v=6.4.0" rel="stylesheet" type="text/css">
@@ -681,10 +712,10 @@ echo $script_end;
     </script>
 
   <link href="/css/template.min.css?v=1.0.2" rel="stylesheet">
-  <link href="/css/main.min.css?v=1.4.0" rel="stylesheet">
+  <link href="/css/main.min.css?v=1.4.3" rel="stylesheet">
 </body>
 
 </html>
 <?
-mysql_close($link);
+mysqli_close($link);
 ?>

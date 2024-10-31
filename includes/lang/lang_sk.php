@@ -5,6 +5,7 @@
 
 --------------------------------------------*/
 
+$globalFormatter = new IntlDateFormatter('sk_SK', IntlDateFormatter::FULL, IntlDateFormatter::FULL);
 setlocale(LC_ALL, 'sk_SK.UTF8');
 setlocale(LC_NUMERIC, 'C');
 
@@ -19,6 +20,8 @@ define("LANG_TIME_SECONDS","sekundami");
 define("LANG_TIME_RIGHTNOW","práve teraz");
 define("LANG_TIME_TODAY","dnes");
 define("LANG_TIME_YESTERDAY","včera");
+define("LANG_TIME_TOMORROW","zajtra");
+define("LANG_TIME_DAYAFTERTOMORROW","pozajtra");
 define("LANG_AGE_YEARS","rokov");
 
 define("LANG_AUTHOR","Autor");
@@ -38,6 +41,7 @@ define("LANG_AT","o"); // o 11:00
 define("LANG_SEND","Odoslať");
 define("LANG_NO","Nie");
 define("LANG_REMOVE","Odstrániť");
+define("LANG_NEW","nové");
 define("LANG_MAIN_COMMENTS","Komentáre");
 define("LANG_MAIN_COMMENT","Komentár");
 define("LANG_MAIN_REMOVECOMMENT","Odstránenie komentára");
@@ -48,6 +52,9 @@ define("LANG_LOGOUT","Odhlásiť sa");
 define("LANG_ROUND","kolo");
 define("LANG_NUM","č."); // ako skratka čísla
 define("LANG_MATCH1","Zápas");
+define("LANG_MATCH2","zápas");
+define("LANG_MATCH3","zápasy");
+define("LANG_MATCH4","zápasov");
 
 define("LANG_MATCH_DESCRIPTION","Priebeh zápasu - LIVE komentár");
 define("LANG_PENALTY","Vylúčenia");
@@ -302,6 +309,21 @@ define("LANG_PLAYERS_POINTS","Bodoval v zápase");
 define("LANG_PLAYERS_POINTSTIMES","bodoval %dx po sebe"); // bodoval 2x po sebe
 define("LANG_PLAYERS_NOTPOINTSTIMES","nebodoval %dx po sebe"); // nebodoval 2x po sebe
 define("LANG_PLAYERS_INJUREDSINCE","Zranený od");
+define("LANG_PLAYERS_WATCHEDTITLE","Sledovaní hráči");
+define("LANG_PLAYERS_DELETEWATCHED","Vymazanie sledovaného hráča");
+define("LANG_PLAYERS_WATCHEDREALLY","Naozaj chcete odstrániť tohto sledovaného hráča?");
+define("LANG_PLAYERS_ADDWATCHED","Pridať hráča na sledovanie");
+define("LANG_PLAYERS_SEARCHPLAYER","Hľadať hráča");
+define("LANG_PLAYERS_MYWATCHED","Moji sledovaní hráči");
+define("LANG_PLAYERS_AGAINST","proti");
+define("LANG_PLAYERS_TOI","Čas na ľade");
+define("LANG_PLAYERS_SUMMARYSTATS","Sumárne štatistiky");
+define("LANG_PLAYERS_PPG","Bodov na zápas");
+define("LANG_PLAYERS_LASTGAME","Posledný zápas");
+define("LANG_PLAYERS_NEXTGAME","Najbližšie nastúpi");
+define("LANG_PLAYERS_LASTDIARY","Posledný zápis v denníku");
+define("LANG_PLAYERS_WATCHEDTEASER","Sledujte progres svojich obľúbených hráčov");
+define("LANG_PLAYERS_WATCHEDTEXT","<a href='/login'>Prihláste sa</a> do svojho účtu a objavte výhody našej exkluzívnej sekcie <b>Sledovania hráčov</b>! Sledujte v reálnom čase výkony svojich obľúbených hráčov, získajte prístup k ich najnovším štatistikám a zistite, kedy sa opäť objavia na ľade. Či už ste vášnivý hráč fantasy ligy alebo oddaný fanúšik, nezmeškajte príležitosť byť vždy o krok vpred. Stačí si pridať hráčov, na ktorých vám záleží, a buďte informovaní o všetkom dôležitom!");
 
 define("LANG_BETS_BEST","Tabuľka najlepších");
 define("LANG_BETS_SHOWFOR","Zobraziť pre ligu");
@@ -335,6 +357,7 @@ define("LANG_OTHER_GAMES_LIVE","Ostatné stretnutia");
 define("LANG_NAV_HOME","Domov");
 define("LANG_NAV_MAINPAGE","Hlavná stránka");
 define("LANG_NAV_PLAYERDB","Databáza hráčov");
+define("LANG_NAV_PLAYERTRACKER","Sledovanie hráčov");
 define("LANG_NAV_SHOOTERS","Strelci");
 define("LANG_NAV_FORUM","Diskusie");
 define("LANG_NAV_IMPERSSUM","Kontakt");

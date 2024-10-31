@@ -6,9 +6,9 @@ header('Content-Type: text/html; charset=utf-8');
 
 if(isset($_POST['check']))
 {
-$username=mysql_real_escape_string($_POST['check']);
-$result=mysql_query("SELECT uname FROM e_xoops_users WHERE uname='$username'");
-if(mysql_num_rows($result)>0) echo "taken";
+$username=mysqli_real_escape_string($link, $_POST['check']);
+$result=mysqli_query($link, "SELECT uname FROM e_xoops_users WHERE uname='".$username."'");
+if(mysqli_num_rows($result)>0) echo "taken";
 }
 
 if(isset($_POST['username']) && isset($_POST['password']) && isset($_POST['email']))
@@ -22,12 +22,12 @@ if(isset($_POST['username']) && isset($_POST['password']) && isset($_POST['email
   if ($responseKeys["success"] && $responseKeys["action"] == 'submit') {
       if ($responseKeys["score"] >= 0.5) {
       
-        $username=mysql_real_escape_string($_POST['username']);
-        $password=md5(mysql_real_escape_string($_POST['password']));
-        $email=mysql_real_escape_string($_POST['email']);
-        $q=mysql_query("SELECT email FROM e_xoops_users WHERE email='".$email."'");
-        if(mysql_num_rows($q)>0) echo "EMAILEXISTS";
-        else $result=mysql_query("INSERT INTO e_xoops_users (uname, email, lang, user_regdate, pass) VALUES ('$username', '$email', '".$_SESSION[lang]."', '".mktime()."', '$password')");
+        $username=mysqli_real_escape_string($link, $_POST['username']);
+        $password=md5(mysqli_real_escape_string($link, $_POST['password']));
+        $email=mysqli_real_escape_string($link, $_POST['email']);
+        $q=mysqli_query($link, "SELECT email FROM e_xoops_users WHERE email='".$email."'");
+        if(mysqli_num_rows($q)>0) echo "EMAILEXISTS";
+        else $result=mysqli_query($link, "INSERT INTO e_xoops_users (uname, email, lang, user_regdate, pass) VALUES ('".$username."', '".$email."', '".$_SESSION["lang"]."', '".time()."', '".$password."')");
         
       } elseif ($responseKeys["score"] < 0.5) {
           echo "CAPTCHAERROR";
@@ -40,8 +40,8 @@ if(isset($_POST['username']) && isset($_POST['password']) && isset($_POST['email
   
   if($result)
     {
-    $id=mysql_insert_id();
-    mysql_query("UPDATE e_xoops_users SET last_login='".mktime()."' WHERE uid='$id'");
+    $id=mysqli_insert_id($link);
+    mysqli_query($link, "UPDATE e_xoops_users SET last_login='".time()."' WHERE uid='".$id."'");
     $_SESSION['logged']=$id;
     SendMail(ADMIN_MAIL, "Nový užívateľ na HL", "https://www.hockey-live.sk/user/".$id);
     echo "OK";
