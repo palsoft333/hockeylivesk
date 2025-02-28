@@ -57,7 +57,7 @@
                   </div>
                   <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                      <div class="text-xs font-weight-bold text-info text-uppercase mb-1"><? echo LANG_CARDS_FLASH; ?></div>
+                      <div class="text-xs font-weight-bold text-info text-uppercase mb-1"><? echo LANG_CARDS_FLASH; ?><span id="flashnews-refresh" class="ml-2"><i class="fas fa-sync-alt" aria-hidden="true"></i></span></div>
                     </div>
                     <div class="col-auto">
                       <i class="fas fa-comments fa-2x text-gray-300"></i>
@@ -141,10 +141,10 @@
                 <p class="m-auto p-2 small"></p>
               </div-->';
                 echo Get_Latest_Stats();
-                if(!isset($_SESSION["logged"])) echo '
+                /*if(!isset($_SESSION["logged"])) echo '
               <div class="advert-container card shadow mb-4">
-                <p class="m-auto p-2 small">Ak chcete získať <a href="https://skhra.com/free-spiny/">tocenia zdarma za registraciu</a>, navštívte stránku skhra.com</p>
-              </div>';
+                <p class="m-auto p-2 small"></p>
+              </div>';*/
                 echo Transfers();
                 echo Favourite_Team();
                 echo Users_Online();

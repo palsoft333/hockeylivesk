@@ -3,24 +3,32 @@
 include("db.php");
 include("main_functions.php");
 
-if($_GET["term"]) $term = mysqli_real_escape_string($link, $_GET["term"]);
-else exit;
+if (!isset($_GET["term"]) || empty($_GET["term"])) {
+    exit;
+}
 
-$q = mysqli_query($link, "SELECT dt.* FROM ((SELECT id, name, pos, born, 0 as type FROM `2004players` WHERE name LIKE '%$term%' GROUP BY name ORDER BY id DESC LIMIT 5)
-UNION
-(SELECT id, name, pos, born, 1 as type FROM `el_players` WHERE name LIKE '%$term%' GROUP BY name ORDER BY id DESC LIMIT 5))dt GROUP BY dt.name
-UNION
-SELECT et.* FROM ((SELECT id, shortname as name, longname as pos, 0 as born, 2 as type FROM `2004teams` WHERE longname LIKE '%$term%' ORDER BY id DESC LIMIT 5)
-UNION
-(SELECT id, shortname as name, longname as pos, 0 as born, 3 as type FROM `el_teams` WHERE longname LIKE '%$term%' ORDER BY id DESC LIMIT 5))et GROUP BY et.name, et.pos
-UNION
-SELECT ft.* FROM ((SELECT id, name, 'GK' as pos, born, 4 as type FROM `2004goalies` WHERE name LIKE '%$term%' GROUP BY name ORDER BY id DESC LIMIT 5)
-UNION
-(SELECT id, name, 'GK' as pos, born, 5 as type FROM `el_goalies` WHERE name LIKE '%$term%' GROUP BY name ORDER BY id DESC LIMIT 5))ft GROUP BY ft.name, ft.pos
-UNION
-(SELECT id, country as name, longname as pos, groups as born, 6 as type FROM `2004leagues` WHERE longname LIKE '%$term%' GROUP BY longname ORDER BY id DESC LIMIT 5)");
+$term = '%' . $_GET["term"] . '%';
 
-while($f = mysqli_fetch_array($q))
+$query = "SELECT dt.* FROM ((SELECT id, name, pos, born, 0 as type FROM `2004players` WHERE name LIKE ? GROUP BY name ORDER BY id DESC LIMIT 5)
+UNION
+(SELECT id, name, pos, born, 1 as type FROM `el_players` WHERE name LIKE ? GROUP BY name ORDER BY id DESC LIMIT 5))dt GROUP BY dt.name
+UNION
+SELECT et.* FROM ((SELECT id, shortname as name, longname as pos, 0 as born, 2 as type FROM `2004teams` WHERE longname LIKE ? ORDER BY id DESC LIMIT 5)
+UNION
+(SELECT id, shortname as name, longname as pos, 0 as born, 3 as type FROM `el_teams` WHERE longname LIKE ? ORDER BY id DESC LIMIT 5))et GROUP BY et.name, et.pos
+UNION
+SELECT ft.* FROM ((SELECT id, name, 'GK' as pos, born, 4 as type FROM `2004goalies` WHERE name LIKE ? GROUP BY name ORDER BY id DESC LIMIT 5)
+UNION
+(SELECT id, name, 'GK' as pos, born, 5 as type FROM `el_goalies` WHERE name LIKE ? GROUP BY name ORDER BY id DESC LIMIT 5))ft GROUP BY ft.name, ft.pos
+UNION
+(SELECT id, country as name, longname as pos, groups as born, 6 as type FROM `2004leagues` WHERE longname LIKE ? GROUP BY longname ORDER BY id DESC LIMIT 5)";
+
+$stmt = mysqli_prepare($link, $query);
+mysqli_stmt_bind_param($stmt, 'sssssss', $term, $term, $term, $term, $term, $term, $term);
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
+
+while($f = mysqli_fetch_array($result, MYSQLI_ASSOC))
   {
   $info="";
   if($f["type"]==0 || $f["type"]==1) 

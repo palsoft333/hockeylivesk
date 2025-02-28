@@ -68,9 +68,9 @@
       if($_GET["vyb"]=="Z") $regexp = "^Z|^Ž";
       }
     
-    if($_GET["vyb"]) $sWhere = "WHERE name REGEXP '".mysqli_real_escape_string($link, $regexp )."'";
-    if($_GET["tshort"]) $sWhere = "WHERE teamshort='".mysqli_real_escape_string($link, $_GET["tshort"] )."'";
-    if($_GET['sSearch']) $sWhere = "WHERE name LIKE '%".mysqli_real_escape_string($link, $_GET['sSearch'] )."%'";
+    if($_GET["vyb"]) $sWhere = "WHERE name REGEXP ?";
+    if($_GET["tshort"]) $sWhere = "WHERE teamshort=?";
+    if($_GET['sSearch']) { $sWhere = "WHERE name LIKE ?"; $_GET['sSearch']="%".$_GET['sSearch']."%"; }
 	}
 	
 	/* Individual column filtering */
@@ -105,22 +105,41 @@
 		$sLimit
 	";*/
 
-  $sQuery = mysqli_query($link, "SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysqli_error($link));
-	$sQuery = "SELECT SQL_CALC_FOUND_ROWS *, GROUP_CONCAT(DISTINCT dt.teamshort
-ORDER BY dt.id ASC) AS timy, GROUP_CONCAT(DISTINCT dt.teamlong
-ORDER BY dt.id ASC) AS timylong, GROUP_CONCAT(DISTINCT dt.el
-ORDER BY dt.id ASC) AS timyel FROM ((SELECT id, name, teamshort, teamlong, 1 as el FROM el_players ".$sWhere.") UNION (SELECT id, name, teamshort, teamlong, 0 as el FROM 2004players ".$sWhere.") UNION (SELECT id, name, teamshort, teamlong, 2 as el FROM el_goalies ".$sWhere."))dt GROUP BY dt.name
-    $sOrder
-		$sLimit";
-	$rResult = mysqli_query($link, $sQuery ) or die(mysqli_error($link));
+    $sQuery = "SELECT SQL_CALC_FOUND_ROWS *, 
+        GROUP_CONCAT(DISTINCT dt.teamshort ORDER BY dt.id ASC) AS timy, 
+        GROUP_CONCAT(DISTINCT dt.teamlong ORDER BY dt.id ASC) AS timylong, 
+        GROUP_CONCAT(DISTINCT dt.el ORDER BY dt.id ASC) AS timyel 
+    FROM (
+        (SELECT id, name, teamshort, teamlong, 1 as el FROM el_players ".$sWhere.") 
+        UNION 
+        (SELECT id, name, teamshort, teamlong, 0 as el FROM 2004players ".$sWhere.") 
+        UNION 
+        (SELECT id, name, teamshort, teamlong, 2 as el FROM el_goalies ".$sWhere.")
+    ) dt 
+    GROUP BY dt.name 
+    $sOrder 
+    $sLimit";
+
+    $stmt = mysqli_prepare($link, $sQuery);
+
+    if($_GET["vyb"]) mysqli_stmt_bind_param($stmt, 'sss', $regexp, $regexp, $regexp);
+    if($_GET["tshort"]) mysqli_stmt_bind_param($stmt, 'sss', $_GET["tshort"], $_GET["tshort"], $_GET["tshort"]);
+    if($_GET['sSearch']) mysqli_stmt_bind_param($stmt, 'sss', $_GET['sSearch'], $_GET['sSearch'], $_GET['sSearch']);
+
+    mysqli_stmt_execute($stmt);
+
+    $rResult = mysqli_stmt_get_result($stmt);
+    if (!$rResult) {
+        die("Chyba v dotaze: " . mysqli_error($link));
+    }
 	
 	/* Data set length after filtering */
 	$sQuery = "
 		SELECT FOUND_ROWS()
 	";
 	$rResultFilterTotal = mysqli_query($link, $sQuery ) or die(mysqli_error($link));
-	$aResultFilterTotal = mysqli_fetch_array($rResultFilterTotal);
-	$iFilteredTotal = $aResultFilterTotal[0];
+	$aResultFilterTotal = mysqli_fetch_array($rResultFilterTotal, MYSQLI_ASSOC);
+	$iFilteredTotal = $aResultFilterTotal['FOUND_ROWS()'];
 	
 	/* Total data set length */
 	$sQuery = mysqli_query($link, "SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysqli_error($link));
@@ -139,7 +158,7 @@ ORDER BY dt.id ASC) AS timyel FROM ((SELECT id, name, teamshort, teamlong, 1 as 
 	$sOutput .= '"iTotalRecords": '.$iTotal.', ';
 	$sOutput .= '"iTotalDisplayRecords": '.$iFilteredTotal.', ';
 	$sOutput .= '"aaData": [ ';
-	while ( $aRow = mysqli_fetch_array( $rResult ) )
+	while ( $aRow = mysqli_fetch_array( $rResult, MYSQLI_ASSOC ) )
 	{
 		$sOutput .= "[";
 		for ( $i=0 ; $i<count($aColumns) ; $i++ )

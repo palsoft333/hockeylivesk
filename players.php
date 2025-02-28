@@ -97,14 +97,13 @@ if(isset($sid))
 		$p=1;
 while ($t = mysqli_fetch_array($r))
       {
-
-	if($t["injury"]!=NULL) $injury = ' <i class="fas fa-user-injured text-danger" data-toggle="tooltip" data-placement="top" data-html="true" title="'.LANG_PLAYERS_INJURED.': <b>'.$t["injury"].'</b>"></i>';
+	if($t["injury"]!=NULL) $injury = ' <i class="fas fa-user-injured text-danger align-self-center" data-toggle="tooltip" data-placement="top" data-html="true" title="'.LANG_PLAYERS_INJURED.': <b>'.$t["injury"].'</b>"></i>';
 	else $injury = '';
 	
 	$content .= '<tr>
                   <td class="text-center" style="width:2%;">'.$p.'.</td>
                   <td style="width:11%;" class="text-nowrap"><img class="flag-el '.$t["teamshort"].'-small" src="/images/blank.png" alt="'.$t["teamshort"].'"> '.$t["teamshort"].'</td>
-                  <td style="width:25%;" class="text-nowrap"><a href="/player/'.$t["id"].'1-'.SEOTitle($t["name"]).'">'.$t["name"].'</a>'.$injury.'</td>
+                  <td class="d-flex justify-content-between text-nowrap"><a href="/player/'.$t["id"].'1-'.SEOTitle($t["name"]).'">'.$t["name"].'</a>'.$injury.'</td>
                   <td class="text-center" style="width:6%;">'.$t["pos"].'</td>
                   <td class="text-center" style="width:7%;">'.$t["gp"].'</td>
                   <td class="text-center" style="width:7%;">'.$t["goals"].'</td>
@@ -115,6 +114,26 @@ while ($t = mysqli_fetch_array($r))
                   <td class="text-center" style="width:7%;">'.$t["shg"].'</td>
                   <td class="text-center" style="width:7%;">'.$t["gwg"].'</td>
                 </tr>';
+
+      $y = mysqli_query($link, "SELECT * FROM player_lowerleagues WHERE name='".$t["name"]."' && league_upper='".$lid."'");
+      if(mysqli_num_rows($y)>0) {
+          while($u = mysqli_fetch_array($y)) {
+            $points = $u["goals"]+$u["asists"];
+            $content .= '<tr>
+                    <td colspan="2"></td>
+                    <td colspan="2" class="text-nowrap text-xs"><div><i class="fa-arrow-turn-up fa-rotate-90 fa-solid mr-1"></i>nižšia liga</div><div class="d-flex"><img src="'.$u["team_image"].'" style="
+        height: 15px;
+    " class="mr-1">'.$u["teamlong"].' ('.$u["league_name"].')</div></td>
+                    
+                    <td class="text-center" style="width:7%;">'.$u["gp"].'</td>
+                    <td class="text-center" style="width:7%;">'.$u["goals"].'</td>
+                    <td class="text-center" style="width:7%;">'.$u["asists"].'</td>
+                    <td class="text-center font-weight-bold" style="width:7%;">'.$points.'</td>
+                    <td colspan="4"</td>
+                    </tr>';
+          }
+      }
+
       $p++;
       }
 $content .= "</tbody></table>
@@ -170,13 +189,13 @@ while ($t = mysqli_fetch_array($r))
 	$svp = round($t["svsp"],1);
   $gaa = round($t["gaa"],2);
   
-	if($t["injury"]!=NULL) $injury = ' <i class="fas fa-user-injured text-danger" data-toggle="tooltip" data-placement="top" data-html="true" title="'.LANG_PLAYERS_INJURED.': <b>'.$t["injury"].'</b>"></i>';
+	if($t["injury"]!=NULL) $injury = ' <i class="fas fa-user-injured text-danger align-self-center" data-toggle="tooltip" data-placement="top" data-html="true" title="'.LANG_PLAYERS_INJURED.': <b>'.$t["injury"].'</b>"></i>';
 	else $injury = '';
   
 	$content .= '<tr>
                   <td class="text-center" style="width:2%;">'.$p.'.</td>
                   <td style="width:11%;" class="text-nowrap"><img class="flag-el '.$t["teamshort"].'-small" src="/images/blank.png" alt="'.$t["teamshort"].'"> '.$t["teamshort"].'</td>
-                  <td style="width:25%;" class="text-nowrap"><a href="/goalie/'.$t["id"].'1-'.SEOTitle($t["name"]).'">'.$t["name"].'</a>'.$injury.'</td>
+                  <td class="d-flex justify-content-between text-nowrap"><a href="/goalie/'.$t["id"].'1-'.SEOTitle($t["name"]).'">'.$t["name"].'</a>'.$injury.'</td>
                   <td class="text-center" style="width:6%;">G</td>
                   <td class="text-center" style="width:7%;">'.$t["gp"].'</td>
                   <td class="text-center" style="width:7%;">'.$t["sog"].'</td>
@@ -301,12 +320,12 @@ while ($t = mysqli_fetch_array($r))
       if(strtotime($t["datetime"])==mktime(0,0,0,date("n"),date("j")-1)) $datum='včera';
       if($t["status"]=="0" && $t["to_name"]=="") $t["to_name"]=LANG_TEAMSTATS_FREEAGENT;
       if($t["pid"]!=NULL) {
-        if($t["goalie"]==0) $pl = mysqli_query($link, "SELECT name FROM el_players WHERE id='".$t["pid"]."'");
-        else $pl = mysqli_query($link, "SELECT name FROM el_goalies WHERE id='".$t["pid"]."'");
+        if($t["goalie"]==0) $pl = mysqli_query($link, "SELECT name FROM ".($t["el"]==1 ? 'el_players':'2004players')." WHERE id='".$t["pid"]."'");
+        else $pl = mysqli_query($link, "SELECT name FROM ".($t["el"]==1 ? 'el_goalies':'2004goalies')." WHERE id='".$t["pid"]."'");
         $player = mysqli_fetch_array($pl);
         if(!isset($player)) $player["name"]="";
-        if($t["goalie"]==0) $url = '/player/'.$t["pid"].'1-'.SEOtitle($player["name"]);
-        else $url = '/goalie/'.$t["pid"].'1-'.SEOtitle($player["name"]);
+        if($t["goalie"]==0) $url = '/player/'.$t["pid"].$t["el"].'-'.SEOtitle($player["name"]);
+        else $url = '/goalie/'.$t["pid"].$t["el"].'-'.SEOtitle($player["name"]);
       }
       else $player["name"] = $t["pname"];
 	$content .= ' <tr>
@@ -472,7 +491,11 @@ ORDER BY datetime DESC LIMIT 1)dt WHERE dt.id IS NOT NULL");
                       </div>';
         }
                 
-    $w = mysqli_query($link, "SELECT el_players.*, l.longname, l.active, t.id as tid FROM el_players JOIN 2004leagues l ON l.id=el_players.league JOIN el_teams t ON t.shortname=el_players.teamshort && t.league=el_players.league WHERE name='".$data["name"]."'".$coll." ORDER BY league ASC, el_players.id ASC");
+    $w = mysqli_query($link, "SELECT el_players.*, l.longname, l.active, t.id as tid FROM el_players JOIN 2004leagues l ON l.id=el_players.league JOIN el_teams t ON t.shortname=el_players.teamshort && t.league=el_players.league WHERE name='".$data["name"]."'".$coll."
+UNION
+SELECT id_upper as id, NULL as teamshort, teamlong, name, 0 as jersey, NULL as pos, NULL as born, 'L' as hold, 0 as kg, 0 as cm, gp, goals, asists, goals+asists as points, 0 as penalty, 0 as gwg, 0 as gtg, 0 as ppg, 0 as shg, league_upper as league, CONCAT(league_name, ' ', season) as longname, 0 as active, 0 as tid FROM player_lowerleagues WHERE name='".$data["name"]."'".$coll."
+ORDER BY league ASC, id ASC");
+    //$w = mysqli_query($link, "SELECT el_players.*, l.longname, l.active, t.id as tid FROM el_players JOIN 2004leagues l ON l.id=el_players.league JOIN el_teams t ON t.shortname=el_players.teamshort && t.league=el_players.league WHERE name='".$data["name"]."'".$coll." ORDER BY league ASC, el_players.id ASC");
     if(mysqli_num_rows($w)>0)
         {
         $name1 = mysqli_query($link, "SELECT sum(gp), sum(goals), sum(asists), sum(points), sum(penalty), sum(ppg), sum(shg), sum(gwg) FROM el_players WHERE name='".$data["name"]."'".$coll."");
@@ -505,16 +528,16 @@ ORDER BY datetime DESC LIMIT 1)dt WHERE dt.id IS NOT NULL");
         while($f = mysqli_fetch_array($w))
           {
           $content .= '<tr>
-              <td style="width:22%;"><a href="/games/'.$f["league"].'-'.SEOTitle($f["longname"]).'">'.$f["longname"].'</a></td>
-              <td style="width:22%;"><a href="/team/'.$f["tid"].'1-'.SEOTitle($f["teamlong"]).'">'.$f["teamlong"].'</a></td>
+              <td style="width:22%;">'.($f["tid"]!=0 ? '<a href="/games/'.$f["league"].'-'.SEOTitle($f["longname"]).'">'.$f["longname"].'</a>':$f["longname"]).'</td>
+              <td style="width:22%;">'.($f["tid"]!=0 ? '<a href="/team/'.$f["tid"].'1-'.SEOTitle($f["teamlong"]).'">'.$f["teamlong"].'</a>':$f["teamlong"]).'</td>
               <td class="text-center" style="width:7%;">'.$f["gp"].'</td>
               <td class="text-center" style="width:7%;">'.$f["goals"].'</td>
               <td class="text-center" style="width:7%;">'.$f["asists"].'</td>
               <td class="text-center font-weight-bold" style="width:7%;">'.$f["points"].'</td>
-              <td class="text-center" style="width:7%;">'.$f["penalty"].'</td>
-              <td class="text-center" style="width:7%;">'.$f["ppg"].'</td>
-              <td class="text-center" style="width:7%;">'.$f["shg"].'</td>
-              <td class="text-center" style="width:7%;">'.$f["gwg"].'</td>
+              <td class="text-center" style="width:7%;">'.($f["tid"]!=0 ? $f["penalty"]:'').'</td>
+              <td class="text-center" style="width:7%;">'.($f["tid"]!=0 ? $f["ppg"]:'').'</td>
+              <td class="text-center" style="width:7%;">'.($f["tid"]!=0 ? $f["shg"]:'').'</td>
+              <td class="text-center" style="width:7%;">'.($f["tid"]!=0 ? $f["gwg"]:'').'</td>
             </tr>';
             if($f["active"]==1) {
                 // hrá túto sezónu
@@ -557,6 +580,13 @@ ORDER BY datetime DESC LIMIT 1)dt WHERE dt.id IS NOT NULL");
                 $transfer_date = $transfer["datetime"];
             }
         }
+        $injured_dates = [];
+        $inj = mysqli_query($link, "SELECT d1.id AS injury_id, d1.name, d1.msg_date AS injury_date, d2.msg_date AS recovery_date FROM 2004playerdiary d1 JOIN 2004playerdiary d2 ON d1.name = d2.name AND d1.msg_type = 7 AND d2.msg_type = 9 AND d2.msg_date > d1.msg_date AND NOT EXISTS (SELECT 1 FROM 2004playerdiary d3 WHERE d3.name = d1.name AND d3.msg_type = 7 AND d3.msg_date > d1.msg_date AND d3.msg_date < d2.msg_date) WHERE d1.name = '".$data["name"]."' ORDER BY d1.msg_date;");
+        if(mysqli_num_rows($inj)>0) {
+            while($injur = mysqli_fetch_array($inj)) {
+                $injured_dates[] = array($injur["injury_date"], $injur["recovery_date"]);
+            }
+        }
         $content .= '<div class="card my-4 shadow animated--grow-in gamelog">
               <div class="card-header">
                 <h6 class="m-0 font-weight-bold text-'.$leaguecolor.'">
@@ -585,7 +615,7 @@ ORDER BY datetime DESC LIMIT 1)dt WHERE dt.id IS NOT NULL");
                         $goals = str_repeat('<i class="fa-fw fa-hockey-puck fas text-gray-900"></i>', $gamelog[$gid]["g"] ?? 0);
                         $asists = str_repeat('<i class="fa-fw fa-a fas text-danger"></i>', $gamelog[$gid]["a"] ?? 0);
                         
-                        $content .= '<div class="d-block position-relative game-holder' . ($f["kedy"] == "na programe" ? ' text-gray-400' : '') . '">
+                        $content .= '<div class="d-block position-relative game-holder' . ($f["kedy"] == "na programe" || (isDateInInjuredPeriod(date("Y-m-d", strtotime($f["datetime"])), $injured_dates) && $goals=="" && $asists=="") ? ' text-gray-400' : '') . '">
                             <div class="text-nowrap border border-left-0 border-right-0 vs-team">vs. ' . $f["vsteam"] . '</div>
                             <div class="text-center border border-top-0 pt-1 icons">' . $goals . $asists . '</div>
                         </div>';
@@ -1530,6 +1560,7 @@ ORDER BY id DESC LIMIT 1");
                               if($last["toi"]!=0) {
                                 $toim = floor($last["toi"]/60);
                                 $tois = $last["toi"]%60;
+                                if($tois<10) $tois = "0".$tois;
                                 $toi = ' · <span class="badge badge-pill badge-secondary" data-toggle="tooltip" data-placement="top" title="'.LANG_PLAYERS_TOI.'">TOI '.$toim.':'.$tois.'</span>';
                               }
                               else $toi = '';

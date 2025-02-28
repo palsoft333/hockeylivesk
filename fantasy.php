@@ -1,18 +1,18 @@
 <?php
 $params = explode("/", htmlspecialchars($_GET["id"]));
 
-$nazov = "Fantasy Championship";
-$menu = "MS 2024";
-$skratka = "MS";
+$nazov = "Fantasy Junior Championship";
+$menu = "MS U20 2025";
+$skratka = "MS U20";
 $manazerov = 10;
-$article_id = 2484;
-$league_id = 153;
+$article_id = 2535;
+$league_id = 161;
 //$timeout = 480;
 $predraftt = 1; // = draftuje sa do zásobníka. ak 1, upraviť počet manažérov aj v includes/fantasy_functions.php
-$knownrosters = 0; // = su zname zostavy (do ft_choices pridat hracov, ktori sa zucastnia)
-$article_rosters = 2487;
-$draft_start = "2024-05-02 09:00:00";
-$league_start = "2024-05-10 16:20:00";
+$knownrosters = 1; // = su zname zostavy (do ft_choices pridat hracov, ktori sa zucastnia)
+$article_rosters = 2534;
+$draft_start = "2024-12-23 09:10:00";
+$league_start = "2024-12-26 18:00:00";
 
 /*
 1. nastaviť dátum deadlinu
@@ -39,11 +39,11 @@ $u = mysqli_query($link, "SELECT * FROM ft_players");
 $o = mysqli_num_rows($u);
 $timeout = ($o==($manazerov)*10 ? 0:floor(($diff*24*60)/(($manazerov)*10-$o)));
 $uid = $_SESSION['logged'] ?? null;
-$leag = mysqli_query($link, "SELECT * FROM 2004leagues WHERE longname LIKE '%".$skratka."%' && active='1'");
+$leag = mysqli_query($link, "SELECT * FROM 2004leagues WHERE id='".$league_id."'");
 $league = mysqli_fetch_array($leag);
 $leaguecolor = $league["color"];
 $active_league = $league["id"];
-//if($uid==2) { $uid=215; $_SESSION["logged"]=215; } 
+//if($uid==2) { $uid=3064; /*$_SESSION["logged"]=215;*/ } 
 
 // cron job pre vyber random hraca pri necinnosti manazera
 if(isset($_GET["cron"]) && $_GET["cron"]==1)
@@ -87,7 +87,7 @@ if(isset($_GET["cron"]) && $_GET["cron"]==1)
         $team[$i] = "'".$v["shortname"]."'";
         $i++;
         }
-      $teams = implode($team, ",");
+      $teams = implode(",", $team);
       $y = mysqli_query($link, "SELECT * FROM 2004goalies WHERE teamshort IN (".$teams.") && name NOT IN (SELECT c.name FROM `ft_players` JOIN ft_choices c ON ft_players.pid=c.id) ORDER BY rand() LIMIT 1");
     }
     else $y = mysqli_query($link, "SELECT * FROM `ft_choices` WHERE pos='GK' && id NOT IN (SELECT pid FROM ft_players) ORDER BY rand() LIMIT 1");
@@ -108,7 +108,7 @@ if(isset($_GET["cron"]) && $_GET["cron"]==1)
       $team[$i] = "'".$v["shortname"]."'";
       $i++;
       }
-    $teams = implode($team, ",");
+    $teams = implode(",", $team);
     if($predraftt==1) $ttable = "ft_choices";
     else $ttable = "2004players";
     $c = mysqli_query($link, "SELECT * FROM ".$ttable." WHERE pos='".$pos."' && teamshort IN (".$teams.") && name NOT IN (SELECT c.name FROM `ft_players` JOIN ft_choices c ON ft_players.pid=c.id) ORDER BY rand() LIMIT 1");
@@ -198,11 +198,29 @@ if($params[0]=="draft")
                             </h6>
                           </div>
                           <div class="card-body alert-info">
-                            <p class="text-center m-0"><i class="fas fa-info-circle mr-1"></i>Predpokladaný začiatok draftu je <strong>'.date("j.n. \o G:i", strtotime($draft_start)).'</strong></p>
+                            <p class="text-center m-0"><i class="fas fa-info-circle mr-1"></i>Čakáme na posledné súpisky <b>Lotyšska</b>, <b>Česka</b> a <b>Švajčiarska</b>.<br>Predpokladaný začiatok draftu je <strong>'.date("j.n. \o G:i", strtotime($draft_start)).'</strong></p>
                           </div>
                          </div>
                         </div>
                        </div>';
+                       
+        // anketa
+        include("includes/poll.php");
+        $content .= '
+        <div class="row justify-content-center">
+            <div class="col-sm-8 col-md-7">
+                <div class="card mb-4 shadow animated--grow-in">
+                    <div class="card-header">
+                        <h6 class="m-0 font-weight-bold text-success">
+                            Zaujímal by nás Váš názor
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        '.renderPoll(1).'
+                    </div>
+                </div>
+            </div>
+        </div>';
                        
     $content .= Show_Drafted();
   }
@@ -211,6 +229,7 @@ if($params[0]=="draft")
       if(mysqli_num_rows($hra)>0) { // ak je prihlasenym manazerom
         $q = mysqli_query($link, "SELECT * FROM ft_players ORDER BY round DESC, id DESC");
         $f = mysqli_fetch_array($q);
+        $f["round"] = $f["round"] ?? null;
         $po = mysqli_query($link, "SELECT * FROM ft_players WHERE round='".$f["round"]."'");
         $poc = mysqli_num_rows($po);
         $push = mysqli_fetch_array($hra);
@@ -222,6 +241,24 @@ if($params[0]=="draft")
                      <h2 class='h6 h6-fluid text-".$leaguecolor." text-uppercase font-weight-bold mb-3'>".LANG_FANTASY_PLAYERSDRAFT."</h2>
                      <div class='row'>
                         <div class='col-12' style='max-width: 1000px;'>";
+
+        // anketa
+        include("includes/poll.php");
+        $content .= '
+        <div class="row justify-content-center">
+            <div class="col-sm-8 col-md-7">
+                <div class="card mb-4 shadow animated--grow-in">
+                    <div class="card-header">
+                        <h6 class="m-0 font-weight-bold text-success">
+                            Zaujímal by nás Váš názor
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        '.renderPoll(1).'
+                    </div>
+                </div>
+            </div>
+        </div>';
         
         // zistit aktualne kolo a poradie manazera na rade
         if($poc<$manazerov) {
@@ -262,6 +299,7 @@ if($params[0]=="draft")
             if(mysqli_num_rows($c)==0) {
                 $q = mysqli_query($link, "SELECT * FROM ft_choices WHERE id='".$picks[$k]["pid"]."'");
                 $f = mysqli_fetch_array($q);
+                $f["pos"] = $f["pos"] ?? null;
                 if($f["pos"]=="GK") $numgk--;
                 if($f["pos"]=="D" || $f["pos"]=="LD" || $f["pos"]=="RD") $numd--;
                 if($f["pos"]=="F" || $f["pos"]=="CE" || $f["pos"]=="RW" || $f["pos"]=="LW") $numf--;
@@ -313,6 +351,7 @@ if($params[0]=="draft")
                         else $b = mysqli_query($link, "SELECT * FROM 2004players WHERE id='".$picks[$j]["pid"]."'");
                         $v = mysqli_fetch_array($b);
                         if($pos=="") {
+                            $v["pos"] = $v["pos"] ?? null;
                             if($v["pos"]=="D" || $v["pos"]=="LD" || $v["pos"]=="RD") $pos = "D";
                             if($v["pos"]=="F" || $v["pos"]=="CE" || $v["pos"]=="RW" || $v["pos"]=="LW") $pos = "F";
                         }
@@ -390,6 +429,23 @@ if($params[0]=="draft")
                    <div class='row'>
                       <div class='col-12' style='max-width: 1000px;'>";
       $content .= '<div class="alert alert-info" role="alert">'.sprintf(LANG_FANTASY_DRAFTTEXT, $nazov, $manazerov).'</div>';
+        // anketa
+        include("includes/poll.php");
+        $content .= '
+        <div class="row justify-content-center">
+            <div class="col-sm-8 col-md-7">
+                <div class="card mb-4 shadow animated--grow-in">
+                    <div class="card-header">
+                        <h6 class="m-0 font-weight-bold text-success">
+                            Zaujímal by nás Váš názor
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        '.renderPoll(1).'
+                    </div>
+                </div>
+            </div>
+        </div>';
       $content .= Show_Drafted();
     }
   }
@@ -417,6 +473,24 @@ if($params[0]=="picks")
                 <div class='row'>
                     <div class='col-12' style='max-width: 1000px;'>";
 
+    // anketa
+    include("includes/poll.php");
+    $content .= '
+    <div class="row justify-content-center">
+        <div class="col-sm-8 col-md-7">
+            <div class="card mb-4 shadow animated--grow-in">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-success">
+                        Zaujímal by nás Váš názor
+                    </h6>
+                </div>
+                <div class="card-body">
+                    '.renderPoll(1).'
+                </div>
+            </div>
+        </div>
+    </div>';
+
   $r = mysqli_query($link, "SELECT t.uid, t.points, t.prev_points, u.uname, u.user_avatar FROM ft_teams t LEFT JOIN e_xoops_users u ON u.uid=t.uid WHERE t.active='1' ORDER BY t.points DESC, t.pos ASC");
   //$content .= '<div class="alert alert-info">Keďže nastala na prvej priečke rovnosť bodov medzi dvoma manažérmi, museli sme zaviesť rozhodovacie pravidlo, ktorým je menší počet výmen hráčov v zostave. Tento rozstrel vyhral v pomere 31:121 manažér <b>Athletix</b>, ktorému gratulujeme! Aby sa ale <b>pegina</b> nehnevala, odmeňujeme takisto aj druhé miesto v drafte :)</div>';
    
@@ -437,7 +511,7 @@ if($params[0]=="picks")
         <div class="row no-gutters">';
           $dnes = date("Y-m-d");
           $exc = [];
-          $excl = mysqli_query($link, "SELECT * FROM `2004matches` WHERE datetime > '".$dnes." 00:00:00' && datetime < now() && kedy='na programe' && league='".$league_id."'");
+          $excl = mysqli_query($link, "SELECT * FROM `2004matches` WHERE datetime < now() && kedy='na programe' && league='".$league_id."'");
           while($exclude = mysqli_fetch_array($excl))
             {
             $exc[] = $exclude["team1short"];

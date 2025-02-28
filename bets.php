@@ -54,7 +54,7 @@ $content .= '<div class="league-select">
               <select class="custom-select custom-select-sm w-auto" name="leagues" id="leagues">
                 <option value="0">'.LANG_BETS_OVERALL.'</option>
                 <optgroup label="'.LANG_BETS_ACTUAL.'">
-                    <!--option value="contest">Súťaž o hokejové kartičky</option-->';
+                    <option value="contest">Súťaž o hokejové kartičky</option>';
                 $l1 = mysqli_query($link, "SELECT * FROM 2004leagues WHERE active='1' && id!='70' ORDER BY position ASC");
                 while($l1d = mysqli_fetch_array($l1))
                   {
@@ -68,21 +68,21 @@ $content .= '<div class="league-select">
                   }
                 $content .= '</optgroup>
               </select>
-            </div>';
-            /*
+            </div>
+            
             <div class="row justify-content-center mt-4">
               <div class="col-12 col-lg-5 col-sm-8">
                 <div class="card shadow animated--grow-in">
-                  <img src="/images/kartickyMS.webp" class="card-img-top" alt="Súťaž">
+                  <img src="/images/kartickyEL.webp?v=2025" class="card-img-top" alt="Súťaž">
                   <div class="card-body">
-                    <p class="card-text">Počas <b>Majstrovstiev sveta v hokeji 2024</b> tu máme znovu našu súťaž o zberateľské hokejové kartičky z našej najvyššej súťaže Tipos Extraliga sezóny 2023/2024! Medzi nimi aj kartičky s kúskom hráčskeho dresu alebo originálnym podpisom.</p>
-                    <p class="card-text">Zapojíte sa jednoducho - <a href="/games/153-majstrovstva-sveta-v-hokeji-2024">tipovaním výsledkov</a> zápasov MS 2024.</p>
-                    <!--p class="card-text text-hl small">* pre vyrovnané šance pre všetkých rátame body do súťaže od 14.2.2024</p-->
+                    <p class="card-text">Počas <b>playoff Tipos Extraligy</b> tu máme znovu našu súťaž o zberateľské hokejové kartičky z našej najvyššej súťaže Tipos Extraliga sezóny 2024/2025! Medzi nimi aj kartičky s kúskom hráčskeho dresu alebo originálnym podpisom.</p>
+                    <p class="card-text">Zapojíte sa jednoducho - <a href="/games/159-tipos-extraliga">tipovaním výsledkov</a> zápasov playoff extraligy.</p>
+                    <p class="card-text text-hl small">* pre vyrovnané šance pre všetkých rátame body do súťaže od 10.3.2025</p>
                   </div>
                 </div>
               </div>
-            </div>
-*/
+            </div>';
+
 $content .= '
             <div class="card my-4 shadow animated--grow-in">
               <div class="card-header">

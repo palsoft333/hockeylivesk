@@ -87,7 +87,7 @@ else echo '
             '.$stats["gp"].'
         </div>
         <div class="col-2 text-xs font-weight-bold text-nowrap">
-            '.round(($stats["svs"]/$stats["sog"])*100,1).'
+            '.($stats["sog"]==0 ? '':round(($stats["svs"]/$stats["sog"])*100,1)).'
         </div>
     </div>';
 }

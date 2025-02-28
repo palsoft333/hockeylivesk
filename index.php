@@ -141,7 +141,7 @@ switch ($_GET["p"]) {
     default:
         include("includes/homepage_functions.php");
         if(isset($_GET["topicID"]) && $_GET["topicID"]!="all") {
-          $q = mysqli_query($link, "SELECT * FROM 2004leagues WHERE topic_id='".$_GET["topicID"]."' ORDER BY id DESC LIMIT 1");
+          $q = mysqli_query($link, "SELECT * FROM 2004leagues WHERE topic_id='".mysqli_real_escape_string($link, $_GET["topicID"])."' ORDER BY id DESC LIMIT 1");
           if(mysqli_num_rows($q)>0) {
             $f = mysqli_fetch_array($q);
             $leaguecolor = LeagueColor($f["longname"]);
@@ -175,7 +175,7 @@ else mysqli_query($link, "UPDATE e_xoops_users SET last_login='".time()."' WHERE
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="<? if(!isset($_GET["p"]) && !isset($_GET["topicID"])) echo "Portál pokrývajúci slovenský a zahraničný ľadový hokej. Štatistiky, tipovanie, databáza hráčov, výsledkový servis z domácich líg, zahraničných turnajov, KHL a NHL."; else echo $title; ?>">
+  <meta name="description" content="<? if(!isset($_GET["p"]) && !isset($_GET["topicID"])) echo "Portál pokrývajúci slovenský a zahraničný ľadový hokej. Štatistiky, tipovanie, databáza hráčov, výsledkový servis z domácich líg, zahraničných turnajov, KHL a NHL."; elseif(isset($desc)) echo $desc; else echo $title; ?>">
 
   <meta name="author" content="<? if(isset($author)) echo $author; else echo "hockey-LIVE.sk"; ?>" />
   <meta name="title" content="<? echo $title; ?>" />
@@ -217,14 +217,14 @@ else mysqli_query($link, "UPDATE e_xoops_users SET last_login='".time()."' WHERE
   if($_GET["p"]=="games" || $_GET["p"]=="teams" || $_GET["p"]=="report" || $_GET["p"]=="articles" || $_GET["p"]=="players" || $_GET["p"]=="fantasy") echo '<link rel="stylesheet" href="/css/jquery.emojiarea.css?v=1.0.0" />';
   ?>
 
-<!-- Quantcast Choice. Consent Manager Tag v2.0 (for TCF 2.0) -->
+<!-- InMobi Choice. Consent Manager Tag v3.0 (for TCF 2.2) -->
 <script type="text/javascript" async=true>
 (function() {
-  var host = 'www.themoneytizer.com';
+  var host = "www.themoneytizer.com";
   var element = document.createElement('script');
   var firstScript = document.getElementsByTagName('script')[0];
-  var url = 'https://cmp.quantcast.com'
-    .concat('/choice/', '6Fv0cGNfc_bw8', '/', host, '/choice.js');
+  var url = 'https://cmp.inmobi.com'
+    .concat('/choice/', '6Fv0cGNfc_bw8', '/', host, '/choice.js?tag_version=V3');
   var uspTries = 0;
   var uspTriesLimit = 3;
   element.async = true;
@@ -286,7 +286,7 @@ else mysqli_query($link, "UPDATE e_xoops_users SET last_login='".time()."' WHERE
         }
       } else {
         if(args[0] === 'init' && typeof args[3] === 'object') {
-          args[3] = { ...args[3], tag_version: 'V2' };
+          args[3] = Object.assign(args[3], { tag_version: 'V3' });
         }
         queue.push(args);
       }
@@ -378,7 +378,7 @@ else mysqli_query($link, "UPDATE e_xoops_users SET last_login='".time()."' WHERE
   }
 })();
 </script>
-<!-- End Quantcast Choice. Consent Manager Tag v2.0 (for TCF 2.0) -->
+<!-- End InMobi Choice. Consent Manager Tag v3.0 (for TCF 2.2) -->
 </head>
 
 <body id="page-top" class="bg-gradient-<? echo $leaguecolor; ?>-darken">
@@ -616,7 +616,7 @@ else mysqli_query($link, "UPDATE e_xoops_users SET last_login='".time()."' WHERE
 <? 
 if(!isset($_GET["p"]) && !isset($_GET["topicID"])) echo '  <script type="text/javascript" src="/js/jquery.calendario.min.js?v=1.0.6"></script>
   <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION["lang"].'.js?v=1.0.0"></script>
-  <script type="text/javascript" src="/js/homepage_events.min.js?v=1.1.3"></script>';
+  <script type="text/javascript" src="/js/homepage_events.min.js?v=1.1.6"></script>';
 elseif($_GET["p"]=="games")
   {
   echo '  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION["lang"].'.js?v=1.0.0"></script>

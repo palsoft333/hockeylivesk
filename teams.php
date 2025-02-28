@@ -64,7 +64,40 @@ if($id)
       $gl = mysqli_num_rows($o)-$f["zapasov"];
       $ce = $tt->check_canearn($f["shortname"])-($f["p_basic"]!=0 ? $f["p_basic"]:$f["body"]);
       $g = mysqli_query($link, "SELECT $goalies_table.*, (svs/sog)*100 as svsp, ga/gp as gaa, CONCAT(YEAR(NOW()),DATE_FORMAT(born,'-%m-%d')) as datum, YEAR(NOW())-YEAR(born) as vek, dt.injury FROM $goalies_table LEFT JOIN (SELECT name, injury FROM $injury_table WHERE league='".$f["league"]."')dt ON $goalies_table.name=dt.name WHERE teamshort='".$f["shortname"]."' && league='".$f["league"]."' ORDER BY svsp DESC, gaa ASC");
-      $p = mysqli_query($link, "SELECT $players_table.*, CONCAT(YEAR(NOW()),DATE_FORMAT(born,'-%m-%d')) as datum, YEAR(NOW())-YEAR(born) as vek, dt.injury FROM $players_table LEFT JOIN (SELECT name, injury FROM $injury_table WHERE league='".$f["league"]."')dt ON $players_table.name=dt.name WHERE teamshort='".$f["shortname"]."' && league='".$f["league"]."' ORDER BY points DESC, gp ASC, goals DESC, asists DESC, gwg DESC, gtg DESC, shg DESC, ppg DESC, penalty ASC");
+      $p = mysqli_query($link, "SELECT 
+    el_players.*, 
+    CONCAT(YEAR(NOW()), DATE_FORMAT(born, '-%m-%d')) AS datum, 
+    YEAR(NOW()) - YEAR(born) AS vek, 
+    dt.injury, 
+    CASE 
+        WHEN EXISTS (
+            SELECT 1
+            FROM el_players p2
+            WHERE el_players.name = p2.name
+              AND el_players.league = p2.league
+              AND el_players.teamshort != p2.teamshort
+              AND el_players.id < p2.id
+        ) THEN '1'
+        ELSE '0'
+    END AS has_transferred
+FROM el_players
+LEFT JOIN (
+    SELECT name, injury 
+    FROM el_injuries 
+    WHERE league = '".$f["league"]."'
+) dt ON el_players.name = dt.name
+WHERE el_players.teamshort = '".$f["shortname"]."' 
+  AND el_players.league = '".$f["league"]."'
+ORDER BY 
+    points DESC, 
+    gp ASC, 
+    goals DESC, 
+    asists DESC, 
+    gwg DESC, 
+    gtg DESC, 
+    shg DESC, 
+    ppg DESC, 
+    penalty ASC;");
       $h = mysqli_query($link, "SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysqli_error($link));
       $h = mysqli_query($link, "SELECT pd.* FROM 2004playerdiary as pd JOIN(SELECT name FROM $players_table WHERE teamshort='".$f["shortname"]."' && league='".$f["league"]."' GROUP BY name UNION SELECT name FROM $goalies_table WHERE teamshort='".$f["shortname"]."' && league='".$f["league"]."' GROUP BY name)dt ON pd.name=dt.name ORDER BY pd.msg_date DESC, pd.id DESC LIMIT 10");
       $k = mysqli_query($link, "SELECT * FROM transfers WHERE from_team='".$f["shortname"]."' || to_team='".$f["shortname"]."' GROUP BY pname, from_team, to_team ORDER BY datetime DESC LIMIT 10");
@@ -185,10 +218,10 @@ if($id)
                       if(!isset($t["gaa"])) $t["gaa"]=0;
                       if(strtotime($t["datum"])==mktime(0,0,0)) $bday = ' <i class="fas fa-birthday-cake align-self-center" data-toggle="tooltip" data-placement="top" data-html="true" title="Dnes oslavuje <strong>'.$t["vek"].'</strong> rokov<br>Blahoželáme!"></i>';
                       if($t["injury"]!=NULL) $injury = ' <i class="fas fa-user-injured text-danger align-self-center" data-toggle="tooltip" data-placement="top" data-html="true" title="Zranený: <strong>'.$t["injury"].'</strong>"></i>';
-                      if(isset($slovaks) && array_key_exists($t["name"], $slovaks)) $slovak = ' <img class="flag-iihf SVK-small align-self-center" src="/img/blank.png" alt="Slovák">';
+                      if(isset($slovaks) && array_key_exists($t["name"], $slovaks) && (strstr($e["longname"], "KHL") || strstr($e["longname"], "NHL"))) $slovak = ' <img class="flag-iihf SVK-small align-self-center" src="/img/blank.png" alt="Slovák">';
                       $content .= '<tr'.(($el==1 && $t["gp"]==0) || $injury!="" ? ' class="text-gray-500"':'').'>
                       <td class="text-center">GK</td>
-                      <td class="text-nowrap'.($bday!="" || $injury!="" || $slovak!="" ? ' d-flex justify-content-between':'').'"><a href="/goalie/'.$t["id"].$el.'-'.SEOtitle($t["name"]).'">'.$t["name"].'</a>'.$slovak.''.$injury.''.$bday.'</td>
+                      <td class="text-nowrap'.($bday!="" || $injury!="" || $slovak!="" ? ' d-flex justify-content-between':'').'"><a href="/goalie/'.$t["id"].$el.'-'.SEOtitle($t["name"]).'"'.(($el==1 && $t["gp"]==0) || $injury!="" ? ' class="text-gray-500"':'').'>'.$t["name"].'</a>'.$slovak.'<div>'.$injury.''.$bday.'</div></td>
                       <td class="text-center">'.$t["gp"].'</td>
                       <td class="text-center">'.$t["sog"].'</td>
                       <td class="text-center">'.$t["svs"].'</td>
@@ -233,7 +266,7 @@ if($id)
                   
                     while($y = mysqli_fetch_array($p))
                       {
-                      $bday=$injury=$slovak="";
+                      $bday=$injury=$slovak=$transfer="";
                       if($el==0)
                         {
                         if($y["pos"]=="LD" || $y["pos"]=="RD") $y["pos"]="D";
@@ -241,10 +274,11 @@ if($id)
                         }
                       if(strtotime($y["datum"])==mktime(0,0,0)) $bday = ' <i class="fas fa-birthday-cake align-self-center" data-toggle="tooltip" data-placement="top" data-html="true" title="Dnes oslavuje <strong>'.$y["vek"].'</strong> rokov<br>Blahoželáme!"></i>';
                       if($y["injury"]!=NULL) $injury = ' <i class="fas fa-user-injured text-danger align-self-center" data-toggle="tooltip" data-placement="top" data-html="true" title="Zranený: <strong>'.$y["injury"].'</strong>"></i>';
-                      if(isset($slovaks) && array_key_exists($y["name"], $slovaks)) $slovak = ' <img class="flag-iihf SVK-small align-self-center" src="/img/blank.png" alt="Slovák">';
-                      $content .= '<tr'.(($el==1 && $y["gp"]==0) || $injury!="" ? ' class="text-gray-500"':'').'>
+                      if(isset($slovaks) && array_key_exists($y["name"], $slovaks) && (strstr($e["longname"], "KHL") || strstr($e["longname"], "NHL"))) $slovak = ' <img class="flag-iihf SVK-small align-self-center" src="/img/blank.png" alt="Slovák">';
+                      if(isset($y["has_transferred"]) && $y["has_transferred"]==1) $transfer = ' <i class="fas fa-arrow-right-arrow-left text-success" data-toggle="tooltip" data-placement="top" title="Prestúpil do iného tímu"></i>';
+                      $content .= '<tr'.(($el==1 && $y["gp"]==0) || $injury!="" || $transfer!="" ? ' class="text-gray-500"':'').'>
                       <td class="text-center">'.$y["pos"].'</td>
-                      <td class="text-nowrap'.($bday!="" || $injury!="" || $slovak!="" ? ' d-flex justify-content-between':'').'"><a href="/player/'.$y["id"].$el.'-'.SEOtitle($y["name"]).'">'.$y["name"].'</a>'.$slovak.''.$injury.''.$bday.'</td>
+                      <td class="text-nowrap'.($bday!="" || $injury!="" || $slovak!="" || $transfer!="" ? ' d-flex justify-content-between':'').'"><a href="/player/'.$y["id"].$el.'-'.SEOtitle($y["name"]).'"'.(($el==1 && $y["gp"]==0) || $injury!="" || $transfer!="" ? ' class="text-gray-500"':'').'>'.$y["name"].'</a><div>'.$slovak.''.$injury.''.$bday.$transfer.'</div></td>
                       <td class="text-center">'.$y["gp"].'</td>
                       <td class="text-center">'.$y["goals"].'</td>
                       <td class="text-center">'.$y["asists"].'</td>
@@ -322,12 +356,12 @@ if($id)
                     if(strtotime($l["datetime"])==mktime(0,0,0,date("n"),date("j")-1)) $datum='včera';
                     if($l["status"]=="0" && $l["to_name"]=="") $l["to_name"]=LANG_TEAMSTATS_FREEAGENT;
                     if($l["pid"]!=NULL) {
-                      if($l["goalie"]==0) $pl = mysqli_query($link, "SELECT name FROM el_players WHERE id='".$l["pid"]."'");
-                      else $pl = mysqli_query($link, "SELECT name FROM el_goalies WHERE id='".$l["pid"]."'");
+                      if($l["goalie"]==0) $pl = mysqli_query($link, "SELECT name FROM ".($l["el"]==1 ? 'el_players':'2004players')." WHERE id='".$l["pid"]."'");
+                      else $pl = mysqli_query($link, "SELECT name FROM ".($l["el"]==1 ? 'el_goalies':'2004goalies')." WHERE id='".$l["pid"]."'");
                       $player = mysqli_fetch_array($pl);
                       if(!isset($player["name"])) $player["name"]="";
-                      if($l["goalie"]==0) $url = '/player/'.$l["pid"].'1-'.SEOtitle($player["name"]);
-                      else $url = '/goalie/'.$l["pid"].'1-'.SEOtitle($player["name"]);
+                      if($l["goalie"]==0) $url = '/player/'.$l["pid"].$l["el"].'-'.SEOtitle($player["name"]);
+                      else $url = '/goalie/'.$l["pid"].$l["el"].'-'.SEOtitle($player["name"]);
                     }
                     else $player["name"] = $l["pname"];
                     $content .= '

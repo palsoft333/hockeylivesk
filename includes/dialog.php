@@ -79,7 +79,7 @@ if($_GET["action"]=="change")
             <select name="newpid" id="newpid" size="1" class="custom-select">
               <option value="0">Vyberte si nového hráča:</option>';
               $dnes = date("Y-m-d");
-              $excl = mysqli_query($link, "SELECT * FROM `2004matches` WHERE datetime > '".$dnes." 00:00:00' && datetime < now() && kedy='na programe' && league='".$f["league"]."'");
+              $excl = mysqli_query($link, "SELECT * FROM `2004matches` WHERE datetime < now() && kedy='na programe' && league='".$f["league"]."'");
               $exc = [];
               while($exclude = mysqli_fetch_array($excl))
                 {

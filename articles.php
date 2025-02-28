@@ -30,6 +30,20 @@ if(mysqli_num_rows($q)>0)
       <meta name="twitter:description" content="'.$desc.'" />
   ';
 
+  // specific meta tags
+  if($id[0]==2539) {
+      $title = "Nový rok, nová príležitosť pre športové stávkovanie";
+      $desc = "Nový rok prináša nové príležitosti a inak tomu nie je ani vo svete hokeja a športového stávkovania. Pozrime sa, ako k tomu pristupovať a ako sa pripraviť.";
+      $article_meta_tags = '<meta property="og:title" content="'.$title.'" />
+      <meta property="og:type" content="article" />
+      <meta property="og:url" content="https://'.$_SERVER["HTTP_HOST"].$_SERVER["REQUEST_URI"].'" />
+      <meta property="og:description" content="'.$desc.'" />     
+      <meta name="twitter:card" content="summary" />
+      <meta name="twitter:title" content="'.$title.'" />
+      <meta name="twitter:description" content="'.$desc.'" />
+  ';
+  }
+
   $f["hometext"] = str_replace("news-image","col-12 col-sm-5 col-xl-2 float-left img-thumbnail mr-3 mb-2 p-1",$f["hometext"]);
   $f["bodytext"] = preg_replace_callback('/\[\[games-table\]\]/', function ($matches) { Global $f; return generateGamesTable($f["lid"]); }, $f["bodytext"]);
   $f["bodytext"] = preg_replace_callback('/\[\[team-roster\]\]/', function ($matches) { Global $f; return generateRoster("SVK",$f["lid"]); }, $f["bodytext"]);

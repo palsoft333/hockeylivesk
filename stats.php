@@ -67,6 +67,8 @@ if(isset($lid))
     
     $script_end = '<script type="text/javascript">
         $(document).ready(function() {
+        
+        let playersLoad = true;
         $("#players").dataTable( {
                 "fnRowCallback": function( nRow, aData, iDisplayIndex ) {
                     $("td:eq('.$incr.')", nRow).html( "<b>"+aData[8]+"</b>" );
@@ -82,9 +84,21 @@ if(isset($lid))
         '.$players.'
             "sPaginationType": "full_numbers",
         "bJQueryUI": false,
-            "sAjaxSource": "/includes/playerstats.php?lid='.$lid.'&el='.$vyb["el"].'"
+            "sAjaxSource": "/includes/playerstats.php?lid='.$lid.'&el='.$vyb["el"].'",
+        "fnPreDrawCallback": function() {
+            if (playersLoad) {
+                $("#loader").show();
+            }
+        },
+        "fnDrawCallback": function() {
+            if (playersLoad) {
+                $("#loader").hide();
+                playersLoad = false;
+            }
+        }
         } );
         
+        let goaliesLoad = true;
         $("#goalies").dataTable( {
                 "fnRowCallback": function( nRow, aData, iDisplayIndex ) {
                     $("td:eq(5)", nRow).html( "<b>"+aData[7]+"</b>" );
@@ -101,10 +115,22 @@ if(isset($lid))
         "aoColumns": [{ "sWidth": "5%", className: "text-center" }, { "sWidth": "31%", className: "text-nowrap" }, { "sWidth": "8%", className: "text-center" }, { "sWidth": "8%", className: "text-center" }, { "sWidth": "8%", className: "text-center" }, { "sWidth": "8%", className: "text-center" }, { "sWidth": "8%", className: "text-center" }, { "sWidth": "8%", className: "text-center" }, { "sWidth": "8%", className: "text-center" }, { "sWidth": "8%", className: "text-center" }, { "sWidth": "8%", className: "text-center" }, { "sWidth": "8%", className: "text-center" }],
             "sPaginationType": "full_numbers",
             "bJQueryUI": false,
-            "sAjaxSource": "/includes/goaliestats.php?lid='.$lid.'&el='.$vyb["el"].'"
+            "sAjaxSource": "/includes/goaliestats.php?lid='.$lid.'&el='.$vyb["el"].'",
+        "fnPreDrawCallback": function() {
+            if (goaliesLoad) {
+                $("#loader1").show();
+            }
+        },
+        "fnDrawCallback": function() {
+            if (goaliesLoad) {
+                $("#loader1").hide();
+                goaliesLoad = false;
+            }
+        }
         }
         );
         
+        let attendanceLoad = true;
         $("#attendance").dataTable( {
                 "fnRowCallback": function( nRow, aData, iDisplayIndex ) {
                     $("td:eq(5)", nRow).html( "<b>"+aData[5]+"</b>" );
@@ -120,7 +146,18 @@ if(isset($lid))
         "aoColumns": [{ "sWidth": "5%", className: "text-center" }, { "sWidth": "35%", className: "text-nowrap" }, { "sWidth": "30%", className: "text-nowrap" }, { "sWidth": "10%", className: "text-center" }, { "sWidth": "10%", className: "text-center" }, { "sWidth": "10%", className: "text-center" }],
             "sPaginationType": "full_numbers",
             "bJQueryUI": false,
-            "sAjaxSource": "/includes/attendance.php?lid='.$lid.'"
+            "sAjaxSource": "/includes/attendance.php?lid='.$lid.'",
+        "fnPreDrawCallback": function() {
+            if (attendanceLoad) {
+                $("#loader2").show();
+            }
+        },
+        "fnDrawCallback": function() {
+            if (attendanceLoad) {
+                $("#loader2").hide();
+                attendanceLoad = false;
+            }
+        }
         }
         );
     } );
@@ -155,6 +192,7 @@ if(isset($lid))
                             <td colspan="10" class="dataTables_empty">'.LANG_STATS_LOADING.'</td>
                         </tr>
                         </tbody></table>
+                      <div id="loader" style="height: 257px;"></div>
                 </div>
                 </div>
                 
@@ -186,6 +224,7 @@ if(isset($lid))
                     <td colspan="10" class="dataTables_empty">'.LANG_STATS_LOADING.'</td>
                 </tr>
                 </tbody></table>
+              <div id="loader1" style="height: 257px;"></div>
             </div>
         </div>';
         
@@ -214,6 +253,7 @@ if(isset($lid))
                     <td colspan="6" class="dataTables_empty">'.LANG_STATS_LOADING.'</td>
                 </tr>
                 </tbody></table>
+              <div id="loader2" style="height: 257px;"></div>
             </div>
         </div>';
         }

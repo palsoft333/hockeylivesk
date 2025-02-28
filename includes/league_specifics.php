@@ -6,7 +6,7 @@ function LeagueSpecifics($lid, $longname, $condensed=FALSE) {
 
     if(strstr($longname, "liga")) {
         // extraliga
-        $tt->games_total = 50;
+        $tt->games_total = 54;
         $tt->playoff_line = array(6, 10);
         $tt->playoff_wins = 4;
         $tt->add_conference("");

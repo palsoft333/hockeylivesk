@@ -115,16 +115,16 @@ function LeagueFont($name) {
 function Tournament_Strip() {
   Global $link;
   $ts="";
-  $q = mysqli_query($link, "SELECT l.*, (SELECT COUNT(*) FROM 2004players p WHERE p.league = l.id && p.teamshort='SVK') AS player_count, t.id as tid, t.longname as tlong, m.datetime, m.id as mid, IF(m.team1short='SVK', m.team2long, m.team1long) as vsteam, m.team1long, m.team2long FROM 2004leagues l LEFT JOIN 2004teams t ON t.league=l.id && t.shortname='SVK' LEFT JOIN 2004matches m ON m.league=l.id && (m.team1short='SVK' || m.team2short='SVK') && m.datetime>NOW() && m.kedy='na programe' WHERE l.start_date <= DATE_ADD(CURDATE(), INTERVAL 1 WEEK) AND l.end_date >= DATE_SUB(CURDATE(), INTERVAL 3 DAY) LIMIT 1");
+  $q = mysqli_query($link, "SELECT l.*, (SELECT COUNT(*) FROM 2004players p WHERE p.league = l.id && p.teamshort='SVK') AS player_count, t.id as tid, t.longname as tlong, t.final_pos, m.datetime, m.id as mid, IF(m.team1short='SVK', m.team2long, m.team1long) as vsteam, m.team1long, m.team2long FROM 2004leagues l LEFT JOIN 2004teams t ON t.league=l.id && t.shortname='SVK' LEFT JOIN 2004matches m ON m.league=l.id && (m.team1short='SVK' || m.team2short='SVK') && m.datetime>NOW() && m.kedy='na programe' WHERE l.start_date <= DATE_ADD(CURDATE(), INTERVAL 1 WEEK) AND l.end_date >= DATE_SUB(CURDATE(), INTERVAL 3 DAY) LIMIT 1");
   if(mysqli_num_rows($q)>0) {
     $f = mysqli_fetch_array($q);
     $longname = $f["longname"];
-    $longname = str_replace("Nemecký pohár", "Nemeckom pohári", $longname);
-    $longname = str_replace("Vianočný Kaufland Cup", "Vianočnom Kaufland Cupe", $longname);
-    $longname = str_replace("Kaufland Cup", "Kaufland Cupe", $longname);
+    $newlongname = str_replace("Nemecký pohár", "Nemeckom pohári", $longname);
+    $newlongname = str_replace("Kaufland Cup", "Kaufland Cupe", $longname);
+    $newlongname = str_replace("Vianočný Kaufland Cup", "Vianočnom Kaufland Cupe", $longname);
     $ts = '
     <div class="bg-secondary border-bottom border-dark d-flex justify-content-between justify-content-sm-start p-1 small text-white" id="tournamentStrip">
-      <div class="align-self-center mr-2 tournamentName"><b class="text-gray-300">Slovensko</b> na <b>'.$longname.'</b></div>
+      <div class="align-self-center mr-2 tournamentName"><b class="text-gray-300">Slovensko</b> na <b>'.$newlongname.'</b></div>
       <div class="d-none d-sm-block vr mr-2"></div>
       <div class="text-center">';
         if($f["player_count"]>0) $ts .= '<a class="btn btn-dark btn-sm py-0 d-inline-flex mr-1" href="/team/'.$f["tid"].'0-'.SEOtitle($f["tlong"]).'">Zostava</a>';
@@ -137,7 +137,7 @@ function Tournament_Strip() {
           $day_after_tomorrow = (clone $today)->modify('+2 days');
 
           if ($date->format('Y-m-d') == $today->format('Y-m-d')) {
-              $hl = "dnes";
+              $hl = "dnes o ".$date->format("H:i");
           } elseif ($date->format('Y-m-d') == $tomorrow->format('Y-m-d')) {
               $hl = "zajtra";
           } elseif ($date->format('Y-m-d') == $day_after_tomorrow->format('Y-m-d')) {
@@ -148,7 +148,7 @@ function Tournament_Strip() {
 
           $ts .= '<a class="btn btn-dark btn-sm py-0 d-inline-flex" href="/game/'.$f["mid"].'0-'.SEOtitle($f["team1long"]." vs ".$f["team2long"]).'">Ďalší zápas<span class="d-none d-sm-block ml-1">'.$hl.' vs. <b>'.$f["vsteam"].'</b></span></a>';
         }
-        if($f["place"]!=0) $ts .= '<a class="btn btn-dark btn-sm py-0 d-inline-flex" href="/table/'.$f["id"].'-'.SEOtitle($f["longname"]).'">Konečné <b class="ml-1">'.$f["place"].'.miesto</b></a>';
+        if($f["final_pos"]!=0) $ts .= '<a class="btn btn-dark btn-sm py-0 d-inline-flex" href="/table/'.$f["id"].'-'.SEOtitle($f["longname"]).'">Konečné <b class="ml-1">'.$f["final_pos"].'.miesto</b></a>';
     $ts .= '
       </div>
     </div>';
@@ -223,7 +223,7 @@ function Generate_Menu($active_league = FALSE) {
                       '.(strstr($f["longname"], 'KHL') ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/slovaks/'.$f["id"].'-'.SEOtitle(Get_SEO_title($f["topic_title"],1)).'"><span itemprop="name">'.LANG_NAV_SLOVAKI.'</span><i class="fas fa-user-shield fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                       '.($f["el"]>0 && $f["topic_id"]!=60 ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/injured/'.$f["id"].'-'.SEOtitle(Get_SEO_title($f["topic_title"],1)).'"><span itemprop="name">'.LANG_NAV_INJURED.'</span><i class="fas fa-user-injured fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                       '.($f["el"]>0 ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/transfers/'.$f["id"].'-'.SEOtitle(Get_SEO_title($f["topic_title"],1)).'"><span itemprop="name">'.LANG_NAV_TRANSFERS.'</span><i class="fas fa-exchange-alt fa-fw float-right text-gray-500 my-1"></i></a>':'').'
-                      '.($f["id"]==153 ? '<a itemprop="url" class="collapse-item font-weight-bold text-success" href="/fantasy/picks"><span itemprop="name">Fantasy MS</span><i class="fas fa-wand-magic-sparkles fa-fw float-right text-gray-500 my-1"></i></a>':'').'
+                      '.($f["id"]==161 ? '<a itemprop="url" class="collapse-item font-weight-bold text-success" href="/fantasy/picks"><span itemprop="name">Fantasy MS</span><i class="fas fa-wand-magic-sparkles fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                       '.($f["id"]==144 ? '<a itemprop="url" class="collapse-item font-weight-bold text-danger" href="/fantasy/main"><span itemprop="name">Fantasy KHL</span><i class="fas fa-wand-magic-sparkles fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                     </div>
                   </div>
@@ -244,105 +244,15 @@ function Generate_Menu($active_league = FALSE) {
 */
 
 function Get_team_table($league, $pos = FALSE) {
-Global $another, $link;
+Global $link;
 
 $ttable="";
 
 $a = mysqli_query($link, "SELECT * FROM 2004leagues WHERE id='".$league."'");
 $b = mysqli_fetch_array($a);
 $wpoints=$b["points"];
-if($b["el"]==1) 
-	{
-	$teams_table="el_teams";
-	$el=1;
-	if(strstr($b["longname"], 'KHL'))
-    {
-    $kol["kolo"]=56;
-    $dev = mysqli_query($link, "SELECT (".$kol["kolo"]."-dt.zapasov)*".$wpoints."+body as ce FROM (SELECT *, goals-ga as diff FROM el_teams WHERE league='".$league."' && (shortname='SPA' || shortname='VIT' || shortname='SOC' || shortname='JOK' || shortname='PET' || shortname='TNN' || shortname='DYN' || shortname='DMN' || shortname='LOK' || shortname='DIR' || shortname='CSK' || shortname='SEV') ORDER BY body desc, wins desc, diff DESC, zapasov asc LIMIT 8,8)dt ORDER BY ce DESC LIMIT 1");
-	$deviaty = mysqli_fetch_array($dev);
-    $osm = mysqli_query($link, "SELECT *, goals-ga as diff FROM el_teams WHERE league='".$league."' && (shortname='SPA' || shortname='VIT' || shortname='SOC' || shortname='JOK' || shortname='PET' || shortname='TNN' || shortname='DYN' || shortname='DMN' || shortname='LOK' || shortname='DIR' || shortname='CSK' || shortname='SEV') ORDER BY body desc, wins desc, diff DESC, zapasov asc LIMIT 7,1");
-	$osmy = mysqli_fetch_array($osm);
-    }
-	elseif(strstr($b["longname"], 'NHL'))
-    {
-		$kol["kolo"]=82;
-		$wpoints=$b["points"];
-    if($another)
-      {
-      $dev = mysqli_query($link, "SELECT (".$kol["kolo"]."-dt.zapasov)*".$wpoints."+body as ce FROM (SELECT *, goals-ga as diff FROM el_teams WHERE league='".$league."' && (shortname='CHI' || shortname='WPG' || shortname='NSH' || shortname='STL' || shortname='CGY' || shortname='COL' || shortname='EDM' || shortname='MIN' || shortname='VAN' || shortname='ANA' || shortname='DAL' || shortname='LAK' || shortname='ARI' || shortname='SJS' || shortname='VGK') ORDER BY body desc, zapasov asc, wins desc, diff desc LIMIT 8,8)dt ORDER BY ce DESC LIMIT 1");
-      $deviaty = mysqli_fetch_array($dev);
-      $osm = mysqli_query($link, "SELECT *, goals-ga as diff FROM el_teams WHERE league='".$league."' && (shortname='CHI' || shortname='WPG' || shortname='NSH' || shortname='STL' || shortname='CGY' || shortname='COL' || shortname='EDM' || shortname='MIN' || shortname='*VAN' || shortname='ANA' || shortname='DAL' || shortname='LAK' || shortname='ARI' || shortname='SJS' || shortname='VGK') ORDER BY body desc, zapasov asc, wins desc, diff desc LIMIT 7,1");
-      $osmy = mysqli_fetch_array($osm);
-      }
-    else
-      {
-      $dev = mysqli_query($link, "SELECT (".$kol["kolo"]."-dt.zapasov)*".$wpoints."+body as ce FROM (SELECT *, goals-ga as diff FROM el_teams WHERE league='".$league."' && (shortname='NJD' || shortname='NYI' || shortname='NYR' || shortname='PHI' || shortname='PIT' || shortname='BOS' || shortname='BUF' || shortname='MTL' || shortname='OTT' || shortname='TOR' || shortname='WPG' || shortname='CAR' || shortname='FLA' || shortname='TBL' || shortname='WSH') ORDER BY body desc, zapasov asc, wins desc, diff desc LIMIT 8,8)dt ORDER BY ce DESC LIMIT 1");
-      $deviaty = mysqli_fetch_array($dev);
-      $osm = mysqli_query($link, "SELECT *, goals-ga as diff FROM el_teams WHERE league='".$league."' && (shortname='NJD' || shortname='NYI' || shortname='NYR' || shortname='PHI' || shortname='PIT' || shortname='BOS' || shortname='BUF' || shortname='MTL' || shortname='OTT' || shortname='TOR' || shortname='WPG' || shortname='CAR' || shortname='FLA' || shortname='TBL' || shortname='WSH') ORDER BY body desc, zapasov asc, wins desc, diff desc LIMIT 7,1");
-      $osmy = mysqli_fetch_array($osm);
-      }
-    }
-  else
-    {
-    $kol["kolo"]=50;
-    /*$dev = mysql_query("SELECT ($kol[kolo]-dt.zapasov)*$wpoints+body as ce FROM (SELECT *, goals-ga as diff FROM el_teams WHERE league='$league' && shortname!='S20' ORDER BY body desc, diff desc, goals desc, wins desc, losts asc, ties desc LIMIT 8,8)dt ORDER BY ce DESC LIMIT 1");
-    $deviaty = mysql_fetch_array($dev);
-    $osm = mysql_query("SELECT *, goals-ga as diff FROM el_teams WHERE league='$league' ORDER BY body desc, diff desc, goals desc, wins desc, losts asc, ties desc LIMIT 7,1");
-    $osmy = mysql_fetch_array($osm);*/
-    $dev = mysqli_query($link, "SELECT (".$kol["kolo"]."-dt.zapasov)*".$wpoints."+body as ce FROM (SELECT *, goals-ga as diff FROM el_teams WHERE league='".$league."' && shortname!='S20' ORDER BY body desc, diff desc, goals desc, wins desc, losts asc, ties desc LIMIT 6,6)dt ORDER BY ce DESC LIMIT 1");
-    $deviaty = mysqli_fetch_array($dev);
-    $osm = mysqli_query($link, "SELECT *, goals-ga as diff FROM el_teams WHERE league='".$league."' ORDER BY body desc, diff desc, goals desc, wins desc, losts asc, ties desc LIMIT 5,1");
-    $osmy = mysqli_fetch_array($osm);
-    $des = mysqli_query($link, "SELECT *, goals-ga as diff FROM el_teams WHERE league='".$league."' ORDER BY body desc, diff desc, goals desc, wins desc, losts asc, ties desc LIMIT 9,1");
-    $desiaty = mysqli_fetch_array($des);
-    }
-	}
-else { $teams_table="2004teams"; $el="0"; }
-if($b["el"]==1 && strstr($b["longname"], 'KHL'))
-  {
-  // Tabulka KHL zapadnej konferencie
-  $b["longname"] = "KHL";
-	$uloha = mysqli_query($link, "(SELECT *, goals-ga as diff, 2 as leader FROM el_teams WHERE league='".$league."' && (shortname='SPA' || shortname='VIT' || shortname='SOC' || shortname='JOK' || shortname='PET' || shortname='TNN') ORDER BY body desc, wins desc, diff DESC, zapasov asc, id asc)
-UNION
-(SELECT *, goals-ga as diff, 2 as leader FROM el_teams WHERE league='".$league."' && (shortname='DYN' || shortname='DMN' || shortname='LOK' || shortname='DIR' || shortname='CSK' || shortname='SEV')  ORDER BY body desc, wins desc, diff DESC, zapasov asc, id asc)
-ORDER BY leader asc, body desc, wins desc, diff desc, zapasov asc");
-  }
-elseif($b["el"]==1 && strstr($b["longname"], 'NHL'))
-  {
-  $b["longname"] = "NHL";
-  // Tabulky konferencii NHL
-	if($another)
-    {
-    $uloha = mysqli_query($link, "(SELECT dt.* FROM ((SELECT *, goals-ga as diff, 1 as leader FROM el_teams WHERE league='".$league."' && (shortname='STL' || shortname='COL' || shortname='CHI' || shortname='MIN' || shortname='DAL' || shortname='WPG' || shortname='NSH' || shortname='ARI') ORDER BY body desc, zapasov asc, wins desc, diff desc LIMIT 3)
-UNION
-(SELECT *, goals-ga as diff, 1 as leader FROM el_teams WHERE league='".$league."' && (shortname='ANA' || shortname='SJS' || shortname='LAK' || shortname='SEA' || shortname='VAN' || shortname='CGY' || shortname='EDM' || shortname='VGK')  ORDER BY body desc, zapasov asc, wins desc, diff desc LIMIT 3))dt)
-UNION
-(SELECT *, goals-ga as diff, 2 as leader FROM el_teams WHERE league='".$league."' && (shortname='STL' || shortname='COL' || shortname='CHI' || shortname='MIN' || shortname='DAL' || shortname='WPG' || shortname='NSH') ORDER BY body desc, zapasov asc, wins desc, diff desc LIMIT 3,6)
-UNION
-(SELECT *, goals-ga as diff, 2 as leader FROM el_teams WHERE league='".$league."' && (shortname='ANA' || shortname='SJS' || shortname='LAK' || shortname='ARI' || shortname='VAN' || shortname='CGY' || shortname='EDM' || shortname='VGK')  ORDER BY body desc, zapasov asc, wins desc, diff desc LIMIT 3,6)
-ORDER BY leader asc, body desc, zapasov asc, wins desc, diff desc");
-    }
-  else
-    {
-    $uloha = mysqli_query($link, "(SELECT dt.* FROM ((SELECT *, goals-ga as diff, 1 as leader FROM el_teams WHERE league='".$league."' && (shortname='BOS' || shortname='MTL' || shortname='TBL' || shortname='DET' || shortname='TOR' || shortname='OTT' || shortname='FLA' || shortname='BUF') ORDER BY body desc, zapasov asc, wins desc, diff desc LIMIT 3)
-UNION
-(SELECT *, goals-ga as diff, 1 as leader FROM el_teams WHERE league='".$league."' && (shortname='PIT' || shortname='NYR' || shortname='PHI' || shortname='CBJ' || shortname='WSH' || shortname='NJD' || shortname='CAR' || shortname='NYI')  ORDER BY body desc, zapasov asc, wins desc, diff desc LIMIT 3))dt)
-UNION
-(SELECT *, goals-ga as diff, 2 as leader FROM el_teams WHERE league='".$league."' && (shortname='BOS' || shortname='MTL' || shortname='TBL' || shortname='DET' || shortname='TOR' || shortname='OTT' || shortname='FLA' || shortname='BUF') ORDER BY body desc, zapasov asc, wins desc, diff desc LIMIT 3,7)
-UNION
-(SELECT *, goals-ga as diff, 2 as leader FROM el_teams WHERE league='".$league."' && (shortname='PIT' || shortname='NYR' || shortname='PHI' || shortname='CBJ' || shortname='WSH' || shortname='NJD' || shortname='CAR' || shortname='NYI')  ORDER BY body desc, zapasov asc, wins desc, diff desc LIMIT 3,7)
-ORDER BY leader asc, body desc, zapasov asc, wins desc, diff desc");
-    }
-  }
-else
-  {
-  // Tabulka extraligy
-  if(strstr($b["longname"], 'Tipos')) $b["longname"] = "Tipos Extraliga";
-  if($b["el"]==1 && $b["endbasic"]==1) $uloha = mysqli_query($link, "SELECT *, gf_basic-ga_basic as diff FROM ".$teams_table." WHERE league='".$league."' && skupina!=1 ORDER BY p_basic desc, diff desc, gf_basic desc, w_basic desc, l_basic asc, t_basic desc");
-  else $uloha = mysqli_query($link, "(SELECT *, goals-ga as diff, 0 as hore FROM ".$teams_table." WHERE league='".$league."' && shortname!='S20')
-  UNION
-  (SELECT *, goals-ga as diff, 1 as hore FROM ".$teams_table." WHERE league='".$league."' && shortname='S20') ORDER BY hore asc, body desc, diff desc, zapasov asc, goals desc, wins desc, losts asc, ties desc");
-  }
+$teams_table="2004teams"; 
+$el="0";
 
 $m = mysqli_query($link, "SELECT * FROM 2004teams WHERE final_pos!='' && league='".$league."'");
 if($b["groups"]=="" || $b["groups"]!="" && $b["endbasic"]==1 && $b["osem"]==0 && mysqli_num_rows($m)==0)
@@ -358,54 +268,31 @@ if($b["groups"]=="" || $b["groups"]!="" && $b["endbasic"]==1 && $b["osem"]==0 &&
     <tbody>";
 $i=0;
 $p=1;
-while ($i < mysqli_num_rows($uloha))
+while ($i < mysqli_num_rows($m))
 		{
 	$clinch=$line="";
-	$data = mysqli_fetch_array($uloha);
-	//$data[mediumname] = iconv("windows-1250","utf-8",$data[mediumname]);
-	//$data[mediumname] = urldecode($data[mediumname]);
-	if($b["el"]==1) $shortname = $data["mediumname"];
-	else $shortname = $data["longname"];
+	$data = mysqli_fetch_array($m);
+	$shortname = $data["longname"];
 	if($_SESSION["lang"] != 'sk') $shortname = TeamParser($shortname);
 	$points = $data["body"];
-	if($b["el"]==1 && $b["endbasic"]==1) $points = $data["p_basic"];
-  // play-off line
-  if(strstr($b["longname"], 'Tipos')) {
-    if($i==5 || $i==9) $line=" style='border-bottom:1px dashed black !important;'";
-    }
-  elseif($i==7) $line=" style='border-bottom:1px dashed black !important;'";
-	// clinched playoff
-	//$kol[kolo]=55;
-	if($b["el"]==1 && $points > $deviaty["ce"]) { $clinch = "<span class='text-success'>*</span>"; $clinchwas=1; }
-	// cannot make playoff's
-	if($b["el"]==1 && strstr($b["longname"], 'Tipos') && (($kol["kolo"]-$data["zapasov"])*$wpoints)+$points < $desiaty["body"] || $data["shortname"]=="S20") { $clinch = "<sup><span class='text-danger font-weight-bold'>x</span></sup>"; $cannotwas=1; }
-	if($b["el"]==1 && !strstr($b["longname"], 'Tipos') && (($kol["kolo"]-$data["zapasov"])*$wpoints)+$points < $osmy["body"] || $data["shortname"]=="S20") { $clinch = "<sup><span class='text-danger font-weight-bold'>x</span></sup>"; $cannotwas=1; }
+
+    // play-off line
+    if($i==7) $line=" style='border-bottom:1px dashed black !important;'";
 	$ttable .= "<tr><td class='text-center'$line'>$p.</td><td$line><a href='/team/$data[id]$el-".SEOtitle($data["longname"])."'><img class='flag-".($b["el"]==1 ? 'el':'iihf')." ".$data["shortname"]."-small mr-1' src='/images/blank.png' alt='".$shortname."'>$shortname</a>$clinch</td><td class='text-center'$line'><b>$points</b></td></tr>";
-	if($pos==$data["shortname"] && $b["el"]==1) { $a = array($p,$kol["kolo"],$wpoints); return $a; }
 	if($pos==$data["shortname"] && $b["el"]==0) { return $p; }
 $i++;
 $p++;
 		}
   $ttable .= '</tbody>
   <tfoot class="small">';
-	if($b["el"]==1 && $clinchwas==1) $ttable .= "<tr><td colspan='3' class='pl-2'><span class='text-success'>*</span> - ".LANG_TEAMTABLE_CLINCHEDSHORT."</td></tr>";
-	if($b["el"]==1 && $cannotwas==1) $ttable .= "<tr><td colspan='3' class='pl-2'><span class='text-danger'>x</span> - ".LANG_TEAMTABLE_CANNOTMAKEPOSHORT."</td></tr>";
-	if($b["el"]==1 && (strstr($b["longname"], 'KHL') || strstr($b["longname"], 'NHL'))) $ttable .= "<tr><td colspan='3' class='text-right pr-2'><a href='/table/$league-".SEOtitle($b["longname"])."'>".LANG_TEAMTABLE_FULLTABLE." &raquo;</a></td></tr>";
 	$ttable .= "</tfoot>
 	</table>";
-  if($b["el"]==1 && strstr($b["longname"], 'NHL') && !$another)
-    {
-    $another=1;
-    Get_team_table($league);
-    }
 	}
 else
 	{
 	if($b["osem"]==1)
 		{
 		// SKUPINY OSEMFINALE
-		//$q = mysql_query("SELECT skup_osem FROM 2004teams WHERE league='$league' GROUP BY skup_osem ORDER BY skup_osem ASC");
-		$q = mysqli_query($link, "SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysqli_error($link));
 		$q = mysqli_query($link, "SELECT skup_osem FROM 2004teams WHERE league='".$league."' && skup_osem!='G' GROUP BY skup_osem ORDER BY skup_osem ASC");
 	$j=0;
 	while ($j <= mysqli_num_rows($q)-1)
@@ -424,8 +311,7 @@ else
     </thead>
     <tbody>";
 $coto = mysqli_query($link, "SELECT *, gf_osem-ga_osem as diff FROM ".$teams_table." WHERE league='".$league."' && skup_osem='".$f["skup_osem"]."' ORDER BY p_osem desc, diff desc, gf_osem, w_osem desc, l_osem asc, t_osem desc");
-if($b["el"]!=1)
-{
+
 $m=0;
 while($data = mysqli_fetch_array($coto))
 	{
@@ -460,23 +346,7 @@ while ($i < count($tabul))
 	$i++;
 	$p++;
 	}
-}
-else
-{
-$i=0;
-$p=1;
-while ($i <= mysqli_num_rows($coto)-1)
-		{
-	$data = mysqli_fetch_array($coto);
-	if($pos==$data["shortname"]) return $p;
-	if($b["el"]==1) $data["shortname"] = $data["mediumname"];
-	else $shortname = $data["longname"];
-	if($_SESSION["lang"] != 'sk') $data["longname"] = TeamParser($data["longname"]);
-	$ttable .= "<tr><td class='text-center'>".$p.".</td><td><a href='/team/".$data["id"].$el."-".SEOtitle($data["longname"])."'>".$shortname."</a></td><td class='text-center'><b>".$data["p_osem"]."</b></td></tr>";
-$i++;
-$p++;
-		}
-}
+
 		$ttable .= "</tbody>
 		</table>";
 		$j++;
@@ -602,28 +472,7 @@ $p++;
           if($pos==$tabul[$i][1]) return $p;
           $i++;
           $p++;
-          }
-        // BODY >> VZAJOMNY ZAPAS >> ROZDIEL SKORE (END)
-         
-        // BODY >> ROZDIEL SKORE (START)
-        /*
-				$i=0;
-				$p=1;
-				while ($i <= mysql_num_rows($coto)-1)
-					{
-					$data = mysql_fetch_array($coto);
-					if($i % 2 == 0) $tableclass = 'light';
-					else $tableclass = 'dark';
-					if($b[el]==1) $data[shortname] = $data[mediumname];
-					else $shortname = $data[longname];
-					if($b[endbasic]==1) $points = $data[p_basic];
-					else $points = $data[body];
-					$ttable .= "<tr class='tabulka-$tableclass'><td style='text-align:center;'>$p.</td><td><img src='images/vlajky/$data[shortname]_small.gif' border=0 align=\"absmiddle\"> <a href='index.php?page=teams&action=show&tid=$data[id]$el' target='_top'>$shortname</a></td><td style='text-align:center;'><b>$points</b></td></tr>";
-					$i++;
-					$p++;
-					}
-        */
-				// BODY >> ROZDIEL SKORE (END)       	
+          } 	
 				
 				$ttable .= "</tbody>
 				</table>";
@@ -634,7 +483,6 @@ $p++;
 	}
 $ttable = str_replace(">Slovensko<", "><span class='font-weight-bold'>Slovensko</span><", $ttable);
 $ttable = str_replace(">Slovensko U20<", "><span class='font-weight-bold'>Slovensko U20</span><", $ttable);
-//$ttable = str_replace(">Slovan<", "><span class='font-weight-bold'>Slovan</span><", $ttable);
 $ttable = str_replace(">Európa<", "><span class='font-weight-bold'>Európa</span><", $ttable);
 return $ttable;
 }
@@ -1337,12 +1185,10 @@ function SendMail($to, $subject, $message) {
         $f = mysqli_fetch_array($q);
         if($f["mail_notify"]==1) {
             // send e-mail
-            if($_SESSION["user"]!=1) {
-                $headers = 'From: '.SITE_MAIL. "\r\n" .
-                'Reply-To: '.SITE_MAIL. "\r\n" .
-                'X-Mailer: PHP/' . phpversion();
-                mail($to, $subject, $message, $headers);
-            }
+            $headers = 'From: '.SITE_MAIL. "\r\n" .
+            'Reply-To: '.SITE_MAIL. "\r\n" .
+            'X-Mailer: PHP/' . phpversion();
+            mail($to, $subject, $message, $headers);
         }
         if($f["push_id"]!=NULL) {
             // send push notification

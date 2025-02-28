@@ -1,4 +1,11 @@
 <?
+require_once('slovaks.php');
+$nhl_players = $slovaks;
+$nhl_goalies = $brankari;
+require_once('slovaki.php');
+$khl_players = $slovaks;
+$khl_goalies = $brankari;
+
 /*
 * Funkcia pre výpis najbližších zápasov všetkých líg dňa
 * version: 2.0.0 (24.11.2015 - kompletne prekopané pre použitie s novou verziou stránok)
@@ -7,16 +14,20 @@
 */
 
 function Get_upcomming() {
-  Global $link;
+  Global $link, $nhl_players, $nhl_goalies, $khl_players, $khl_goalies;
   $today_teams = $injured = array();
-  include('slovaks.php');
-  $nhl_players=$slovaks;
-  $nhl_goalies=$brankari;
-  include('slovaki.php');
-  $khl_players=$slovaks;
-  $khl_goalies=$brankari;
+    if (!isset($nhl_players)) {
+        require_once('slovaks.php');
+        $nhl_players = $slovaks;
+        $nhl_goalies = $brankari;
+    }
+    if (!isset($khl_players)) {
+        require_once('slovaki.php');
+        $khl_players = $slovaks;
+        $khl_goalies = $brankari;
+    }
   $dnes = date("Y-m-d");
-  $zajtra = date('Y-m-d', mktime(0, 0, 0, date('m'), date('d')+1, date('Y')));
+  $zajtra = date('Y-m-d', strtotime("+1 day"));
   $q = mysqli_query($link, "SELECT dt.*, position, longname, el FROM 2004leagues JOIN ((SELECT m.id, m.team1short, m.team1long, m.team2short, m.team2long, m.goals1, m.goals2, m.kedy, m.datetime, null as kolo, m.league, t1.id as t1id, t2.id as t2id, t1.longname as t1long, t2.longname as t2long FROM 2004matches m LEFT JOIN 2004teams t1 ON t1.shortname=m.team1short && t1.league=m.league LEFT JOIN 2004teams t2 ON t2.shortname=m.team2short && t2.league=m.league WHERE m.datetime LIKE '".$dnes."%')
 UNION
 (SELECT m.id, m.team1short, m.team1long, m.team2short, m.team2long, m.goals1, m.goals2, m.kedy, m.datetime, m.kolo, m.league, t1.id as t1id, t2.id as t2id, t1.longname as t1long, t2.longname as t2long FROM el_matches m LEFT JOIN el_teams t1 ON t1.shortname=m.team1short && t1.league=m.league LEFT JOIN el_teams t2 ON t2.shortname=m.team2short && t2.league=m.league WHERE m.datetime > '".$dnes." 07:00:00' && m.datetime < '".$zajtra." 07:00:00'))dt ON dt.league=2004leagues.id ORDER BY position ASC, datetime ASC");
@@ -229,7 +240,7 @@ function Get_PlayersToWatch($today_teams, $injured, $favteam) {
 */
 
 function Get_Latest_Stats() {
-  Global $link;
+  Global $link, $nhl_players, $nhl_goalies, $khl_players, $khl_goalies;
   $stat = '<div class="card shadow mb-4">
             <div class="card-header">
                 <div class="font-weight-bold text-primary text-uppercase">'.LANG_GAMECONT_STATS.'</div>
@@ -237,12 +248,18 @@ function Get_Latest_Stats() {
             <div class="card-body">
               <div class="row no-gutters align-items-center">
                 <div class="col mr-2">';
-  include('slovaks.php');
-  $nhl_slovaks = $slovaks;
-  $nhl_goalies = $brankari;
-  include('slovaki.php');
-  $slovaks = array_merge($nhl_slovaks, $slovaks);
-  $brankari = array_merge($nhl_goalies, $brankari);
+    if (!isset($nhl_players)) {
+        require_once('slovaks.php');
+        $nhl_players = $slovaks;
+        $nhl_goalies = $brankari;
+    }
+    if (!isset($khl_players)) {
+        require_once('slovaki.php');
+        $khl_players = $slovaks;
+        $khl_goalies = $brankari;
+    }
+  $slovaks = array_merge($nhl_players, $khl_players);
+  $brankari = array_merge($nhl_goalies, $khl_goalies);
   $vcera = date('Y-m-d', mktime(0, 0, 0, date('m'), date('d')-1, date('Y')));
   $dnes = date("Y-m-d");
   //array_walk($slovaks, function (&$i, $k) { $i = "'$k'"; });
@@ -261,7 +278,7 @@ function Get_Latest_Stats() {
     if($e["kedy"]=="na programe") { $vcera = date('Y-m-d', mktime(0, 0, 0, date('m'), date('d')-2, date('Y'))); $dnes = date('Y-m-d', mktime(0, 0, 0, date('m'), date('d')-1, date('Y'))); }
     }
   $q = mysqli_query($link, "(SELECT ft.*, 2004leagues.longname FROM 2004leagues JOIN (SELECT et.* FROM (SELECT el_goals.goaler, el_goals.asister1, el_goals.asister2, el_goals.teamshort, dt.league FROM el_goals JOIN (SELECT id, league FROM el_matches WHERE kedy = 'konečný stav' && datetime > '$vcera 07:00' && datetime < '$dnes 07:00' ORDER BY datetime)dt ON dt.id=el_goals.matchno)et WHERE goaler IN ($in) OR asister1 IN ($in) OR asister2 IN ($in))ft ON 2004leagues.id=ft.league)
-  UNION
+  UNION ALL
   (SELECT gt.*, 2004leagues.longname FROM 2004leagues JOIN (SELECT et.* FROM (SELECT 2004goals.goaler, 2004goals.asister1, 2004goals.asister2, 2004goals.teamshort, dt.league FROM 2004goals JOIN (SELECT id, league FROM 2004matches WHERE kedy = 'konečný stav' && datetime > '$vcera 07:00' && datetime < '$dnes 07:00' ORDER BY datetime)dt ON dt.id=2004goals.matchno)et WHERE teamshort='SVK')gt ON 2004leagues.id=gt.league)");
  
   $g = mysqli_query($link, "(SELECT m.id, m.league, m.team1short, m.team2short, l.longname, ms.goalie1, ms.goalie2, 
@@ -486,11 +503,11 @@ function Transfers() {
 
             if($l["status"]=="0" && $l["to_name"]=="") $l["to_name"]=LANG_TEAMSTATS_FREEAGENT;
             if($l["pid"]!=NULL) {
-                if($l["goalie"]==0) $pl = mysqli_query($link, "SELECT name FROM el_players WHERE id='".$l["pid"]."'");
-                else $pl = mysqli_query($link, "SELECT name FROM el_goalies WHERE id='".$l["pid"]."'");
+                if($l["goalie"]==0) $pl = mysqli_query($link, "SELECT name FROM ".($l["el"]==1 ? 'el_players':'2004players')." WHERE id='".$l["pid"]."'");
+                else $pl = mysqli_query($link, "SELECT name FROM ".($l["el"]==1 ? 'el_goalies':'2004goalies')." WHERE id='".$l["pid"]."'");
                 $player = mysqli_fetch_array($pl);
-                if($l["goalie"]==0) $url = sprintf('/player/%s1-%s', $l['pid'], SEOtitle($player['name']));
-                else $url = sprintf('/goalie/%s1-%s', $l['pid'], SEOtitle($player['name']));
+                if($l["goalie"]==0) $url = sprintf('/player/%s%s-%s', $l['pid'], $l["el"], SEOtitle($player['name']));
+                else $url = sprintf('/goalie/%s%s-%s', $l['pid'], $l["el"], SEOtitle($player['name']));
             }
             else $player["name"] = $l["pname"];
             $trans .= '
@@ -875,7 +892,7 @@ function ComputePOTW() {
 
 function ComputeGOTD()
   {
-  Global $lid, $link;
+  Global $lid, $link, $nhl_players, $nhl_goalies, $khl_players, $khl_goalies;
   $z = mysqli_query($link, "SELECT * FROM gotd WHERE datetime='".date("Y-m-d")."'");
   if(mysqli_num_rows($z)>0)
     {
@@ -919,12 +936,16 @@ function ComputeGOTD()
         $season_start = $rok."-01-08";
         }
       else $season_start = date("Y")."-01-08";
-      include('slovaks.php');
-      $nhl_players=$slovaks;
-      $nhl_goalies=$brankari;
-      include('slovaki.php');
-      $khl_players=$slovaks;
-      $khl_goalies=$brankari;
+        if (!isset($nhl_players)) {
+            require_once('slovaks.php');
+            $nhl_players = $slovaks;
+            $nhl_goalies = $brankari;
+        }
+        if (!isset($khl_players)) {
+            require_once('slovaki.php');
+            $khl_players = $slovaks;
+            $khl_goalies = $brankari;
+        }
       $a = mysqli_query($link, "SELECT * FROM el_matches WHERE datetime > '$dnes 07:00:00' && datetime < '$zajtra 07:00:00' && league='$lid'");
       if($f["topic_id"]==68 || $f["topic_id"]==71) {
         // NHL a KHL
@@ -1073,7 +1094,7 @@ function ComputeGOTD()
 
 function gotd()
   {
-  Global $link;
+  Global $link, $nhl_players, $nhl_goalies, $khl_players, $khl_goalies;
   $pohl=$slov=$tv="";
   $gotdid = ComputeGOTD();
   
@@ -1114,12 +1135,16 @@ function gotd()
           $pohl = '<p class="m-0"><span class="font-weight-bold">'.LANG_MATCHES_SERIES.':</span> '.$sstatus.'</p>';
       }
       // slovaci v akcii
-      include('slovaks.php');
-      $nhl_players=$slovaks;
-      $nhl_goalies=$brankari;
-      include('slovaki.php');
-      $khl_players=$slovaks;
-      $khl_goalies=$brankari;
+        if (!isset($nhl_players)) {
+            require_once('slovaks.php');
+            $nhl_players = $slovaks;
+            $nhl_goalies = $brankari;
+        }
+        if (!isset($khl_players)) {
+            require_once('slovaki.php');
+            $khl_players = $slovaks;
+            $khl_goalies = $brankari;
+        }
       $slov=$tv="";
       if(strstr($gotf["league_name"], 'NHL') || strstr($gotf["league_name"], 'KHL'))
         {

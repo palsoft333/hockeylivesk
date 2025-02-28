@@ -36,7 +36,7 @@ if(isset($_GET["save"]) && $_GET["save"]==1)
           $e = mysqli_query($link, "SELECT * FROM ft_players WHERE pid='".$options[$i]["pid"]."'");
           if($options[$i]["pid"]!=$f["pid"] && mysqli_num_rows($e)==0) {
             mysqli_query($link, "UPDATE ft_players SET pid='".$options[$i]["pid"]."', type='0', gk='".$options[$i]["gk"]."', g='0', a='0', w='0', so='0' WHERE round='".$options[$i]["round"]."' && uid='".$uid."'");
-            mysqli_query("INSERT INTO ft_changes (uid, old_pid, new_pid, tstamp) VALUES ('".$uid."', '".$f["pid"]."', '".$options[$i]["pid"]."', NOW())");
+            mysqli_query($link, "INSERT INTO ft_changes (uid, old_pid, new_pid, tstamp) VALUES ('".$uid."', '".$f["pid"]."', '".$options[$i]["pid"]."', NOW())");
             if($_SESSION["knownrosters"]==0) {
                 if($options[$i]["gk"]==1) $sp = mysqli_query($link, "SELECT * FROM 2004goalies WHERE id='".$options[$i]["pid"]."'");
                 else $sp = mysqli_query($link, "SELECT * FROM 2004players WHERE id='".$options[$i]["pid"]."'");
@@ -191,6 +191,7 @@ function Show_Drafted()
     {
     $mid = $k["uid"];
     $avgtime[$mid] = $k["avgtime"];
+    $k["avgtime"] = $k["avgtime"] ?? 0;
     mysqli_query($link, "UPDATE e_xoops_users SET avg_time='".$k["avgtime"]."' WHERE uid='".$mid."'");
     }
   $drafted = '
@@ -216,6 +217,7 @@ function Show_Drafted()
             <tbody>';
   $q = mysqli_query($link, "SELECT * FROM ft_players ORDER BY round DESC, id DESC");
   $f = mysqli_fetch_array($q);
+  $f["round"] = $f["round"] ?? null;
   $po = mysqli_query($link, "SELECT * FROM ft_players WHERE round='".$f["round"]."'");
   $poc = mysqli_num_rows($po);
   if($poc<$manazerov)
@@ -257,13 +259,14 @@ function Show_Drafted()
     }
     else {
         $mid = $y["uid"];
-        $avg = $avgtime[$mid]/60;
+        if(isset($avgtime)) $avg = $avgtime[$mid]/60;
+        else $avg = 0;
     }
     if($avg>60) $avg = round($avg/60,0)." ".LANG_FANTASY_HRS;
     else $avg = round($avg,0)." ".LANG_FANTASY_MINS;
     if($y["user_avatar"]!="") $avatar = "<img class='rounded-circle mr-1' src='/images/user_avatars/".$y["uid"].".".$y["user_avatar"]."?".filemtime('images/user_avatars/'.$y["uid"].'.'.$y["user_avatar"])."' alt='".$y["uname"]."' style='width:2rem;height:2rem;vertical-align:-11px;'>";
     else $avatar = "<i class='text-gray-300 fas fa-user-circle fa-2x mr-1' style='vertical-align:-7px;'></i>";
-    $drafted .= '<tr><td class="text-center">'.$y[pos].'</td><td class="text-nowrap"><a href="/user/'.$y["uid"].'" class="blacklink">'.$avatar.$y["uname"].''.($y["last_login"]+300>time() ? '<i class="fas fa-circle live ml-1 rounded-circle text-success" style="font-size: 14px;" data-toggle="tooltip" data-placement="top" title="Online!"></i>':'').'</a></td><td class="text-nowrap">'.$hl.'</b></td><td class="text-nowrap">'.$avg.'</b></td></tr>';
+    $drafted .= '<tr><td class="text-center">'.$y["pos"].'</td><td class="text-nowrap"><a href="/user/'.$y["uid"].'" class="blacklink">'.$avatar.$y["uname"].''.($y["last_login"]+300>time() ? '<i class="fas fa-circle live ml-1 rounded-circle text-success" style="font-size: 14px;" data-toggle="tooltip" data-placement="top" title="Online!"></i>':'').'</a></td><td class="text-nowrap">'.$hl.'</b></td><td class="text-nowrap">'.$avg.'</b></td></tr>';
     }
   
   $drafted .= '</tbody></table></div></div></div></div>';

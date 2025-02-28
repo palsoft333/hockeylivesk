@@ -133,4 +133,16 @@ function GetBio($name, $gk) {
   }
   return $bio;
 }
+
+function isDateInInjuredPeriod($date_to_check, $injured_dates) {
+    foreach ($injured_dates as $period) {
+        $start_date = $period[0];
+        $end_date = $period[1];
+
+        if ($date_to_check >= $start_date && $date_to_check <= $end_date) {
+            return true;
+        }
+    }
+    return false;
+}
 ?>
