@@ -47,7 +47,27 @@ if(isset($sid))
   $active_league = $lid;
   if($f["topic_title"]=="KHL") include("includes/slovaki.php"); 
   else include("includes/slovaks.php");
+  $in = $slovaks;
   $title = LANG_PLAYERS_SLOVAKSTITLE." ".$f["topic_title"];
+
+  if($f["topic_title"]=="NHL") $content .= '
+            <!-- Video modal -->
+            <div class="modal fade" id="videoModal" tabindex="-1" role="dialog" aria-labelledby="videoModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+                    <div class="modal-content bg-gradient-secondary">
+                        <div class="modal-header border-0 pb-0 pt-2">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="clearVideoUrl()">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="embed-responsive embed-responsive-16by9">
+                                <iframe class="embed-responsive-item border-0" id="videoFrame" src="" allowfullscreen></iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>';
    
   $content .= "<i class='float-left h1 h1-fluid ll-".LeagueFont($f["longname"])." text-gray-600 mr-1'></i>
                <h1 class='h3 h3-fluid mb-1'>".LANG_PLAYERS_SLOVAKSTITLE."</h1>
@@ -140,7 +160,7 @@ $content .= "</tbody></table>
             </div>
            </div>";
 
-  if(!is_array($brankari)) $brankari = "''";
+  if(isset($brankari) && !is_array($brankari)) $brankari = "''";
   else {
     if(count($brankari)==0) $brankari = "''";
     else {
@@ -211,6 +231,41 @@ while ($t = mysqli_fetch_array($r))
 $content .= '</tbody></table>
             </div>
            </div>';
+    }
+
+    // najnovsie videa
+    if($f["topic_title"]=="NHL") {
+        array_walk($in, function(&$i, $k) { $i = "'$k'"; });
+        $in = implode(",", $in);
+        $lv = mysqli_query($link, "SELECT pv.*, m.datetime, m.team1short, m.team1long, m.team2short, m.team2long, g.teamshort, g.goaler, g.asister1, g.asister2, g.status, g.kedy FROM `player_videos` pv LEFT JOIN el_matches m ON m.id=pv.match_id LEFT JOIN el_goals g ON g.id=pv.goal_id WHERE pv.name IN (".$in.") && pv.league='".$lid."' ORDER BY m.datetime DESC, goal_id DESC LIMIT 8");
+        if(mysqli_num_rows($lv)>0) {
+            $content .= '<div class="card my-4 shadow animated--grow-in">
+                            <div class="card-header">
+                            <h6 class="m-0 font-weight-bold text-'.$leaguecolor.'">
+                                Najnovšie videá
+                            </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">';
+            while($lvi = mysqli_fetch_array($lv)) {
+                $status = explode(":",$lvi["status"]);
+                if($lvi["teamshort"]==$lvi["team1short"]) {
+                    $against = $lvi["team2long"];
+                    $goals = "<b>&#91;".$status[0]."&#93;</b>:".$status[1];
+                }
+                else {
+                    $against = $lvi["team1long"];
+                    $goals = $status[0].":<b>&#91;".$status[1]."&#93;</b>";
+                }
+                if($lvi["name"]==$lvi["goaler"]) $hl = "dal gól";
+                elseif($lvi["name"]==$lvi["asister1"] || $lvi["name"]==$lvi["asister2"]) $hl = "asistoval pri góle";
+                $content .= "<div class='col-6 col-sm-4 col-lg-3 d-flex flex-column'><a class='flex-fill text-decoration-none' data-toggle='modal' data-target='#videoModal' data-url='".$lvi["link"]."' onclick='setVideoUrl(this)' href='#'>".(isset($lvi["image_url"]) ? "<img src='data:image/svg+xml,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1 0.563\"%3E%3C/svg%3E' data-src='".$lvi["image_url"]."' class='lazy img-thumbnail shadow-sm'>":"<div class='align-items-center d-flex h-100 img-thumbnail justify-content-center shadow-sm'><i class='fa-2x fa-image fas text-gray-300'></i></div>")."</a><p class='px-2 py-1 m-0 small text-muted'>".time_elapsed_string($lvi["datetime"])."</p><p class='px-2 pb-2 m-0 p-fluid'><b>".$lvi["name"]."</b> ".$hl." na ".$goals." proti tímu <b>".$against."</b></p></div>";
+            }
+                $content .= '
+                                </div>
+                            </div>
+                        </div>';
+        }
     }
 $content .= '</div> <!-- end col -->
         <div class="col-auto flex-grow-1 flex-shrink-1 d-none d-xl-block mt-4">
@@ -363,7 +418,9 @@ elseif(isset($pid))
     $data = mysqli_fetch_array($q);
     if($data["name"]=="MIKUŠ Juraj" || $data["name"]=="MIKÚŠ Juraj") 
       {
-      $coll = " COLLATE utf8_bin";
+      //$coll = " COLLATE utf8_bin";
+      if($data["name"]=="MIKUŠ Juraj") $coll = " && born='1988-11-30'";
+      if($data["name"]=="MIKÚŠ Juraj") $coll = " && born='1987-02-22'";
       }
     else $coll="";
 
@@ -371,6 +428,25 @@ elseif(isset($pid))
     $leaguecolor = $data["color"];
     $active_league = $data["league"];   
     $pinfo = GetBio($data["name"], 0);
+
+    $content .= '
+            <!-- Video modal -->
+            <div class="modal fade" id="videoModal" tabindex="-1" role="dialog" aria-labelledby="videoModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+                    <div class="modal-content bg-gradient-secondary">
+                        <div class="modal-header border-0 pb-0 pt-2">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="clearVideoUrl()">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="embed-responsive embed-responsive-16by9">
+                                <iframe class="embed-responsive-item border-0" id="videoFrame" src="" allowfullscreen></iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>';
      
     $content .= "<i class='float-left h1 h1-fluid ll-".LeagueFont($data["longname"])." text-gray-600 mr-1'></i>
                <h1 class='h3 h3-fluid mb-1'>".LANG_PLAYERSTATS_TITLE."</h1>
@@ -493,7 +569,7 @@ ORDER BY datetime DESC LIMIT 1)dt WHERE dt.id IS NOT NULL");
                 
     $w = mysqli_query($link, "SELECT el_players.*, l.longname, l.active, t.id as tid FROM el_players JOIN 2004leagues l ON l.id=el_players.league JOIN el_teams t ON t.shortname=el_players.teamshort && t.league=el_players.league WHERE name='".$data["name"]."'".$coll."
 UNION
-SELECT id_upper as id, NULL as teamshort, teamlong, name, 0 as jersey, NULL as pos, NULL as born, 'L' as hold, 0 as kg, 0 as cm, gp, goals, asists, goals+asists as points, 0 as penalty, 0 as gwg, 0 as gtg, 0 as ppg, 0 as shg, league_upper as league, CONCAT(league_name, ' ', season) as longname, 0 as active, 0 as tid FROM player_lowerleagues WHERE name='".$data["name"]."'".$coll."
+SELECT id_upper as id, NULL as teamshort, teamlong, name, 0 as jersey, NULL as pos, NULL as born, 'L' as hold, 0 as kg, 0 as cm, gp, goals, asists, goals+asists as points, 0 as penalty, 0 as gwg, 0 as gtg, 0 as ppg, 0 as shg, league_upper as league, CONCAT(league_name, ' ', season) as longname, 0 as active, 0 as tid FROM player_lowerleagues WHERE name='".$data["name"]."'
 ORDER BY league ASC, id ASC");
     //$w = mysqli_query($link, "SELECT el_players.*, l.longname, l.active, t.id as tid FROM el_players JOIN 2004leagues l ON l.id=el_players.league JOIN el_teams t ON t.shortname=el_players.teamshort && t.league=el_players.league WHERE name='".$data["name"]."'".$coll." ORDER BY league ASC, el_players.id ASC");
     if(mysqli_num_rows($w)>0)
@@ -631,7 +707,42 @@ ORDER BY league ASC, id ASC");
               </div>
             </div>';
     }
-               
+
+    // najnovsie videa
+    $lv = mysqli_query($link, "SELECT pv.*, m.datetime, m.team1short, m.team1long, m.team2short, m.team2long, g.teamshort, g.goaler, g.asister1, g.asister2, g.status, g.kedy FROM `player_videos` pv LEFT JOIN el_matches m ON m.id=pv.match_id LEFT JOIN el_goals g ON g.id=pv.goal_id WHERE pv.name='".$data["name"]."' ORDER BY m.datetime DESC LIMIT 8");
+    if(mysqli_num_rows($lv)>0) {
+        $content .= '<div class="card my-4 shadow animated--grow-in">
+                        <div class="card-header">
+                        <h6 class="m-0 font-weight-bold text-'.$leaguecolor.'">
+                            Najnovšie videá
+                        </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">';
+        while($lvi = mysqli_fetch_array($lv)) {
+            $status = explode(":",$lvi["status"]);
+            if($lvi["teamshort"]==$lvi["team1short"]) {
+                $against = $lvi["team2long"];
+                $goals = "<b>&#91;".$status[0]."&#93;</b>:".$status[1];
+            }
+            else {
+                $against = $lvi["team1long"];
+                $goals = $status[0].":<b>&#91;".$status[1]."&#93;</b>";
+            }
+            if($lvi["name"]==$lvi["goaler"]) $hl = "dal gól";
+            elseif($lvi["name"]==$lvi["asister1"] || $lvi["name"]==$lvi["asister2"]) $hl = "asistoval pri góle";
+            $content .= "<div class='col-6 col-sm-4 col-lg-3'><a data-toggle='modal' data-target='#videoModal' data-url='".$lvi["link"]."' onclick='setVideoUrl(this)' href='#'>".(isset($lvi["image_url"]) ? "<img src='data:image/svg+xml,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1 0.563\"%3E%3C/svg%3E' data-src='".$lvi["image_url"]."' class='lazy img-thumbnail shadow-sm'>":"<div class='img-thumbnail shadow-sm'></div>")."</a><p class='p-2 m-0 p-fluid'>".time_elapsed_string($lvi["datetime"])." ".$hl." na ".$goals." proti tímu <b>".$against."</b></p></div>";
+        }
+            $content .= '
+                            </div>
+                        </div>
+                    </div>';
+    }
+    
+    if($data["name"]=="MIKUŠ Juraj" || $data["name"]=="MIKÚŠ Juraj") {
+      $coll = " COLLATE utf8_bin";
+    }
+    else $coll = "";
     $h = mysqli_query($link, "SELECT * FROM 2004playerdiary WHERE name='".$data["name"]."'".$coll." ORDER BY msg_date DESC");
     if(mysqli_num_rows($h)>0)
       {
@@ -1169,12 +1280,12 @@ elseif(isset($_GET["shooters"]))
         $content .= "
     <div class='alert alert-info'>
         <p class='p-fluid'><i class='fas fa-question-circle mr-2'></i>".LANG_PLAYERS_SHOOTERSTEXT1."</p>
-        <p class='p-fluid'>".LANG_PLAYERS_SHOOTERSTEXT2."</p>
+        <!--p class='p-fluid'>".LANG_PLAYERS_SHOOTERSTEXT2."</p-->
         <p class='text-xs m-0'>".LANG_PLAYERS_NOTES.":<br>
             <hr class='mt-0'>
             <ul class='text-xs'>
                 <li>".sprintf(LANG_PLAYERS_NOTE1, "<b>".$r["datum"]."</b>")."</li>
-                <li>".LANG_PLAYERS_NOTE2."</li>
+                <!--li>".LANG_PLAYERS_NOTE2."</li-->
             </ul>
         </p>
     </div>
@@ -1220,7 +1331,7 @@ elseif(isset($_GET["shooters"]))
                             <th class='mdl-data-table__cell--non-numeric'>".LANG_PLAYERS_SCORED."</th>
                             <th class='mdl-data-table__cell--non-numeric'>".LANG_PLAYERS_LASTTIME."</th>
                             <th class='mdl-data-table__cell--non-numeric'>".LANG_MATCHES_STREAK."</th>
-                            <th class='mdl-data-table__cell--numeric'>".LANG_PLAYERS_RATE."</th>
+                            <!--th class='mdl-data-table__cell--numeric'>".LANG_PLAYERS_RATE."</th-->
                         </tr>
                     </thead>
                     <tbody>";
@@ -1290,7 +1401,7 @@ elseif(isset($_GET["shooters"]))
                     <td class='mdl-data-table__cell--non-numeric'>".$f["poc"]."/".$kol." (".$pom."%)</td>
                     <td class='mdl-data-table__cell--non-numeric'>".$f["datum"]."</td>
                     <td class='mdl-data-table__cell--non-numeric'>".$hl."</td>
-                    <td class='mdl-data-table__cell--numeric'>".$odd."</td>
+                    <!--td class='mdl-data-table__cell--numeric'>".$odd."</td-->
                 </tr>";
     $i++;
     } 
@@ -1318,6 +1429,7 @@ elseif(isset($_GET["shooters"]))
     {
     $j=0;
     $dal=$nedal=0;
+    $hl="";
     $times = mysqli_query($link, "SELECT * FROM el_matches WHERE league='$league' && kedy='konečný stav' && (team1short='".$p["teamshort"]."' || team2short='".$p["teamshort"]."') ORDER BY datetime DESC");
     $kol = mysqli_num_rows($times);
     while($j < mysqli_num_rows($times))

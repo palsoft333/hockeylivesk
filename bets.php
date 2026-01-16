@@ -54,7 +54,7 @@ $content .= '<div class="league-select">
               <select class="custom-select custom-select-sm w-auto" name="leagues" id="leagues">
                 <option value="0">'.LANG_BETS_OVERALL.'</option>
                 <optgroup label="'.LANG_BETS_ACTUAL.'">
-                    <option value="contest">Súťaž o hokejové kartičky</option>';
+                    <!--option value="contest">Súťaž o vecné ceny Tipsport ligy</option-->';
                 $l1 = mysqli_query($link, "SELECT * FROM 2004leagues WHERE active='1' && id!='70' ORDER BY position ASC");
                 while($l1d = mysqli_fetch_array($l1))
                   {
@@ -68,16 +68,17 @@ $content .= '<div class="league-select">
                   }
                 $content .= '</optgroup>
               </select>
-            </div>
+            </div>';
             
+            $content .= '
             <div class="row justify-content-center mt-4">
               <div class="col-12 col-lg-5 col-sm-8">
                 <div class="card shadow animated--grow-in">
-                  <img src="/images/kartickyEL.webp?v=2025" class="card-img-top" alt="Súťaž">
+                  <img src="/images/kartickyZOH.webp?v=ZOH2026" class="card-img-top" alt="Súťaž">
                   <div class="card-body">
-                    <p class="card-text">Počas <b>playoff Tipos Extraligy</b> tu máme znovu našu súťaž o zberateľské hokejové kartičky z našej najvyššej súťaže Tipos Extraliga sezóny 2024/2025! Medzi nimi aj kartičky s kúskom hráčskeho dresu alebo originálnym podpisom.</p>
-                    <p class="card-text">Zapojíte sa jednoducho - <a href="/games/159-tipos-extraliga">tipovaním výsledkov</a> zápasov playoff extraligy.</p>
-                    <p class="card-text text-hl small">* pre vyrovnané šance pre všetkých rátame body do súťaže od 10.3.2025</p>
+                    <p class="card-text">Počas <b>ZOH v Miláne 2026</b> tu máme znovu našu súťaž o zberateľské kartičku z našej najvyššej súťaže sezóny 2025/2026! Medzi nimi aj kartičky s kúskom hráčskeho dresu alebo originálnym podpisom.</p>
+                    <p class="card-text">Zapojíte sa jednoducho - <a href="/games/164-zimne-olympijske-hry-milano-2026">tipovaním výsledkov</a> zápasov ZOH Miláno 2026.</p>
+                    <p class="card-text text-hl small">* súťaž prebieha od 11.2.2026 do 22.2.2026 vrátane.</p>
                   </div>
                 </div>
               </div>
@@ -138,12 +139,12 @@ $content .= '
                  <p>'.LANG_BETS_FORWHATTEXT.'</p>
                  <div class="card-columns">
 
-                  <!--div class="card bg-gradient-light">
-                    <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="https://sportzoo.s15.cdn-upgates.com/_cache/7/d/7d23067f53d1d0ca72633e4926d12bdf-balicek-retail.png" class="lazy card-img-top" alt="Cestovný batoh">
+                  <div class="card bg-gradient-light">
+                    <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="https://sportzoo.s15.cdn-upgates.com/_cache/f/3/f31f01d79d39097bb639ae9a9ab02fb0-retail-package-2048x2048.jpg" class="lazy card-img-top" alt="Hokejové kartičky">
                     <div class="card-body">
-                      <h5 class="card-title">Retail balíčky Tipos extraliga 2023/24 – 1. séria</h5>
+                      <h5 class="card-title">Retail balíčky Tipos extraliga 2025/26 - 1. séria</h5>
                     </div>
-                  </div-->
+                  </div>
 
                   <div class="card">
                     <img src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="/images/ceny/batoh.jpg" class="lazy card-img-top" alt="Cestovný batoh">

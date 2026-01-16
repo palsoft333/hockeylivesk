@@ -115,7 +115,7 @@
   }
 
   Calendario.prototype.parseDay = function(c, day) {
-    if(!this.curData[day]) this.curData[day] = {html: [], allDay: [], startTime: [], endTime: [], note: [], content: [], url: [], color: []}
+    if(!this.curData[day]) this.curData[day] = {html: [], allDay: [], startTime: [], endTime: [], note: [], content: [], url: [], color: [], el: []}
     c.allDay  ? this.curData[day].allDay.push(true) : this.curData[day].allDay.push(false)
     c.allDay  ? this.curData[day].startTime.push(this.toDObj('00:00', day)) : this.curData[day].startTime.push(this.toDObj(c.startTime, day))
     c.allDay  ? this.curData[day].endTime.push(this.toDObj('23:59', day)) : this.curData[day].endTime.push(this.toDObj(c.endTime, day))
@@ -123,6 +123,7 @@
 	c.content ? this.curData[day].content.push(c.content) : this.curData[day].content.push('')
 	c.url     ? this.curData[day].url.push(c.url) : this.curData[day].url.push('')
 	c.color     ? this.curData[day].color.push(c.color) : this.curData[day].color.push('')
+	c.el !== undefined ? this.curData[day].el.push(c.el) : this.curData[day].el.push(1)
     var i = c.url ? this.curData[day].html.push('<a class="' + c.category + '" href="' + c.url + '">' + c.content +'</a>') - 1
                   : this.curData[day].html.push('<span class="' + c.category + '">' + c.content + '</span>') - 1
     this.curData[day].html[i] += '<time class="fc-allday" datetime="' + this.curData[day].allDay[i] + '"></time>'
@@ -132,7 +133,7 @@
   }
   
   Calendario.prototype.parseDayID = function(c, day) {
-    if(!this.curData[day]) this.curData[day] = {html: [], allDay: [], startTime: [], endTime: [], note: [], content: [], url: [], color: []}
+    if(!this.curData[day]) this.curData[day] = {html: [], allDay: [], startTime: [], endTime: [], note: [], content: [], url: [], color: [], el: []}
 	c.color     ? this.curData[day].color.push(c.color) : this.curData[day].color.push('')
   }
 
@@ -189,6 +190,7 @@
 
     this.$cal = $('<div class="fc-calendar ' + rowClass + '">').append(head, body)
     this.$element.find('div.fc-calendar').remove().end().append(this.$cal)
+    this.addBadgePills()
     this.propDate()
     this.$element.trigger($.Event('shown.calendar.calendario'))
     if(callback) callback.call()
@@ -305,6 +307,75 @@
     return this.options.displayMonthAbbr ? this.options.monthabbrs[this.month] : this.options.months[this.month]
   }
   
+  Calendario.prototype.addBadgePills = function() {
+    var self = this
+    var eventGroups = {}
+    
+    // Group consecutive days by event content for el=0 events
+    for(var day = 1; day <= 31; day++) {
+      if(this.curData[day] && this.curData[day].el) {
+        for(var i = 0; i < this.curData[day].el.length; i++) {
+          if(this.curData[day].el[i] === 0) {
+            var content = this.curData[day].content[i]
+            if(!eventGroups[content]) eventGroups[content] = []
+            eventGroups[content].push(day)
+          }
+        }
+      }
+    }
+    
+    // Create badge pills for consecutive day ranges
+    $.each(eventGroups, function(eventName, days) {
+      days.sort(function(a, b) { return a - b })
+      var ranges = []
+      var start = days[0], end = days[0]
+      
+      for(var i = 1; i < days.length; i++) {
+        if(days[i] === end + 1) {
+          end = days[i]
+        } else {
+          ranges.push({start: start, end: end})
+          start = end = days[i]
+        }
+      }
+      ranges.push({start: start, end: end})
+      
+      // Add badge pill for each range
+      $.each(ranges, function(idx, range) {
+        if(range.end > range.start) { // Only for multi-day events
+          var currentDay = range.start
+          while(currentDay <= range.end) {
+            var startCell = self.$cal.find('#day-' + currentDay).parent()
+            if(startCell.length) {
+              var row = startCell.parent()
+              var rowStart = currentDay
+              var rowEnd = currentDay
+              
+              // Find consecutive days in same row
+              while(rowEnd < range.end) {
+                var nextCell = self.$cal.find('#day-' + (rowEnd + 1)).parent()
+                if(nextCell.length && nextCell.parent().is(row)) {
+                  rowEnd++
+                } else {
+                  break
+                }
+              }
+              
+              var daySpan = rowEnd - rowStart + 1
+              var width = (daySpan * 100) + '%'
+              var badge = $('<div class="badge-pill badge-light position-absolute border border-dark" style="top: 4px; left: 2px; width: calc(' + width + ' - 4px); font-size: 10px; z-index: 10; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none;">' + eventName + '</div>')
+              startCell.css('position', 'relative').prepend(badge)
+              
+              currentDay = rowEnd + 1
+            } else {
+              currentDay++
+            }
+          }
+        }
+      })
+    })
+  }
+
   Calendario.prototype.getCell = function(day, data) {
     if (!data) return this.$cal.find("span.fc-date").filter(function(){return $(this).text() == day}).parent()
     else return this.$cal.find("span.fc-date").filter(function(){return $(this).text() == day}).parent().data('bz.calendario.dateprop')

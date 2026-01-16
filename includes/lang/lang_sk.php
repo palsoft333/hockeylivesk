@@ -371,6 +371,9 @@ define("LANG_NAV_SLOVAKS","Slováci v NHL");
 define("LANG_NAV_SLOVAKI","Slováci v KHL");
 define("LANG_NAV_INJURED","Zranení hráči");
 define("LANG_NAV_TRANSFERS","Prestupy");
+define("LANG_NAV_INFO","Informácie");
+define("LANG_NAV_TRIP","Výlet");
+define("LANG_NAV_FANSHOP","Fanshop");
 
 define("LANG_CARDS_GOTD","Zápas dňa");
 define("LANG_CARDS_CALENDAR","Kalendár");
@@ -398,9 +401,10 @@ define("LANG_NAV_LOGIN","Prihlásiť sa");
 define("LANG_NAV_LOGIN2","Prihlásenie");
 define("LANG_NAV_REMEMBER","Zapamätať si ma na tomto zariadení");
 define("LANG_NAV_REGISTRATION","Registrácia");
-define("LANG_NAV_USERNAME","Prihlasovacie meno");
+define("LANG_NAV_USERNAME","Užívateľské meno");
 define("LANG_NAV_PASSWORD","Heslo");
 define("LANG_NAV_PASSWORDAGAIN","Overenie hesla");
+define("LANG_NAV_OPTIN","Chcem byť informovaný o súťažiach e-mailom");
 define("LANG_NAV_EMAIL","E-mail");
 define("LANG_NAV_REGISTER","Registrovať sa");
 define("LANG_NAV_WRONGUSERNAME","Iba čísla a písmená");
@@ -611,4 +615,6 @@ define('LANG_FORUM_TEAMTOPICS','Diskusie k tímom');
 define('LANG_FORUM_GAMETOPICS','Diskusie k zápasom');
 define('LANG_FORUM_PLAYERTOPICS','Diskusie k hráčom');
 define('LANG_FORUM_NEWSTOPICS','Diskusie k článkom');
+
+define('LANG_SHOP_DESC', 'Pripravili sme pre vás fanúšikovský obchod, ktorý budeme postupne rozširovať o ďalšie skvelé predmety. Dizajny sú z našej dielne, takže ich nájdete iba v tomto obchode. Ak by ste mali požiadavku na iný návrh alebo dizajn fan predmetu, dajte <a href="/contact">nám vedieť</a> a my takýto produkt zaradíme.');
 ?>

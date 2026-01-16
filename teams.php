@@ -293,7 +293,9 @@ ORDER BY
                   $content .='</tbody>
                     </table>
                   </div>
-                </div>
+                </div>';
+                if(mysqli_num_rows($h)>0) {
+                $content .= '
                 <div class="card my-4 shadow animated--grow-in">
                   <div class="card-header">
                     <h6 class="m-0 font-weight-bold text-'.$leaguecolor.'">
@@ -333,6 +335,7 @@ ORDER BY
                   $content .='
                   </div>
                 </div>';
+                }
                 if($el==1 && mysqli_num_rows($k)>0) {
                   $content .= '
                 <div class="card my-4 shadow animated--grow-in">
@@ -458,7 +461,7 @@ ORDER BY
     "location": "'.$e["longname"].'"
   },';
     }
-    $content = substr($content, 0, -1);
+    if(count($struct_data)>0) $content = substr($content, 0, -1);
     $content .= ']
     </script>';
 

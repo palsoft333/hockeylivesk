@@ -129,6 +129,9 @@ switch ($_GET["p"]) {
         include("includes/forum_functions.php");
         include("forum.php");
         break;
+    case "shop":
+        include("shop.php");
+        break;
     case "fantasy":
         if(strstr($_GET["id"], "select")) include("fantasyleague.php");
         elseif(strstr($_GET["id"], "main")) include("fantasyleague.php");
@@ -210,7 +213,7 @@ else mysqli_query($link, "UPDATE e_xoops_users SET last_login='".time()."' WHERE
     }
   </style>
   <?
-  echo '<link href="/css/flagsprites.css?v=1.0.2" rel="stylesheet">';
+  echo '<link href="/css/flagsprites.css?v=1.0.3" rel="stylesheet">';
   if($_GET["p"]=="stats") echo '<link href="/vendor/datatables/dataTables.bootstrap4.min.css?v=1.13.4" rel="stylesheet">';
   if($_GET["p"]=="users") echo '<link href="/css/croppie.min.css?v=2.6.4" rel="stylesheet">';
   if($_GET["p"]=="articles") echo '<link rel="stylesheet" href="/css/jquery.fancybox.min.css?v=3.5.7" />';
@@ -423,7 +426,7 @@ else mysqli_query($link, "UPDATE e_xoops_users SET last_login='".time()."' WHERE
 
       <li class="nav-item<? if($_GET["p"]=="players" && isset($_GET["watched"])) echo " active"; ?>">
         <a class="nav-link" href="/watched">
-          <span><? echo LANG_NAV_PLAYERTRACKER; ?></span><span class="badge badge-light float-right" style="font-size: 12px; line-height: 16px;"><? echo LANG_NEW; ?></span></a>
+          <span><? echo LANG_NAV_PLAYERTRACKER; ?></span></a>
       </li>
 
       <li class="nav-item<? if($_GET["p"]=="players" && isset($_GET["shooters"])) echo " active"; ?>">
@@ -434,6 +437,11 @@ else mysqli_query($link, "UPDATE e_xoops_users SET last_login='".time()."' WHERE
       <li class="nav-item<? if($_GET["p"]=="forum") echo " active"; ?>">
         <a class="nav-link" href="/forum">
           <span><? echo LANG_NAV_FORUM; ?></span></a>
+      </li>
+
+      <li class="nav-item<? if($_GET["p"]=="shop") echo " active"; ?>">
+        <a class="nav-link" href="/shop">
+          <span><? echo LANG_NAV_FANSHOP; ?></span><span class="badge badge-light float-right" style="font-size: 12px; line-height: 16px;"><? echo LANG_NEW; ?></span></a>
       </li>
 
       <!-- Divider -->
@@ -604,19 +612,19 @@ else mysqli_query($link, "UPDATE e_xoops_users SET last_login='".time()."' WHERE
 
   <!-- Bootstrap core JavaScript-->
   <script src="/vendor/jquery/jquery.min.js?v=3.7.0"></script>
-  <script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="/vendor/bootstrap/js/bootstrap.bundle.min.js" defer></script>
 
   <!-- Core plugin JavaScript-->
-  <script src="/vendor/jquery-easing/jquery.easing.min.js"></script>
+  <script src="/vendor/jquery-easing/jquery.easing.min.js" defer></script>
 
   <!-- Custom scripts for all pages-->
-  <script src="/js/jquery-ui.min.js?v=1.13.2"></script>
+  <script src="/js/jquery-ui.min.js?v=1.13.2" defer></script>
   <script src="/js/jquery.lazy.min.js"></script>
-  <script src="/js/main.min.js?v=1.2.7"></script>
+  <script src="/js/main.min.js?v=1.3.0"></script>
 <? 
-if(!isset($_GET["p"]) && !isset($_GET["topicID"])) echo '  <script type="text/javascript" src="/js/jquery.calendario.min.js?v=1.0.6"></script>
-  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION["lang"].'.js?v=1.0.0"></script>
-  <script type="text/javascript" src="/js/homepage_events.min.js?v=1.1.6"></script>';
+if(!isset($_GET["p"]) && !isset($_GET["topicID"])) echo '  <script type="text/javascript" src="/js/jquery.calendario.min.js?v=1.1.3" defer></script>
+  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION["lang"].'.js?v=1.0.0" defer></script>
+  <script type="text/javascript" src="/js/homepage_events.min.js?v=1.1.7"></script>';
 elseif($_GET["p"]=="games")
   {
   echo '  <script type="text/javascript" src="/includes/lang/lang_'.$_SESSION["lang"].'.js?v=1.0.0"></script>
@@ -681,7 +689,7 @@ $script_end = $script_end ?? null;
 echo $script_end;
 ?>
   <link href="/vendor/fontawesome-free/css/all.min.css?v=6.4.0" rel="stylesheet" type="text/css">
-  <link href="/css/league-logos.min.css?v=1.0.8" rel="stylesheet" type="text/css">
+  <link href="/css/league-logos.min.css?v=1.1.0" rel="stylesheet" type="text/css">
   <link rel="preload" href="https://fonts.googleapis.com/css?family=Nunito:300,300i,400,400i,700,700i,800,800i,900,900i&display=swap" as="style" onload="this.rel='stylesheet'">
     <noscript class="async-css"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:300,300i,400,400i,700,700i,800,800i,900,900i&display=swap"></noscript>
 

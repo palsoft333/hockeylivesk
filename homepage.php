@@ -1,6 +1,48 @@
+            <!-- Video modal -->
+            <div class="modal fade" id="videoModal" tabindex="-1" role="dialog" aria-labelledby="videoModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+                    <div class="modal-content bg-gradient-secondary">
+                        <div class="modal-header border-0 pb-0 pt-2">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="clearVideoUrl()">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="embed-responsive embed-responsive-16by9">
+                                <iframe class="embed-responsive-item border-0" id="videoFrame" src="" allowfullscreen></iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
           <?
           if(!isset($_GET["topicID"])) {
           ?>
+          
+          <?
+          if(!isset($_SESSION["logged"])) echo "
+            <!-- Top mobile advert -->
+            <div id='101390-31' class='text-center mb-3'></div>
+            
+            <script>
+               if (window.matchMedia(\"(max-width: 767px)\").matches) {
+                const adDiv = document.getElementById('101390-31');
+
+                const script1 = document.createElement('script');
+                script1.src = '//ads.themoneytizer.com/s/gen.js?type=31';
+                script1.defer = true;
+                adDiv.appendChild(script1);
+
+                const script2 = document.createElement('script');
+                script2.src = '//ads.themoneytizer.com/s/requestform.js?siteId=101390&formatId=31';
+                script2.defer = true;
+                adDiv.appendChild(script2);
+              }
+            </script>
+          ";
+          
+          ?>
+
           <!-- Content Row -->
           <div class="row">
 
@@ -11,9 +53,9 @@
 
             <!-- Calendar -->
             <div class="col-xl-3 col-md-6 mb-4">
-              <div class="card border-left-success shadow h-100 py-2">
-                <div class="card-body">
-                  <div class="row no-gutters align-items-center">
+              <div class="card border-left-success shadow h-100">
+                <div class="card-body p-3">
+                  <div class="row no-gutters align-items-center pb-2">
                     <div class="col mr-2">
                       <div class="text-xs font-weight-bold text-success text-uppercase mb-1"><? echo LANG_CARDS_CALENDAR; ?></div>
                     </div>
@@ -48,14 +90,14 @@
 
             <!-- Flash news -->
             <div class="d-none d-md-block col-xl-3 col-md-6 mb-4">
-              <div class="card border-left-info shadow h-100 py-2">
-                <div class="card-body">
+              <div class="card border-left-info shadow h-100">
+                <div class="card-body p-3">
                   <div id="flash-spinner" class="position-absolute" style="top: 50%; left: 50%; z-index: 2; display: none;">
                     <div class="spinner-border text-success" role="status">
                       <span class="sr-only">Loading...</span>
                     </div>
                   </div>
-                  <div class="row no-gutters align-items-center">
+                  <div class="row no-gutters align-items-center pb-2">
                     <div class="col mr-2">
                       <div class="text-xs font-weight-bold text-info text-uppercase mb-1"><? echo LANG_CARDS_FLASH; ?><span id="flashnews-refresh" class="ml-2"><i class="fas fa-sync-alt" aria-hidden="true"></i></span></div>
                     </div>
@@ -86,29 +128,25 @@
             <!--<div class="banner468x60">-->
             <div class="banner468x60 col-12 col-xl-6">
           <?
-              if(!isset($_GET["topicID"]) && !isset($_SESSION["logged"])) echo '
-                <div id="101390-1">
-                    <script src="//ads.themoneytizer.com/s/gen.js?type=1" defer></script>
-                    <script src="//ads.themoneytizer.com/s/requestform.js?siteId=101390&formatId=1" defer></script>
-                </div>';
-              else {
-               /*   echo '
-                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8860983069832222"
-                    crossorigin="anonymous"></script>
-                <!-- HL hlavná stránka top -->
-                <ins class="adsbygoogle"
-                    style="display:inline-block;width:728px;height:90px"
-                    data-ad-client="ca-pub-8860983069832222"
-                    data-ad-slot="8007937220"></ins>
-                <script>
-                    (adsbygoogle = window.adsbygoogle || []).push({});
-                </script>';*/
-                echo '
-                <div id="101390-1">
-                    <script src="//ads.themoneytizer.com/s/gen.js?type=1" defer></script>
-                    <script src="//ads.themoneytizer.com/s/requestform.js?siteId=101390&formatId=1" defer></script>
-                </div>';
-              }
+              echo "
+              <div id='101390-1'></div>
+              <script>
+                if (window.innerWidth >= 768) {
+                  window.addEventListener('load', function() {
+                    const adDiv = document.getElementById('101390-1');
+
+                    const script1 = document.createElement('script');
+                    script1.src = '//ads.themoneytizer.com/s/gen.js?type=1';
+                    script1.defer = true;
+                    adDiv.appendChild(script1);
+
+                    const script2 = document.createElement('script');
+                    script2.src = '//ads.themoneytizer.com/s/requestform.js?siteId=101390&formatId=1';
+                    script2.defer = true;
+                    adDiv.appendChild(script2);
+                  });
+                }
+              </script>";
           ?>
             </div>
             <!--<div class="d-none d-lg-block col-3"></div>-->
@@ -136,10 +174,10 @@
               if(!$_GET["topicID"])
                 {
                 echo Get_upcomming();
-                if(!isset($_SESSION["logged"])) echo '
-              <!--div class="advert-container card shadow mb-4 text-center">
+                /*if(!isset($_SESSION["logged"])) echo '
+              <div class="advert-container card shadow mb-4 text-center">
                 <p class="m-auto p-2 small"></p>
-              </div-->';
+              </div>';*/
                 echo Get_Latest_Stats();
                 /*if(!isset($_SESSION["logged"])) echo '
               <div class="advert-container card shadow mb-4">
@@ -155,7 +193,7 @@
               </div>';
           
                 echo '
-              <div class="card shadow my-4 articleBanner d-none d-xl-block">
+              <div class="card shadow my-4 articleBanner">
                 <div class="card-body">
                   <!--<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
                   <ins class="adsbygoogle"
@@ -167,10 +205,22 @@
                   <script>
                        (adsbygoogle = window.adsbygoogle || []).push({});
                   </script>-->
-                  <div id="101390-19">
-                    <script src="//ads.themoneytizer.com/s/gen.js?type=19" defer></script>
-                    <script src="//ads.themoneytizer.com/s/requestform.js?siteId=101390&formatId=19" defer></script>
-                  </div>
+                  <div id="101390-19" class="text-center"></div>
+                  <script>
+                      window.addEventListener("load", function() {
+                        const adDiv = document.getElementById("101390-19");
+
+                        const script1 = document.createElement("script");
+                        script1.src = "//ads.themoneytizer.com/s/gen.js?type=19";
+                        script1.defer = true;
+                        adDiv.appendChild(script1);
+
+                        const script2 = document.createElement("script");
+                        script2.src = "//ads.themoneytizer.com/s/requestform.js?siteId=101390&formatId=19";
+                        script2.defer = true;
+                        adDiv.appendChild(script2);
+                      });
+                  </script>
                 </div>
               </div>';
               

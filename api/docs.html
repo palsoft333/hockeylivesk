@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>hockey-LIVE.sk API documentation</title>
+  <style>
+    html {
+      line-height: 1.5;
+      font-family: Georgia, serif;
+      font-size: 20px;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 1em;
+      }
+    }
+    @media print {
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
+      font-size: 85%;
+      margin: 0;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<h1 id="hockey-live-api-documentation">hockey-LIVE.sk API Documentation</h1>
+<h2 id="overview">Overview</h2>
+<p>The hockey-LIVE.sk API provides access to various hockey-related information including team statistics, player statistics, game reports, game lists, and team standings for top hockey leagues and tournaments like NHL, IIHF World Championships, Olympic Games, KHL and Slovak extraliga. The API is designed to deliver data in a simple and efficient manner, allowing developers to integrate hockey-related information into their applications.</p>
+<h2 id="api-key">API key</h2>
+<p>For obtaining a free API key for our API, please <a href="https://www.hockey-live.sk/contact">contact us by e-mail</a>.</p>
+<h2 id="base-url">Base URL</h2>
+<p><code>https://hockey-live-sk-data.p.rapidapi.com</code></p>
+<h2 id="team-statistics">Team Statistics</h2>
+<h3 id="get-team-statistics-by-team-league-and-year">Get Team Statistics by Team, League, and Year</h3>
+<pre><code>GET /team/{team}/{league}/{year}?key={API_key}</code></pre>
+<ul>
+<li><code>team</code>: 3-char country ISO code (e.g., SVK).</li>
+<li><code>league</code>: League identifier (<b>WCH</b> for World Championship, <b>OG</b> for Olympic Games, <b>NHL</b> for NHL season, <b>KHL</b> for KHL season, <b>EL</b> for Slovak extraliga season).</li>
+<li><code>year</code>: Tournament year or season (e.g., 2018 for the year 2018; or 2018/2019 for NHL, KHL and EL season).</li>
+<li><code>API_key</code>: Your API key for authentication.</li>
+</ul>
+<p>Example:</p>
+<pre><code>https://hockey-live-sk-data.p.rapidapi.com/team/SVK/WCH/2018?key=your_api_key</code></pre>
+<h2 id="player-statistics">Player Statistics</h2>
+<h3 id="get-player-statistics-by-id">Get Player Statistics by ID</h3>
+<pre><code>GET /player/{id}?key={API_key}</code></pre>
+<ul>
+<li><code>id</code>: Player ID.</li>
+<li><code>API_key</code>: Your API key for authentication.</li>
+</ul>
+<p>Example:</p>
+<pre><code>https://hockey-live-sk-data.p.rapidapi.com/player/2620?key=your_api_key</code></pre>
+<h3 id="get-player-statistics-by-name-and-league">Get Player Statistics by Name and League</h3>
+<pre><code>GET /player/{player_name}/{league}?key={API_key}</code></pre>
+<ul>
+<li><code>player_name</code>: Player's name.</li>
+<li><code>league</code>: League identifier.</li>
+<li><code>API_key</code>: Your API key for authentication.</li>
+</ul>
+<p>Example:</p>
+<pre><code>https://hockey-live-sk-data.p.rapidapi.com/player/SATAN%20Miroslav/NHL?key=your_api_key</code></pre>
+<h2 id="game-information">Game Information</h2>
+<h3 id="get-game-report-by-id">Get Game Report by ID</h3>
+<pre><code>GET /game/{id}?key={API_key}</code></pre>
+<ul>
+<li><code>id</code>: Game ID.</li>
+<li><code>API_key</code>: Your API key for authentication.</li>
+</ul>
+<p>Example:</p>
+<pre><code>https://hockey-live-sk-data.p.rapidapi.com/game/20380?key=your_api_key</code></pre>
+<h3 id="get-last-game-report-by-teams-and-league">Get Last Game Report by Teams and League</h3>
+<pre><code>GET /game/{team1}/{team2}/{league}?key={API_key}</code></pre>
+<ul>
+<li><code>team1</code>: 3-char country ISO code for the home team.</li>
+<li><code>team2</code>: 3-char country ISO code for the away team.</li>
+<li><code>league</code>: League identifier.</li>
+<li><code>API_key</code>: Your API key for authentication.</li>
+</ul>
+<p>Example:</p>
+<pre><code>https://hockey-live-sk-data.p.rapidapi.com/game/SVK/CAN/WCH?key=your_api_key</code></pre>
+<h2 id="game-list">Game List</h2>
+<h3 id="get-game-list-by-league-and-year">Get Game List by League and Year</h3>
+<pre><code>GET /games/{league}/{year}?key={API_key}</code></pre>
+<ul>
+<li><code>league</code>: League identifier.</li>
+<li><code>year</code>: Tournament year or season.</li>
+<li><code>API_key</code>: Your API key for authentication.</li>
+</ul>
+<p>Example:</p>
+<pre><code>https://hockey-live-sk-data.p.rapidapi.com/games/NHL/2020?key=your_api_key</code></pre>
+<h2 id="team-standings">Team Standings</h2>
+<h3 id="get-team-standings-by-league-and-year">Get Team Standings by League and Year</h3>
+<pre><code>GET /table/{league}/{year}?key={API_key}</code></pre>
+<ul>
+<li><code>league</code>: League identifier.</li>
+<li><code>year</code>: Tournament year or season.</li>
+<li><code>API_key</code>: Your API key for authentication.</li>
+</ul>
+<p>Example:</p>
+<pre><code>https://hockey-live-sk-data.p.rapidapi.com/table/KHL/2021?key=your_api_key</code></pre>
+<h2 id="authentication">Authentication</h2>
+<p>All requests must include the <code>key</code> parameter with your unique API key for authentication.</p>
+<h2 id="response-format">Response Format</h2>
+<p>The API returns data in JSON format.</p>
+<h2 id="response-parameters">Response Parameters</h2>
+<p>Most of the return parameters should be self-explanatory. Some that could be unclear are listed here:</p>
+<ul>
+<li><b>po_type</b> = stage of playoff the game is played in (possible values are: <code>NULL</code>-no playoff, <code>Q</code>-qualification round, <code>QF</code>-quarterfinals, <code>SF</code>-semifinals, <code>B</code>-bronze medal game, <code>F</code>-finals, <code>SC</code>-Stanley Cup/Gagarin Cup finals)</li>
+<li><b>status</b> = status in which the game is currently in (possible values are: <code>final result, scheduled, get ready, in the 1st period, after 1st period, in the 2nd period, after 2nd period, in the 3rd period, after 3rd period, overtime, after overtime</code>)</li>
+<li><b>when</b> = when was the goal scored (possible values are: <code>normal</code>, <code>PP1</code>-5on4 powerplay, <code>PP2</code>-5on3 powerplay, <code>SH1</code>-4on5 shorthanded, <code>SH2</code>-3on5 shorthanded, <code>PS</code>-penalty shot)</li>
+<li><b>where</b> = where is the game played (possible values are: <code>home, away</code>)</li>
+<li><b>result</b> = outcome of the game for the team (possible values are: <code>loss, win</code>)</li>
+<li><b>overtime</b> = whether the game ended in overtime (possible values are: <code>0</code>-ended in regulation time, <code>1</code>-ended in overtime, <code>2</code>-ended in shootouts)</li>
+<li><b>group</b> = group for the team in team standings (possible values are: eg. <code>A, B,</code> ...)</li>
+<li><b>pos</b> = position the players plays in (possible values are: <code>GK</code>-goalkeeper, <code>F</code>-forward, <code>D</code>-defense, <code>RW</code>-right wing, <code>LW</code>-left wing, <code>CE</code>-center, <code>RD</code>-right defense, <code>LD</code>-left defense)</li>
+<li><b>clinch</b> = whether the team clinched the quarterfinals (possible values are: <code>tím už má zaistenú účasť vo štvrťfinále</code>-clinched quarterfinals, <code>tím sa už nedostane do štvrťfinále</code>-cannot make quarterfinals, <code>tím zostupuje do I.DIV</code>-team is dropping to the first division)</li>
+</ul>
+<h2 id="rate-limiting">Rate Limiting</h2>
+<p>To ensure fair usage, please consider caching all your requests to API and/or save results to your database.</p>
+
+<h2 id="support-us">Support us</h2>
+<p>If you find our API useful, consider supporting us: <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="palsoft" data-color="#5F7FFF" data-emoji="🍺"  data-font="Arial" data-text="Buy me a beer" data-outline-color="#000000" data-font-color="#ffffff" data-coffee-color="#FFDD00" ></script></p>
+</body>
+</html>

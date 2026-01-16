@@ -3,6 +3,7 @@
 $slovaks = array(
 //"CEHLÁRIK Peter" => "BOS",
 "ČERNÁK Erik" => "TBL",
+"DVORSKÝ Dalibor" => "STL",
 "FEHÉRVÁRY Martin" => "WSH",
 //"DAŇO Marko" => "CBJ",
 //"HRIVÍK Marek" => "CGY",
@@ -18,11 +19,11 @@ $slovaks = array(
 "NEMEC Šimon" => "NJD",
 "POSPÍŠIL Martin" => "CGY",
 //"RUŽIČKA Adam" => "ARI",
-//"REGENDA Pavol" => "ANA",
+"REGENDA Pavol" => "SJS",
 "SLAFKOVSKÝ Juraj" => "MTL",
 //"STUDENIČ Marián" => "SEA",
 //"PÁNIK Richard" => "NYI",
-"TATAR Tomáš" => "NJD"
+//"TATAR Tomáš" => "NJD"
 );
 
 // SVK brankari

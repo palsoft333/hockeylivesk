@@ -43,6 +43,14 @@ $content .= '<h1 class="h3 h3-fluid mb-4">'.LANG_NAV_IMPERSSUM.'</h1>
       <b>e-mail:</b> <span class="email"><a href="mailto:kuxrek@hockeyx-lixve.sk"
   onmouseover="this.href=this.href.replace(/x/g,\'\');">kurek<span style="display:none">-anti-bot-bit</span>@hockey-live.sk</a></span>
     </div>
+    
+    <div class="mb-4">
+      <img src="/images/contacts/pilarcikova.jpg" class="img-thumbnail mr-3 rounded-circle float-left" style="width:100px; height:100px;" alt="Agáta Pilarčíková">
+      <h5 class="mt-2 d-inline-block d-sm-block">Agáta Pilarčíková</h5>
+      <b>redaktor</b> hockey-LIVE.sk. Agáta sa stará o naše sociálne siete a zároveň je aj redaktorkou.<br>
+      <b>e-mail:</b> <span class="email"><a href="mailto:pixlxarcxikovxa@hockeyx-lixve.sk"
+  onmouseover="this.href=this.href.replace(/x/g,\'\');">pilarcikova<span style="display:none">-anti-bot-bit</span>@hockey-live.sk</a></span>
+    </div>
         
   </div>
 </div>

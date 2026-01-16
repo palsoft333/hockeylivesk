@@ -28,6 +28,7 @@ function Show_Draft_Button($playername,$pid)
 "BAKOŠ Martin"
   );
   $uid = $_SESSION['logged'];
+  $draft = '';
   if($uid)
     {
     $m = mysqli_query($link, "SELECT * FROM ft_teams WHERE uid='$uid'");
@@ -89,7 +90,13 @@ function GetBio($name, $gk) {
   if($gk==0) {
     $pos=$born=$hold=$kg=$cm=$hl=$hl1="";
     $bio=array();
-    $q = mysqli_query($link, "SELECT id, pos, born, hold, kg, cm, league FROM 2004players WHERE name='".$name."' UNION SELECT id, pos, born, hold, kg, cm, league FROM el_players WHERE name='".$name."' ORDER BY league DESC, id DESC;");
+    if($name=="MIKUŠ Juraj" || $name=="MIKÚŠ Juraj") 
+      {
+      if($name=="MIKUŠ Juraj") $coll = " && born='1988-11-30'";
+      if($name=="MIKÚŠ Juraj") $coll = " && born='1987-02-22'";
+      }
+    else $coll="";
+    $q = mysqli_query($link, "SELECT id, pos, born, hold, kg, cm, league FROM 2004players WHERE name='".$name."' UNION SELECT id, pos, born, hold, kg, cm, league FROM el_players WHERE name='".$name."'".$coll." ORDER BY league DESC, id DESC;");
     while($f = mysqli_fetch_array($q)) {
       if($pos=="" && $f["pos"]!="") $pos=$f["pos"];
       if($born=="" && $f["born"]!="1970-01-01") $born=$f["born"];

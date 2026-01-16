@@ -27,7 +27,8 @@ $id = substr($_GET["id"], 0, $dl-1);
 if($el==1) $goals_table = "el_goals";
 else $goals_table = "2004goals";
 
-$q = mysqli_query($link, "SELECT *, CAST(time as DECIMAL(5,2)) as cas FROM ".$goals_table." WHERE matchno='".$id."' ORDER BY cas ASC, id ASC");
+if($el==1) $q = mysqli_query($link, "SELECT g.*, CAST(g.time as DECIMAL(5,2)) as cas, pv.link as video FROM el_goals g LEFT JOIN player_videos pv ON pv.goal_id=g.id WHERE g.matchno='".$id."' ORDER BY cas ASC, g.id ASC;");
+else $q = mysqli_query($link, "SELECT *, CAST(time as DECIMAL(5,2)) as cas, NULL as video FROM 2004goals WHERE matchno='".$id."' ORDER BY cas ASC, id ASC");
 
 $out .= '<div class="card my-4 shadow animated--grow-in">
                   <div class="card-header">
@@ -50,13 +51,14 @@ $out .= '<div class="card my-4 shadow animated--grow-in">
 
 while($f = mysqli_fetch_array($q))
   {
-  $pridaj="";
+  $pridaj=$video="";
   if($f["kedy"]=="pres/1") $kedy = "<span class='badge badge-pill text-xs badge-success' data-toggle='tooltip' data-placement='top' title='".LANG_REPORT_PP1."'>PP1</span>";
   if($f["kedy"]=="pres/2") $kedy = "<span class='badge badge-pill text-xs badge-success' data-toggle='tooltip' data-placement='top' title='".LANG_REPORT_PP2."'>PP2</span>";
   if($f["kedy"]=="oslab/1") $kedy = "<span class='badge badge-pill text-xs badge-danger' data-toggle='tooltip' data-placement='top' title='".LANG_REPORT_SH1."'>SH1</span>";
   if($f["kedy"]=="oslab/2") $kedy = "<span class='badge badge-pill text-xs badge-danger' data-toggle='tooltip' data-placement='top' title='".LANG_REPORT_SH2."'>SH2</span>";
   if($f["kedy"]=="trestne") $kedy = "<span class='badge badge-pill text-xs badge-primary' data-toggle='tooltip' data-placement='top' title='".LANG_REPORT_PS."'>PS</span>";
   if($f["kedy"]=="normal") $kedy = "";
+  if(isset($f["video"])) $video = '<div class="float-right"><a class="fa-film fas ml-1 text-decoration-none" data-toggle="modal" data-target="#videoModal" data-url="'.$f["video"].'" onclick="setVideoUrl(this)" href="#"></a></div>';
   if($f["asister1"]=="bez asistencie" && $f["asister2"]=="bez asistencie") $gol = "<div class='goaler'>".$f["goaler"]."</div>";
   if($f["asister1"]!="bez asistencie" && $f["asister2"]=="bez asistencie") $gol = "<div class='goaler'>".$f["goaler"]."</div><div class='asisters font-weight-light text-xs'>(".$f["asister1"].")</div>";
   if($f["asister1"]!="bez asistencie" && $f["asister2"]!="bez asistencie") $gol = "<div class='goaler'>".$f["goaler"]."</div><div class='asisters font-weight-light text-xs'>(".$f["asister1"].", ".$f["asister2"].")</div>";
@@ -64,7 +66,7 @@ while($f = mysqli_fetch_array($q))
   $out .= "<tr>
             <td class='text-center align-top$pridaj' style='width:10%;'>".$f["time"]."</td>
             <td class='text-nowrap align-top$pridaj' style='width:10%;'><img class='flag-".($el==0 ? 'iihf':'el')." ".$f["teamshort"]."-small' src='/img/blank.png' alt='".$f["teamlong"]."'> ".$f["teamshort"]."</td>
-            <td class='text-nowrap align-top$pridaj' style='width:60%;'>".$gol."</td>
+            <td class='text-nowrap align-top$pridaj' style='width:60%;'>".$video.$gol."</td>
             <td class='text-center align-top$pridaj' style='width:10%;'>".$f["status"]."</td>
             <td class='text-center align-top$pridaj' style='width:10%;'>".$kedy."</td>
            </tr>";

@@ -15,6 +15,31 @@ function SwipeButtonCheck() {
     }
   });
   }
+  
+function setVideoUrl(element) {
+    var videoUrl = element.getAttribute("data-url");
+    var videoFrame = document.getElementById("videoFrame");
+    if (videoFrame) {
+        videoFrame.src = videoUrl;
+    }
+    
+    fetch('/includes/counter.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'video_url=' + encodeURIComponent(videoUrl)
+    });
+}
+
+function clearVideoUrl() {
+    var videoFrame = document.getElementById("videoFrame");
+    if (videoFrame) {
+        videoFrame.src = "";
+    }
+}
+
+$(document).on('hidden.bs.modal', '#videoModal', function () {
+    clearVideoUrl();
+});
 
 $(document).ready( function() {
   "use strict"; // Start of use strict

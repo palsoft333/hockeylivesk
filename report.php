@@ -36,12 +36,31 @@ if(mysqli_num_rows($q)>0)
   if($_SESSION["lang"]!='sk') { $f["team1long"] = TeamParser($f["team1long"]); $f["team2long"] = TeamParser($f["team2long"]); }
   $title = LANG_MATCH1." ".$f["team1long"]." - ".$f["team2long"];
   
-  if(isset($e["goalhorn"]) && $e["goalhorn"]==1) $content .= '<script src="https://code.responsivevoice.org/responsivevoice.js" defer></script>';
+  if(isset($e["goalhorn"]) && $e["goalhorn"]==1) $content .= '';
   else $content .= '<audio preload="auto" id="goalhorn">
     <source src="/includes/sounds/goal.mp3"></source>
     <source src="/includes/sounds/goal.ogg"></source>
     </audio>';
 
+    $content .= '
+            <!-- Video modal -->
+            <div class="modal fade" id="videoModal" tabindex="-1" role="dialog" aria-labelledby="videoModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+                    <div class="modal-content bg-gradient-secondary">
+                        <div class="modal-header border-0 pb-0 pt-2">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="clearVideoUrl()">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="embed-responsive embed-responsive-16by9">
+                                <iframe class="embed-responsive-item border-0" id="videoFrame" src="" allowfullscreen></iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>';
+    
     $content .= "<i class='float-left h1 h1-fluid ll-".LeagueFont($f["longname"])." text-gray-600 mr-1'></i>
                  <h1 class='h3 h3-fluid mb-1'>".LANG_REPORT_TITLE." ".$f["team1long"]." - ".$f["team2long"]."</h1>
                  <h2 class='h6 h6-fluid text-".$leaguecolor." text-uppercase font-weight-bold mb-3'>".$f["longname"]."</h2>

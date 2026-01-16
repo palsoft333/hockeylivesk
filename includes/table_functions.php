@@ -1,4 +1,4 @@
-<?  
+<?
 /*
 * Funkcia pre zistenie aká tabuľka sa bude generovať
 * version: 1.0.0 (29.1.2016 - vytvorenie novej funkcie)
@@ -242,6 +242,7 @@ function Insert_to_table($table_name, $uloha, $league_data, $show_clinch, $playo
   {
   Global $leaderwas, $clinchwas, $cannotwas, $relegwas, $npos, $leaguecolor, $json, $link;
   $clinch_uloha=$uloha;
+  $ttable = '';
   if($playoff_line>0) $pol = $playoff_line-1;
   if(!$json) $ttable .= '<div class="card my-4 shadow animated--grow-in">
   <div class="card-header">

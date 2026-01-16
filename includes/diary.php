@@ -37,11 +37,14 @@
 	}
 	
 	
-	$sQuery = "SELECT SQL_CALC_FOUND_ROWS * FROM 2004playerdiary WHERE name='".$_GET["name"]."'
+	$sQuery = "SELECT SQL_CALC_FOUND_ROWS * FROM 2004playerdiary WHERE name=?
     ORDER BY msg_date DESC
 		$sLimit";
-	$rResult = mysqli_query($link, $sQuery ) or die(mysqli_error($link));
-	
+	$stmt = mysqli_prepare($link, $sQuery);
+	mysqli_stmt_bind_param($stmt, "s", $_GET["name"]);
+	mysqli_stmt_execute($stmt);
+	$rResult = mysqli_stmt_get_result($stmt);	
+  
 	/* Data set length after filtering */
 	$sQuery = "
 		SELECT FOUND_ROWS()

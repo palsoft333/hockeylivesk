@@ -33,7 +33,7 @@ function Get_Matches($lid, $params, $sel, $potype)
 		$c = mysqli_query($link, "SELECT * FROM ".$matches_table." WHERE league='".$lid."' ORDER BY kolo DESC LIMIT 0,1");
 		$d = mysqli_fetch_array($c); 
 		$maxim = $d["kolo"];
-		if(!isset($_GET["sel"])) { $act_round = $b["kolo"]; }
+		if(!isset($_GET["sel"]) || !is_numeric($_GET["sel"])) { $act_round = $b["kolo"]; }
 		else $act_round = $_GET["sel"];
 		$prev_round=$act_round-1;
 		$next_round=$act_round+1;
@@ -63,6 +63,7 @@ function Get_Matches($lid, $params, $sel, $potype)
 				{
 				$posel = mysqli_query($link, "SELECT league, potype FROM el_playoff WHERE league='$lid' ORDER BY id DESC LIMIT 1");
 				$pofet = mysqli_fetch_array($posel);
+                $pofet["potype"] = $pofet["potype"] ?? null;
 				$potype = $pofet["potype"];
 				}
       elseif($potype=="quarter") $potype="stvrt";
@@ -128,6 +129,10 @@ function Get_Matches($lid, $params, $sel, $potype)
 		$el=0;
 		}
   // VYPIS ZAPASOV
+  $matches .= '<div class="text-center" id="101390-31">
+    <script src="//ads.themoneytizer.com/s/gen.js?type=31"></script>
+    <script src="//ads.themoneytizer.com/s/requestform.js?siteId=101390&formatId=31"></script>
+  </div>';
   $title = LANG_TEAMSTATS_MATCHES." ".$f["longname"]." - ".$hl;
   $leaguecolor = LeagueColor($f["longname"]);
   $matches .= '<div id="toasts" class="fixed-top" style="top: 80px; right: 23px; left: initial; z-index:3;"></div>';

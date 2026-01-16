@@ -18,7 +18,10 @@ if(mysqli_num_rows($q)>0)
   $author = $f["name"];
   $meta_image = "";
   preg_match('/<img.+src=[\'"](?P<src>.+?)[\'"].*>/i', $f["hometext"], $image);
-  if(isset($image['src'])) $meta_image = "https://www.hockey-live.sk/".str_replace("../","",$image['src']);
+  if(isset($image['src'])) {
+    $img_src = str_replace("../","",$image['src']);
+    $meta_image = (strpos($img_src, 'http') === 0) ? $img_src : "https://www.hockey-live.sk/".$img_src;
+  }
   $desc = html_entity_decode(strip_tags($f["hometext"]),ENT_COMPAT,"");
   $desc = str_replace("&scaron;","",$desc);
   $article_meta_tags = '<meta property="og:title" content="'.$f["title"].'" />
@@ -43,10 +46,23 @@ if(mysqli_num_rows($q)>0)
       <meta name="twitter:description" content="'.$desc.'" />
   ';
   }
+  if($id[0]==2589) {
+      $title = "Digitálne inovácie v hokeji a online stávky";
+      $desc = "Preskúmajte, ako technológie menia hokej a stávky pre zvýšenú bezpečnosť a zážitok. Čítajte teraz!";
+      $article_meta_tags = '<meta property="og:title" content="'.$title.'" />
+      <meta property="og:type" content="article" />
+      <meta property="og:url" content="https://'.$_SERVER["HTTP_HOST"].$_SERVER["REQUEST_URI"].'" />
+      <meta property="og:description" content="'.$desc.'" />     
+      <meta name="twitter:card" content="summary" />
+      <meta name="twitter:title" content="'.$title.'" />
+      <meta name="twitter:description" content="'.$desc.'" />
+  ';
+  }
 
   $f["hometext"] = str_replace("news-image","col-12 col-sm-5 col-xl-2 float-left img-thumbnail mr-3 mb-2 p-1",$f["hometext"]);
   $f["bodytext"] = preg_replace_callback('/\[\[games-table\]\]/', function ($matches) { Global $f; return generateGamesTable($f["lid"]); }, $f["bodytext"]);
   $f["bodytext"] = preg_replace_callback('/\[\[team-roster\]\]/', function ($matches) { Global $f; return generateRoster("SVK",$f["lid"]); }, $f["bodytext"]);
+  $f["bodytext"] = preg_replace_callback('/\[\[trip-form\]\]/', function ($matches) { Global $f; return generateTripForm($f["lid"]); }, $f["bodytext"]);
 
   $content .= '
   <div class="row">
@@ -68,12 +84,14 @@ $content .= '
             }
 $content .= '
         </div>
-      </div>
+      </div>';
+if(!isset($_GET["trip"])) $content .= '
       <div class="card shadow">
           <div class="card-body">
           '.GenerateComments(0,$id[0]).'
           </div>
-      </div>
+      </div>';
+$content .= '
     </div>
     <div class="col-lg-3">';
     if($f["lid"]==null) {

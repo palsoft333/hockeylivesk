@@ -40,42 +40,40 @@ UNION
 
   if(mysqli_num_rows($q)==0)
     {
-    $games .= "<p class='bg-gray-100 border p-2 rounded small'>".LANG_GAMECONT_NOGAMES."</p>
+    $games .= "<p class='bg-gray-100 border p-2 rounded small m-0'>".LANG_GAMECONT_NOGAMES."</p>
               </div>
             </div>";
     }
   else
     {
-    $pos=0;
-    $ppos=0;
     $fav="";
     $games .= '<div class="row no-gutters align-items-center">
                 <div class="col mr-2">';
     
+    $current_league = null;
     while($f = mysqli_fetch_array($q))
       {
       $lid = $f["league"];
-      if($pos==0) $games .= '
-                  <div class="text-xs text-muted font-weight-bold mb-1">'.$f["longname"].'</div>
-                </div>
-              </div>';
-      $pos=$f["position"];
-      if($pos!=$ppos && $ppos) $games .= '
-              <div class="row no-gutters align-items-center">
-                <div class="col mr-2">
-                  <div class="text-xs text-muted font-weight-bold mb-1 mt-3">'.$f["longname"].'</div>
-                </div>
-              </div>';
-      $injured[$lid] = [];
-      if($pos==0 || ($pos!=$ppos))
-        {
+      
+      // Display league header when league changes
+      if($current_league !== $f["longname"]) {
+        if($current_league !== null) {
+          $games .= '<div class="text-xs text-muted font-weight-bold mb-1 mt-3">'.$f["longname"].'</div>';
+        } else {
+          $games .= '<div class="text-xs text-muted font-weight-bold mb-1">'.$f["longname"].'</div>';
+        }
+        $current_league = $f["longname"];
+        
+        // Load injuries for this league
+        $injured[$lid] = [];
+        $zra = [];
         $z = mysqli_query($link, "SELECT * FROM el_injuries WHERE league='".$f["league"]."'");
         while($zr = mysqli_fetch_array($z))
           {
           $zra[] = $zr["name"];
-          $injured[$lid] = $zra;
           }
-        }
+        $injured[$lid] = $zra;
+      }
       $slov=$favor="";
       // slovaci v akcii
       if(strstr($f["longname"], 'NHL') || strstr($f["longname"], 'KHL'))
@@ -153,7 +151,6 @@ UNION
                   <div class="col-3 text-right font-weight-bold text-nowrap"><a href="/team/'.$f["t2id"].($f["el"]==1 ? '1':'0').'-'.SEOtitle($f["t2long"]).'" data-toggle="tooltip" data-placement="top" title="'.$f["team2long"].'">'.$f["team2short"].'</a> <img class="flag-'.($f["el"]==1 ? 'el':'iihf').' '.$f["team2short"].'-small" src="/img/blank.png" alt="'.$f["team2long"].'"></div>
                   '.($f["el"]==1 ? '<div class="col-2 text-center">'.$slov.'</div>':'').'
                  </div>';
-      $ppos = $pos;
       if($f["kedy"]!="konečný stav") {
         $today_teams[$lid]["teams"][] = $f["team1short"];
         $today_teams[$lid]["teams"][] = $f["team2short"];
@@ -162,7 +159,13 @@ UNION
         }
       }
     $games .= "</div></div>";
-    $games .= Get_PlayersToWatch($today_teams, $injured, $fav["user_favteam"]);
+    if(count($today_teams) > 0) {
+      $games .= '</div></div>';
+      $games .= Get_PlayersToWatch($today_teams, $injured, $fav["user_favteam"]);
+    }
+    else {
+      $games .= "</div></div>";
+    }
     }
 return $games;
 }
@@ -190,15 +193,17 @@ function Get_PlayersToWatch($today_teams, $injured, $favteam) {
             while($f = mysqli_fetch_array($q)) {
                 if(!in_array($f["name"],$injured[$league])) $ptw[$league]["players"][] = array($f["teamshort"], $f["name"], $f["goals"], $f["asists"], $f["points"]);
             }
-            usort($ptw[$league]["players"], function($a,$b){ $c = $b[2] - $a[2]; $c .= $b[4] - $a[4]; return $c; });
-            $ptw[$league]["players"] = array_slice($ptw[$league]["players"], 0, 10, true);
+            if(isset($ptw[$league]["players"])) {
+                usort($ptw[$league]["players"], function($a,$b){ $c = $b[2] - $a[2]; $c .= $b[4] - $a[4]; return $c; });
+                $ptw[$league]["players"] = array_slice($ptw[$league]["players"], 0, 5, true);
+            }
         }
     }
 
     if(count($ptw)>0) {
         foreach($ptw as $league=>$players) {
             if(isset($players["players"]) && count($players["players"])>0) {
-                if(!isset($bol)) $p = '<div class="card shadow mb-4">
+                if(!isset($bol)) $p .= '<div class="card shadow mb-4">
                         <div class="card-header">
                             <div class="font-weight-bold text-primary text-uppercase">'.LANG_GAMECONT_PTW.'</div>
                         </div>
@@ -225,8 +230,8 @@ function Get_PlayersToWatch($today_teams, $injured, $favteam) {
             $bol=1;
             }
         }
-        $p .= '</div>
-        </div>';
+        if(isset($bol)) $p .= '</div>
+            </div>';
     }
     return $p;
 }
@@ -277,21 +282,25 @@ function Get_Latest_Stats() {
     $e = mysqli_fetch_array($w);
     if($e["kedy"]=="na programe") { $vcera = date('Y-m-d', mktime(0, 0, 0, date('m'), date('d')-2, date('Y'))); $dnes = date('Y-m-d', mktime(0, 0, 0, date('m'), date('d')-1, date('Y'))); }
     }
-  $q = mysqli_query($link, "(SELECT ft.*, 2004leagues.longname FROM 2004leagues JOIN (SELECT et.* FROM (SELECT el_goals.goaler, el_goals.asister1, el_goals.asister2, el_goals.teamshort, dt.league FROM el_goals JOIN (SELECT id, league FROM el_matches WHERE kedy = 'konečný stav' && datetime > '$vcera 07:00' && datetime < '$dnes 07:00' ORDER BY datetime)dt ON dt.id=el_goals.matchno)et WHERE goaler IN ($in) OR asister1 IN ($in) OR asister2 IN ($in))ft ON 2004leagues.id=ft.league)
+  $q = mysqli_query($link, "(SELECT ft.*, 2004leagues.longname FROM 2004leagues JOIN (SELECT et.* FROM (SELECT el_goals.goaler, el_goals.asister1, el_goals.asister2, el_goals.teamshort, dt.league, pv.link as video FROM el_goals JOIN (SELECT id, league FROM el_matches WHERE kedy = 'konečný stav' && datetime > '$vcera 07:00' && datetime < '$dnes 07:00' ORDER BY datetime)dt ON dt.id=el_goals.matchno LEFT JOIN player_videos pv ON pv.goal_id=el_goals.id)et WHERE goaler IN ($in) OR asister1 IN ($in) OR asister2 IN ($in))ft ON 2004leagues.id=ft.league)
   UNION ALL
-  (SELECT gt.*, 2004leagues.longname FROM 2004leagues JOIN (SELECT et.* FROM (SELECT 2004goals.goaler, 2004goals.asister1, 2004goals.asister2, 2004goals.teamshort, dt.league FROM 2004goals JOIN (SELECT id, league FROM 2004matches WHERE kedy = 'konečný stav' && datetime > '$vcera 07:00' && datetime < '$dnes 07:00' ORDER BY datetime)dt ON dt.id=2004goals.matchno)et WHERE teamshort='SVK')gt ON 2004leagues.id=gt.league)");
+  (SELECT gt.*, 2004leagues.longname FROM 2004leagues JOIN (SELECT et.* FROM (SELECT 2004goals.goaler, 2004goals.asister1, 2004goals.asister2, 2004goals.teamshort, dt.league, NULL as video FROM 2004goals JOIN (SELECT id, league FROM 2004matches WHERE kedy = 'konečný stav' && datetime > '$vcera 07:00' && datetime < '$dnes 07:00' ORDER BY datetime)dt ON dt.id=2004goals.matchno)et WHERE teamshort='SVK')gt ON 2004leagues.id=gt.league)");
  
-  $g = mysqli_query($link, "(SELECT m.id, m.league, m.team1short, m.team2short, l.longname, ms.goalie1, ms.goalie2, 
-  IF(JSON_UNQUOTE(JSON_EXTRACT(goalie1, '$[0]')) IN ($in_goalies),1,
-    IF(JSON_UNQUOTE(JSON_EXTRACT(goalie1, '$[1]')) IN ($in_goalies),2,
-      IF(JSON_UNQUOTE(JSON_EXTRACT(goalie2, '$[0]')) IN ($in_goalies),3,4)
-      )
-    ) as kde, ms.g1_goals, ms.g1_shots, ms.g2_goals, ms.g2_shots
-  FROM el_matches m LEFT JOIN el_matchstats ms ON ms.matchid=m.id LEFT JOIN 2004leagues l ON l.id=m.league WHERE m.kedy = 'konečný stav' && m.datetime > '$vcera 07:00' && m.datetime < '$dnes 07:00' && (JSON_UNQUOTE(JSON_EXTRACT(goalie1, '$[0]')) IN ($in_goalies) || JSON_UNQUOTE(JSON_EXTRACT(goalie1, '$[1]')) IN ($in_goalies) || JSON_UNQUOTE(JSON_EXTRACT(goalie2, '$[0]')) IN ($in_goalies) || JSON_UNQUOTE(JSON_EXTRACT(goalie2, '$[1]')) IN ($in_goalies)))");
+  if(!empty($in_goalies)) {
+    $g = mysqli_query($link, "(SELECT m.id, m.league, m.team1short, m.team2short, l.longname, ms.goalie1, ms.goalie2, 
+    IF(JSON_UNQUOTE(JSON_EXTRACT(goalie1, '$[0]')) IN ($in_goalies),1,
+      IF(JSON_UNQUOTE(JSON_EXTRACT(goalie1, '$[1]')) IN ($in_goalies),2,
+        IF(JSON_UNQUOTE(JSON_EXTRACT(goalie2, '$[0]')) IN ($in_goalies),3,4)
+        )
+      ) as kde, ms.g1_goals, ms.g1_shots, ms.g2_goals, ms.g2_shots
+    FROM el_matches m LEFT JOIN el_matchstats ms ON ms.matchid=m.id LEFT JOIN 2004leagues l ON l.id=m.league WHERE m.kedy = 'konečný stav' && m.datetime > '$vcera 07:00' && m.datetime < '$dnes 07:00' && (JSON_UNQUOTE(JSON_EXTRACT(goalie1, '$[0]')) IN ($in_goalies) || JSON_UNQUOTE(JSON_EXTRACT(goalie1, '$[1]')) IN ($in_goalies) || JSON_UNQUOTE(JSON_EXTRACT(goalie2, '$[0]')) IN ($in_goalies) || JSON_UNQUOTE(JSON_EXTRACT(goalie2, '$[1]')) IN ($in_goalies)))");
+  } else {
+    $g = mysqli_query($link, "SELECT NULL LIMIT 0");
+  }
       
   if(mysqli_num_rows($q)==0 && mysqli_num_rows($g)==0)
     {
-    $stat .= "<p class='bg-gray-100 border p-2 rounded small'>".LANG_GAMECONT_NOSTATS."</p>
+    $stat .= "<p class='bg-gray-100 border p-2 rounded small m-0'>".LANG_GAMECONT_NOSTATS."</p>
               </div>
             </div>
           </div>
@@ -387,6 +396,7 @@ function Get_Latest_Stats() {
         if(array_key_exists($gname,$slovaks) || $f["teamshort"]=="SVK") {
             if(!isset($stats[$gname])) {
                 $stats[$gname] = array_fill(0, 7, 0);
+                $stats[$gname][7] = [];
             }
             $stats[$gname][0]++; 
             $stats[$gname][1]++; 
@@ -394,28 +404,33 @@ function Get_Latest_Stats() {
             $stats[$gname][4]=$f["longname"]; 
             $stats[$gname][5]=$gname; 
             $stats[$gname][6]=$f["teamshort"];
+            if(isset($f["video"])) $stats[$gname][7][] = $f["video"];
         }
         if(array_key_exists($a1name,$slovaks) || ($f["teamshort"]=="SVK" && $f["asister1"]!="bez asistencie")) {
             if(!isset($stats[$a1name])) {
                 $stats[$a1name] = array_fill(0, 7, 0);
+                $stats[$a1name][7] = [];
             }
             $stats[$a1name][0]++;
             $stats[$a1name][2]++; 
             $stats[$a1name][3]=$f["league"]; 
             $stats[$a1name][4]=$f["longname"];
             $stats[$a1name][5]=$a1name; 
-            $stats[$a1name][6]=$f["teamshort"]; 
+            $stats[$a1name][6]=$f["teamshort"];
+            if(isset($f["video"])) $stats[$a1name][7][] = $f["video"];
         }
         if(array_key_exists($a2name,$slovaks) || ($f["teamshort"]=="SVK" && $f["asister2"]!="bez asistencie")) { 
             if(!isset($stats[$a2name])) {
                 $stats[$a2name] = array_fill(0, 7, 0);
+                $stats[$a2name][7] = [];
             }
             $stats[$a2name][0]++; 
             $stats[$a2name][2]++; 
             $stats[$a2name][3]=$f["league"]; 
             $stats[$a2name][4]=$f["longname"]; 
             $stats[$a2name][5]=$a2name; 
-            $stats[$a2name][6]=$f["teamshort"]; 
+            $stats[$a2name][6]=$f["teamshort"];
+            if(isset($f["video"])) $stats[$a2name][7][] = $f["video"]; 
         }
         $p++;
         }
@@ -432,6 +447,7 @@ function Get_Latest_Stats() {
               [4] => league longname
               [5] => player
               [6] => teamshort
+              [7] => video links
           )    
       */
     
@@ -441,6 +457,14 @@ function Get_Latest_Stats() {
         $lid = $stats[$i][3];
         if(!isset($stats[$i][1])) $stats[$i][1]=0;
         if(!isset($stats[$i][2])) $stats[$i][2]=0;
+        $videos = "";
+        if(count($stats[$i][7])>0) {
+            $videos .= '<div class="float-right mr-2 text-primary">';
+            foreach($stats[$i][7] as $video) {
+                $videos .= '<a class="fa-film fas ml-1 text-decoration-none" data-toggle="modal" data-target="#videoModal" data-url="'.$video.'" onclick="setVideoUrl(this)" href="#"></a>';
+            }
+            $videos .= '</div>';
+        }
         
         if($gpos==0 && !$ppos) $stat .= '<div class="text-xs text-muted font-weight-bold mb-1">'.$stats[$i][4].'</div>
                             </div>
@@ -466,7 +490,7 @@ function Get_Latest_Stats() {
                               </div>';
         
         $stat .= '            <div class="row no-gutters align-items-center small">
-                                <div class="col-9"><img class="flag-iihf '.$stats[$i][6].'-small" src="/img/blank.png" alt="'.$stats[$i][6].'"> '.$stats[$i][5].'</div>
+                                <div class="col-9"><img class="flag-iihf '.$stats[$i][6].'-small" src="/img/blank.png" alt="'.$stats[$i][6].'"> '.$stats[$i][5].$videos.'</div>
                                 <div class="col font-weight-bold">'.$stats[$i][0].'</div>
                                 <div class="col">'.$stats[$i][1].'</div>
                                 <div class="col">'.$stats[$i][2].'</div>
@@ -688,6 +712,7 @@ function Sending_Prize() {
   $q = mysqli_query($link, "SELECT u.*, l.longname FROM `e_xoops_users` u LEFT JOIN 2004leagues l ON l.id=SUBSTRING_INDEX(sending_prize,'-',1) WHERE u.sending_prize IS NOT NULL");
   if(mysqli_num_rows($q)>0)
     {
+    $sending = "";
     while($f = mysqli_fetch_array($q))
       {
       $prize = explode("-", $f["sending_prize"]);
@@ -756,9 +781,9 @@ function potw() {
     elseif($f["pos"]=="D" || $f["pos"]=="LD" || $f["pos"]=="RD") $hl1=LANG_PLAYERSTATS_D;
     else $hl1="";
     
-    $potw = ' <div class="card border-left-warning shadow h-100 py-2">
-                <div class="card-body">
-                  <div class="row no-gutters align-items-center">
+    $potw = ' <div class="card border-left-warning shadow h-100">
+                <div class="card-body p-3">
+                  <div class="row no-gutters align-items-center pb-2">
                     <div class="col mr-2">
                       <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">'.LANG_GAMECONT_POTW.'</div>
                       <div class="text-xs text-muted font-weight-bold mb-1">'.$f["longname"].'</div>
@@ -780,9 +805,9 @@ function potw() {
     }
 else
     {
-    $potw = ' <div class="card border-left-warning shadow h-100 py-2">
-                <div class="card-body">
-                  <div class="row no-gutters align-items-center">
+    $potw = ' <div class="card border-left-warning shadow h-100">
+                <div class="card-body p-3">
+                  <div class="row no-gutters align-items-center pb-2">
                     <div class="col mr-2">
                       <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">'.LANG_GAMECONT_POTW.'</div>
                     </div>
@@ -876,8 +901,12 @@ function ComputePOTW() {
       $r = mysqli_fetch_array($e);
       if($stats[0][1]=="") $stats[0][1]=0;
       if($stats[0][2]=="") $stats[0][2]=0;
-      mysqli_query($link, "INSERT INTO potw (datetime, pid, el, g, a) VALUES ('$teraz', '".$r["id"]."', '".$stats[0][7]."', '".$stats[0][1]."', '".$stats[0][2]."')");
-      $potwdata = array($r["id"], $stats[0][7], $stats[0][1], $stats[0][2]);
+      if($r && !empty($r["id"])) {
+        mysqli_query($link, "INSERT INTO potw (datetime, pid, el, g, a) VALUES ('$teraz', '".$r["id"]."', '".$stats[0][7]."', '".$stats[0][1]."', '".$stats[0][2]."')");
+        $potwdata = array($r["id"], $stats[0][7], $stats[0][1], $stats[0][2]);
+      } else {
+        $potwdata = array(0, 0, 0, 0);
+      }
     }
     else $potwdata = array(0, 0, 0, 0);
     }
@@ -1101,14 +1130,14 @@ function gotd()
   $k = mysqli_query($link, "select * from comments WHERE what='2' && whatid='".$gotdid[0].$gotdid[1]."'");
   $comm_count = mysqli_num_rows($k);
   
-  $gotd = '<div class="card border-left-primary shadow h-100 py-2">
+  $gotd = '<div class="card border-left-primary shadow h-100">
       '.($comm_count>0 ? '
             <div class="position-absolute" style="right: -5px;top: -10px;">
               <span class="badge badge-pill badge-secondary"><a href="/game/'.$gotdid[0].$gotdid[1].'#comments" class="text-white"><i class="fa fa-comment mr-1"></i>'.$comm_count.'</a></span>
             </div>
             ':'').'
-            <div class="card-body d-flex flex-column">
-              <div class="row no-gutters align-items-center">
+            <div class="card-body d-flex flex-column p-3">
+              <div class="row no-gutters align-items-center pb-2">
                 <div class="col mr-2">
                   <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">'.LANG_CARDS_GOTD.'</div>
                 </div>
@@ -1122,108 +1151,115 @@ function gotd()
     if($gotdid[1]==1) { $mtable = "el_matches"; $ttable = "el_teams"; $st=""; }
     else { $mtable = "2004matches"; $ttable = "2004teams"; $st = " shadow-sm"; }
     $q = mysqli_query($link, "SELECT m.*, DATE_FORMAT(m.datetime, '%e.%c.%Y o %k:%i') as datum, t1.id as t1id, t2.id as t2id, t1.longname as t1long, t2.longname as t2long, l.longname as league_name FROM $mtable m LEFT JOIN $ttable t1 ON t1.shortname=m.team1short && t1.league=m.league LEFT JOIN $ttable t2 ON t2.shortname=m.team2short && t2.league=m.league LEFT JOIN 2004leagues l ON l.id=m.league WHERE m.id='".$gotdid[0]."'");
-    
-    $gotf = mysqli_fetch_array($q);
-    if($gotdid[1]==1) {
-      $g = mysqli_query($link, "SELECT count(id) as poc, ROUND(sum(tip1)/count(id),2) as vys1, ROUND(sum(tip2)/count(id),2) as vys2 FROM el_tips WHERE matchid='".$gotdid[0]."'");
-      // stav serie
-      if($gotf["kolo"]==0) {
-          $p = mysqli_query($link, "SELECT * FROM `el_playoff` WHERE league='".$gotf["league"]."' && ((team1='".$gotf["team1short"]."' && team2='".$gotf["team2short"]."') || (team2='".$gotf["team1short"]."' && team1='".$gotf["team2short"]."'))");
-          $po = mysqli_fetch_array($p);
-          if($gotf["team1short"]!=$po["team1"]) $sstatus = $po["status2"].':'.$po["status1"];
-          else $sstatus = $po["status1"].':'.$po["status2"];
-          $pohl = '<p class="m-0"><span class="font-weight-bold">'.LANG_MATCHES_SERIES.':</span> '.$sstatus.'</p>';
-      }
-      // slovaci v akcii
-        if (!isset($nhl_players)) {
-            require_once('slovaks.php');
-            $nhl_players = $slovaks;
-            $nhl_goalies = $brankari;
+
+    if(mysqli_num_rows($q)>0) {
+        $gotf = mysqli_fetch_array($q);
+        if($gotdid[1]==1) {
+        $g = mysqli_query($link, "SELECT count(id) as poc, ROUND(sum(tip1)/count(id),2) as vys1, ROUND(sum(tip2)/count(id),2) as vys2 FROM el_tips WHERE matchid='".$gotdid[0]."'");
+        // stav serie
+        $gotf["kolo"] = $gotf["kolo"] ?? null;
+        if($gotf["kolo"]==0) {
+            $p = mysqli_query($link, "SELECT * FROM `el_playoff` WHERE league='".$gotf["league"]."' && ((team1='".$gotf["team1short"]."' && team2='".$gotf["team2short"]."') || (team2='".$gotf["team1short"]."' && team1='".$gotf["team2short"]."'))");
+            $po = mysqli_fetch_array($p);
+            if($gotf["team1short"]!=$po["team1"]) $sstatus = $po["status2"].':'.$po["status1"];
+            else $sstatus = $po["status1"].':'.$po["status2"];
+            $pohl = '<p class="m-0"><span class="font-weight-bold">'.LANG_MATCHES_SERIES.':</span> '.$sstatus.'</p>';
         }
-        if (!isset($khl_players)) {
-            require_once('slovaki.php');
-            $khl_players = $slovaks;
-            $khl_goalies = $brankari;
+        // slovaci v akcii
+            if (!isset($nhl_players)) {
+                require_once('slovaks.php');
+                $nhl_players = $slovaks;
+                $nhl_goalies = $brankari;
+            }
+            if (!isset($khl_players)) {
+                require_once('slovaki.php');
+                $khl_players = $slovaks;
+                $khl_goalies = $brankari;
+            }
+        $slov=$tv="";
+        if(strstr($gotf["league_name"], 'NHL') || strstr($gotf["league_name"], 'KHL'))
+            {
+            $tran1 = $tran2 = array();
+            if(date("n")<8) {
+            $rok = date("Y")-1;
+            $season_start = $rok."-01-08";
+            }
+            else $season_start = date("Y")."-01-08";
+            $z = mysqli_query($link, "SELECT * FROM el_injuries WHERE league='".$gotf["league"]."'");
+            while($zr = mysqli_fetch_array($z))
+            {
+            $zra[] = $zr["name"];
+            }
+            $tr = mysqli_query($link, "SELECT from_team, pname FROM transfers WHERE (from_team='".$gotf["team1short"]."' || from_team='".$gotf["team2short"]."') && datetime>'".$season_start."'");
+            while($tra = mysqli_fetch_array($tr))
+            {
+            if($tra["from_team"]==$gotf["team1short"]) $tran1[] = $tra["pname"];
+            if($tra["from_team"]==$gotf["team2short"]) $tran2[] = $tra["pname"];
+            }
+            if(strstr($gotf["league_name"], 'NHL')) { $slovaks = $nhl_players; $brankari = $nhl_goalies; }
+            if(strstr($gotf["league_name"], 'KHL')) { $slovaks = $khl_players; $brankari = $khl_goalies; }
+            $pia1 = array_keys($slovaks, $gotf["team1short"]);
+            $gia1 = array_keys($brankari, $gotf["team1short"]);
+            $inaction1 = array_merge($pia1, $gia1);
+            if(count($zra)>0) $inaction1 = array_diff($inaction1, $zra);
+            if(count($tran1)>0) $inaction1 = array_diff($inaction1, $tran1);
+            $inaction1 = array_values($inaction1);
+            $pia2 = array_keys($slovaks, $gotf["team2short"]);
+            $gia2 = array_keys($brankari, $gotf["team2short"]);
+            $inaction2 = array_merge($pia2, $gia2);
+            if(count($zra)>0) $inaction2 = array_diff($inaction2, $zra);
+            if(count($tran2)>0) $inaction2 = array_diff($inaction2, $tran2);
+            $inaction2 = array_values($inaction2);
+            if(count($inaction1)>0 || count($inaction2)>0)
+            {
+            $c = count($inaction1)+count($inaction2);
+            $slov = '<p class="m-0"><span class="font-weight-bold">'.LANG_MATCHES_SLOVAKS.':</span> '.(count($inaction1)>0 ? implode(", ",$inaction1):'').(count($inaction2)>0 ? (count($inaction1)>0 ? ', '.implode(", ",$inaction2):implode(", ",$inaction2)):'').'</p>';
+            }
+            }
         }
-      $slov=$tv="";
-      if(strstr($gotf["league_name"], 'NHL') || strstr($gotf["league_name"], 'KHL'))
+        else $g = mysqli_query($link, "SELECT count(id) as poc, ROUND(sum(tip1)/count(id),2) as vys1, ROUND(sum(tip2)/count(id),2) as vys2 FROM 2004tips WHERE matchid='".$gotdid[0]."'");
+        if($gotf["fs_tv"]!=NULL && $gotf["fs_tv"]!='[]')
         {
-        $tran1 = $tran2 = array();
-        if(date("n")<8) {
-          $rok = date("Y")-1;
-          $season_start = $rok."-01-08";
-          }
-        else $season_start = date("Y")."-01-08";
-        $z = mysqli_query($link, "SELECT * FROM el_injuries WHERE league='".$gotf["league"]."'");
-        while($zr = mysqli_fetch_array($z))
-          {
-          $zra[] = $zr["name"];
-          }
-        $tr = mysqli_query($link, "SELECT from_team, pname FROM transfers WHERE (from_team='".$gotf["team1short"]."' || from_team='".$gotf["team2short"]."') && datetime>'".$season_start."'");
-        while($tra = mysqli_fetch_array($tr))
-          {
-          if($tra["from_team"]==$gotf["team1short"]) $tran1[] = $tra["pname"];
-          if($tra["from_team"]==$gotf["team2short"]) $tran2[] = $tra["pname"];
-          }
-        if(strstr($gotf["league_name"], 'NHL')) { $slovaks = $nhl_players; $brankari = $nhl_goalies; }
-        if(strstr($gotf["league_name"], 'KHL')) { $slovaks = $khl_players; $brankari = $khl_goalies; }
-        $pia1 = array_keys($slovaks, $gotf["team1short"]);
-        $gia1 = array_keys($brankari, $gotf["team1short"]);
-        $inaction1 = array_merge($pia1, $gia1);
-        if(count($zra)>0) $inaction1 = array_diff($inaction1, $zra);
-        if(count($tran1)>0) $inaction1 = array_diff($inaction1, $tran1);
-        $inaction1 = array_values($inaction1);
-        $pia2 = array_keys($slovaks, $gotf["team2short"]);
-        $gia2 = array_keys($brankari, $gotf["team2short"]);
-        $inaction2 = array_merge($pia2, $gia2);
-        if(count($zra)>0) $inaction2 = array_diff($inaction2, $zra);
-        if(count($tran2)>0) $inaction2 = array_diff($inaction2, $tran2);
-        $inaction2 = array_values($inaction2);
-        if(count($inaction1)>0 || count($inaction2)>0)
-          {
-          $c = count($inaction1)+count($inaction2);
-          $slov = '<p class="m-0"><span class="font-weight-bold">'.LANG_MATCHES_SLOVAKS.':</span> '.(count($inaction1)>0 ? implode(", ",$inaction1):'').(count($inaction2)>0 ? (count($inaction1)>0 ? ', '.implode(", ",$inaction2):implode(", ",$inaction2)):'').'</p>';
-          }
+        $tvarr = json_decode($gotf["fs_tv"], true);
+        $tvarr = implode(", ",$tvarr);
+        $tv .= '<p class="m-0"><span class="font-weight-bold">LIVE:</span> '.$tvarr.'</p>';
         }
+        $h = mysqli_fetch_array($g);
+        
+        $gotd .= '    <div class="row mb-2 no-gutters">
+                        <div class="col-5 text-center">
+                        <img src="/images/vlajky/'.$gotf["team1short"].'.gif" alt="'.$gotf["team1long"].'" class="img-fluid'.$st.'">
+                        <div class="gotd-team h6 mb-0 mt-1 font-weight-bold"><a href="/team/'.$gotf["t1id"].($gotdid[1]==1 ? '1':'0').'-'.SEOtitle($gotf["t1long"]).'" class="stretched-link text-gray-800">'.$gotf["team1long"].'</a></div>
+                        </div>
+                        <div class="col-2 text-center align-self-center">
+                        vs.
+                        </div>
+                        <div class="col-5 text-center">
+                        <img src="/images/vlajky/'.$gotf["team2short"].'.gif" alt="'.$gotf["team2long"].'" class="img-fluid'.$st.'">
+                        <div class="gotd-team h6 mb-0 mt-1 font-weight-bold"><a href="/team/'.$gotf["t2id"].($gotdid[1]==1 ? '1':'0').'-'.SEOtitle($gotf["t2long"]).'" class="stretched-link text-gray-800">'.$gotf["team2long"].'</a></div>
+                        </div>
+                    </div>
+                    <div class="text-xs text-center mb-2">
+                        '.$pohl.'
+                        <p class="m-0"><span class="font-weight-bold">'.LIVE_GAME_START.':</span> '.$gotf["datum"].'</p>
+                        <p class="m-0"><span class="font-weight-bold">'.LANG_MATCHES_AVGBET.':</span> '.$h["vys1"].' : '.$h["vys2"].'</p>
+                        <p class="m-0"><span class="font-weight-bold">'.LANG_MATCHES_BETS.':</span> '.$h["poc"].'</p>
+                        '.$slov.'
+                        '.$tv.'
+                    </div>
+                    <div class="align-items-end d-flex flex-fill justify-content-center">
+                        <a href="/'.($gotf["active"]==1 ? 'report':'game').'/'.$gotf["id"].$gotdid[1].'-'.SEOtitle($gotf["team1long"].' vs '.$gotf["team2long"]).'" class="btn btn-light btn-icon-split">
+                        <span class="icon text-gray-600">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <span class="text text-gray-800">'.($gotf["active"]==1 ? LANG_NAV_LIVE:LANG_MATCHES_DETAIL).'</span>
+                        </a>
+                    </div>';
     }
-    else $g = mysqli_query($link, "SELECT count(id) as poc, ROUND(sum(tip1)/count(id),2) as vys1, ROUND(sum(tip2)/count(id),2) as vys2 FROM 2004tips WHERE matchid='".$gotdid[0]."'");
-    if($gotf["fs_tv"]!=NULL && $gotf["fs_tv"]!='[]')
-      {
-      $tvarr = json_decode($gotf["fs_tv"], true);
-      $tvarr = implode(", ",$tvarr);
-      $tv .= '<p class="m-0"><span class="font-weight-bold">LIVE:</span> '.$tvarr.'</p>';
-      }
-    $h = mysqli_fetch_array($g);
-    
-    $gotd .= '    <div class="row mb-2 no-gutters">
-                    <div class="col-5 text-center">
-                      <img src="/images/vlajky/'.$gotf["team1short"].'.gif" alt="'.$gotf["team1long"].'" class="img-fluid'.$st.'">
-                      <div class="gotd-team h6 mb-0 mt-1 font-weight-bold"><a href="/team/'.$gotf["t1id"].($gotdid[1]==1 ? '1':'0').'-'.SEOtitle($gotf["t1long"]).'" class="stretched-link text-gray-800">'.$gotf["team1long"].'</a></div>
-                    </div>
-                    <div class="col-2 text-center align-self-center">
-                      vs.
-                    </div>
-                    <div class="col-5 text-center">
-                      <img src="/images/vlajky/'.$gotf["team2short"].'.gif" alt="'.$gotf["team2long"].'" class="img-fluid'.$st.'">
-                      <div class="gotd-team h6 mb-0 mt-1 font-weight-bold"><a href="/team/'.$gotf["t2id"].($gotdid[1]==1 ? '1':'0').'-'.SEOtitle($gotf["t2long"]).'" class="stretched-link text-gray-800">'.$gotf["team2long"].'</a></div>
-                    </div>
-                  </div>
-                  <div class="text-xs text-center mb-2">
-                    '.$pohl.'
-                    <p class="m-0"><span class="font-weight-bold">'.LIVE_GAME_START.':</span> '.$gotf["datum"].'</p>
-                    <p class="m-0"><span class="font-weight-bold">'.LANG_MATCHES_AVGBET.':</span> '.$h["vys1"].' : '.$h["vys2"].'</p>
-                    <p class="m-0"><span class="font-weight-bold">'.LANG_MATCHES_BETS.':</span> '.$h["poc"].'</p>
-                    '.$slov.'
-                    '.$tv.'
-                  </div>
-                  <div class="align-items-end d-flex flex-fill justify-content-center">
-                    <a href="/'.($gotf["active"]==1 ? 'report':'game').'/'.$gotf["id"].$gotdid[1].'-'.SEOtitle($gotf["team1long"].' vs '.$gotf["team2long"]).'" class="btn btn-light btn-icon-split">
-                      <span class="icon text-gray-600">
-                        <i class="fas fa-search"></i>
-                      </span>
-                      <span class="text text-gray-800">'.($gotf["active"]==1 ? LANG_NAV_LIVE:LANG_MATCHES_DETAIL).'</span>
-                    </a>
-                  </div>';
+    else {
+        if(date("n")>5 && date("n")<9) $gotd .= '<h5 class="mt-2 text-center"><i class="fas fa-umbrella-beach text-gray-300"></i> Letná prestávka</h5><p class="mt-4 text-center">Netrpezlivo čakáme na začiatok novej sezóny ...</p>';
+        else $gotd .= '<h5 class="mt-2 text-center"><i class="fas fa-ban text-gray-300"></i> Bez zápasu</h5><p class="mt-4 text-center">Najbližšie nás nečaká žiaden napínavý zápas</p>';
+    }
     }
   else
     {
@@ -1318,7 +1354,7 @@ if($f["bodytext"] != '') { $s = '<a href="/news/'.$f["storyid"].'-'.SEOtitle($f[
                         <div class="card-body news-body text-justify">
                           '.$f["hometext"].'
                           '.($f["bodytext"]!="" ? '<p class="float-right small"><a href="#" class="text-'.LeagueColor($f["topic_title"]).'">'.LANG_READMORE.' <i class="fas fa-angle-double-right"></i></a></p>':'').'
-                          <p class="text-left text-xs text-muted"><span class="font-weight-bold">'.$f["name"].'</span> · '.date("j.n.Y H:i",$f["published"]).' · <span class="text-hl"><i class="far fa-comment"></i> '.$f["comment_count"].'</span></p>
+                          <p class="text-left text-xs text-muted m-0"><span class="font-weight-bold">'.$f["name"].'</span> · '.date("j.n.Y H:i",$f["published"]).' · <span class="text-hl"><i class="far fa-comment"></i> '.$f["comment_count"].'</span></p>
                         </div>
                       
                       </div>

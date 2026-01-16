@@ -43,30 +43,34 @@ function GetCalEvents(month, year) {
   });
 }
 
-function GetFlashNews() {
+function GetFlashNews(frombutton) {
   $.ajax({
-  type: "POST",
-  url: "/includes/flashnews.php",
-  dataType: "text",
-  contentType:"application/x-www-form-urlencoded; charset=utf-8",
-  cache: false,
-  complete: function() { $('#flash-spinner').hide(); },
-  success: function(data){
-    if(data)
-      {
-      $("#flash-container").html(data).fadeIn(1500);
-      $(function() {
-        $(".lazy").lazy(
-          { effect: 'fadeIn',     
+    type: "POST",
+    url: "/includes/flashnews.php",
+    dataType: "text",
+    contentType: "application/x-www-form-urlencoded; charset=utf-8",
+    cache: false,
+    beforeSend: function() {
+      if (frombutton == 1) {
+        $('#flash-spinner').show();
+      }
+    },
+    complete: function() {
+      $('#flash-spinner').hide();
+    },
+    success: function(data) {
+      if (data) {
+        $("#flash-container").html(data).fadeIn(1500);
+        $(function() {
+          $(".lazy").lazy({
+            effect: 'fadeIn',
             afterLoad: function(e) {
               e.removeClass("lazy");
-          }}
-        );
-      });
-      }
-    else
-      {
-      Notification(LANG_FLASH_CANNOT);
+            }
+          });
+        });
+      } else {
+        Notification(LANG_FLASH_CANNOT);
       }
     }
   });
@@ -108,7 +112,7 @@ $(document).ready( function() {
 
                 function showEvents( contentEl, dateprop ) {
                     hideEvents();
-                    var $events = $( '<div id="custom-content-reveal" class="animated--fade-in list-group border custom-content-reveal h-100 p-2 position-absolute top w-100" style="top:0; left:0; background:rgba(246, 246, 246, 0.9);"><h6 class="font-weight-bold text-center text-success text-uppercase">'+LANG_CALENDAR_GAMESFOR+' ' + dateprop.day + '.'
+                    var $events = $( '<div id="custom-content-reveal" class="animated--fade-in list-group border custom-content-reveal h-100 p-2 position-absolute top w-100" style="top:0; left:0; background:rgba(246, 246, 246, 0.9); z-index:11;"><h6 class="font-weight-bold text-center text-success text-uppercase">'+LANG_CALENDAR_GAMESFOR+' ' + dateprop.day + '.'
 					+ dateprop.monthname + ' ' + dateprop.year + '</h4></div>' ),
                     $close = $( '<div class="p-1 position-absolute" style="right: 0; top: 0;"><button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>' ).on( 'click', hideEvents);
                     $events.append( contentEl.join('') , $close ).insertAfter( $wrapper );
@@ -133,8 +137,29 @@ $(document).ready( function() {
             
        
           });
+          
+      $('body').on('click', "#flashnews-refresh", function() {
+        var $elem = $(this).find('.fa-sync-alt'); 
+        
+        $({ deg: 0 }).animate(
+          { deg: 359 },
+          {
+            duration: 1000,
+            step: function(now) {
+              $elem.css({
+                transform: 'rotate(' + now + 'deg)'
+              });
+            },
+            complete: function() {
+              $elem.css({ transform: 'rotate(0deg)' });
+            }
+          }
+        );
+        
+        GetFlashNews(1);
+      });
       
      $('#flash-spinner').show();
-     GetFlashNews();
+     GetFlashNews(0);
 
 });

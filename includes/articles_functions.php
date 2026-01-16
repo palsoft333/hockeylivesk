@@ -64,3 +64,131 @@ function generateRoster($tshort, $lid) {
     }
     return $table;
 }
+
+function generateTripForm($lid) {
+    Global $link;
+    $q = mysqli_query($link, "SELECT * FROM 2004leagues WHERE id='".$lid."'");
+    $f = mysqli_fetch_assoc($q);
+    
+    $form = '
+    <form class="needs-validation" novalidate>
+        <input type="hidden" name="tournament" value="'.$f["longname"].'">
+        <div class="form-group row mb-3">
+            <label for="numPeople" class="col-sm-3 col-form-label">Počet osôb</label>
+            <div class="col-sm-9">
+                <input type="number" class="form-control" id="numPeople" name="numPeople" min="1" required>
+                <div class="invalid-feedback">
+                    Prosím zadajte počet osôb
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group row mb-3">
+            <label for="numDays" class="col-sm-3 col-form-label">Počet dní</label>
+            <div class="col-sm-9">
+                <input type="number" class="form-control" id="numDays" name="numDays" min="1" required>
+                <div class="invalid-feedback">
+                    Prosím zadajte počet dní
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group row mb-3">
+            <label for="travelMode" class="col-sm-3 col-form-label">Spôsob dopravy</label>
+            <div class="col-sm-9">
+                <select class="form-control" id="travelMode" name="travelMode" required>
+                    <option value="">Vyberte spôsob dopravy...</option>
+                    <option value="car">Autom</option>
+                    <option value="bus">Autobusom</option>
+                    <option value="train">Vlakom</option>
+                    <option value="plane">Lietadlom</option>
+                </select>
+                <div class="invalid-feedback">
+                    Prosím vyberte spôsob dopravy
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group row mb-3">
+            <label for="budget" class="col-sm-3 col-form-label">Rozpočet</label>
+            <div class="col-sm-9">
+                <select class="form-control" id="budget" name="budget" required>
+                    <option value="">Vyberte rozpočet...</option>
+                    <option value="low">low-cost</option>
+                    <option value="medium">stredný</option>
+                    <option value="high">vysoký</option>
+                </select>
+                <div class="invalid-feedback">
+                    Prosím vyberte rozpočet
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group row mb-3">
+            <label for="cityOrigin" class="col-sm-3 col-form-label">Mesto odchodu</label>
+            <div class="col-sm-9">
+                <input type="text" class="form-control" id="cityOrigin" name="cityOrigin" required>
+                <div class="invalid-feedback">
+                    Prosím zadajte mesto odchodu
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group row mb-3">
+            <label for="email" class="col-sm-3 col-form-label">Kontaktný e-mail</label>
+            <div class="col-sm-9">
+                <input type="email" class="form-control" id="email" name="email" required>
+                <div class="invalid-feedback">
+                    Prosím zadajte platný email
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="col-sm-9 offset-sm-3">
+                <button type="submit" class="btn btn-primary">Odoslať</button>
+            </div>
+        </div>
+    </form>
+
+    <script>
+    (function() {
+        "use strict";
+        window.addEventListener("load", function() {
+            var forms = document.getElementsByClassName("needs-validation");
+            var validation = Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener("submit", function(event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    
+                    if (form.checkValidity() === true) {
+                        var formData = new FormData(form);
+                        fetch("/includes/trip_handler.php", {
+                            method: "POST",
+                            body: formData
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert("Formulár bol úspešne odoslaný!");
+                                form.reset();
+                                form.classList.remove("was-validated");
+                            } else {
+                                alert("Chyba pri odosielaní: " + data.message);
+                            }
+                        })
+                        .catch(error => {
+                            alert("Chyba pri odosielaní formulára.");
+                        });
+                    }
+                    
+                    form.classList.add("was-validated");
+                }, false);
+            });
+        }, false);
+    })();
+    </script>
+    ';
+    
+    return $form;
+}

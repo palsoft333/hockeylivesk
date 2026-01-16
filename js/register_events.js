@@ -28,11 +28,14 @@ $(document).ready( function() {
         var password=$("#pass").val();
         var passagain=$("#passagain").val();
         var email=$("#email").val();
+        var optin = $('#optin').is(':checked') ? 1 : 0;
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if(password!==passagain) $("#alert").html(LANG_USERPROFILE_PASSDIDNTMATCH).removeClass("d-none");
         else if(username.length<3) $("#alert").html(LANG_REGISTER_USERATLEAST3).removeClass("d-none");
+        else if(!regex.test(email)) $("#alert").html(LANG_LOGIN_WRONGEMAIL).removeClass("d-none");
         else
           {
-          var dataString = 'username='+username+'&password='+password+'&email='+email+'&token='+token;
+          var dataString = 'username='+username+'&password='+password+'&email='+email+'&optin='+optin+'&token='+token;
           if($.trim(username).length>0 && $.trim(password).length>0 && $.trim(email).length>0)
             {
             $.ajax({

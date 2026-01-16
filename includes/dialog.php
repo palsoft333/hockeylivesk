@@ -172,7 +172,7 @@ ORDER BY zor ASC, price DESC");
       else $dis='';
       if($_GET["action"]=="pricelist") { $disppos = "(".$f["pos"].") "; $val=""; }
       else $val = ' value="'.$f["playerid"].'-'.$pos.'"';
-      echo '<option'.$val.$dis.'>'.$disppos.$f["name"].' | '.money_format('%.0n', $f["price"]).'</option>';
+      echo '<option'.$val.$dis.'>'.$disppos.$f["name"].' | '.number_format('%.0n', $f["price"]).'</option>';
       $predzor=$f["zor"];
       }
     if($_GET["action"]=="pricelist") echo '</optgroup>';
@@ -461,7 +461,7 @@ elseif($_GET["action"]=="automat")
           $b = mysqli_query($link, "SELECT * FROM `fl_selects` LEFT JOIN el_players t1 ON t1.id=fl_selects.pid LEFT JOIN el_goalies t2 ON t2.id=fl_selects.pid WHERE uid='".$uid."' && t1.league='".$lid."' || uid='".$uid."' && t2.league='".$lid."'");
           if(mysqli_num_rows($b)==9) $act = 1;
           else $act = 0;
-          mysqli_query($link, "UPDATE fl_wallet SET balance=balance-".$y[price].", active='".$act."' WHERE uid='".$uid."' && league='".$lid."'");
+          mysqli_query($link, "UPDATE fl_wallet SET balance=balance-".$y["price"].", active='".$act."' WHERE uid='".$uid."' && league='".$lid."'");
           $togk--;
           }
         if($togk==0) break;
@@ -494,7 +494,7 @@ elseif($_GET["action"]=="automat")
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">'.LANG_CLOSE.'</button>
-          '.($_GET[action]=="pricelist" ? '' : '<button type="button" class="btn btn-hl automat">'.LANG_FANTASY_FILL.'</button>').'
+          '.($_GET["action"]=="pricelist" ? '' : '<button type="button" class="btn btn-hl automat">'.LANG_FANTASY_FILL.'</button>').'
         </div>
       </div>
     </div>';

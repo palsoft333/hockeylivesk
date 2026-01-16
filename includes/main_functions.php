@@ -120,8 +120,8 @@ function Tournament_Strip() {
     $f = mysqli_fetch_array($q);
     $longname = $f["longname"];
     $newlongname = str_replace("Nemecký pohár", "Nemeckom pohári", $longname);
-    $newlongname = str_replace("Kaufland Cup", "Kaufland Cupe", $longname);
     $newlongname = str_replace("Vianočný Kaufland Cup", "Vianočnom Kaufland Cupe", $longname);
+    if($newlongname == $longname) $newlongname = str_replace("Kaufland Cup", "Kaufland Cupe", $newlongname);
     $ts = '
     <div class="bg-secondary border-bottom border-dark d-flex justify-content-between justify-content-sm-start p-1 small text-white" id="tournamentStrip">
       <div class="align-self-center mr-2 tournamentName"><b class="text-gray-300">Slovensko</b> na <b>'.$newlongname.'</b></div>
@@ -213,7 +213,7 @@ function Generate_Menu($active_league = FALSE) {
                       </div>
                       <div class="collapse-divider"></div>
                       <h6 class="collapse-header">Odkazy:</h6>
-                      '.($f["info_id"]!=null ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/info/'.$f["info_id"].'-'.SEOtitle(Get_SEO_title($f["topic_title"],1)).'"><span itemprop="name">Informácie</span><i class="fas fa-circle-info fa-fw float-right text-gray-500 my-1"></i></a>':'').'
+                      '.($f["info_id"]!=null ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/info/'.$f["info_id"].'-'.SEOtitle(Get_SEO_title($f["topic_title"],1)).'"><span itemprop="name">'.LANG_NAV_INFO.'</span><i class="fas fa-circle-info fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                       <a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/category/'.$f["topic_id"].'-'.SEOtitle(Get_SEO_title($f["topic_title"],1)).'"><span itemprop="name">'.LANG_NAV_NEWS.'</span><i class="fas fa-newspaper fa-fw float-right text-gray-500 my-1"></i></a>
                       '.($f["el"]>0 && $f["endbasic"]==1 ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/table/'.$f["id"].'-'.SEOtitle(Get_SEO_title($f["topic_title"],1)).'/playoff"><span itemprop="name">'.LANG_TEAMTABLE_PLAYOFF.'</span><i class="fas fa-trophy fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                       <a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="'.($f["endbasic"]==1 && $f["el"]==0 ? "/table/".$f["id"]."-".SEOtitle(Get_SEO_title($f["topic_title"],1))."/playoff" : "/games/".$f["id"]."-".SEOtitle(Get_SEO_title($f["topic_title"],1))).'"><span itemprop="name">'.LANG_NAV_UPCOMMING.'</span><i class="fas fa-hockey-puck fa-fw float-right text-gray-500 my-1"></i>'.$badge.'</a>
@@ -223,8 +223,9 @@ function Generate_Menu($active_league = FALSE) {
                       '.(strstr($f["longname"], 'KHL') ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/slovaks/'.$f["id"].'-'.SEOtitle(Get_SEO_title($f["topic_title"],1)).'"><span itemprop="name">'.LANG_NAV_SLOVAKI.'</span><i class="fas fa-user-shield fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                       '.($f["el"]>0 && $f["topic_id"]!=60 ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/injured/'.$f["id"].'-'.SEOtitle(Get_SEO_title($f["topic_title"],1)).'"><span itemprop="name">'.LANG_NAV_INJURED.'</span><i class="fas fa-user-injured fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                       '.($f["el"]>0 ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/transfers/'.$f["id"].'-'.SEOtitle(Get_SEO_title($f["topic_title"],1)).'"><span itemprop="name">'.LANG_NAV_TRANSFERS.'</span><i class="fas fa-exchange-alt fa-fw float-right text-gray-500 my-1"></i></a>':'').'
-                      '.($f["id"]==161 ? '<a itemprop="url" class="collapse-item font-weight-bold text-success" href="/fantasy/picks"><span itemprop="name">Fantasy MS</span><i class="fas fa-wand-magic-sparkles fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                       '.($f["id"]==144 ? '<a itemprop="url" class="collapse-item font-weight-bold text-danger" href="/fantasy/main"><span itemprop="name">Fantasy KHL</span><i class="fas fa-wand-magic-sparkles fa-fw float-right text-gray-500 my-1"></i></a>':'').'
+                      '.($f["trip_id"]!=null ? '<a itemprop="url" class="collapse-item font-weight-bold text-gray-700" href="/trip/'.$f["trip_id"].'-'.SEOtitle(Get_SEO_title($f["topic_title"],1)).'"><span itemprop="name">'.LANG_NAV_TRIP.'</span><i class="fas fa-suitcase fa-fw float-right text-gray-500 my-1"></i></a>':'').'
+                      '.($f["id"]==166 ? '<a itemprop="url" class="collapse-item font-weight-bold text-success" href="/fantasy/picks"><span itemprop="name">Fantasy MS</span><i class="fas fa-wand-magic-sparkles fa-fw float-right text-gray-500 my-1"></i></a>':'').'
                     </div>
                   </div>
                 </li>';
@@ -312,7 +313,9 @@ else
     <tbody>";
 $coto = mysqli_query($link, "SELECT *, gf_osem-ga_osem as diff FROM ".$teams_table." WHERE league='".$league."' && skup_osem='".$f["skup_osem"]."' ORDER BY p_osem desc, diff desc, gf_osem, w_osem desc, l_osem asc, t_osem desc");
 
-$m=0;
+$m=$points=0;
+$tshort="";
+$tabul=[];
 while($data = mysqli_fetch_array($coto))
 	{
 	$posun=0;
@@ -428,7 +431,9 @@ while ($i < count($tabul))
 				else $coto = mysqli_query($link, "SELECT *, goals-ga as diff FROM ".$teams_table." WHERE league='".$league."' && skupina='".$skup."' ORDER BY body desc, zapasov asc, diff desc, wins desc, losts asc, ties desc");
 				
 				// BODY >> VZAJOMNY ZAPAS >> ROZDIEL SKORE (START)
-        $m=0;
+        $m=$points=0;
+        $tshort="";
+        $tabul=[];
         while($data = mysqli_fetch_array($coto))
           {
           $posun=0;
@@ -506,6 +511,8 @@ function Get_Series($lid)
 	$q = mysqli_query($link, "SELECT potype, 2004leagues.longname FROM el_playoff JOIN 2004leagues ON 2004leagues.id=el_playoff.league WHERE league='".$lid."' && played='1' GROUP BY potype ORDER BY el_playoff.id DESC LIMIT 1");
 	}
 	$f = mysqli_fetch_array($q);
+    $f["potype"] = $f["potype"] ?? null;
+    $hl = "";
 	$w = mysqli_query($link, "SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';") or die(mysqli_error($link));
 	$w = mysqli_query($link, "SELECT el_playoff.*, t1.longname as t1, t2.longname as t2, t1.id as t1id, t2.id as t2id FROM el_playoff JOIN el_teams t1 ON (el_playoff.team1=t1.shortname && el_playoff.league=t1.league) JOIN el_teams t2 ON (el_playoff.team2=t2.shortname && el_playoff.league=t2.league) WHERE el_playoff.league='".$lid."' && el_playoff.potype='".$f["potype"]."' GROUP BY id ORDER BY el_playoff.id ASC");
   if($f["potype"]=="baraz") $hl=LANG_TEAMTABLE_PLAYOFF." - ".LANG_QUALIFYROUND;
@@ -818,7 +825,7 @@ function Notifications($lite=FALSE)
                 }
                elseif($f["what"]==3)
                 {
-                $e = mysqli_query($link, "SELECT c.*, u.uname FROM comments c LEFT JOIN e_xoops_users u ON u.uid=c.uid WHERE c.id='".$f[whatid]."'");
+                $e = mysqli_query($link, "SELECT c.*, u.uname FROM comments c LEFT JOIN e_xoops_users u ON u.uid=c.uid WHERE c.id='".$f["whatid"]."'");
                 $r = mysqli_fetch_array($e);
                 if($r["what"]==0) { $url = "/news/".$r["whatid"]."#comments"; }
                 if($r["what"]==1) { $url = "/team/".$r["whatid"]."#comments"; }

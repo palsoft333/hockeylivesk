@@ -38,7 +38,7 @@ if(mysqli_num_rows($q)>0)
       else echo '"'.date("m-d-Y", strtotime($f["datetime"])).'" : [';
       if($f["el"]==1) $url = $f["league"].'-'.SEOtitle($f["longname"]).'/'.$f["kolo"];
       else $url = $f["league"].'-'.SEOtitle($f["longname"]).'/'.date("Y-m-d",strtotime($f["datetime"]));
-      echo '{"content": "'.$f["longname"].'", "url": "/games/'.$url.'", "allDay": true, "color": "'.$f["league"].'|'.$f["color"].'"}';
+      echo '{"content": "'.$f["longname"].'", "url": "/games/'.$url.'", "allDay": true, "color": "'.$f["league"].'|'.$f["color"].'", "el": '.$f["el"].'}';
       $prevday=$f["den"];
       $i++;
       }

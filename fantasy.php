@@ -2,26 +2,26 @@
 $params = explode("/", htmlspecialchars($_GET["id"]));
 
 $nazov = "Fantasy Junior Championship";
-$menu = "MS U20 2025";
+$menu = "MS U20 2026";
 $skratka = "MS U20";
 $manazerov = 10;
-$article_id = 2535;
-$league_id = 161;
+$article_id = 2606;
+$league_id = 166;
 //$timeout = 480;
 $predraftt = 1; // = draftuje sa do zásobníka. ak 1, upraviť počet manažérov aj v includes/fantasy_functions.php
-$knownrosters = 1; // = su zname zostavy (do ft_choices pridat hracov, ktori sa zucastnia)
-$article_rosters = 2534;
-$draft_start = "2024-12-23 09:10:00";
-$league_start = "2024-12-26 18:00:00";
+$knownrosters = 1; // = su zname zostavy (editovať xadm/2004/fantasy_copychoices.php a spustiť)
+$article_rosters = 2605;
+$draft_start = "2025-12-20 11:00:00"; // väčšinou týždeň pred začiatkom turnaja
+$league_start = "2025-12-26 19:00:00";
 
 /*
 1. nastaviť dátum deadlinu
 2. odremovať potrebné veci
 3. vyprázdniť ft_players, ft_predraft, ft_teams, ft_choices a ft_changes
 4. zmeniť link v menu
-5. vypnúť/zapnúť cronjob pre neaktivitu a nulovanie bodov
-6. ak je knownroster=1 do ft_choices pridat hracov a brankarov, ktori sa zucastnia
-7. odoslať pozvánkové maily na základe reakčného času avg_time (menej ako 10k) v e_xoops_users
+5. ak je knownroster=1 do ft_choices pridat hracov a brankarov, ktori sa zucastnia (cez xadm/2004/fantasy_copychoices.php)
+6. odoslať pozvánkové maily na základe reakčného času avg_time (menej ako 10k) v e_xoops_users
+7. vypnúť/zapnúť cronjob pre neaktivitu (až po začatí) a nulovanie bodov
 */
 
 if(isset($_GET["cron"]) && $_GET["cron"]==1) {
@@ -43,7 +43,7 @@ $leag = mysqli_query($link, "SELECT * FROM 2004leagues WHERE id='".$league_id."'
 $league = mysqli_fetch_array($leag);
 $leaguecolor = $league["color"];
 $active_league = $league["id"];
-//if($uid==2) { $uid=3064; /*$_SESSION["logged"]=215;*/ } 
+if($uid==2) { $uid=1319; /*$_SESSION["logged"]=215;*/ } 
 
 // cron job pre vyber random hraca pri necinnosti manazera
 if(isset($_GET["cron"]) && $_GET["cron"]==1)
@@ -198,14 +198,14 @@ if($params[0]=="draft")
                             </h6>
                           </div>
                           <div class="card-body alert-info">
-                            <p class="text-center m-0"><i class="fas fa-info-circle mr-1"></i>Čakáme na posledné súpisky <b>Lotyšska</b>, <b>Česka</b> a <b>Švajčiarska</b>.<br>Predpokladaný začiatok draftu je <strong>'.date("j.n. \o G:i", strtotime($draft_start)).'</strong></p>
+                            <p class="text-center m-0"><i class="fas fa-info-circle mr-1"></i>Predpokladaný začiatok draftu je <strong>'.date("j.n. \o G:i", strtotime($draft_start)).'</strong></p>
                           </div>
                          </div>
                         </div>
                        </div>';
                        
         // anketa
-        include("includes/poll.php");
+        /*include("includes/poll.php");
         $content .= '
         <div class="row justify-content-center">
             <div class="col-sm-8 col-md-7">
@@ -220,7 +220,7 @@ if($params[0]=="draft")
                     </div>
                 </div>
             </div>
-        </div>';
+        </div>';*/
                        
     $content .= Show_Drafted();
   }
@@ -243,7 +243,7 @@ if($params[0]=="draft")
                         <div class='col-12' style='max-width: 1000px;'>";
 
         // anketa
-        include("includes/poll.php");
+        /*include("includes/poll.php");
         $content .= '
         <div class="row justify-content-center">
             <div class="col-sm-8 col-md-7">
@@ -258,7 +258,7 @@ if($params[0]=="draft")
                     </div>
                 </div>
             </div>
-        </div>';
+        </div>';*/
         
         // zistit aktualne kolo a poradie manazera na rade
         if($poc<$manazerov) {
@@ -430,7 +430,7 @@ if($params[0]=="draft")
                       <div class='col-12' style='max-width: 1000px;'>";
       $content .= '<div class="alert alert-info" role="alert">'.sprintf(LANG_FANTASY_DRAFTTEXT, $nazov, $manazerov).'</div>';
         // anketa
-        include("includes/poll.php");
+        /*include("includes/poll.php");
         $content .= '
         <div class="row justify-content-center">
             <div class="col-sm-8 col-md-7">
@@ -445,7 +445,7 @@ if($params[0]=="draft")
                     </div>
                 </div>
             </div>
-        </div>';
+        </div>';*/
       $content .= Show_Drafted();
     }
   }
@@ -474,7 +474,7 @@ if($params[0]=="picks")
                     <div class='col-12' style='max-width: 1000px;'>";
 
     // anketa
-    include("includes/poll.php");
+    /*include("includes/poll.php");
     $content .= '
     <div class="row justify-content-center">
         <div class="col-sm-8 col-md-7">
@@ -489,7 +489,7 @@ if($params[0]=="picks")
                 </div>
             </div>
         </div>
-    </div>';
+    </div>';*/
 
   $r = mysqli_query($link, "SELECT t.uid, t.points, t.prev_points, u.uname, u.user_avatar FROM ft_teams t LEFT JOIN e_xoops_users u ON u.uid=t.uid WHERE t.active='1' ORDER BY t.points DESC, t.pos ASC");
   //$content .= '<div class="alert alert-info">Keďže nastala na prvej priečke rovnosť bodov medzi dvoma manažérmi, museli sme zaviesť rozhodovacie pravidlo, ktorým je menší počet výmen hráčov v zostave. Tento rozstrel vyhral v pomere 31:121 manažér <b>Athletix</b>, ktorému gratulujeme! Aby sa ale <b>pegina</b> nehnevala, odmeňujeme takisto aj druhé miesto v drafte :)</div>';
@@ -584,7 +584,7 @@ if($params[0]=="picks")
               </p>
             </div>
             <div class="footer">
-              '.(in_array($players[$i][0], $exc) ? '<span data-toggle="tooltip" data-placement="bottom" title="Momentálne sa nedá vymeniť. Hrá zápas."><a href="#" class="btn btn-sm btn-block btn-secondary disabled"><i class="fas fa-ban"></i></a></span>':'<a href="#" class="btn btn-sm btn-block btn-light change-player" data-pid="'.$players[$i][8].'" data-toggle="tooltip" data-placement="bottom" title="Vymeniť brankára"><i class="fas fa-retweet"></i></a>').'
+              '.(isset($players) && in_array($players[$i][0], $exc) ? '<span data-toggle="tooltip" data-placement="bottom" title="Momentálne sa nedá vymeniť. Hrá zápas."><a href="#" class="btn btn-sm btn-block btn-secondary disabled"><i class="fas fa-ban"></i></a></span>':'<a href="#" class="btn btn-sm btn-block btn-light change-player" data-pid="'.$players[$i][8].'" data-toggle="tooltip" data-placement="bottom" title="Vymeniť brankára"><i class="fas fa-retweet"></i></a>').'
             </div>
           </div>
          </div>
@@ -691,7 +691,7 @@ if($params[0]=="picks")
           </h6>
         </div>
         <div class="card-body">
-          <table class="table-hover table-light table-striped table-responsive-sm w-100 p-fluid">
+          <table class="table-hover table-light table-striped table-responsive w-100 p-fluid">
             <thead>
               <tr>
                 <th>'.LANG_DATE.'</th>
@@ -710,11 +710,15 @@ if($params[0]=="picks")
     if(date('Y-m-d',strtotime($f["tstamp"]))==date("Y-m-d")) $hl="dnes o <b>".date('G:i', strtotime($f["tstamp"]))."</b>";
     elseif(date('Y-m-d',strtotime($f["tstamp"]))==date('Y-m-d', mktime(0, 0, 0, date('m'), date('d')-1, date('Y')))) $hl="včera o ".date('G:i', strtotime($f["tstamp"]));
     else $hl=date('j.n.',strtotime($f["tstamp"])). " ".LANG_AT." ".date('G:i', strtotime($f["tstamp"]));
+    $o["old_name"] = $o["old_name"] ?? "";
+    $o["new_name"] = $o["new_name"] ?? "";
+    $o["old_tshort"] = $o["old_tshort"] ?? "FEQ";
+    $o["new_tshort"] = $o["new_tshort"] ?? "FEQ";
     $content .= '<tr><td class="text-nowrap">'.$hl.'</td><td><a href="/user/'.$f["uid"].'">'.$f["uname"].'</a></td><td class="text-nowrap"><img class="flag-iihf '.$o["old_tshort"].'-small" src="/images/blank.png" alt="'.$o["old_tshort"].'"> <a href="/'.($f["gk"]==1 ? 'goalie':'player').'/'.$f["old_pid"].'0-'.SEOtitle($o["old_name"]).'" data-toggle="popover" data-player="'.$o["old_name"].'|'.$f["gk"].'">'.$o["old_name"].'</a></td><td class="text-nowrap"><img class="flag-iihf '.$o["new_tshort"].'-small" src="/images/blank.png" alt="'.$o["new_tshort"].'"> <a href="/'.($f["gk"]==1 ? 'goalie':'player').'/'.$f["new_pid"].'0-'.SEOtitle($o["new_name"]).'" data-toggle="popover" data-player="'.$o["new_name"].'|'.$f["gk"].'">'.$o["new_name"].'</a></td></tr>';
     }
   $content .= '</tbody></table></div></div></div></div>';
   
-  $q = mysqli_query($link, "SELECT dt.*, e_xoops_users.uname FROM e_xoops_users JOIN (SELECT * FROM ft_teams ORDER BY pos ASC)dt ON dt.uid=e_xoops_users.uid");
+  $q = mysqli_query($link, "SELECT dt.*, e_xoops_users.uname FROM e_xoops_users JOIN (SELECT * FROM ft_teams WHERE active='1' ORDER BY pos ASC)dt ON dt.uid=e_xoops_users.uid");
   while($f = mysqli_fetch_array($q))
     {
     $thead=$tfood=$tbody="";
@@ -783,7 +787,7 @@ if($params[0]=="picks")
   }
 elseif($params[0]=="signin")
   {
-		if(isset($_POST['active']))
+		if(isset($_POST['active']) && isset($_SESSION['logged']))
 			{
 			$uid = $_SESSION['logged'];
       $title = $nazov;
@@ -833,8 +837,8 @@ elseif($params[0]=="signin")
                    
       $content .= '<div class="alert alert-warning" role="alert"><i class="fas fa-hourglass-half"></i> '.LANG_FANTASY_WAITFOROTHERS.'</div>
                    <div class="alert alert-info font-weight-bold" role="alert"><i class="fas fa-users"></i> '.sprintf(LANG_FANTASY_CURRENTLYSIGNED, $count, $manazerov).'</div>';
-      if($count>=$manazerov) $content .= '
-                   <div class="alert alert-success" role="alert"><i class="fas fa-thumbs-up text-success"></i> '.sprintf(LANG_FANTASY_ALLSET, $manazerov, date("j.n.Y H:i",strtotime($draft_start))).'</div>';
+      /*if($count>=$manazerov) $content .= '
+                   <div class="alert alert-success" role="alert"><i class="fas fa-thumbs-up text-success"></i> '.sprintf(LANG_FANTASY_ALLSET, $manazerov, date("j.n.Y H:i",strtotime($draft_start))).'</div>';*/
       }
     else
       {

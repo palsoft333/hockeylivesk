@@ -107,6 +107,12 @@ else
                     <input type="password" class="form-control form-control-user" id="passagain" placeholder="<? echo LANG_NAV_PASSWORDAGAIN; ?>" autocomplete="new-password" required>
                   </div>
                 </div>
+                <div class="form-group">
+                    <div class="custom-control custom-checkbox small">
+                    <input type="checkbox" class="custom-control-input" id="optin" name="optin">
+                    <label class="custom-control-label" for="optin"><? echo LANG_NAV_OPTIN; ?></label>
+                    </div>
+                </div>
                 <a href="#" class="btn btn-hl btn-user btn-block register-proceed-button">
                   <? echo LANG_NAV_REGISTER; ?>
                 </a>
@@ -134,7 +140,7 @@ else
   <script src="/js/jquery.lazy.min.js"></script>
   <script src="/js/main.min.js?v=1.1.7"></script>
   <script src="/includes/lang/lang_<? echo $_SESSION["lang"]; ?>.js?v=1.0.0"></script>
-  <script src="/js/register_events.min.js?v=1.1.0"></script>
+  <script src="/js/register_events.min.js?v=1.1.3"></script>
 
 </body>
 

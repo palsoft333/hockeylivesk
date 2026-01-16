@@ -10,6 +10,95 @@ else {
     include("lang/lang_sk.php");
 }
 
+function GetSubscriber($email) {
+    $url = 'https://api.sender.net/v2/subscribers/' . urlencode($email);
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Authorization: Bearer ' . SENDERS_TOKEN,
+        'Content-Type: application/json',
+        'Accept: application/json'
+    ]);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    $response = curl_exec($ch);
+    curl_close($ch);
+
+    if (curl_errno($ch)) {
+      return false;
+    }
+    else {
+      $json = json_decode($response, true);
+      if(isset($json["success"]) && $json["success"]==false) return false;
+      else return $json;
+    }
+}
+
+function AddSubscriber($username, $email) {
+    $url = 'https://api.sender.net/v2/subscribers';
+
+    $json = [
+        "email" => $email,
+        "firstname" => $username,
+        "groups" => ["azx8oO"]
+    ];
+
+    $ch = curl_init($url);
+
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Authorization: Bearer ' . SENDERS_TOKEN,
+        'Content-Type: application/json',
+        'Accept: application/json'
+    ]);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($json));
+
+    $response = curl_exec($ch);
+
+    if (curl_errno($ch)) {
+        SendMail(ADMIN_MAIL, "Chyba pri importe do Senders.net", 'cURL error: '.curl_error($ch));
+    }
+
+    curl_close($ch);
+}
+
+function UpdateSubscriber($email, $status) {
+    $url = 'https://api.sender.net/v2/subscribers/' . urlencode($email);
+
+    $json = [
+        "subscriber_status" => ($status ? "ACTIVE" : "UNSUBSCRIBED"),
+    ];
+
+    $ch = curl_init($url);
+
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Authorization: Bearer ' . SENDERS_TOKEN,
+        'Content-Type: application/json',
+        'Accept: application/json'
+    ]);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($json));
+
+    $response = curl_exec($ch);
+
+    if (curl_errno($ch)) {
+      return false;
+    }
+    else {
+      return true;
+    }
+
+    curl_close($ch);
+}
+
+function GetUserName($uid) {
+  Global $link;
+  $q = mysqli_query($link, "SELECT uname FROM e_xoops_users WHERE uid=".mysqli_real_escape_string($link, $uid));
+  $f = mysqli_fetch_array($q);
+  return $f["uname"];
+}
+
 header('Content-Type: text/html; charset=utf-8');
 
 if(isset($_POST['username']) && isset($_POST['password']))
@@ -116,6 +205,21 @@ if($_POST["change"]=="data")
   if(filter_var($email, FILTER_VALIDATE_EMAIL))
     {
     mysqli_query($link, "UPDATE e_xoops_users SET email='".$email."', lang='".$lang."', user_favteam='".$tshort."', goalhorn='".$goalhorn."', mail_notify='".$mailnotify."' WHERE uid='".$_SESSION['logged']."'");
+    $subscriber = GetSubscriber($email);
+    if($subscriber) {
+      if($mailnotify==1) {
+        $update = UpdateSubscriber($email, true);
+      }
+      else {
+        $update = UpdateSubscriber($email, false);
+      }
+    }
+    else {
+      if($mailnotify==1) {
+        $username = GetUserName($_SESSION['logged']);
+        AddSubscriber($username, $email);
+      }
+    }
     echo "ok";
     }
 }

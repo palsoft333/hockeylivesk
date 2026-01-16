@@ -309,11 +309,11 @@ class TeamTable {
           else $tpos_over_line = $this->playoff_line[0]-1;
       }
       else $tpos_over_line = $this->playoff_line-1;
-      if($teams[$team_pos]["can_earn"]<$teams[$tpos_over_line]["points"] || $teams[$team_pos]["games"]==$this->games_total && $team_pos >= $playoff_line) $clinch = "y";
+      if($tpos_over_line >= 0 && $tpos_over_line < count($teams) && isset($teams[$tpos_over_line]) && ($teams[$team_pos]["can_earn"]<$teams[$tpos_over_line]["points"] || $teams[$team_pos]["games"]==$this->games_total && $team_pos >= $playoff_line)) $clinch = "y";
       // relegated to I.DIV
       if(is_array($this->playoff_line) && strstr($this->name, "MS")) {
         $tpos_over_line = end($this->playoff_line)-1;
-        if($teams[$team_pos]["can_earn"]<$teams[$tpos_over_line]["points"] || $teams[$team_pos]["games"]==$this->games_total && $team_pos > $tpos_over_line) $clinch = "z";
+        if($tpos_over_line >= 0 && $tpos_over_line < count($teams) && isset($teams[$tpos_over_line]) && ($teams[$team_pos]["can_earn"]<$teams[$tpos_over_line]["points"] || $teams[$team_pos]["games"]==$this->games_total && $team_pos > $tpos_over_line)) $clinch = "z";
       }
       return $clinch;
     }

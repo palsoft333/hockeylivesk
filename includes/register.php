@@ -4,6 +4,35 @@ include("db.php");
 include("main_functions.php");
 header('Content-Type: text/html; charset=utf-8');
 
+function AddSubscriber($username, $email) {
+    $url = 'https://api.sender.net/v2/subscribers';
+
+    $json = [
+        "email" => $email,
+        "firstname" => $username,
+        "groups" => ["azx8oO"]
+    ];
+
+    $ch = curl_init($url);
+
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Authorization: Bearer ' . SENDERS_TOKEN,
+        'Content-Type: application/json',
+        'Accept: application/json'
+    ]);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($json));
+
+    $response = curl_exec($ch);
+
+    if (curl_errno($ch)) {
+        SendMail(ADMIN_MAIL, "Chyba pri importe do Senders.net", 'cURL error: '.curl_error($ch));
+    }
+
+    curl_close($ch);
+}
+
 if(isset($_POST['check']))
 {
 $username=mysqli_real_escape_string($link, $_POST['check']);
@@ -25,9 +54,14 @@ if(isset($_POST['username']) && isset($_POST['password']) && isset($_POST['email
         $username=mysqli_real_escape_string($link, $_POST['username']);
         $password=md5(mysqli_real_escape_string($link, $_POST['password']));
         $email=mysqli_real_escape_string($link, $_POST['email']);
+        if($_POST["optin"]=="1") $notify=1;
+        else $notify=0;
         $q=mysqli_query($link, "SELECT email FROM e_xoops_users WHERE email='".$email."'");
         if(mysqli_num_rows($q)>0) echo "EMAILEXISTS";
-        else $result=mysqli_query($link, "INSERT INTO e_xoops_users (uname, email, lang, user_regdate, pass) VALUES ('".$username."', '".$email."', '".$_SESSION["lang"]."', '".time()."', '".$password."')");
+        else {
+            $result=mysqli_query($link, "INSERT INTO e_xoops_users (uname, email, lang, user_regdate, pass, mail_notify) VALUES ('".$username."', '".$email."', '".$_SESSION["lang"]."', '".time()."', '".$password."', '".$notify."')");
+            if($notify==1) AddSubscriber($username, $email);
+        }
         
       } elseif ($responseKeys["score"] < 0.5) {
           echo "CAPTCHAERROR";

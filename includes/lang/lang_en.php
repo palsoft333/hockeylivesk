@@ -372,6 +372,9 @@ define("LANG_NAV_SLOVAKS","Slovaks in NHL");
 define("LANG_NAV_SLOVAKI","Slovaks in KHL");
 define("LANG_NAV_INJURED","Injured players");
 define("LANG_NAV_TRANSFERS","Transfers");
+define("LANG_NAV_INFO","Information");
+define("LANG_NAV_TRIP","Trip");
+define("LANG_NAV_FANSHOP","Fan Shop");
 
 define("LANG_CARDS_GOTD","Game of the day");
 define("LANG_CARDS_CALENDAR","Calendar");
@@ -402,6 +405,7 @@ define("LANG_NAV_REGISTRATION","Register");
 define("LANG_NAV_USERNAME","Username");
 define("LANG_NAV_PASSWORD","Password");
 define("LANG_NAV_PASSWORDAGAIN","Password again");
+define("LANG_NAV_OPTIN","I want to be informed about competitions by email");
 define("LANG_NAV_EMAIL","Email");
 define("LANG_NAV_REGISTER","Register");
 define("LANG_NAV_WRONGUSERNAME","Only numbers and letters");
@@ -612,6 +616,8 @@ define('LANG_FORUM_TEAMTOPICS','Team discussions');
 define('LANG_FORUM_GAMETOPICS','Game discussions');
 define('LANG_FORUM_PLAYERTOPICS','Player discussions');
 define('LANG_FORUM_NEWSTOPICS','Article discussions');
+
+define('LANG_SHOP_DESC', 'We have prepared a fan shop for you, which we will gradually expand with other great items. The designs are from our workshop, so you can only find them at our shop. If you have a request for a different suggestion or design of a fan item, let <a href="/contact">us know</a> and we will include such a product.');
 
 $foreign_teams = array("Belarus","Denmark","China","Czechia","Europe","Finland","France","Japan","Canada","Kazakhstan","Latvia","Hungary","Germany","Norway","Austria","Russia","North America","Slovakia","Slovenia","Italy","Ukraine","USA","Switzerland","Sweden");
 $foreign_statuses = array("final result","scheduled","get ready","in the 1st period","after 1st period","in the 2nd period","after 2nd period","in the 3rd period","after 3rd period","overtime","after overtime");

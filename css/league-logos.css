@@ -1,11 +1,11 @@
 @font-face {
   font-family: 'league-logos';
-  src: url('../font/league-logos.eot?26205974');
-  src: url('../font/league-logos.eot?26205974#iefix') format('embedded-opentype'),
-       url('../font/league-logos.woff2?26205974') format('woff2'),
-       url('../font/league-logos.woff?26205974') format('woff'),
-       url('../font/league-logos.ttf?26205974') format('truetype'),
-       url('../font/league-logos.svg?26205974#league-logos') format('svg');
+  src: url('../font/league-logos.eot?27636526');
+  src: url('../font/league-logos.eot?27636526#iefix') format('embedded-opentype'),
+       url('../font/league-logos.woff2?27636526') format('woff2'),
+       url('../font/league-logos.woff?27636526') format('woff'),
+       url('../font/league-logos.ttf?27636526') format('truetype'),
+       url('../font/league-logos.svg?27636526#league-logos') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -72,6 +72,7 @@
 .sidebar .ll-olympics {
     font-size: 50% !important;
     margin-right: 0.75rem !important;
+    vertical-align: 2px !important;
 }
 
 .sidebar.toggled .ll-olympics {

@@ -35,7 +35,7 @@
 	if ( isset( $_GET['iDisplayStart'] ) && $_GET['iDisplayLength'] != '-1' )
 	{
 		$sLimit = "LIMIT ".mysqli_real_escape_string($link, $_GET['iDisplayStart'] ).", ".
-			mysqli_reali_escape_string($link, $_GET['iDisplayLength'] );
+			mysqli_real_escape_string($link, $_GET['iDisplayLength'] );
 	}
 	
 	if(isset($_GET["lid"]))
@@ -43,7 +43,7 @@
     $lid = $_GET["lid"];
     if($lid=="contest") {
       // sutaz o karticky
-      $sQuery = "SELECT SQL_CALC_FOUND_ROWS t.userid,t.matchid,m.datetime,sum(t.points) as points, count(t.id) as poc, u.uname, u.uid, u.user_avatar FROM el_tips t LEFT JOIN el_matches m ON m.id=t.matchid LEFT JOIN e_xoops_users u ON u.uid=t.userid WHERE t.league='159' && m.datetime>'2025-03-10 00:00:00' GROUP BY t.userid ORDER BY points DESC $sLimit";
+      $sQuery = "SELECT SQL_CALC_FOUND_ROWS t.userid,t.matchid,m.datetime,sum(t.points) as points, count(t.id) as poc, u.uname, u.uid, u.user_avatar FROM el_tips t LEFT JOIN el_matches m ON m.id=t.matchid LEFT JOIN e_xoops_users u ON u.uid=t.userid WHERE t.league='169' && m.datetime<'2025-12-01 00:00:00' GROUP BY t.userid ORDER BY points DESC $sLimit";
     }
     else {
       $sel = mysqli_query($link,"SELECT el FROM 2004leagues WHERE id='".$lid."'");

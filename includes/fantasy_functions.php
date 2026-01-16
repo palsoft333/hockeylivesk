@@ -15,14 +15,16 @@ if(isset($_GET["save"]) && $_GET["save"]==1)
   if($_SESSION["knownrosters"]==0) {
     $i=0;
     while($i < count($options)) {
-      if($options[$i]["gk"]==1) $sp = mysqli_query($link, "SELECT * FROM 2004goalies WHERE id='".$options[$i]["pid"]."'");
-      else $sp = mysqli_query($link, "SELECT * FROM 2004players WHERE id='".$options[$i]["pid"]."'");
-      $selp = mysqli_fetch_array($sp);
-      if($options[$i]["gk"]==1) $pos = "GK";
-      else $pos = $selp[pos];
-      if($pos=="LD" || $pos=="RD") $pos="D";
-      if($pos=="CE" || $pos=="RW" || $pos=="LW") $pos="F";
-      mysqli_query($link, "REPLACE INTO `ft_choices` (`id`, `teamshort`, `teamlong`, `pos`, `name`) VALUES ('".$selp["id"]."', '".$selp["teamshort"]."', '".$selp["teamlong"]."', '".$pos."', '".$selp["name"]."')");
+      if($options[$i]["pid"]!=0) {
+        if($options[$i]["gk"]==1) $sp = mysqli_query($link, "SELECT * FROM 2004goalies WHERE id='".$options[$i]["pid"]."'");
+        else $sp = mysqli_query($link, "SELECT * FROM 2004players WHERE id='".$options[$i]["pid"]."'");
+        $selp = mysqli_fetch_array($sp);
+        if($options[$i]["gk"]==1) $pos = "GK";
+        else $pos = $selp["pos"];
+        if($pos=="LD" || $pos=="RD") $pos="D";
+        if($pos=="CE" || $pos=="RW" || $pos=="LW") $pos="F";
+        mysqli_query($link, "REPLACE INTO `ft_choices` (`id`, `teamshort`, `teamlong`, `pos`, `name`) VALUES ('".$selp["id"]."', '".$selp["teamshort"]."', '".$selp["teamlong"]."', '".$pos."', '".$selp["name"]."')");
+      }
       $i++;
     }
   }
@@ -284,7 +286,7 @@ function Show_Drafted()
           </h6>
         </div>
         <div class="card-body">
-          <table class="table-hover table-light table-striped table-responsive-sm w-100 p-fluid">
+          <table class="table-hover table-light table-striped table-responsive w-100 p-fluid">
             <thead>
               <tr>
                 <th>'.LANG_DATE.'</th>
@@ -303,6 +305,10 @@ function Show_Drafted()
     if(date('Y-m-d',strtotime($f["tstamp"]))==date("Y-m-d")) $hl="dnes o <b>".date('G:i', strtotime($f["tstamp"]))."</b>";
     elseif(date('Y-m-d',strtotime($f["tstamp"]))==date('Y-m-d', mktime(0, 0, 0, date('m'), date('d')-1, date('Y')))) $hl="včera o ".date('G:i', strtotime($f["tstamp"]));
     else $hl=date('j.n.',strtotime($f["tstamp"])). " ".LANG_AT." ".date('G:i', strtotime($f["tstamp"]));
+    $m["old_name"] = $m["old_name"] ?? "";
+    $m["new_name"] = $m["new_name"] ?? "";
+    $m["old_tshort"] = $m["old_tshort"] ?? "FEQ";
+    $m["new_tshort"] = $m["new_tshort"] ?? "FEQ";
     $drafted .= '<tr><td class="text-nowrap">'.$hl.'</td><td><a href="/user/'.$f["uid"].'">'.$f["uname"].'</a></td><td class="text-nowrap"><img class="flag-iihf '.$m["old_tshort"].'-small" src="/images/blank.png" alt="'.$m["old_tshort"].'"> <a href="/'.($f["gk"]==1 ? 'goalie':'player').'/'.$f["old_pid"].'0-'.SEOtitle($m["old_name"]).'" data-toggle="popover" data-player="'.$m["old_name"].'|'.$f["gk"].'">'.$m["old_name"].'</a></td><td class="text-nowrap"><img class="flag-iihf '.$m["new_tshort"].'-small" src="/images/blank.png" alt="'.$m["new_tshort"].'"> <a href="/'.($f["gk"]==1 ? 'goalie':'player').'/'.$f["new_pid"].'0-'.SEOtitle($m["new_name"]).'" data-toggle="popover" data-player="'.$m["new_name"].'|'.$f["gk"].'">'.$m["new_name"].'</a></td></tr>';
     }
   $drafted .= '</tbody></table></div></div></div></div>';

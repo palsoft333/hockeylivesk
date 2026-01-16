@@ -52,7 +52,9 @@ else
 function h2h_reorder1($uloha, $lid, $league_data)
   {
   Global $link;
-  $m=0;
+  $m=$points=0;
+  $tshort="";
+  $reord = [];
   while($data = mysqli_fetch_array($uloha))
     {
     $posun=0;
@@ -73,6 +75,7 @@ function h2h_reorder1($uloha, $lid, $league_data)
     $games = $data["zapasov"];
     $wins = $data["wins"];
     $losts = $data["losts"];
+    $ties = 0;
     $goals = $data["goals"].":".$data["ga"];
     $points = $data["body"];
     $tshort = $data["shortname"];
@@ -87,8 +90,8 @@ function h2h_reorder1($uloha, $lid, $league_data)
   
 function TeamParser($team)
   {
-  $slovak_teams = array("Bielorusko","Dánsko","Česko","Čína","Európa","Fínsko","Francúzsko","Japonsko","Južná Kórea","Kanada","Kazachstan","Lotyšsko","Maďarsko","Nemecko","Nórsko","Rakúsko","Rusko","Severná Amerika","Slovensko","Slovinsko","Taliansko","Ukrajina","USA","Veľká Británia","Švajčiarsko","Švédsko");
-  $foreign_teams = array("Belarus","Denmark","Czechia","China","Europe","Finland","France","Japan","South Korea","Canada","Kazakhstan","Latvia","Hungary","Germany","Norway","Austria","Russia","North America","Slovakia","Slovenia","Italy","Ukraine","USA","Great Britain","Switzerland","Sweden");
+  $slovak_teams = array("Bielorusko","Dánsko","Česko","Čína","Európa","Fínsko","Francúzsko","Japonsko","Južná Kórea","Kanada","Kazachstan","Lotyšsko","Maďarsko","Nemecko","Nórsko","Poľsko","Rakúsko","Rusko","Severná Amerika","Slovensko","Slovinsko","Taliansko","Ukrajina","USA","Veľká Británia","Švajčiarsko","Švédsko");
+  $foreign_teams = array("Belarus","Denmark","Czechia","China","Europe","Finland","France","Japan","South Korea","Canada","Kazakhstan","Latvia","Hungary","Germany","Norway","Poland","Austria","Russia","North America","Slovakia","Slovenia","Italy","Ukraine","USA","Great Britain","Switzerland","Sweden");
   $newname = str_replace($slovak_teams,$foreign_teams,$team);
   return $newname;
   }
@@ -487,6 +490,7 @@ elseif(isset($_GET["game"]))
   $game["score"]["goals1"] = $y["goals1"];
   $game["score"]["goals2"] = $y["goals2"];
   $game["score"]["status"] = $y["kedy"];
+  $game["score"]["overtime"] = 0;
   if($el==1) $w = mysqli_query($link, "SELECT * FROM el_goals WHERE matchno='".$y["id"]."' ORDER BY time AsC, id ASC");
   else $w = mysqli_query($link, "SELECT * FROM 2004goals WHERE matchno='".$y["id"]."' ORDER BY time AsC, id ASC");
   $i=0;
@@ -501,6 +505,8 @@ elseif(isset($_GET["game"]))
     $game["goals"][$i]["asister2"] = $f["asister2"];
     $game["goals"][$i]["status"] = $f["status"];
     $game["goals"][$i]["when"] = $f["kedy"];
+    if($f["time"]=="65.00" || $f["time"]=="70.00" || $f["time"]=="80.00") $game["score"]["overtime"]=2;
+    elseif($f["time"]>"60.00") $game["score"]["overtime"]=1;
     $i++;
     }
   if($el==1) $e = mysqli_query($link, "SELECT * FROM el_penalty WHERE matchno='".$y["id"]."' ORDER BY time ASC");
@@ -750,8 +756,8 @@ elseif(isset($_GET["games"]))
   else die("Incorrect tournament name");
   $q = mysqli_query($link, "SELECT * FROM 2004leagues WHERE longname LIKE '".$lname."'");
   $f = mysqli_fetch_array($q);
-  if($el==1) $w = mysqli_query($link, "SELECT m.*, IF(kolo=0,p.potype,NULL) as po_type FROM el_matches m LEFT JOIN el_playoff p ON (p.team1=m.team1short && p.team2=m.team2short && p.league=m.league) || (p.team2=m.team1short && p.team1=m.team2short && p.league=m.league) WHERE m.league='".$f["id"]."' ORDER BY m.datetime ASC");
-  else $w = mysqli_query($link, "SELECT m.*, t.skupina FROM 2004matches m LEFT JOIN 2004teams t ON t.shortname=m.team1short && t.league='".$f["id"]."' WHERE m.league='".$f["id"]."' ORDER BY m.datetime ASC");
+  if($el==1) $w = mysqli_query($link, "SELECT m.*, IF(kolo=0,p.potype,NULL) as po_type, (SELECT MAX(CAST(g.time as DECIMAL(5,2))) FROM el_goals g WHERE g.matchno = m.id) AS maxtime FROM el_matches m LEFT JOIN el_playoff p ON (p.team1=m.team1short && p.team2=m.team2short && p.league=m.league) || (p.team2=m.team1short && p.team1=m.team2short && p.league=m.league) WHERE m.league='".$f["id"]."' ORDER BY m.datetime ASC");
+  else $w = mysqli_query($link, "SELECT m.*, t.skupina, (SELECT MAX(CAST(g.time as DECIMAL(5,2))) FROM 2004goals g WHERE g.matchno = m.id) AS maxtime FROM 2004matches m LEFT JOIN 2004teams t ON t.shortname=m.team1short && t.league='".$f["id"]."' WHERE m.league='".$f["id"]."' ORDER BY m.datetime ASC");
   $i=0;
   while($e = mysqli_fetch_array($w))
     {
@@ -784,6 +790,9 @@ elseif(isset($_GET["games"]))
     $games["games"][$i]["score"]["goals1"] = $e["goals1"];
     $games["games"][$i]["score"]["goals2"] = $e["goals2"];
     $games["games"][$i]["score"]["status"] = $e["kedy"];
+    if($e["maxtime"]=="65.00" || $e["maxtime"]=="70.00" || $e["maxtime"]=="80.00") $games["games"][$i]["score"]["overtime"]=2;
+    elseif($e["maxtime"]>"60.00") $games["games"][$i]["score"]["overtime"]=1;
+    else $games["games"][$i]["score"]["overtime"]=0;
     $i++;
     }
   $games = json_encode($games, JSON_UNESCAPED_UNICODE);
